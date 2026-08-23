@@ -1,0 +1,41 @@
+{
+  "id": "healthcare",
+  "version": 1,
+  "extends": "universal",
+  "entities": [
+    "doctor",
+    "specialty",
+    "appointment_date",
+    "appointment_time",
+    "patient_name"
+  ],
+  "actions": [
+    "find_doctor",
+    "book_appointment",
+    "reschedule_appointment",
+    "cancel_appointment",
+    "ask_clinic_info"
+  ],
+  "semantics": {
+    "offeringBrowseTerms": [
+      "treatments",
+      "services",
+      "specialties",
+      "consultations",
+      "what do you treat"
+    ],
+    "offeringInterestTerms": [
+      "consultation",
+      "dermatology",
+      "physiotherapy"
+    ],
+    "bookingTerms": [
+      "book",
+      "appointment",
+      "consultation",
+      "see a doctor",
+      "can i have",
+      "can i get"
+    ]
+  }
+}

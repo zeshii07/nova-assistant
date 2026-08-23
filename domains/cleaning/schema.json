@@ -1,0 +1,40 @@
+{
+  "id": "cleaning",
+  "version": 1,
+  "extends": "universal",
+  "entities": [
+    "service",
+    "property_type",
+    "date",
+    "time",
+    "duration",
+    "address",
+    "rooms"
+  ],
+  "actions": [
+    "browse_services",
+    "request_service",
+    "reschedule_service",
+    "cancel_service"
+  ],
+  "semantics": {
+    "offeringBrowseTerms": [
+      "cleaning services",
+      "services",
+      "cleaning options"
+    ],
+    "offeringInterestTerms": [
+      "home cleaning",
+      "deep cleaning",
+      "office cleaning",
+      "sofa cleaning",
+      "carpet cleaning"
+    ],
+    "bookingTerms": [
+      "cleaner",
+      "cleaning",
+      "book",
+      "request service"
+    ]
+  }
+}

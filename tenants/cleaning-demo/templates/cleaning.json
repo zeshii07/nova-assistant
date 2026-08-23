@@ -1,0 +1,47 @@
+{
+  "CLEANING_SERVICES_LISTED": {
+    "english": "Of course. Here are our cleaning services:\n\n{{serviceLines}}\n\nTell me which one you need and I’ll help you submit a service request.",
+    "roman_urdu": "Ji bilkul 😊 Hamari cleaning services ye hain:\n\n{{serviceLines}}\n\nJo service chahiye uska naam bata dein, main request banwa deta hoon.",
+    "urdu": "جی بالکل۔ ہماری صفائی کی خدمات یہ ہیں:\n\n{{serviceLines}}\n\nجو سروس چاہیے اس کا نام بتا دیں۔"
+  },
+  "CLEANING_SERVICE_SELECTED": {
+    "english": "{{serviceName}} sounds good.\n{{description}}\nPrice: {{priceText}}\n{{durationLine}}\n\nWhat date would you prefer? Please use DD/MM/YYYY, or say “tomorrow”.",
+    "roman_urdu": "{{serviceName}} available hai 😊\n{{description}}\nPrice: {{priceText}}\n{{durationLine}}\n\nDate DD/MM/YYYY format mein dein, ya “tomorrow” keh dein.",
+    "urdu": "{{serviceName}} دستیاب ہے۔\n{{description}}\nقیمت: {{priceText}}\n\nآپ کس تاریخ کو سروس چاہتے ہیں؟"
+  },
+  "CLEANING_ASK_TIME": {
+    "english": "Got it. What time would you prefer? For example, 9:00 AM or 14:30.",
+    "roman_urdu": "Theek hai. Kis time service chahiye?",
+    "urdu": "ٹھیک ہے۔ کس وقت سروس چاہیے؟"
+  },
+  "CLEANING_ASK_ADDRESS": {
+    "english": "Thanks. Please share the full service address.",
+    "roman_urdu": "Shukriya. Service ka full address bata dein.",
+    "urdu": "شکریہ۔ سروس کا مکمل پتہ بتا دیں۔"
+  },
+  "CLEANING_READY_TO_CONFIRM": {
+    "english": "Here’s your service request:\n\n{{serviceName}} — {{priceText}}\nDate: {{preferredDate}}\nTime: {{preferredTime}}\nAddress: {{address}}\nPhone: {{phone}}\n\nIf everything looks correct, say confirm.",
+    "roman_urdu": "Aapki cleaning request:\n\n{{serviceName}} — {{priceText}}\nDate: {{preferredDate}}\nTime: {{preferredTime}}\nAddress: {{address}}\nPhone: {{phone}}\n\nAgar sab theek hai to confirm kar dein.",
+    "urdu": "آپ کی صفائی کی درخواست:\n\n{{serviceName}} — {{priceText}}\nتاریخ: {{preferredDate}}\nوقت: {{preferredTime}}\nپتہ: {{address}}\n\nاگر سب درست ہے تو تصدیق کر دیں۔"
+  },
+  "CLEANING_REQUEST_CREATED": {
+    "english": "✅ Your cleaning request has been received.\nRequest ID: {{requestId}}\n{{serviceName}}\nDate: {{preferredDate}}\nTime: {{preferredTime}}\n\nOur team will check availability and send the final confirmation.",
+    "roman_urdu": "✅ Aapki cleaning request receive ho gayi hai.\nRequest ID: {{requestId}}\n{{serviceName}}\nDate: {{preferredDate}}\nTime: {{preferredTime}}\n\nTeam availability check karke final confirmation degi.",
+    "urdu": "✅ آپ کی صفائی کی درخواست موصول ہو گئی ہے۔\nRequest ID: {{requestId}}\n{{serviceName}}\nتاریخ: {{preferredDate}}\nوقت: {{preferredTime}}\n\nٹیم دستیابی چیک کر کے حتمی تصدیق کرے گی۔"
+  },
+  "CLEANING_SERVICES_WITH_DURATION": {
+    "english": "Got it 👍 I’ve noted that you need cleaning for {{durationHours}} hours.\n\nHere are our cleaning services:\n\n{{serviceLines}}\n\nTell me which service you need and I’ll keep the {{durationHours}}-hour duration with your request.",
+    "roman_urdu": "Theek hai 👍 {{durationHours}} ghantay ki cleaning duration note kar li hai.\n\nHamari cleaning services:\n\n{{serviceLines}}\n\nJo service chahiye uska naam bata dein; {{durationHours}} ghantay ki duration request ke sath rahegi.",
+    "urdu": "ٹھیک ہے 👍 {{durationHours}} گھنٹے کی صفائی کی مدت نوٹ کر لی ہے۔\n\nہماری صفائی کی خدمات:\n\n{{serviceLines}}\n\nجو سروس چاہیے اس کا نام بتا دیں۔"
+  },
+  "CLEANING_ASK_PHONE": {
+    "english": "What is the best contact phone number to reach you on?",
+    "roman_urdu": "Cleaning request ke liye contact number bata dein.",
+    "urdu": "صفائی کی درخواست کے لیے رابطہ نمبر بتائیں۔"
+  },
+  "CLEANING_ASK_NAME": {
+    "english": "May I have your full name?",
+    "roman_urdu": "Aap ka poora naam bata dein.",
+    "urdu": "اپنا پورا نام بتائیں۔"
+  }
+}

@@ -1,0 +1,1 @@
+{"id":"universal","version":1,"description":"Domain-neutral assistant schema","entities":["subject","person","date","time","duration","location","phone","email","quantity","preference"],"actions":["ask","browse","select","acquire_or_book","confirm","cancel","correct","reschedule"]}

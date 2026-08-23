@@ -1,0 +1,21 @@
+{
+  "description": "Semantic demo school/academy for testing education conversations.",
+  "services": [
+    "Admissions information",
+    "Grade 1-10 programs",
+    "Campus visit information"
+  ],
+  "hours": "Monday to Friday, 8:00 AM to 4:00 PM",
+  "contact": {
+    "phone": "+92 300 7770002",
+    "email": "hello@education-demo.example"
+  },
+  "location": {
+    "address": "Model Town, Lahore",
+    "city": "Lahore",
+    "country": "Pakistan"
+  },
+  "delivery": "Not applicable.",
+  "paymentMethods": [],
+  "returns": "Not applicable."
+}

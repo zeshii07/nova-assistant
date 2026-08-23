@@ -1,0 +1,21 @@
+{
+  "id": "crm",
+  "name": "CRM",
+  "version": "1.0.0",
+  "entry": "./src/index.js",
+  "priority": 80,
+  "permissions": [
+    "crm.customer.read:crm",
+    "crm.customer.write:crm",
+    "crm.note.write:crm",
+    "crm.tag.write:crm",
+    "crm.activity.read:crm",
+    "crm.activity.write:crm"
+  ],
+  "events": [
+    "crm.customer.updated.v1",
+    "crm.note.added.v1",
+    "crm.tag.added.v1",
+    "crm.activity.recorded.v1"
+  ]
+}

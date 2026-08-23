@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "provider": "local",
+  "timezone": "Asia/Karachi",
+  "defaultDurationMinutes": 30,
+  "slotIntervalMinutes": 15,
+  "holdTtlSeconds": 600,
+  "minLeadMinutes": 0,
+  "maxAdvanceDays": 180,
+  "resourcePools": [
+    { "id": "clinicians", "name": "Clinicians", "capacity": 3, "serviceIds": [], "active": true }
+  ],
+  "serviceRules": []
+}

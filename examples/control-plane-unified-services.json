@@ -1,0 +1,52 @@
+{
+  "kind": "cleaning",
+  "currency": "AED",
+  "items": [
+    {
+      "id": "standard-cleaning",
+      "name": "Standard Cleaning",
+      "category": "Home cleaning",
+      "description": "Routine cleaning for apartments, villas and houses.",
+      "aliases": ["home cleaning", "regular cleaning"],
+      "tags": ["routine", "home"],
+      "active": true,
+      "pricingRuleIds": ["standard-hourly"]
+    },
+    {
+      "id": "deep-villa",
+      "name": "Deep Villa Cleaning",
+      "category": "Deep cleaning",
+      "description": "Detailed villa cleaning priced by bedroom count.",
+      "aliases": ["villa deep cleaning"],
+      "tags": ["deep", "villa"],
+      "active": true,
+      "pricingRuleIds": ["deep-villa-bedroom"]
+    }
+  ],
+  "pricingRules": [
+    {
+      "id": "standard-hourly",
+      "name": "Standard Cleaning Hourly Rate",
+      "model": "hourly",
+      "rate": 40,
+      "currency": "AED",
+      "operationalServiceId": "standard-cleaning",
+      "aliases": ["hourly cleaning"]
+    },
+    {
+      "id": "deep-villa-bedroom",
+      "name": "Deep Villa by Bedrooms",
+      "model": "linear",
+      "inputKey": "bedrooms",
+      "baseInput": 1,
+      "minimum": 1,
+      "basePrice": 300,
+      "stepPrice": 70,
+      "currency": "AED",
+      "operationalServiceId": "deep-villa",
+      "aliases": ["deep villa cleaning"]
+    }
+  ],
+  "addOns": [],
+  "discounts": []
+}

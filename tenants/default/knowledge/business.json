@@ -1,0 +1,18 @@
+{
+  "description": "Demo Assistant is a configurable AI assistant for testing the Nova SaaS platform.",
+  "services": ["AI assistance", "Business information", "Customer support"],
+  "hours": "Monday to Saturday, 9:00 AM to 6:00 PM Pakistan Standard Time",
+  "contact": {
+    "phone": "+92 300 1234567",
+    "email": "support@example.com",
+    "website": "https://example.com"
+  },
+  "location": {
+    "address": "123 Main Market",
+    "city": "Lahore",
+    "country": "Pakistan"
+  },
+  "delivery": "Delivery information is not enabled for this assistant-only tenant.",
+  "paymentMethods": [],
+  "returns": "Return information is not enabled for this assistant-only tenant."
+}

@@ -1,0 +1,15 @@
+{
+  "maxLength": 1200,
+  "emojiLevel": "low",
+  "allowHumor": false,
+  "allowedLanguages": [
+    "english",
+    "roman_urdu",
+    "urdu"
+  ],
+  "forbiddenPhrases": [
+    "guaranteed appointment",
+    "guaranteed admission"
+  ],
+  "alwaysGreet": false
+}

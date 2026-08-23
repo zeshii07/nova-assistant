@@ -1,0 +1,9 @@
+class PostgresBookingRepository {
+  constructor({ db }) { this.db=db; }
+  async findByIdempotencyKey(tenantId,key){if(!key)return null;const r=await this.db.query(`SELECT payload FROM bookings WHERE tenant_id=$1 AND idempotency_key=$2 LIMIT 1`,[tenantId,key]);return r.rows[0]?structuredClone(r.rows[0].payload):null;}
+  async create(record){if(record.idempotencyKey){const existing=await this.findByIdempotencyKey(record.tenantId,record.idempotencyKey);if(existing)return existing;}await this.db.query(`INSERT INTO bookings(id,tenant_id,customer_id,conversation_id,status,payload,created_at,idempotency_key) VALUES($1,$2,$3,$4,$5,$6::jsonb,COALESCE($7::timestamptz,now()),$8) ON CONFLICT(tenant_id,idempotency_key) WHERE idempotency_key IS NOT NULL DO NOTHING`,[record.id,record.tenantId,record.customerId,record.conversationId||null,record.status||'requested',JSON.stringify(record),record.createdAt||null,record.idempotencyKey||null]);return (record.idempotencyKey&&await this.findByIdempotencyKey(record.tenantId,record.idempotencyKey))||structuredClone(record);}
+  async save(record){const r=await this.db.query(`UPDATE bookings SET status=$3,payload=$4::jsonb WHERE tenant_id=$1 AND id=$2 RETURNING payload`,[record.tenantId,record.id,record.status,JSON.stringify(record)]);if(!r.rows[0])throw new Error('Booking not found');return structuredClone(r.rows[0].payload);}
+  async get(tenantId,id){if(!tenantId||!id)throw new Error('tenantId and id are required');const r=await this.db.query(`SELECT payload FROM bookings WHERE tenant_id=$1 AND id=$2`,[tenantId,id]);return r.rows[0]?structuredClone(r.rows[0].payload):null;}
+  async list(tenantId,customerId){const p=[tenantId];let sql=`SELECT payload FROM bookings WHERE tenant_id=$1`;if(customerId){p.push(customerId);sql+=` AND customer_id=$2`;}sql+=` ORDER BY created_at DESC`;const r=await this.db.query(sql,p);return r.rows.map(x=>structuredClone(x.payload));}
+}
+module.exports={PostgresBookingRepository};

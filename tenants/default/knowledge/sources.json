@@ -1,0 +1,54 @@
+[
+  {
+    "id": "SRC-BUSINESS",
+    "kind": "business_profile",
+    "title": "Business profile",
+    "file": "knowledge/business.json",
+    "status": "active",
+    "priority": 100,
+    "revision": 1,
+    "tags": [],
+    "metadata": {},
+    "createdAt": "2026-08-10T12:28:45.572Z",
+    "updatedAt": "2026-08-10T12:28:45.572Z"
+  },
+  {
+    "id": "SRC-FAQS",
+    "kind": "faq_collection",
+    "title": "FAQs",
+    "file": "knowledge/faqs.json",
+    "status": "active",
+    "priority": 80,
+    "revision": 1,
+    "tags": [],
+    "metadata": {},
+    "createdAt": "2026-08-10T12:28:45.572Z",
+    "updatedAt": "2026-08-10T12:28:45.572Z"
+  },
+  {
+    "id": "SRC-DOC-demo-store-business-facts-md",
+    "kind": "document",
+    "title": "demo-store-business-facts.md",
+    "file": "knowledge/documents/demo-store-business-facts.md",
+    "status": "active",
+    "priority": 50,
+    "revision": 1,
+    "tags": [],
+    "metadata": {},
+    "createdAt": "2026-08-10T12:28:45.572Z",
+    "updatedAt": "2026-08-10T12:28:45.572Z"
+  },
+  {
+    "id": "SRC-DOC-store-policies-md",
+    "kind": "document",
+    "title": "store-policies.md",
+    "file": "knowledge/documents/store-policies.md",
+    "status": "active",
+    "priority": 50,
+    "revision": 1,
+    "tags": [],
+    "metadata": {},
+    "createdAt": "2026-08-10T12:28:45.573Z",
+    "updatedAt": "2026-08-10T12:28:45.573Z"
+  }
+]

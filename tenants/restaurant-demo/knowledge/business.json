@@ -1,0 +1,21 @@
+{
+  "name": "Nova Bistro",
+  "description": "A casual family restaurant serving Pakistani and continental food.",
+  "hours": "Daily, 12:00 PM to 11:00 PM",
+  "location": "Main Boulevard, Lahore",
+  "contact": "+92 300 7770003",
+  "services": [
+    "Dine-in",
+    "Takeaway",
+    "Family seating",
+    "Table reservation information"
+  ],
+  "highlights": [
+    "Burgers",
+    "Biryani",
+    "Pasta",
+    "Grilled Chicken"
+  ],
+  "delivery": "Home delivery is not currently offered.",
+  "takeaway": "Yes, takeaway is available."
+}

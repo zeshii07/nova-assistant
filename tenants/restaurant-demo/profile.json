@@ -1,0 +1,45 @@
+{
+  "status": "active",
+  "defaultLanguage": "english",
+  "capabilities": [
+    "assistant",
+    "crm",
+    "offering",
+    "booking"
+  ],
+  "features": {
+    "llmFallback": false
+  },
+  "permissions": [
+    "knowledge.read",
+    "memory.read:assistant",
+    "memory.write:assistant",
+    "memory.delete:assistant",
+    "crm.customer.read:assistant",
+    "crm.customer.write:assistant",
+    "crm.activity.write:assistant",
+    "crm.customer.read:crm",
+    "crm.customer.write:crm",
+    "crm.note.write:crm",
+    "crm.tag.write:crm",
+    "crm.activity.read:crm",
+    "crm.activity.write:crm",
+    "offering.read:offering",
+    "booking.read:booking",
+    "booking.write:booking",
+    "offering.read:booking"
+  ],
+  "id": "restaurant-demo",
+  "name": "Nova Bistro",
+  "domain": "restaurant",
+  "branding": {
+    "assistantName": "Nova Bistro Assistant",
+    "welcomeMessage": "Hi! 👋 I’m the Nova Bistro Assistant. I can help with the menu, dining options, takeaway information, food orders, and table reservations.",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Menu, dining options aur reservation request mein main aapki madad kar sakta hoon.",
+    "welcomeMessageUrdu": "السلام علیکم! میں آپ کی کیا مدد کر سکتا ہوں؟"
+  },
+  "business": {
+    "description": "Semantic demo restaurant for testing restaurant conversations.",
+    "contact": "+92 300 7770003"
+  }
+}

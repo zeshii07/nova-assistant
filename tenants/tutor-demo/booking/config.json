@@ -1,0 +1,30 @@
+{
+  "enabled": true,
+  "mode": "lesson",
+  "triggerTerms": [
+    "book",
+    "lesson",
+    "session",
+    "tutoring",
+    "tuition",
+    "can i get",
+    "i need"
+  ],
+  "requiredFields": [
+    "subject",
+    "date",
+    "time",
+    "name",
+    "phone"
+  ],
+  "confirmedLabel": "Tutoring session request received",
+  "readyLabel": "Your tutoring session request is ready",
+  "confirmPrompt": "Confirm this tutoring session request when ready.",
+  "prompts": {
+    "subject": "Which subject would you like tutoring for?",
+    "date": "What date would you prefer?",
+    "time": "What time works best?",
+    "name": "What student or parent name should I use?",
+    "phone": "What contact number should I use?"
+  }
+}

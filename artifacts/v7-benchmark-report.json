@@ -1,0 +1,43 @@
+{
+  "version": "7.1.0-alpha.1",
+  "pass": true,
+  "generatedAt": "2026-08-10T04:09:19.999Z",
+  "rows": [
+    {
+      "name": "Persistence contract",
+      "ok": true,
+      "durationMs": 74
+    },
+    {
+      "name": "Full automated suite",
+      "ok": true,
+      "durationMs": 5067
+    },
+    {
+      "name": "Conversation corpus",
+      "ok": true,
+      "durationMs": 1496
+    },
+    {
+      "name": "Syntax/structure check",
+      "ok": true,
+      "durationMs": 4120
+    },
+    {
+      "name": "State-safety audit",
+      "ok": true,
+      "durationMs": 27
+    }
+  ],
+  "livePersistence": {
+    "configured": false,
+    "ok": null
+  },
+  "acceptance": {
+    "persistenceContract": "7/7 required",
+    "fullSuite": "0 failures required",
+    "conversationCorpus": "0 failures required",
+    "stateSafety": "PASS required",
+    "livePersistence": "required before production persistent-mode signoff"
+  }
+}

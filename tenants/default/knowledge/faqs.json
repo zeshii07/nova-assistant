@@ -1,0 +1,10 @@
+[
+  {
+    "question": "What can this assistant do?",
+    "answer": "It can answer approved questions about the organization, services, hours, contact details, and location."
+  },
+  {
+    "question": "Does it support Urdu?",
+    "answer": "Yes. It supports English, Roman Urdu, and Urdu script."
+  }
+]

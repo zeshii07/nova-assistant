@@ -1,0 +1,44 @@
+{
+  "id": "salon",
+  "version": 1,
+  "extends": "universal",
+  "entities": [
+    "service",
+    "stylist",
+    "appointment_date",
+    "appointment_time",
+    "duration",
+    "preference"
+  ],
+  "actions": [
+    "browse_services",
+    "ask_price",
+    "book_appointment",
+    "reschedule_appointment",
+    "cancel_appointment",
+    "ask_salon_info"
+  ],
+  "semantics": {
+    "offeringBrowseTerms": [
+      "services",
+      "beauty services",
+      "grooming services",
+      "hair services"
+    ],
+    "offeringInterestTerms": [
+      "haircut",
+      "hair styling",
+      "beard grooming",
+      "facial",
+      "hair color"
+    ],
+    "bookingTerms": [
+      "book",
+      "appointment",
+      "schedule",
+      "can i get",
+      "i want",
+      "i need"
+    ]
+  }
+}

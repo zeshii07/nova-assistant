@@ -1,0 +1,24 @@
+[
+  {
+    "id": "P-POLO",
+    "sku": "POLO-PARENT",
+    "name": "Polo Shirt",
+    "category": "clothing",
+    "description": "Breathable pique polo shirt",
+    "price": 2200,
+    "currency": "PKR",
+    "aliases": ["polo", "polo tee"],
+    "colors": ["Black", "White"],
+    "sizes": ["S", "M", "L"],
+    "tags": ["shirt", "clothing"],
+    "inStock": true,
+    "variants": [
+      { "id": "P-POLO-BLK-S", "sku": "POLO-BLK-S", "attributes": { "color": "Black", "size": "S" }, "inventory": 4, "active": true },
+      { "id": "P-POLO-BLK-M", "sku": "POLO-BLK-M", "attributes": { "color": "Black", "size": "M" }, "inventory": 2, "active": true },
+      { "id": "P-POLO-BLK-L", "sku": "POLO-BLK-L", "attributes": { "color": "Black", "size": "L" }, "price": 2400, "inventory": 1, "active": true },
+      { "id": "P-POLO-WHT-S", "sku": "POLO-WHT-S", "attributes": { "color": "White", "size": "S" }, "inventory": 3, "active": true },
+      { "id": "P-POLO-WHT-M", "sku": "POLO-WHT-M", "attributes": { "color": "White", "size": "M" }, "inventory": 3, "active": true },
+      { "id": "P-POLO-WHT-L", "sku": "POLO-WHT-L", "attributes": { "color": "White", "size": "L" }, "inventory": 2, "active": true }
+    ]
+  }
+]

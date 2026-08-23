@@ -1,0 +1,58 @@
+/** Public Cleaning Services SDK types. */
+function createCleaningRequest(input = {}) {
+  const createdAt = input.createdAt || new Date().toISOString();
+  return {
+    id: input.id || null,
+    tenantId: input.tenantId,
+    customerId: input.customerId,
+    serviceId: input.serviceId,
+    serviceName: input.serviceName,
+    propertyType: input.propertyType || null,
+    propertyCount: Number.isFinite(Number(input.propertyCount)) ? Number(input.propertyCount) : null,
+    propertyFloor: input.propertyFloor || null,
+    bedrooms: Number.isFinite(Number(input.bedrooms)) ? Number(input.bedrooms) : null,
+    washrooms: Number.isFinite(Number(input.washrooms)) ? Number(input.washrooms) : null,
+    balconies: Number.isFinite(Number(input.balconies)) ? Number(input.balconies) : null,
+    interiorWindows: Number.isFinite(Number(input.interiorWindows)) ? Number(input.interiorWindows) : null,
+    halls: Number.isFinite(Number(input.halls)) ? Number(input.halls) : null,
+    insideRefrigerator: input.insideRefrigerator === true,
+    insideOven: input.insideOven === true,
+    fragranceFree: input.fragranceFree === true,
+    petPresent: input.petPresent === true,
+    heavyPetHair: input.heavyPetHair === true ? true : input.heavyPetHair === false ? false : null,
+    cleaningType: input.cleaningType || null,
+    requestedTasks: Array.isArray(input.requestedTasks) ? [...input.requestedTasks] : [],
+    requiredEquipment: Array.isArray(input.requiredEquipment) ? [...input.requiredEquipment] : [],
+    businessProvidesSupplies: input.businessProvidesSupplies === true,
+    businessProvidesEquipment: input.businessProvidesEquipment === true,
+    availabilityRequested: input.availabilityRequested === true,
+    noSubstitutionWithoutConsent: input.noSubstitutionWithoutConsent === true,
+    finishBy: input.finishBy || null,
+    preferredDate: input.preferredDate || null,
+    preferredTime: input.preferredTime || null,
+    timeFlexible: input.timeFlexible === true,
+    timePreference: input.timePreference || (input.timeFlexible === true ? "any_available" : null),
+    endTime: input.endTime || null,
+    address: input.address || null,
+    phone: input.phone || null,
+    email: input.email || null,
+    name: input.name || null,
+    durationHours: Number.isFinite(Number(input.durationHours)) ? Number(input.durationHours) : null,
+    cleanerCount: Number.isFinite(Number(input.cleanerCount)) ? Number(input.cleanerCount) : null,
+    hourlyRate: Number.isFinite(Number(input.hourlyRate)) ? Number(input.hourlyRate) : null,
+    total: Number.isFinite(Number(input.total)) ? Number(input.total) : null,
+    currency: input.currency || null,
+    recurrence: input.recurrence || null,
+    recurringDays: Array.isArray(input.recurringDays) ? input.recurringDays : null,
+    scopeText: input.scopeText || null,
+    notes: input.notes || null,
+    status: input.status || "requested",
+    revision: Number.isInteger(input.revision) && input.revision > 0 ? input.revision : 1,
+    timeline: Array.isArray(input.timeline) && input.timeline.length
+      ? structuredClone(input.timeline)
+      : [{ action: "created", status: input.status || "requested", at: createdAt }],
+    createdAt,
+    updatedAt: input.updatedAt || createdAt
+  };
+}
+module.exports = { createCleaningRequest };

@@ -1,0 +1,18 @@
+{
+  "capturedOn": "2026-08-19",
+  "currency": "AED",
+  "adjustmentPercent": -10,
+  "policy": "Only a clearly published public amount is reduced by 10%. Services without a visible current public price remain custom_quote.",
+  "affiliation": "SparkleCare Cleaning is an independent Nova test tenant and is not affiliated with or represented as Justlife.",
+  "sources": [
+    {"topic":"service catalog","url":"https://www.justlife.com/"},
+    {"topic":"furniture cleaning and dining-chair price","url":"https://www.justlife.com/en-AE/furniture-cleaning"},
+    {"topic":"sofa cleaning and 3-seater price","url":"https://www.justlife.com/en-AE/sofa-cleaning"},
+    {"topic":"deep cleaning scope","url":"https://www.justlife.com/en-AE/deep-cleaning-dubai"},
+    {"topic":"move-in/out apartment price matrix","url":"https://www.justlife.com/en-AE/move-in-out-cleaning-services-sharjah"},
+    {"topic":"move-in/out villa price matrix","url":"https://www.justlife.com/en-AE/move-in-out-cleaning-services-abu-dhabi"},
+    {"topic":"general cleaning public hourly benchmark","url":"https://www.justlife.com/en-AE/house-cleaning-dubai-al-muteena"},
+    {"topic":"maid and recurring cleaning scope","url":"https://www.justlife.com/en-AE/maid-service-dubai"},
+    {"topic":"laundry package prices","url":"https://www.justlife.com/en-AE/laundry"}
+  ]
+}

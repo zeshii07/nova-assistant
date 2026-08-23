@@ -1,0 +1,14 @@
+{
+  "id": "pricing",
+  "name": "Universal Service Pricing & Discounts",
+  "version": "1.0.0",
+  "entry": "./src/index.js",
+  "priority": 104,
+  "permissions": [
+    "offering.read:pricing"
+  ],
+  "events": [
+    "pricing.quote.generated.v1",
+    "pricing.discount.applied.v1"
+  ]
+}

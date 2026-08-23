@@ -1,0 +1,24 @@
+{
+  "GREETING": {
+    "english": [
+      "Hi! 👋 I’m the SparkleCare Cleaning Assistant. I can explain our cleaning services and help you prepare a cleaning request.",
+      "Hello 😊 Welcome to SparkleCare. Would you like service information, a price, or help preparing a cleaning request?",
+      "Hi there 👋 Tell me what needs cleaning or what you’d like to know, and I’ll guide you."
+    ],
+    "roman_urdu": [
+      "Assalam-o-alaikum! 👋 Cleaning chahiye? Bata dein kya clean karwana hai, main suitable service choose karne mein help karta hoon.",
+      "Salam 😊 SparkleCare mein khush aamdeed. Price poochni ho ya cleaning request banani ho, bata dein.",
+      "Assalam-o-alaikum 👋 Kya clean karwana hai ya kis service ki information chahiye?"
+    ],
+    "urdu": "السلام علیکم! 😊 صفائی کے حوالے سے میں آپ کی کیا مدد کر سکتا ہوں؟"
+  },
+  "THANKS": {
+    "english": ["You’re welcome. If you need another cleaning service, just tell me.", "Happy to help 😊 If you want another price or service detail, I’m here.", "Anytime! Message me whenever you need help with a cleaning request."],
+    "roman_urdu": ["Khushi hui 😊 Agar kisi aur cleaning service ki zarurat ho to bata dein.", "Koi baat nahi 😊 Kisi aur service ki price ya detail chahiye ho to pooch lein.", "Bohat khushi hui! Cleaning ke bare mein aur madad chahiye ho to message kar dein."],
+    "urdu": "خوشی ہوئی۔ اگر کسی اور صفائی کی سروس کی ضرورت ہو تو بتا دیں۔"
+  },
+  "SMALL_TALK": {
+    "english": ["I’m doing well, thank you 😊 What cleaning information or help do you need today?", "All good here 😊 Would you like a service price, details, or help preparing a request?", "I’m well, thanks for asking! Tell me how SparkleCare can help today."],
+    "roman_urdu": ["Main bilkul theek hoon, shukriya 😊 Aap sunayein? Aaj kis cheez mein madad chahiye?", "Alhamdulillah sab theek 😊 Price, service detail ya booking request mein kya help chahiye?", "Main theek hoon, shukriya! Aap batayein SparkleCare aaj kya madad kare?"]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "GREETING": {
+    "english": [
+      "Hello! 👋 I’m the Demo Store Assistant. I can help you find products, compare options, manage your cart, and place or track an order.",
+      "Hi! 😊 Welcome to Demo Store. Would you like to browse products, compare something, or work on an order?",
+      "Hello there 👋 Tell me what you’re shopping for, and I’ll help you find or manage it."
+    ],
+    "roman_urdu": [
+      "Assalam-o-alaikum! 👋 Store mein khush aamdeed. Products dekhne, compare karne ya order place karne mein main madad kar sakta hoon.",
+      "Salam 😊 Demo Store mein khush aamdeed. Aaj kya dekhna ya order karna hai?",
+      "Assalam-o-alaikum 👋 Batayein, product dhoondna hai, compare karna hai ya order manage karna hai?"
+    ],
+    "urdu": "السلام علیکم! 😊 میں آپ کی کیا مدد کر سکتا ہوں؟"
+  },
+  "SMALL_TALK": {
+    "english": ["I’m doing well, thank you 😊 How are you, and what can I help you with?", "All good here 😊 What would you like to shop for or ask about today?", "I’m well, thanks for asking! Tell me what you need and I’ll help."],
+    "roman_urdu": ["Main bilkul theek hoon, shukriya 😊 Aap sunayein?", "Alhamdulillah sab theek 😊 Aap batayein, aaj kya dekhna hai?", "Main theek hoon, shukriya! Aap ko kis cheez mein madad chahiye?"]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "provider": "local",
+  "timezone": "Asia/Karachi",
+  "defaultDurationMinutes": 60,
+  "slotIntervalMinutes": 30,
+  "holdTtlSeconds": 600,
+  "minLeadMinutes": 0,
+  "maxAdvanceDays": 365,
+  "resourcePools": [
+    { "id": "instructors", "name": "Driving instructors", "capacity": 4, "serviceIds": [], "active": true }
+  ],
+  "serviceRules": []
+}

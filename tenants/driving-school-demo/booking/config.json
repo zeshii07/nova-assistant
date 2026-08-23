@@ -1,0 +1,31 @@
+{
+  "enabled": true,
+  "mode": "appointment",
+  "defaultSubject": null,
+  "triggerTerms": [
+    "book",
+    "appointment",
+    "reserve",
+    "schedule",
+    "can i get",
+    "i want",
+    "need"
+  ],
+  "requiredFields": [
+    "subject",
+    "date",
+    "time",
+    "name",
+    "phone"
+  ],
+  "confirmedLabel": "Booking request received",
+  "readyLabel": "Your booking request is ready",
+  "confirmPrompt": "Confirm this booking request when you are ready.",
+  "prompts": {
+    "subject": "What would you like to book?",
+    "date": "What date would you prefer?",
+    "time": "What time would you prefer?",
+    "name": "May I have your full name?",
+    "phone": "What is the best contact phone number to reach you on?"
+  }
+}

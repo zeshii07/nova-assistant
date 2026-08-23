@@ -1,0 +1,199 @@
+{
+  "name": "Shared Conversation Core",
+  "tenantId": "default",
+  "cases": [
+    {
+      "name": "cancel-0",
+      "turns": [
+        {
+          "text": "cancel",
+          "expect": {
+            "capabilityId": "system",
+            "replyContains": "cancel"
+          }
+        }
+      ]
+    },
+    {
+      "name": "cancel-1",
+      "turns": [
+        {
+          "text": "cancel my order",
+          "expect": {
+            "capabilityId": "system",
+            "replyContains": "cancel"
+          }
+        }
+      ]
+    },
+    {
+      "name": "cancel-2",
+      "turns": [
+        {
+          "text": "stop order",
+          "expect": {
+            "capabilityId": "system",
+            "replyContains": "cancel"
+          }
+        }
+      ]
+    },
+    {
+      "name": "cancel-3",
+      "turns": [
+        {
+          "text": "rehne do",
+          "expect": {
+            "capabilityId": "system",
+            "replyContains": "cancel"
+          }
+        }
+      ]
+    },
+    {
+      "name": "cancel-4",
+      "turns": [
+        {
+          "text": "cancel request",
+          "expect": {
+            "capabilityId": "system",
+            "replyContains": "cancel"
+          }
+        }
+      ]
+    },
+    {
+      "name": "cancel-5",
+      "turns": [
+        {
+          "text": "کینسل",
+          "expect": {
+            "capabilityId": "system",
+            "replyContains": "cancel"
+          }
+        }
+      ]
+    },
+    {
+      "name": "reset-0",
+      "turns": [
+        {
+          "text": "start over",
+          "expect": {
+            "capabilityId": "system"
+          }
+        }
+      ]
+    },
+    {
+      "name": "reset-1",
+      "turns": [
+        {
+          "text": "restart",
+          "expect": {
+            "capabilityId": "system"
+          }
+        }
+      ]
+    },
+    {
+      "name": "reset-2",
+      "turns": [
+        {
+          "text": "reset conversation",
+          "expect": {
+            "capabilityId": "system"
+          }
+        }
+      ]
+    },
+    {
+      "name": "reset-3",
+      "turns": [
+        {
+          "text": "dobara shuru",
+          "expect": {
+            "capabilityId": "system"
+          }
+        }
+      ]
+    },
+    {
+      "name": "assistant-0",
+      "turns": [
+        {
+          "text": "hello",
+          "expect": {
+            "capabilityId": "assistant"
+          }
+        }
+      ]
+    },
+    {
+      "name": "assistant-1",
+      "turns": [
+        {
+          "text": "hi",
+          "expect": {
+            "capabilityId": "assistant"
+          }
+        }
+      ]
+    },
+    {
+      "name": "assistant-2",
+      "turns": [
+        {
+          "text": "assalam o alaikum",
+          "expect": {
+            "capabilityId": "assistant"
+          }
+        }
+      ]
+    },
+    {
+      "name": "assistant-3",
+      "turns": [
+        {
+          "text": "hello kia hal hai",
+          "expect": {
+            "capabilityId": "assistant"
+          }
+        }
+      ]
+    },
+    {
+      "name": "assistant-4",
+      "turns": [
+        {
+          "text": "how are you",
+          "expect": {
+            "capabilityId": "assistant"
+          }
+        }
+      ]
+    },
+    {
+      "name": "assistant-5",
+      "turns": [
+        {
+          "text": "thanks",
+          "expect": {
+            "capabilityId": "assistant"
+          }
+        }
+      ]
+    },
+    {
+      "name": "assistant-6",
+      "turns": [
+        {
+          "text": "shukriya",
+          "expect": {
+            "capabilityId": "assistant"
+          }
+        }
+      ]
+    }
+  ]
+}

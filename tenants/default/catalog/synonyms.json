@@ -1,0 +1,78 @@
+{
+  "earbuds": [
+    "earbud",
+    "airbud",
+    "airbuds",
+    "earphones"
+  ],
+  "tshirt": [
+    "t shirt",
+    "tee",
+    "shirt"
+  ],
+  "jeans": [
+    "denim",
+    "pants",
+    "trousers"
+  ],
+  "watch": [
+    "smartwatch",
+    "wearable"
+  ],
+  "wallet": [
+    "purse"
+  ],
+  "sunglasses": [
+    "shades",
+    "glasses"
+  ],
+  "hoodie": [
+    "fleece sweatshirt",
+    "hooded sweatshirt"
+  ],
+  "polo": [
+    "collar shirt",
+    "polo tshirt"
+  ],
+  "powerbank": [
+    "power bank",
+    "portable charger"
+  ],
+  "speaker": [
+    "wireless speaker",
+    "sound box"
+  ],
+  "running shoes": [
+    "runners",
+    "sports shoes",
+    "joggers shoes"
+  ],
+  "slides": [
+    "slippers",
+    "flip flops"
+  ],
+  "desk lamp": [
+    "study lamp",
+    "table lamp"
+  ],
+  "water bottle": [
+    "steel bottle",
+    "flask"
+  ],
+  "backpack": [
+    "laptop bag",
+    "school bag"
+  ],
+  "tote bag": [
+    "canvas bag",
+    "shopping bag"
+  ],
+  "notebook": [
+    "diary",
+    "writing book"
+  ],
+  "pens": [
+    "gel pen",
+    "pen pack"
+  ]
+}

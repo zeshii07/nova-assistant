@@ -1,0 +1,45 @@
+{
+  "status": "active",
+  "defaultLanguage": "english",
+  "capabilities": [
+    "assistant",
+    "crm",
+    "offering",
+    "booking"
+  ],
+  "features": {
+    "llmFallback": false
+  },
+  "permissions": [
+    "knowledge.read",
+    "memory.read:assistant",
+    "memory.write:assistant",
+    "memory.delete:assistant",
+    "crm.customer.read:assistant",
+    "crm.customer.write:assistant",
+    "crm.activity.write:assistant",
+    "crm.customer.read:crm",
+    "crm.customer.write:crm",
+    "crm.note.write:crm",
+    "crm.tag.write:crm",
+    "crm.activity.read:crm",
+    "crm.activity.write:crm",
+    "offering.read:offering",
+    "booking.read:booking",
+    "booking.write:booking",
+    "offering.read:booking"
+  ],
+  "id": "tutor-demo",
+  "name": "BrightPath Tutoring",
+  "domain": "universal",
+  "branding": {
+    "assistantName": "BrightPath Assistant",
+    "welcomeMessage": "Hi! 👋 I can help with tutoring subjects, lesson information, and booking a session.",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Tutoring subjects aur session booking mein main madad kar sakta hoon.",
+    "welcomeMessageUrdu": "السلام علیکم! ٹیوشن سیشن کے بارے میں میں آپ کی مدد کر سکتا ہوں۔"
+  },
+  "business": {
+    "description": "Config-only tutoring demo proving Nova can onboard an unseen service business without new engine code.",
+    "contact": "+92 300 7770007"
+  }
+}

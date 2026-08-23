@@ -1,0 +1,16 @@
+{
+  "id": "assistant",
+  "name": "Assistant",
+  "version": "1.0.0",
+  "entry": "./src/index.js",
+  "priority": 10,
+  "permissions": [
+    "knowledge.read",
+    "crm.customer.read:assistant",
+    "crm.customer.write:assistant",
+    "crm.activity.write:assistant"
+  ],
+  "events": [
+    "assistant.responded.v1"
+  ]
+}

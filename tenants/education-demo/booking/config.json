@@ -1,0 +1,33 @@
+{
+  "enabled": true,
+  "mode": "inquiry",
+  "defaultSubject": "Admission Inquiry",
+  "defaultSubjectTerms": [
+    "admission",
+    "admitted",
+    "enroll",
+    "enrol"
+  ],
+  "triggerTerms": [
+    "admission",
+    "admitted",
+    "enroll",
+    "enrol",
+    "book visit",
+    "campus visit"
+  ],
+  "requiredFields": [
+    "subject",
+    "grade",
+    "name",
+    "phone"
+  ],
+  "confirmedLabel": "Admission inquiry received",
+  "readyLabel": "Your admission inquiry is ready",
+  "confirmPrompt": "Confirm this inquiry when ready.",
+  "prompts": {
+    "grade": "Which grade/class are you interested in?",
+    "name": "What parent or guardian name should I use?",
+    "phone": "What contact number should I use?"
+  }
+}

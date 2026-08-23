@@ -1,0 +1,11 @@
+# Commerce Acceptance
+- Catalog-backed cart creation
+- State-first checkout collection
+- Phone and address validation
+- Payment normalization
+- Official price revalidation
+- Tenant/customer isolation
+- Order event emission
+- CRM activity and memory updates
+- Order listing
+- Full inherited regression suite

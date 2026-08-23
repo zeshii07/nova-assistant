@@ -1,0 +1,7 @@
+{
+  "COMMERCE_ORDER_CREATED": {
+    "english": "🎉 Great news — your order is confirmed!\n\nOrder ID: *{{orderId}}*\nTotal: {{totalText}}\nPayment: {{paymentMethod}}\n\nThank you for choosing us 😊",
+    "roman_urdu": "🎉 Mubarak ho — aapka order confirm ho gaya hai!\n\nOrder ID: *{{orderId}}*\nTotal: {{totalText}}\nPayment: {{paymentMethod}}\n\nBohat shukriya 😊",
+    "urdu": "🎉 مبارک ہو — آپ کا آرڈر تصدیق ہو گیا ہے!\n\nآرڈر آئی ڈی: *{{orderId}}*\nکل: {{totalText}}\nادائیگی: {{paymentMethod}}\n\nبہت شکریہ 😊"
+  }
+}

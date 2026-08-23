@@ -1,0 +1,14 @@
+[
+  {"question":"Do you bring cleaning supplies and equipment?","answer":"Yes, standard cleaning supplies are included unless the customer requests otherwise. Special products and equipment are recorded on the request and confirmed with the team before the visit."},
+  {"question":"Is the requested time guaranteed?","answer":"No. Nova records the requested time, but the team must verify live staff availability before it becomes a final appointment."},
+  {"question":"Does receiving a quote mean my booking is confirmed?","answer":"No. A quote, price or availability reply is not a confirmed appointment. The request is confirmed only after you receive a booking reference and the team confirms the date/time window."},
+  {"question":"What is the arrival window and when is the team late?","answer":"The normal arrival window runs from the requested start time until 30 minutes afterward. At 15 minutes the team is still within that window. If the team is more than 60 minutes late, you may decline the service without a cancellation fee."},
+  {"question":"Which areas do you serve?","answer":"SparkleCare serves Dubai and nearby supported UAE areas. The exact service address is checked before confirmation."},
+  {"question":"Can I combine office and sofa cleaning?","answer":"Yes. Multiple services can be kept as separate lines in the same request and can share the same date, time, address and customer details."},
+  {"question":"How much is general cleaner hire?","answer":"Standard cleaning is AED 40 per hour per cleaner for apartments, villas, houses and other routine-cleaning properties."},
+  {"question":"How much is a 3-seater sofa cleaning?","answer":"The configured price for a 3-seater sofa is AED 110: AED 50 for one seat plus AED 30 for each additional seat."},
+  {"question":"Do you accept card payments?","answer":"SparkleCare does not currently have an approved card-payment method in its configured business information. The team must confirm available payment methods before payment"},
+  {"question":"Do you clean all furniture types?","answer":"Supported furniture includes single seats, 3-, 4-, 5- and 7-seater sofas, L-shaped sofas, sofa beds, dining chairs, crib/single/queen/king mattresses, small through extra-large curtains, and carpets from 5 to 16 metres. Types without a published structured price require a custom quote."},
+  {"question":"Can you clean the outside of high-rise windows?","answer":"No. Standard service covers safely accessible interior windows and glass only. Climbing outside, rope access and unsafe high-rise exterior work are not offered."},
+  {"question":"Why do some services say custom quote?","answer":"Their final price depends on property size, item size, condition or scope, and no current public checkout price was available in the benchmark. Nova must ask for scope or hand off a quotation instead of inventing a price."}
+]

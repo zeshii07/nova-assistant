@@ -1,0 +1,19 @@
+{
+  "collectionLabel": "clinic services",
+  "browseTerms": [
+    "services",
+    "treatments",
+    "treatment",
+    "consultation",
+    "what do you offer",
+    "specialties"
+  ],
+  "interestTerms": [
+    "want",
+    "need",
+    "can i have",
+    "can i get",
+    "book",
+    "appointment"
+  ]
+}

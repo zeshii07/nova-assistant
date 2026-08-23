@@ -1,0 +1,47 @@
+[
+  {
+    "id": "general-consultation",
+    "name": "General Consultation",
+    "aliases": [
+      "general consultation",
+      "general doctor",
+      "doctor consultation"
+    ],
+    "type": "service",
+    "category": "consultation",
+    "description": "General consultation with a clinic doctor.",
+    "price": 2000,
+    "durationMinutes": 30,
+    "bookable": true
+  },
+  {
+    "id": "dermatology",
+    "name": "Dermatology Consultation",
+    "aliases": [
+      "dermatology",
+      "skin doctor",
+      "skin consultation"
+    ],
+    "type": "service",
+    "category": "specialty",
+    "description": "Consultation for general dermatology concerns.",
+    "price": 3000,
+    "durationMinutes": 30,
+    "bookable": true
+  },
+  {
+    "id": "physiotherapy",
+    "name": "Physiotherapy Session",
+    "aliases": [
+      "physiotherapy",
+      "physio",
+      "physical therapy"
+    ],
+    "type": "service",
+    "category": "therapy",
+    "description": "One physiotherapy assessment/session.",
+    "price": 2500,
+    "durationMinutes": 45,
+    "bookable": true
+  }
+]

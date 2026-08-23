@@ -1,0 +1,47 @@
+{
+  "id": "education",
+  "version": 1,
+  "extends": "universal",
+  "entities": [
+    "program",
+    "grade",
+    "admission",
+    "fee",
+    "term",
+    "campus",
+    "class",
+    "schedule"
+  ],
+  "actions": [
+    "ask_admission",
+    "ask_fee",
+    "get_schedule",
+    "book_visit",
+    "register_interest"
+  ],
+  "semantics": {
+    "offeringBrowseTerms": [
+      "classes",
+      "clsses",
+      "programs",
+      "grades",
+      "education",
+      "admissions"
+    ],
+    "offeringInterestTerms": [
+      "admission",
+      "primary",
+      "middle",
+      "secondary",
+      "campus visit"
+    ],
+    "bookingTerms": [
+      "admission",
+      "admitted",
+      "enroll",
+      "enrol",
+      "campus visit",
+      "book visit"
+    ]
+  }
+}

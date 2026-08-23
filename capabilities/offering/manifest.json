@@ -1,0 +1,14 @@
+{
+  "id": "offering",
+  "name": "Generic Offerings",
+  "version": "1.0.0",
+  "entry": "./src/index.js",
+  "priority": 82,
+  "permissions": [
+    "offering.read:offering"
+  ],
+  "events": [
+    "offering.viewed.v1",
+    "offering.listed.v1"
+  ]
+}

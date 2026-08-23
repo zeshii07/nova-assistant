@@ -1,0 +1,12 @@
+{
+  "GREETING": {
+    "english": "Hello! 👋 Welcome to the clinic assistant. I can help with available consultations, treatments, and appointment requests.",
+    "roman_urdu": "Assalam-o-alaikum! 👋 Clinic assistant mein khush aamdeed. Available consultations, treatments aur appointment request mein madad kar sakta hoon.",
+    "urdu": "السلام علیکم! 😊 میں آپ کی کیا مدد کر سکتا ہوں؟"
+  },
+  "THANKS": {
+    "english": "You’re welcome. Let me know if you need anything else.",
+    "roman_urdu": "Khushi hui 😊 Aur kisi info ki zarurat ho to bata dein.",
+    "urdu": "خوشی ہوئی۔ مزید معلومات چاہیے ہوں تو بتا دیں۔"
+  }
+}

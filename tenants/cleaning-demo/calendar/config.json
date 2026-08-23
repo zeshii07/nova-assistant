@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "provider": "local",
+  "timezone": "Asia/Dubai",
+  "defaultDurationMinutes": 180,
+  "slotIntervalMinutes": 30,
+  "holdTtlSeconds": 600,
+  "minLeadMinutes": 0,
+  "maxAdvanceDays": 730,
+  "resourcePools": [
+    { "id": "cleaning-teams", "name": "Cleaning teams", "capacity": 60, "serviceIds": [], "active": true }
+  ],
+  "serviceRules": [
+    { "serviceId": "CLN001", "poolId": "cleaning-teams", "durationMinutes": 180, "capacityRequired": 1 },
+    { "serviceId": "CLN002", "poolId": "cleaning-teams", "durationMinutes": 300, "capacityRequired": 2 },
+    { "serviceId": "CLN003", "poolId": "cleaning-teams", "durationMinutes": 90, "capacityRequired": 1 },
+    { "serviceId": "CLN010", "poolId": "cleaning-teams", "durationMinutes": 300, "capacityRequired": 2 },
+    { "serviceId": "CLN011", "poolId": "cleaning-teams", "durationMinutes": 360, "capacityRequired": 2 }
+  ]
+}

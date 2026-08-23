@@ -1,0 +1,11 @@
+{
+  "GREETING": {
+    "english": "Hi! 👋 I can help with tutoring subjects, lesson information, and booking a session.",
+    "roman_urdu": "Assalam-o-alaikum! 👋 Tutoring subjects aur session booking mein main madad kar sakta hoon.",
+    "urdu": "السلام علیکم! ٹیوشن سیشن کے بارے میں میں آپ کی مدد کر سکتا ہوں۔"
+  },
+  "THANKS": {
+    "english": "You’re welcome 😊 Message me if you need help with another subject or session.",
+    "roman_urdu": "Khushi hui 😊 Kisi aur subject ya session ke liye message kar dein."
+  }
+}

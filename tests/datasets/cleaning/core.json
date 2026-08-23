@@ -1,0 +1,593 @@
+{
+  "name": "Cleaning Conversation Core",
+  "tenantId": "cleaning-demo",
+  "cases": [
+    {
+      "name": "service-0",
+      "turns": [
+        {
+          "text": "deep cleaning",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_request",
+            "entities": {
+              "serviceName": "Deep Home Cleaning"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "service-1",
+      "turns": [
+        {
+          "text": "deep clean karwani hai",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_request",
+            "entities": {
+              "serviceName": "Deep Home Cleaning"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "service-2",
+      "turns": [
+        {
+          "text": "i need sofa cleaning",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_request",
+            "entities": {
+              "serviceName": "Sofa Cleaning"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "service-3",
+      "turns": [
+        {
+          "text": "sofa safai chahiye",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_request",
+            "entities": {
+              "serviceName": "Sofa Cleaning"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "service-4",
+      "turns": [
+        {
+          "text": "carpet cleaning please",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_request",
+            "entities": {
+              "serviceName": "Carpet Cleaning"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "service-5",
+      "turns": [
+        {
+          "text": "office cleaning chahiye",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_request",
+            "entities": {
+              "serviceName": "Office Cleaning"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "service-6",
+      "turns": [
+        {
+          "text": "commercial cleaning",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_request",
+            "entities": {
+              "serviceName": "Commercial Cleaning"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "service-7",
+      "turns": [
+        {
+          "text": "move out cleaning",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_request",
+            "entities": {
+              "serviceName": "Move-in / Move-out Cleaning"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "service-8",
+      "turns": [
+        {
+          "text": "house cleaning",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_request",
+            "entities": {
+              "serviceName": "Standard Home Cleaning"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "service-9",
+      "turns": [
+        {
+          "text": "ghar ki safai",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_request",
+            "entities": {
+              "serviceName": "Standard Home Cleaning"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "generic-0",
+      "turns": [
+        {
+          "text": "i need a cleaner",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_explore"
+          }
+        }
+      ]
+    },
+    {
+      "name": "generic-1",
+      "turns": [
+        {
+          "text": "can you send a cleaner",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_explore"
+          }
+        }
+      ]
+    },
+    {
+      "name": "generic-2",
+      "turns": [
+        {
+          "text": "cleaner chahiye",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_explore"
+          }
+        }
+      ]
+    },
+    {
+      "name": "generic-3",
+      "turns": [
+        {
+          "text": "mujhe safai karwani hai",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_explore"
+          }
+        }
+      ]
+    },
+    {
+      "name": "generic-4",
+      "turns": [
+        {
+          "text": "need someone to clean my house",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_request",
+            "entities": {
+              "serviceName": "Standard Home Cleaning"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "generic-5",
+      "turns": [
+        {
+          "text": "cleaning service chahiye",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.service_explore"
+          }
+        }
+      ]
+    },
+    {
+      "name": "complex-0",
+      "turns": [
+        {
+          "text": "i want a cleaner tomorrow for two hours",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "complex-1",
+      "turns": [
+        {
+          "text": "kal 2 ghantay ke liye cleaner chahiye",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "complex-2",
+      "turns": [
+        {
+          "text": "can someone clean my apartment tomorrow morning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "complex-3",
+      "turns": [
+        {
+          "text": "office cleaning tomorrow afternoon",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "cleaning-active-workflow",
+      "turns": [
+        {
+          "text": "deep cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        },
+        {
+          "text": "tomorrow",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.workflow_input"
+          }
+        },
+        {
+          "text": "11 am",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.workflow_input"
+          }
+        },
+        {
+          "text": "Johar Town Lahore",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.workflow_input"
+          }
+        }
+      ]
+    },
+    {
+      "name": "cleaning-interruption",
+      "turns": [
+        {
+          "text": "deep cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        },
+        {
+          "text": "what are your business hours",
+          "expect": {
+            "capabilityId": "assistant",
+            "intent": "assistant.ask_hours"
+          }
+        }
+      ]
+    },
+    {
+      "name": "cleaning-cancel",
+      "turns": [
+        {
+          "text": "deep cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        },
+        {
+          "text": "cancel my request",
+          "expect": {
+            "capabilityId": "system",
+            "replyContains": "cancel"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-23",
+      "turns": [
+        {
+          "text": "i need deep cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-24",
+      "turns": [
+        {
+          "text": "can i book deep cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-25",
+      "turns": [
+        {
+          "text": "i want deep cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-26",
+      "turns": [
+        {
+          "text": "please arrange deep cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-27",
+      "turns": [
+        {
+          "text": "mujhe deep cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-28",
+      "turns": [
+        {
+          "text": "i need sofa cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-29",
+      "turns": [
+        {
+          "text": "can i book sofa cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-30",
+      "turns": [
+        {
+          "text": "i want sofa cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-31",
+      "turns": [
+        {
+          "text": "please arrange sofa cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-32",
+      "turns": [
+        {
+          "text": "mujhe sofa cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-33",
+      "turns": [
+        {
+          "text": "i need office cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-34",
+      "turns": [
+        {
+          "text": "can i book office cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-35",
+      "turns": [
+        {
+          "text": "i want office cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-36",
+      "turns": [
+        {
+          "text": "please arrange office cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-37",
+      "turns": [
+        {
+          "text": "mujhe office cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-38",
+      "turns": [
+        {
+          "text": "i need carpet cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-39",
+      "turns": [
+        {
+          "text": "can i book carpet cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-40",
+      "turns": [
+        {
+          "text": "i want carpet cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-41",
+      "turns": [
+        {
+          "text": "please arrange carpet cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording-42",
+      "turns": [
+        {
+          "text": "mujhe carpet cleaning",
+          "expect": {
+            "capabilityId": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "semantic-duration-price-43",
+      "turns": [
+        {
+          "text": "what do you charge for two hours of cleaning",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.pricing_request",
+            "entities": {
+              "durationHours": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "semantic-duration-price-44",
+      "turns": [
+        {
+          "text": "i want a clenr for two hours what will be charges",
+          "expect": {
+            "capabilityId": "cleaning",
+            "intent": "cleaning.pricing_request",
+            "entities": {
+              "durationHours": 2
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

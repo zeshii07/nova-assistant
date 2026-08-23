@@ -1,0 +1,20 @@
+{
+  "id": "catalog",
+  "name": "Catalog",
+  "version": "1.0.0",
+  "entry": "./src/index.js",
+  "priority": 80,
+  "permissions": [
+    "catalog.search:catalog",
+    "catalog.read:catalog",
+    "memory.read:catalog",
+    "memory.write:catalog",
+    "crm.activity.write:catalog",
+    "commerce.write:catalog"
+  ],
+  "events": [
+    "catalog.responded.v1",
+    "catalog.product.viewed.v1",
+    "catalog.product.unavailable.v1"
+  ]
+}

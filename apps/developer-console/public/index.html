@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nova Conversation Playground</title><link rel="stylesheet" href="/developer/style.css"></head>
+<body>
+<header><div><strong>Nova Developer Console</strong><span>Conversation Intelligence Playground</span></div><div class="controls"><select id="tenant"><option value="default">Retail · default</option><option value="cleaning-demo">Cleaning · cleaning-demo</option><option value="healthcare-demo">Healthcare · healthcare-demo (generic offerings + booking)</option><option value="education-demo">Education · education-demo (generic offerings + admission)</option>
+<option value="tutor-demo">Tutoring · tutor-demo (config-only unseen business)</option><option value="restaurant-demo">Restaurant · restaurant-demo (menu + reservation)</option><option value="salon-demo">Salon · salon-demo (services + appointment)</option></select><input id="customer" value="playground-user" title="Customer ID"><input id="devtoken" type="password" placeholder="Dev token (public host)" title="NOVA_DEV_TOKEN"><button id="reset" title="Reset conversation state; preserve cart and history">Reset chat</button><button id="freshTest" title="Reset conversation and clear only this customer's active cart">Fresh test</button></div></header>
+<main>
+  <section class="chat-panel">
+    <div id="chat" class="chat"></div>
+    <form id="composer"><textarea id="message" placeholder="Try: Can I get shoes?" rows="2"></textarea><button>Send</button></form>
+    <div class="quick"><button data-q="Can I get shoes?">Shoes</button><button data-q="I want white running shoes size 42">Running shoes</button><button data-q="confirm order">Confirm</button><button data-q="Cancel my order">Cancel</button><button data-q="I need a cleaner tomorrow for two hours">Cleaning</button><button data-q="What doctors and services do you have?">Healthcare</button><button data-q="Tell me about admissions and class programs">Education</button></div>
+  </section>
+  <section class="inspect-panel">
+    <nav><button class="tab active" data-tab="decision">Decision</button><button class="tab" data-tab="state">State</button><button class="tab" data-tab="replay">Replay</button><button class="tab" data-tab="dataset">Datasets</button><button class="tab" data-tab="onboarding">Onboarding Studio</button><button class="tab" data-tab="controlplane">Control Plane</button><button class="tab" data-tab="knowledge">Knowledge Manager</button><button class="tab" data-tab="data">Data Inspector</button></nav>
+    <div id="decision" class="tabbody active">
+      <div class="cards"><article><h3>Selected</h3><pre id="selected">—</pre></article><article><h3>Entities</h3><pre id="entities">—</pre></article><article><h3>All intents / message frame</h3><pre id="messageframe">—</pre></article><article><h3>Remote NLU decision</h3><pre id="nlu">—</pre></article><article><h3>Workflow</h3><pre id="workflow">—</pre></article><article><h3>Goal</h3><pre id="goal">—</pre></article><article><h3>Social</h3><pre id="social">—</pre></article><article><h3>Universal Semantics</h3><pre id="semantic">—</pre></article><article><h3>Domain Schema</h3><pre id="domain">—</pre></article><article><h3>Timing</h3><pre id="timing">—</pre></article></div>
+      <article><h3>Vocabulary matches</h3><pre id="vocabulary">—</pre></article><article><h3>Candidate intents</h3><pre id="candidates">—</pre></article>
+    </div>
+    <div id="state" class="tabbody"><article><h3>Conversation state</h3><pre id="statejson">—</pre></article></div>
+    <div id="replay" class="tabbody"><div class="replay-head"><button id="refreshReplays">Refresh</button></div><div id="replays"></div><article><h3>Selected replay</h3><pre id="replayjson">—</pre></article></div>
+    <div id="dataset" class="tabbody"><div class="dataset-actions"><select id="datasetName"><option value="retail/core.json">Retail core</option><option value="cleaning/core.json">Cleaning core</option><option value="shared/global.json">Shared/global</option></select><button id="runDataset">Run dataset</button></div><pre id="datasetResult">Choose a dataset and run it.</pre></div>
+    <div id="onboarding" class="tabbody">
+      <div class="studio-head"><div><h2>Developer Onboarding Studio</h2><p>Create an unseen tenant from business data only. No engine code changes.</p></div><button id="refreshTenants">Refresh tenants</button></div>
+      <div class="studio-grid">
+        <article class="studio-card"><h3>1 · Business identity</h3>
+          <div class="import-box"><strong>Import Business Data</strong><p class="hint">Recommended: upload one structured JSON or CSV containing business details plus products/services. Nova will populate this form automatically.</p><label>Business data file<input id="obBusinessFile" type="file" accept=".json,.csv"></label><div id="obBusinessFileStatus" class="hint">JSON can contain name, description, hours, contact, offerings/products/services and FAQs.</div></div>
+          <label>Business name<input id="obName" placeholder="City Drive Academy"></label><label>Tenant ID <span>optional</span><input id="obId" placeholder="city-drive-academy"></label>
+          <label>Business/domain type<input id="obDomain" placeholder="driving_school, lawyer, consultant, hotel..."></label><label>Assistant name <span>optional</span><input id="obAssistant" placeholder="City Drive Assistant"></label>
+          <label>Description<textarea id="obDescription" rows="3" placeholder="What does this business do?"></textarea></label>
+          <div class="two"><label>Hours<input id="obHours" placeholder="Mon-Sat, 9 AM-7 PM"></label><label>Contact<input id="obContact" placeholder="+92..."></label></div>
+          <label>Location<input id="obLocation" placeholder="Lahore, Pakistan"></label>
+          <label class="check"><input id="obOverwrite" type="checkbox"> Replace existing tenant with the same ID (clean rebuild)</label>
+        </article>
+        <article class="studio-card"><h3>2 · Offerings</h3><p class="hint">Add any product, service, program, consultation, lesson, menu item, etc.</p><div id="obOfferings"></div><button type="button" id="addOffering">+ Add offering</button></article>
+        <article class="studio-card"><h3>3 · Additional Knowledge</h3><p class="hint">Use this for policies, FAQs, notes and descriptive documents that are not the structured product/service catalog.</p><label>Business notes / policies<textarea id="obKnowledge" rows="8" placeholder="Paste approved business facts, policies, terminology, FAQs, delivery rules, service details..."></textarea></label><label>Load additional knowledge file<input id="obKnowledgeFile" type="file" accept=".txt,.md,.csv,.json"></label><div id="obFileStatus" class="hint"></div></article>
+        <article class="studio-card"><h3>4 · Generate & test</h3><p>Nova derives the tenant profile, capabilities, offerings, booking/catalog configuration and knowledge index.</p><button id="createTenant" class="primary">Generate tenant</button><button id="testCreatedTenant" disabled>Open in Playground</button><pre id="onboardingResult">Fill the business information and generate the tenant.</pre></article>
+      </div>
+    </div>
+
+    <div id="controlplane" class="tabbody">
+      <div class="studio-head"><div><h2>Tenant Business Control Plane</h2><p>Edit durable operational truth through draft → validate → preview → publish. Customer conversations and LLM output cannot publish changes.</p></div><button id="cpRefresh">Refresh</button></div>
+      <div class="control-context">
+        <label>Actor ID<input id="cpActor" value="local-developer" placeholder="owner-123"></label>
+        <label>Role<select id="cpRole"><option value="owner">Owner</option><option value="admin">Admin</option><option value="catalog_manager">Catalog manager</option><option value="operations_manager">Operations manager</option><option value="support_agent">Support agent</option><option value="viewer">Viewer</option></select></label>
+        <label>Resource<select id="cpResource"><option value="profile">Business profile</option><option value="products">Products & prices</option><option value="services">Services & pricing</option><option value="hours">Business hours</option><option value="calendar">Calendar & capacity</option></select></label>
+        <button id="cpLoad">Load effective</button><button id="cpCreate">Create draft</button>
+      </div>
+      <div class="studio-grid">
+        <article class="studio-card cp-editor-card"><h3>Operational resource JSON</h3><p class="hint">Products & Prices is the only product-price source. Services & Pricing is the only service-price source. Knowledge documents may explain policies but cannot override commercial values. Create, validate, and publish a draft to affect customers.</p><textarea id="cpEditor" rows="24" spellcheck="false"></textarea><div class="cp-actions"><button id="cpSave">Save draft</button><button id="cpValidate">Validate</button><button id="cpPreview">Preview</button><button id="cpPublish" class="primary">Publish</button><button id="cpDiscard">Discard</button></div><pre id="cpStatus">Select a tenant and load a resource.</pre></article>
+        <div>
+          <article class="studio-card"><h3>Overview</h3><pre id="cpOverview">—</pre></article>
+          <article class="studio-card"><h3>Validation / Preview</h3><pre id="cpPreviewResult">—</pre></article>
+          <article class="studio-card"><h3>Revision history</h3><select id="cpRevision"></select><button id="cpRollback">Rollback to selected revision</button><pre id="cpRevisions">—</pre></article>
+          <article class="studio-card"><h3>Audit history</h3><pre id="cpAudit">—</pre></article>
+          <article class="studio-card"><h3>Live SKU inventory</h3><p class="hint">On-hand stock is operational state. Active checkout reservations reduce available stock until confirmation.</p><div class="two"><label>SKU<input id="cpInventorySku" placeholder="POLO-BLK-L"></label><label>New on-hand quantity<input id="cpInventoryQuantity" type="number" min="0" step="1"></label></div><label>Adjustment reason<input id="cpInventoryReason" placeholder="stock count correction"></label><button id="cpInventorySet">Set on-hand stock</button><button id="cpInventoryRefresh">Refresh inventory</button><pre id="cpInventory">—</pre></article>
+          <article class="studio-card"><h3>Live calendar</h3><p class="hint">Confirmed events and temporary holds consume tenant capacity. Add a block to simulate staff, rooms, vehicles, or tables being unavailable.</p><div class="two"><label>Date (DD/MM/YYYY)<input id="cpCalendarDate" placeholder="25/08/2026"></label><label>Start time<input id="cpCalendarTime" placeholder="14:00"></label></div><div class="two"><label>Duration minutes<input id="cpCalendarDuration" type="number" min="1" value="60"></label><label>Capacity units<input id="cpCalendarCapacity" type="number" min="1" value="1"></label></div><label>Resource pool ID <span>optional</span><input id="cpCalendarPool" placeholder="stylists"></label><label>Reason / title<input id="cpCalendarSubject" placeholder="Staff meeting"></label><button id="cpCalendarBlock">Block this time</button><button id="cpCalendarRefresh">Refresh calendar</button><pre id="cpCalendar">—</pre></article>
+        </div>
+      </div>
+    </div>
+
+    <div id="data" class="tabbody"><div class="studio-head"><div><h2>Nova v7 Data Inspector</h2><p>Inspect the repositories that own this customer's live state and durable records.</p></div><button id="dataRefresh">Refresh</button></div><div class="cards"><article><h3>Storage</h3><pre id="dataStorage">—</pre></article><article><h3>CRM</h3><pre id="dataCrm">—</pre></article><article><h3>Cart & Orders</h3><pre id="dataCommerce">—</pre></article><article><h3>Bookings</h3><pre id="dataBookings">—</pre></article></div><article><h3>Live conversation state</h3><pre id="dataState">—</pre></article></div>
+
+    <div id="knowledge" class="tabbody">
+      <div class="studio-head"><div><h2>Tenant Knowledge Manager</h2><p>Manage approved policies, FAQs and descriptive information. Product and service prices are managed only in the Control Plane.</p></div><div><button id="kmRefresh">Refresh</button><button id="kmReindex">Re-index</button></div></div>
+      <div class="studio-grid">
+        <article class="studio-card"><h3>Knowledge overview</h3>
+          <p class="hint">Informational knowledge is retrieved from approved tenant sources. It cannot override products, services, prices, inventory, hours or calendar state.</p>
+          <pre id="kmOverview">Select a tenant and refresh.</pre>
+        </article>
+        <article class="studio-card"><h3>Add business fact</h3>
+          <label>Fact path<input id="kmFactKey" placeholder="policies.minimumOrder or delivery.area"></label>
+          <label>Value<textarea id="kmFactValue" rows="3" placeholder="Approved business fact"></textarea></label>
+          <button id="kmAddFact">Save fact</button>
+          <h3>Add FAQ</h3>
+          <label>Question<input id="kmFaqQuestion" placeholder="Do you offer home delivery?"></label>
+          <label>Approved answer<textarea id="kmFaqAnswer" rows="3"></textarea></label>
+          <button id="kmAddFaq">Add FAQ</button>
+        </article>
+        <article class="studio-card"><h3>Add knowledge document</h3>
+          <label>Title<input id="kmDocTitle" placeholder="Returns policy"></label>
+          <label>Approved text<textarea id="kmDocText" rows="9" placeholder="Paste policy, service explanation, terminology, instructions, etc."></textarea></label>
+          <label>Upload knowledge file<input id="kmDocFile" type="file" accept=".txt,.md,.pdf,.csv,.json"></label><div id="kmDocFileStatus" class="hint">TXT/Markdown/PDF/CSV/JSON policies and business information. PDF text is extracted locally. Products and prices belong in Products & Prices; services and charges belong in Services & Pricing.</div>
+          <div class="two"><label>Priority<input id="kmDocPriority" type="number" min="0" max="100" value="50"></label><label>Tags<input id="kmDocTags" placeholder="policy, delivery"></label></div>
+          <button id="kmAddDocument">Add document</button>
+        </article>
+        <article class="studio-card"><h3>Test retrieval</h3>
+          <label>Customer question<input id="kmSearchQuery" placeholder="What is your return policy?"></label>
+          <button id="kmSearch">Search tenant knowledge</button>
+          <pre id="kmSearchResult">No search yet.</pre>
+        </article>
+        <article class="studio-card" style="grid-column:1/-1"><h3>Registered knowledge sources</h3><div id="kmSources">—</div></article>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="/developer/app.js"></script></body></html>

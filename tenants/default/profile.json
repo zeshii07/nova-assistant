@@ -1,0 +1,57 @@
+{
+  "id": "default",
+  "name": "Demo Store",
+  "status": "active",
+  "defaultLanguage": "english",
+  "capabilities": [
+    "assistant",
+    "crm",
+    "catalog",
+    "commerce"
+  ],
+  "branding": {
+    "assistantName": "Demo Store Assistant",
+    "welcomeMessage": "Hello! 👋 I’m the Demo Store Assistant. I can help you find products, compare options, manage your cart, and place or track an order.",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Store mein khush aamdeed. Products dekhne, compare karne ya order place karne mein main madad kar sakta hoon.",
+    "welcomeMessageUrdu": "السلام علیکم! میں ڈیمو اسسٹنٹ ہوں۔ میں آپ کی کیا مدد کر سکتا ہوں؟"
+  },
+  "business": {
+    "description": "A configurable AI assistant tenant used for Sprint 1 testing.",
+    "contact": "support@example.com"
+  },
+  "features": {
+    "llmFallback": true
+  },
+  "permissions": [
+    "knowledge.read",
+    "memory.read:assistant",
+    "memory.write:assistant",
+    "memory.delete:assistant",
+    "crm.customer.read:assistant",
+    "crm.customer.write:assistant",
+    "crm.activity.write:assistant",
+    "crm.customer.read:crm",
+    "crm.customer.write:crm",
+    "crm.note.write:crm",
+    "crm.tag.write:crm",
+    "crm.activity.read:crm",
+    "crm.activity.write:crm",
+    "catalog.search:catalog",
+    "catalog.read:catalog",
+    "memory.read:catalog",
+    "memory.write:catalog",
+    "crm.activity.write:catalog",
+    "commerce.read:commerce",
+    "commerce.write:commerce",
+    "commerce.order.create:commerce",
+    "commerce.order.update:commerce",
+    "catalog.read:commerce",
+    "memory.read:commerce",
+    "memory.write:commerce",
+    "crm.customer.read:commerce",
+    "crm.customer.write:commerce",
+    "crm.activity.write:commerce",
+    "commerce.write:catalog"
+  ],
+  "domain": "retail"
+}

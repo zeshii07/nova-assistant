@@ -1,0 +1,11 @@
+{
+  "description": "BrightPath Tutoring provides one-to-one Math, English and Science tutoring.",
+  "services": [
+    "Math Tutoring",
+    "English Tutoring",
+    "Science Tutoring"
+  ],
+  "hours": "Monday to Saturday, 10:00 AM to 8:00 PM",
+  "location": "Johar Town, Lahore, Pakistan",
+  "contact": "+92 300 7770007"
+}

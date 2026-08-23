@@ -1,0 +1,29 @@
+{
+  "enabled": true,
+  "mode": "appointment",
+  "triggerTerms": [
+    "book",
+    "appointment",
+    "can i have",
+    "can i get",
+    "i want",
+    "consultation"
+  ],
+  "requiredFields": [
+    "subject",
+    "date",
+    "time",
+    "name",
+    "phone"
+  ],
+  "confirmedLabel": "Appointment request received",
+  "readyLabel": "Your clinic appointment request is ready",
+  "confirmPrompt": "Confirm this appointment request when ready.",
+  "prompts": {
+    "subject": "Which clinic service or consultation do you need?",
+    "date": "What date would you prefer?",
+    "time": "What time would you prefer?",
+    "name": "What patient name should I use?",
+    "phone": "What contact number should I use?"
+  }
+}

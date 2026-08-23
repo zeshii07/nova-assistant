@@ -1,0 +1,44 @@
+{
+  "id": "driving-school-demo",
+  "name": "City Drive Academy",
+  "domain": "driving_school",
+  "description": "Driving lessons for beginners and experienced drivers.",
+  "hours": "Monday to Saturday, 9 AM to 7 PM",
+  "location": "Lahore, Pakistan",
+  "contact": "+92 300 0000000",
+  "currency": "PKR",
+  "offerings": [
+    {
+      "name": "Automatic Car Lesson",
+      "type": "service",
+      "category": "driving lessons",
+      "description": "One-hour automatic car driving lesson.",
+      "price": 3000,
+      "durationMinutes": 60,
+      "bookable": true,
+      "aliases": [
+        "automatic lesson",
+        "automatic driving"
+      ]
+    },
+    {
+      "name": "Manual Car Lesson",
+      "type": "service",
+      "category": "driving lessons",
+      "description": "One-hour manual car driving lesson.",
+      "price": 2500,
+      "durationMinutes": 60,
+      "bookable": true,
+      "aliases": [
+        "manual lesson",
+        "manual driving"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Do you teach beginners?",
+      "answer": "Yes, beginner lessons are available."
+    }
+  ]
+}

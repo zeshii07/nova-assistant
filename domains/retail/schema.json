@@ -1,0 +1,37 @@
+{
+  "id": "retail",
+  "version": 1,
+  "extends": "universal",
+  "entities": [
+    "product",
+    "product_family",
+    "category",
+    "color",
+    "size",
+    "quantity",
+    "price",
+    "order"
+  ],
+  "actions": [
+    "browse",
+    "select_product",
+    "purchase",
+    "confirm_order",
+    "cancel_order",
+    "track_order"
+  ],
+  "semantics": {
+    "offeringBrowseTerms": [
+      "products",
+      "items",
+      "what do you sell"
+    ],
+    "offeringInterestTerms": [
+      "buy",
+      "purchase",
+      "want",
+      "can i get"
+    ],
+    "bookingTerms": []
+  }
+}

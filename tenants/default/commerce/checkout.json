@@ -1,0 +1,4 @@
+{
+  "requiredFields": ["name", "phone", "city", "address", "landmark", "paymentMethod"],
+  "paymentMethods": ["Cash on Delivery", "JazzCash", "EasyPaisa", "Bank Transfer"]
+}

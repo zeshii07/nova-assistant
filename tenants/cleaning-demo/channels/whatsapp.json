@@ -1,0 +1,11 @@
+{
+  "enabled": false,
+  "graphVersion": "v23.0",
+  "phoneNumberIdEnv": "WHATSAPP_PHONE_NUMBER_ID_CLEANING_DEMO",
+  "accessTokenEnv": "WHATSAPP_ACCESS_TOKEN_CLEANING_DEMO",
+  "verifyTokenEnv": "WHATSAPP_VERIFY_TOKEN_CLEANING_DEMO",
+  "appSecretEnv": "WHATSAPP_APP_SECRET_CLEANING_DEMO",
+  "markRead": true,
+  "retries": 2,
+  "timeoutMs": 15000
+}

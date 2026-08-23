@@ -1,0 +1,21 @@
+{
+  "name": "SparkleCare Cleaning",
+  "description": "SparkleCare is a full-service residential, furniture, office, laundry and specialised cleaning business serving Dubai and nearby supported UAE areas.",
+  "services": ["Standard Home Cleaning", "Hourly Cleaner Hire", "Recurring Maid Service", "Apartment Cleaning", "Villa Cleaning", "Deep Home Cleaning", "Deep Apartment Cleaning", "Deep Villa Cleaning", "Move-in / Move-out Cleaning", "Post-renovation / Post-construction Cleaning", "Office Cleaning", "Commercial Cleaning", "Housekeeping Service", "Kitchen Deep Cleaning", "Bathroom Deep Cleaning", "Floor Cleaning", "Interior Window Cleaning", "Balcony Cleaning", "Sofa Cleaning", "Dining Chair Cleaning", "Mattress Cleaning", "Carpet Cleaning", "Curtain Cleaning", "Furniture Cleaning Package", "AC Cleaning", "AC Duct Cleaning", "Disinfection & Sanitisation", "Pest Control", "Laundry Wash & Fold", "Laundry Ironing", "Laundry Wash & Iron", "Laundry Home-care Cleaning"],
+  "hours": "Monday to Saturday, 9 AM to 7 PM Gulf Standard Time",
+  "contact": {"phone": "+971 4 555 0199", "email": "hello@sparklecare.example", "website": "https://sparklecare.example"},
+  "location": {"city": "Dubai", "country": "United Arab Emirates", "serviceArea": "SparkleCare serves Dubai and nearby supported UAE areas; the exact address is checked before confirmation."},
+  "policies": {
+    "availability": "A requested date or time is not confirmed until the customer receives a service-request reference and the team verifies live staff availability.",
+    "booking_confirmation": "A quote, price, or availability reply does not by itself confirm a booking. A request is confirmed only after the customer receives a booking reference and the team confirms the date/time window.",
+    "arrival_window": "The requested start time begins a normal arrival window of up to 30 minutes. At 15 minutes the team is still within the window. If the team is more than 60 minutes late, the customer may decline the service without a cancellation fee.",
+    "pricing": "Standard cleaning is hourly. Deep cleaning is priced by property type and bedroom count. Sofa and other furniture cleaning is priced by the configured item size. Unlisted scope requires staff quotation.",
+    "hourly_cleaner_pricing": "Standard cleaning is AED 40 per hour per cleaner. Total = AED 40 × hours × cleaners.",
+    "multi_service": "Customers can combine multiple cleaning services in one conversation. Each service remains a separate request line and preserves the same schedule and customer details unless changed.",
+    "safety": "Only safely accessible interior windows and glass are included. Exterior high-rise work, climbing outside, rope access and unsafe access are not offered through standard cleaning.",
+    "supplies": "Standard cleaning supplies are included unless the customer requests otherwise. Special products and equipment are recorded and confirmed before the visit.",
+    "custom_quotes": "Office, commercial, unlisted deep-cleaning scopes, unlisted furniture sizes, post-construction and other variable-scope services require a custom quotation. Nova must not invent a price."
+  },
+  "hourlyCleanerPricing": {"ratePerHourPerCleaner": 40, "currency": "AED", "description": "Standard cleaning is charged at AED 40 per hour per cleaner."},
+  "pricingBenchmark": {"provider": "Justlife UAE public website", "capturedOn": "2026-08-19", "adjustmentPercent": -10, "affiliation": "SparkleCare is an independent test tenant and is not represented as affiliated with Justlife."}
+}

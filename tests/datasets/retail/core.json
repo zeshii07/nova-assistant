@@ -1,0 +1,1287 @@
+{
+  "name": "Retail Conversation Core",
+  "tenantId": "default",
+  "cases": [
+    {
+      "name": "category-0-footwear",
+      "turns": [
+        {
+          "text": "Can I get shoes?",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "footwear"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-1-footwear",
+      "turns": [
+        {
+          "text": "Do you have shoes?",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "footwear"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-2-footwear",
+      "turns": [
+        {
+          "text": "Show me sneakers",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "footwear"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-3-footwear",
+      "turns": [
+        {
+          "text": "I need trainers",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "footwear"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-4-footwear",
+      "turns": [
+        {
+          "text": "mujhe shoes chahiye",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "footwear"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-5-footwear",
+      "turns": [
+        {
+          "text": "ap k pass joggers hain",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-6-clothing",
+      "turns": [
+        {
+          "text": "Show me shirts",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.family_browse",
+            "entities": {
+              "productFamily": "shirts"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-7-clothing",
+      "turns": [
+        {
+          "text": "Do you have clothes?",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "clothing"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-8-clothing",
+      "turns": [
+        {
+          "text": "mujhe tshirts dikhao",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Cotton T-Shirt"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-9-clothing",
+      "turns": [
+        {
+          "text": "Can I get a hoodie?",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Fleece Hoodie"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-10-electronics",
+      "turns": [
+        {
+          "text": "Show electronics",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "electronics"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-11-electronics",
+      "turns": [
+        {
+          "text": "what gadgets do you have",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "electronics"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-12-electronics",
+      "turns": [
+        {
+          "text": "mujhe electronics chahiye",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "electronics"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-13-bags",
+      "turns": [
+        {
+          "text": "show me bags",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "bags"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-14-bags",
+      "turns": [
+        {
+          "text": "do you have backpacks",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Urban Backpack"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "category-15-stationery",
+      "turns": [
+        {
+          "text": "show stationery",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "stationery"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-0",
+      "turns": [
+        {
+          "text": "Do you have running shoes",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-1",
+      "turns": [
+        {
+          "text": "I want running shoes",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-2",
+      "turns": [
+        {
+          "text": "running shoes please",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-3",
+      "turns": [
+        {
+          "text": "can i purchase sunglasses",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Sunglasses"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-4",
+      "turns": [
+        {
+          "text": "mujhe sunglasses chahiye",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Sunglasses"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-5",
+      "turns": [
+        {
+          "text": "wireless airbud price",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Wireless Earbuds"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-6",
+      "turns": [
+        {
+          "text": "do you have earbuds",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Wireless Earbuds"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-7",
+      "turns": [
+        {
+          "text": "show bluetooth speaker",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Bluetooth Speaker"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-8",
+      "turns": [
+        {
+          "text": "i need a power bank",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "20000mAh Power Bank"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-9",
+      "turns": [
+        {
+          "text": "show fleece hoodie",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Fleece Hoodie"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-10",
+      "turns": [
+        {
+          "text": "polo shirt price",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Polo Shirt"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-11",
+      "turns": [
+        {
+          "text": "steel bottle",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Steel Water Bottle"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-12",
+      "turns": [
+        {
+          "text": "urban backpack",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Urban Backpack"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "product-13",
+      "turns": [
+        {
+          "text": "gel pens",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Gel Pen Pack"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-0",
+      "turns": [
+        {
+          "text": "i want running shoes",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-1",
+      "turns": [
+        {
+          "text": "can i get running shoes",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-2",
+      "turns": [
+        {
+          "text": "show running shoes",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-3",
+      "turns": [
+        {
+          "text": "do you sell running shoes",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-4",
+      "turns": [
+        {
+          "text": "running shoe chahiye",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-5",
+      "turns": [
+        {
+          "text": "mujhe running shoes lene hain",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-6",
+      "turns": [
+        {
+          "text": "sports shoes dikhao",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-7",
+      "turns": [
+        {
+          "text": "i am looking for runners",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-8",
+      "turns": [
+        {
+          "text": "i want wireless earbuds",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Wireless Earbuds"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-9",
+      "turns": [
+        {
+          "text": "can i get earbuds",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Wireless Earbuds"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-10",
+      "turns": [
+        {
+          "text": "do you have airbuds",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Wireless Earbuds"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-11",
+      "turns": [
+        {
+          "text": "earphones chahiye",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Wireless Earbuds"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-12",
+      "turns": [
+        {
+          "text": "wireless earbud dikhao",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Wireless Earbuds"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-13",
+      "turns": [
+        {
+          "text": "i need bluetooth earbuds",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Wireless Earbuds"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-14",
+      "turns": [
+        {
+          "text": "price of wireless airbud",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Wireless Earbuds"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-15",
+      "turns": [
+        {
+          "text": "i want sunglasses",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Sunglasses"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-16",
+      "turns": [
+        {
+          "text": "can i buy shades",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Sunglasses"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-17",
+      "turns": [
+        {
+          "text": "do you have sunglasses",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Sunglasses"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-18",
+      "turns": [
+        {
+          "text": "sun glasses chahiye",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Sunglasses"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-19",
+      "turns": [
+        {
+          "text": "mujhe shades chahiye",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Sunglasses"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "variant-20",
+      "turns": [
+        {
+          "text": "show polarized sunglasses",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Sunglasses"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "running-shoes-no-phantom-quantity",
+      "turns": [
+        {
+          "text": "Do you have running shoes",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        },
+        {
+          "text": "I want white size 42",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.attribute_update",
+            "entities": {
+              "color": "White",
+              "size": "42"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "sunglasses-four-pieces",
+      "turns": [
+        {
+          "text": "i want silver sunglasses",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Sunglasses",
+              "color": "Silver"
+            }
+          }
+        },
+        {
+          "text": "i want four pieces",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.attribute_update",
+            "entities": {
+              "quantity": 4
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "quantity-correction",
+      "turns": [
+        {
+          "text": "i want black wireless earbuds",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Wireless Earbuds",
+              "color": "Black"
+            }
+          }
+        },
+        {
+          "text": "2 pieces",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.attribute_update",
+            "entities": {
+              "quantity": 2
+            }
+          }
+        },
+        {
+          "text": "actually make it 1",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.attribute_update",
+            "entities": {
+              "quantity": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "checkout-price-interruption",
+      "turns": [
+        {
+          "text": "i want silver sunglasses",
+          "expect": {
+            "capabilityId": "catalog"
+          }
+        },
+        {
+          "text": "1",
+          "expect": {
+            "capabilityId": "catalog"
+          }
+        },
+        {
+          "text": "confirm order",
+          "expect": {
+            "capabilityId": "commerce",
+            "intent": "commerce.confirm"
+          }
+        },
+        {
+          "text": "wah g itny mehngy hain",
+          "expect": {
+            "capabilityId": "commerce",
+            "intent": "commerce.price_comment",
+            "replyContains": "Rs1,800"
+          }
+        }
+      ]
+    },
+    {
+      "name": "checkout-invalid-name",
+      "turns": [
+        {
+          "text": "i want black wireless earbuds",
+          "expect": {
+            "capabilityId": "catalog"
+          }
+        },
+        {
+          "text": "1",
+          "expect": {
+            "capabilityId": "catalog"
+          }
+        },
+        {
+          "text": "confirm order",
+          "expect": {
+            "capabilityId": "commerce"
+          }
+        },
+        {
+          "text": "these earbuds are expensive",
+          "expect": {
+            "capabilityId": "commerce",
+            "replyContains": "delivery"
+          }
+        }
+      ]
+    },
+    {
+      "name": "checkout-name-correction",
+      "turns": [
+        {
+          "text": "i want black wireless earbuds",
+          "expect": {
+            "capabilityId": "catalog"
+          }
+        },
+        {
+          "text": "1",
+          "expect": {
+            "capabilityId": "catalog"
+          }
+        },
+        {
+          "text": "confirm order",
+          "expect": {
+            "capabilityId": "commerce"
+          }
+        },
+        {
+          "text": "Zeeshan Ahmad",
+          "expect": {
+            "capabilityId": "commerce"
+          }
+        },
+        {
+          "text": "this is not my name",
+          "expect": {
+            "capabilityId": "commerce",
+            "intent": "commerce.correction",
+            "replyContains": "name"
+          }
+        }
+      ]
+    },
+    {
+      "name": "browse-0",
+      "turns": [
+        {
+          "text": "what products do you have",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.list"
+          }
+        }
+      ]
+    },
+    {
+      "name": "browse-1",
+      "turns": [
+        {
+          "text": "ap k pass kia kia hai",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.list"
+          }
+        }
+      ]
+    },
+    {
+      "name": "browse-2",
+      "turns": [
+        {
+          "text": "aap ke paas kya kya hai",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.list"
+          }
+        }
+      ]
+    },
+    {
+      "name": "browse-3",
+      "turns": [
+        {
+          "text": "kon sy products hain",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.list"
+          }
+        }
+      ]
+    },
+    {
+      "name": "browse-4",
+      "turns": [
+        {
+          "text": "show me your products",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.list"
+          }
+        }
+      ]
+    },
+    {
+      "name": "browse-5",
+      "turns": [
+        {
+          "text": "what do you sell",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.list"
+          }
+        }
+      ]
+    },
+    {
+      "name": "browse-6",
+      "turns": [
+        {
+          "text": "products dikhao",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.list"
+          }
+        }
+      ]
+    },
+    {
+      "name": "browse-7",
+      "turns": [
+        {
+          "text": "list items",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.list"
+          }
+        }
+      ]
+    },
+    {
+      "name": "goal-footwear-order-needs-selection",
+      "turns": [
+        {
+          "text": "can i get shoes",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "footwear"
+            }
+          }
+        },
+        {
+          "text": "ok book my order",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.goal_selection_required",
+            "replyContains": "Running Shoes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "goal-select-running-shoes-before-commerce",
+      "turns": [
+        {
+          "text": "can i get shoes",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse"
+          }
+        },
+        {
+          "text": "confirm running shoes as my order",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "replyContains": "Running Shoes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "goal-product-details-then-checkout",
+      "turns": [
+        {
+          "text": "can i get shoes",
+          "expect": {
+            "capabilityId": "catalog"
+          }
+        },
+        {
+          "text": "running shoes",
+          "expect": {
+            "capabilityId": "catalog"
+          }
+        },
+        {
+          "text": "white",
+          "expect": {
+            "capabilityId": "catalog"
+          }
+        },
+        {
+          "text": "42",
+          "expect": {
+            "capabilityId": "catalog"
+          }
+        },
+        {
+          "text": "1",
+          "expect": {
+            "capabilityId": "catalog",
+            "replyContains": "confirm"
+          }
+        },
+        {
+          "text": "confirm my order",
+          "expect": {
+            "capabilityId": "commerce",
+            "intent": "commerce.confirm",
+            "replyContains": "Order Summary"
+          }
+        }
+      ]
+    },
+    {
+      "name": "mixed-greeting-shoes",
+      "turns": [
+        {
+          "text": "hello can i get shoes from here",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "replyContains": "Running Shoes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "other-shoes",
+      "turns": [
+        {
+          "text": "running shoes",
+          "expect": {
+            "capabilityId": "catalog"
+          }
+        },
+        {
+          "text": "do you have other shoes",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "replyContains": "Comfort Slides"
+          }
+        }
+      ]
+    },
+    {
+      "name": "unsupported-football",
+      "turns": [
+        {
+          "text": "do you sell football",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.unavailable_request",
+            "replyContains": "football"
+          }
+        }
+      ]
+    },
+    {
+      "name": "unsupported-cleaning-retail",
+      "turns": [
+        {
+          "text": "I need a cleaner tomorrow for two hours",
+          "expect": {
+            "capabilityId": "assistant",
+            "intent": "assistant.unsupported_capability",
+            "replyContains": "cleaning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "small-talk-how-do-you-do",
+      "turns": [
+        {
+          "text": "how do you do today",
+          "expect": {
+            "capabilityId": "assistant",
+            "intent": "assistant.small_talk",
+            "replyContains": "doing well"
+          }
+        }
+      ]
+    },
+    {
+      "name": "semantic-family-browse-shoes",
+      "turns": [
+        {
+          "text": "what types of shoes do you have",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "footwear"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "semantic-family-browse-shoes-roman",
+      "turns": [
+        {
+          "text": "ap k pass konsy shoes hain",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "footwear"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "family-filter-black-shoes",
+      "turns": [
+        {
+          "text": "can i get black shoes",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "footwear"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "family-filter-black-shoes-roman",
+      "turns": [
+        {
+          "text": "mujhe black shoes chahiye",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.category_browse",
+            "entities": {
+              "categoryId": "footwear"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "specific-black-running-shoes",
+      "turns": [
+        {
+          "text": "i want black running shoes",
+          "expect": {
+            "capabilityId": "catalog",
+            "intent": "catalog.product_interest",
+            "entities": {
+              "productName": "Running Shoes"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

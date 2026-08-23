@@ -1,0 +1,34 @@
+{
+  "enabled": true,
+  "mode": "reservation",
+  "defaultSubject": "Table Reservation",
+  "defaultSubjectTerms": [
+    "table",
+    "reservation",
+    "reserve"
+  ],
+  "triggerTerms": [
+    "reserve",
+    "reservation",
+    "book a table",
+    "table for"
+  ],
+  "requiredFields": [
+    "subject",
+    "date",
+    "time",
+    "partySize",
+    "name",
+    "phone"
+  ],
+  "confirmedLabel": "Table reservation request received",
+  "readyLabel": "Your table reservation request is ready",
+  "confirmPrompt": "Confirm this reservation request when ready.",
+  "prompts": {
+    "date": "What date would you like the table?",
+    "time": "What time would you prefer?",
+    "partySize": "How many guests should I reserve for?",
+    "name": "May I have your full name?",
+    "phone": "What is the best contact phone number to reach you on?"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "id": "cleaning-demo",
+  "name": "SparkleCare Cleaning",
+  "status": "active",
+  "defaultLanguage": "english",
+  "capabilities": [
+    "assistant",
+    "crm",
+    "cleaning",
+    "pricing",
+    "availability"
+  ],
+  "branding": {
+    "assistantName": "SparkleCare Cleaning Assistant",
+    "welcomeMessage": "Hi! \ud83d\udc4b I\u2019m the SparkleCare Cleaning Assistant. I can explain our home, deep, furniture, office, laundry and specialised cleaning services, calculate configured prices, and prepare one or more service requests.",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! \ud83d\udc4b Cleaning chahiye? Bata dein kya clean karwana hai, main suitable service choose karne mein help karta hoon.",
+    "welcomeMessageUrdu": "\u0627\u0644\u0633\u0644\u0627\u0645 \u0639\u0644\u06cc\u06a9\u0645! \u0635\u0641\u0627\u0626\u06cc \u06a9\u06d2 \u062d\u0648\u0627\u0644\u06d2 \u0633\u06d2 \u0645\u06cc\u06ba \u0622\u067e \u06a9\u06cc \u06a9\u06cc\u0627 \u0645\u062f\u062f \u06a9\u0631 \u0633\u06a9\u062a\u0627 \u06c1\u0648\u06ba\u061f"
+  },
+  "business": {
+    "description": "A full-service residential, furniture, office and specialised cleaning business serving Dubai and nearby supported UAE areas.",
+    "contact": "+971 4 555 0199"
+  },
+  "features": {
+    "llmFallback": true
+  },
+  "permissions": [
+    "knowledge.read",
+    "memory.read:assistant",
+    "memory.write:assistant",
+    "memory.delete:assistant",
+    "crm.customer.read:assistant",
+    "crm.customer.write:assistant",
+    "crm.activity.write:assistant",
+    "crm.customer.read:crm",
+    "crm.customer.write:crm",
+    "crm.note.write:crm",
+    "crm.tag.write:crm",
+    "crm.activity.read:crm",
+    "crm.activity.write:crm",
+    "cleaning.read:cleaning",
+    "cleaning.request.create:cleaning",
+    "cleaning.request.update:cleaning",
+    "crm.customer.read:cleaning",
+    "crm.customer.write:cleaning",
+    "crm.activity.write:cleaning",
+    "memory.read:cleaning",
+    "memory.write:cleaning",
+    "offering.read:pricing",
+    "offering.read:availability"
+  ],
+  "domain": "cleaning"
+}

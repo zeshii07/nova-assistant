@@ -1,0 +1,80 @@
+[
+  {
+    "id": "primary-program",
+    "name": "Primary Program (Grades 1-5)",
+    "aliases": [
+      "grade 1",
+      "grade 2",
+      "grade 3",
+      "grade 4",
+      "grade 5",
+      "primary classes",
+      "primary"
+    ],
+    "type": "program",
+    "category": "Primary",
+    "description": "Academic program for Grades 1 through 5.",
+    "priceLabel": "Fee information available from admissions",
+    "bookable": false
+  },
+  {
+    "id": "middle-program",
+    "name": "Middle Program (Grades 6-8)",
+    "aliases": [
+      "grade 6",
+      "grade 7",
+      "grade 8",
+      "middle school",
+      "middle"
+    ],
+    "type": "program",
+    "category": "Middle",
+    "description": "Academic program for Grades 6 through 8.",
+    "priceLabel": "Fee information available from admissions",
+    "bookable": false
+  },
+  {
+    "id": "secondary-program",
+    "name": "Secondary Program (Grades 9-10)",
+    "aliases": [
+      "grade 9",
+      "grade 10",
+      "secondary school",
+      "secondary"
+    ],
+    "type": "program",
+    "category": "Secondary",
+    "description": "Academic program for Grades 9 and 10.",
+    "priceLabel": "Fee information available from admissions",
+    "bookable": false
+  },
+  {
+    "id": "admission-inquiry",
+    "name": "Admission Inquiry",
+    "aliases": [
+      "admission",
+      "get admitted",
+      "admitted",
+      "enrollment",
+      "enrolment"
+    ],
+    "type": "inquiry",
+    "category": "Admissions",
+    "description": "Admissions are available for Grades 1-10. To start an inquiry, share the grade, parent or guardian name, and contact number.",
+    "bookable": true
+  },
+  {
+    "id": "campus-visit",
+    "name": "Campus Visit",
+    "aliases": [
+      "school visit",
+      "campus visit",
+      "visit school",
+      "visit campus"
+    ],
+    "type": "visit",
+    "category": "Admissions",
+    "description": "Request a visit to the campus.",
+    "bookable": true
+  }
+]

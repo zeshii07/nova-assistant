@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: nova-saas-test
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.0
+      - key: NODE_ENV
+        value: production
+      - key: DEFAULT_TENANT_ID
+        value: default
+      - key: LOG_LEVEL
+        value: info
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID_DEFAULT
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN_DEFAULT
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN_DEFAULT
+        sync: false
+      - key: WHATSAPP_APP_SECRET_DEFAULT
+        sync: false

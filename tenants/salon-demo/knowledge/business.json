@@ -1,0 +1,14 @@
+{
+  "name": "Nova Style Salon",
+  "description": "A unisex salon offering hair, grooming and beauty services.",
+  "hours": "Monday to Sunday, 10:00 AM to 9:00 PM",
+  "location": "Gulberg, Lahore",
+  "contact": "+92 300 7770004",
+  "services": [
+    "Haircut",
+    "Hair styling",
+    "Beard grooming",
+    "Facial",
+    "Hair color"
+  ]
+}

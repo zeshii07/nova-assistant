@@ -1,0 +1,12 @@
+{
+  "name": "City Drive Academy",
+  "description": "Driving lessons for beginners and experienced drivers.",
+  "hours": "Monday to Saturday, 9 AM to 7 PM",
+  "location": "Lahore, Pakistan",
+  "contact": "+92 300 0000000",
+  "services": [
+    "Automatic Car Lesson",
+    "Manual Car Lesson"
+  ],
+  "paymentMethods": []
+}

@@ -1,0 +1,21 @@
+{
+  "description": "Semantic demo clinic for testing healthcare conversations.",
+  "services": [
+    "General consultation",
+    "Dermatology",
+    "Physiotherapy"
+  ],
+  "hours": "Monday to Saturday, 8:00 AM to 8:00 PM",
+  "contact": {
+    "phone": "+92 300 7770001",
+    "email": "hello@healthcare-demo.example"
+  },
+  "location": {
+    "address": "Gulberg, Lahore",
+    "city": "Lahore",
+    "country": "Pakistan"
+  },
+  "delivery": "Not applicable.",
+  "paymentMethods": [],
+  "returns": "Not applicable."
+}

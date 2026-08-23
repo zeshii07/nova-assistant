@@ -1,0 +1,6 @@
+{"tenantId":"education-demo","cases":[
+{"name":"browse classes","turns":[{"text":"what classes do you provide","expect":{"capabilityId":"offering","intent":"offering.browse","replyContains":"Grades 1-5"}}]},
+{"name":"admission information","turns":[{"text":"how to get admission","expect":{"capabilityId":"offering","intent":"offering.details","replyContains":"Grades 1-10"}}]},
+{"name":"start admission inquiry","turns":[{"text":"can i get my boy admitted to your school","expect":{"capabilityId":"booking","intent":"booking.start","replyContains":"grade"}},{"text":"grade 5","expect":{"capabilityId":"booking","intent":"booking.continue","replyContains":"parent"}}]},
+{"name":"school hours","turns":[{"text":"what are office hours","expect":{"capabilityId":"assistant","replyContains":"8:00 AM"}}]}
+]}

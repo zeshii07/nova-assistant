@@ -1,0 +1,45 @@
+[
+  {
+    "id": "math-tutoring",
+    "name": "Math Tutoring",
+    "aliases": [
+      "math",
+      "mathematics",
+      "math tuition"
+    ],
+    "type": "service",
+    "category": "Academic",
+    "description": "One-to-one mathematics tutoring session.",
+    "price": 2000,
+    "durationMinutes": 60,
+    "bookable": true
+  },
+  {
+    "id": "english-tutoring",
+    "name": "English Tutoring",
+    "aliases": [
+      "english",
+      "english tuition"
+    ],
+    "type": "service",
+    "category": "Academic",
+    "description": "One-to-one English tutoring session.",
+    "price": 1800,
+    "durationMinutes": 60,
+    "bookable": true
+  },
+  {
+    "id": "science-tutoring",
+    "name": "Science Tutoring",
+    "aliases": [
+      "science",
+      "science tuition"
+    ],
+    "type": "service",
+    "category": "Academic",
+    "description": "One-to-one science tutoring session.",
+    "price": 2200,
+    "durationMinutes": 60,
+    "bookable": true
+  }
+]

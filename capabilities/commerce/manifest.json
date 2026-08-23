@@ -1,0 +1,19 @@
+{
+  "id": "commerce",
+  "name": "Commerce",
+  "version": "1.0.0",
+  "entry": "./src/index.js",
+  "priority": 95,
+  "permissions": [
+    "commerce.read:commerce",
+    "commerce.write:commerce",
+    "commerce.order.create:commerce",
+    "catalog.read:commerce",
+    "crm.customer.read:commerce",
+    "crm.customer.write:commerce",
+    "crm.activity.write:commerce",
+    "memory.read:commerce",
+    "memory.write:commerce"
+  ],
+  "events": ["commerce.cart.created.v1", "commerce.checkout.started.v1", "commerce.order.created.v1"]
+}

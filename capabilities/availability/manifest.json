@@ -1,0 +1,13 @@
+{
+  "id": "availability",
+  "name": "Universal Service Availability",
+  "version": "1.0.0",
+  "entry": "./src/index.js",
+  "priority": 105,
+  "permissions": [
+    "offering.read:availability"
+  ],
+  "events": [
+    "availability.checked.v1"
+  ]
+}

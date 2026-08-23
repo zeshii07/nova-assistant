@@ -1,0 +1,6 @@
+{"tenantId":"healthcare-demo","cases":[
+{"name":"browse treatments","turns":[{"text":"what treatments do you offer","expect":{"capabilityId":"offering","intent":"offering.browse","replyContains":"General Consultation"}}]},
+{"name":"book consultation","turns":[{"text":"can i have general consultation tomorrow","expect":{"capabilityId":"booking","intent":"booking.start","replyContains":"time"}}]},
+{"name":"dermatology details","turns":[{"text":"tell me about dermatology","expect":{"capabilityId":"offering","intent":"offering.details","replyContains":"Dermatology"}}]},
+{"name":"clinic location","turns":[{"text":"where are you located","expect":{"capabilityId":"assistant","replyContains":"Gulberg"}}]}
+]}

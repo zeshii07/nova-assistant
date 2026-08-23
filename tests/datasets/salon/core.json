@@ -1,0 +1,6 @@
+{"tenantId":"salon-demo","cases":[
+{"name":"browse salon services","turns":[{"text":"what services do you offer","expect":{"capabilityId":"offering","intent":"offering.browse","replyContains":"Beard Grooming"}}]},
+{"name":"book grooming","turns":[{"text":"can i get beard grooming tomorrow","expect":{"capabilityId":"booking","intent":"booking.start","replyContains":"time"}},{"text":"5 pm","expect":{"capabilityId":"booking","intent":"booking.continue","replyContains":"name"}}]},
+{"name":"facial with date and time","turns":[{"text":"can i have facial tomorrow at 5 pm","expect":{"capabilityId":"booking","intent":"booking.start","replyContains":"name"}}]},
+{"name":"strict unknown service","turns":[{"text":"do you offer body massage","expect":{"replyContains":""}}]}
+]}

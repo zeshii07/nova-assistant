@@ -1,0 +1,27 @@
+{
+  "enabled": true,
+  "provider": "local",
+  "timezone": "Asia/Karachi",
+  "defaultDurationMinutes": 60,
+  "slotIntervalMinutes": 30,
+  "holdTtlSeconds": 600,
+  "minLeadMinutes": 60,
+  "maxAdvanceDays": 365,
+  "resourcePools": [
+    {
+      "id": "staff",
+      "name": "Bookable staff",
+      "capacity": 3,
+      "serviceIds": [],
+      "active": true
+    }
+  ],
+  "serviceRules": [
+    {
+      "serviceId": "haircut",
+      "poolId": "staff",
+      "durationMinutes": 45,
+      "capacityRequired": 1
+    }
+  ]
+}

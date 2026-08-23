@@ -1,0 +1,31 @@
+{
+  "currency": "AED",
+  "pricingPolicy": {
+    "owner": "SparkleCare Cleaning",
+    "standardCleaning": "AED 40 per hour per cleaner for apartments, villas, houses, and other routine-cleaning properties.",
+    "deepCleaning": "Apartment deep cleaning starts at AED 200 for a studio and AED 250 for one bedroom, adding AED 50 per bedroom. Villa deep cleaning starts at AED 300 for one bedroom, adding AED 70 per bedroom.",
+    "furnitureCleaning": "Configured by furniture type and size; an unlisted type or unusual condition requires staff quotation.",
+    "tax": "Any applicable tax must be disclosed before final confirmation."
+  },
+  "services": [
+    {"id":"hourly-cleaner","name":"Hourly Cleaner Hire","aliases":["cleaner","cleaning","maid","home cleaning","standard home cleaning","apartment cleaning","villa cleaning","housekeeping"],"model":"hourly","rate":40,"currency":"AED","operationalServiceId":"CLN-HOURLY"},
+    {"id":"deep-home-cleaning","name":"Deep Home Cleaning","aliases":["deep cleaning","deep home cleaning","full house deep cleaning","pura ghar deep cleaning"],"model":"matrix","keys":["propertyType","bedrooms"],"currency":"AED","prices":{"apartment|0":200,"apartment|1":250,"apartment|2":300,"apartment|3":350,"apartment|4":400,"apartment|5":450,"apartment|6":500,"apartment|7":550,"apartment|8":600,"villa|1":300,"villa|2":370,"villa|3":440,"villa|4":510,"villa|5":580,"villa|6":650,"villa|7":720,"villa|8":790,"villa|9":860,"villa|10":930},"operationalServiceId":"CLN002"},
+    {"id":"deep-apartment-cleaning","name":"Deep Apartment Cleaning","aliases":["deep apartment cleaning","apartment deep cleaning","deep flat cleaning"],"model":"linear","inputKey":"bedrooms","baseInput":0,"minimum":0,"basePrice":200,"stepPrice":50,"currency":"AED","operationalServiceId":"CLN010"},
+    {"id":"deep-villa-cleaning","name":"Deep Villa Cleaning","aliases":["deep villa cleaning","villa deep cleaning","full villa cleaning"],"model":"linear","inputKey":"bedrooms","baseInput":1,"minimum":1,"basePrice":300,"stepPrice":70,"currency":"AED","operationalServiceId":"CLN011"},
+    {"id":"move-in-out-cleaning","name":"Move-in / Move-out Cleaning","aliases":["move in cleaning","move out cleaning","moving cleaning","end of tenancy cleaning"],"model":"matrix","keys":["propertyType","bedrooms"],"currency":"AED","prices":{"apartment|0":701.1,"apartment|1":1007.1,"apartment|2":1691.1,"apartment|3":2609.1,"apartment|4":3239.1,"apartment|5":4499.1,"villa|2":1979.1,"villa|3":2879.1,"villa|4":4049.1,"villa|5":4499.1},"operationalServiceId":"CLN006"},
+    {"id":"sofa-cleaning","name":"Sofa Cleaning","aliases":["sofa and upholstery cleaning","sofa cleaning","couch cleaning","seater sofa","sofa"],"model":"linear","inputKey":"units","baseInput":1,"minimum":1,"basePrice":50,"stepPrice":30,"currency":"AED","operationalServiceId":"CLN003"},
+    {"id":"carpet-cleaning","name":"Carpet Cleaning","aliases":["carpet cleaning","rug cleaning","carpet wash"],"model":"matrix","keys":["units"],"currency":"AED","prices":{"5":140,"6":168,"7":196,"8":224,"9":252,"10":280,"11":308,"12":336,"13":364,"14":392,"15":420,"16":448},"operationalServiceId":"CLN004"},
+    {"id":"mattress-cleaning","name":"Mattress Cleaning","aliases":["mattress cleaning","bed mattress cleaning"],"model":"matrix","keys":["serviceVariant"],"currency":"AED","prices":{"crib":90,"single":120,"queen":160,"king":200},"operationalServiceId":"CLN020"},
+    {"id":"dining-chair-cleaning","name":"Dining Chair Cleaning","aliases":["chair cleaning","dining chair","chairs"],"model":"unit","rate":31.5,"unitLabel":"chairs","currency":"AED","operationalServiceId":"CLN021"},
+    {"id":"curtain-cleaning","name":"Curtain Cleaning","aliases":["small curtain cleaning","curtain cleaning","drape cleaning"],"model":"matrix","keys":["serviceVariant"],"currency":"AED","prices":{"small":95,"medium":130,"large":170,"extra-large":220},"operationalServiceId":"CLN022"},
+    {"id":"laundry-wash-fold-small","name":"Laundry Wash & Fold Small Bag","aliases":["wash and fold small bag"],"model":"flat","price":31.5,"currency":"AED","operationalServiceId":"CLN028"},
+    {"id":"laundry-wash-fold-big","name":"Laundry Wash & Fold Big Bag","aliases":["wash and fold big bag"],"model":"flat","price":49.5,"currency":"AED","operationalServiceId":"CLN028"},
+    {"id":"laundry-iron-small","name":"Laundry Iron Small Bag","aliases":["iron small bag"],"model":"flat","price":40.5,"currency":"AED","operationalServiceId":"CLN029"},
+    {"id":"laundry-iron-big","name":"Laundry Iron Big Bag","aliases":["iron big bag"],"model":"flat","price":67.5,"currency":"AED","operationalServiceId":"CLN029"},
+    {"id":"laundry-wash-iron-small","name":"Laundry Wash & Iron Small Bag","aliases":["wash and iron small bag"],"model":"flat","price":58.5,"currency":"AED","operationalServiceId":"CLN030"},
+    {"id":"laundry-wash-iron-big","name":"Laundry Wash & Iron Big Bag","aliases":["wash and iron big bag"],"model":"flat","price":108,"currency":"AED","operationalServiceId":"CLN030"},
+    {"id":"laundry-home-care-big","name":"Laundry Home-care Big Bag","aliases":["home care big bag","homecare laundry"],"model":"flat","price":67.5,"currency":"AED","operationalServiceId":"CLN031"}
+  ],
+  "addOns": [],
+  "discounts": []
+}

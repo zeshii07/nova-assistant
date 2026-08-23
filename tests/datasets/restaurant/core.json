@@ -1,0 +1,6 @@
+{"tenantId":"restaurant-demo","cases":[
+{"name":"browse menu","turns":[{"text":"what food do you serve","expect":{"capabilityId":"offering","intent":"offering.browse","replyContains":"Chicken Biryani"}}]},
+{"name":"specific menu item","turns":[{"text":"tell me about biryani","expect":{"capabilityId":"offering","intent":"offering.details","replyContains":"Chicken Biryani"}}]},
+{"name":"reserve table","turns":[{"text":"reserve a table tomorrow at 7 pm for 4 people","expect":{"capabilityId":"booking","intent":"booking.start","replyContains":"name"}},{"text":"Ali","expect":{"capabilityId":"booking","intent":"booking.continue","replyContains":"contact"}},{"text":"03001234567","expect":{"capabilityId":"booking","intent":"booking.continue","replyContains":"Party Size: 4"}},{"text":"confirm","expect":{"capabilityId":"booking","intent":"booking.confirm","replyContains":"reservation request received"}}]},
+{"name":"restaurant info still works","turns":[{"text":"what are your hours","expect":{"capabilityId":"assistant","replyContains":"12:00 PM"}}]}
+]}

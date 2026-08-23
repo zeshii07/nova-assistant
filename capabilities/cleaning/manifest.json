@@ -1,0 +1,17 @@
+{
+  "id": "cleaning",
+  "name": "Cleaning Services",
+  "version": "1.0.0",
+  "entry": "./src/index.js",
+  "priority": 80,
+  "permissions": [
+    "cleaning.read:cleaning",
+    "cleaning.request.create:cleaning",
+    "crm.customer.read:cleaning",
+    "crm.customer.write:cleaning",
+    "crm.activity.write:cleaning",
+    "memory.read:cleaning",
+    "memory.write:cleaning"
+  ],
+  "events": ["cleaning.responded.v1", "cleaning.request.created.v1"]
+}

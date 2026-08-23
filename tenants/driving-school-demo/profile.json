@@ -1,0 +1,37 @@
+{
+  "status": "active",
+  "defaultLanguage": "english",
+  "capabilities": [
+    "assistant",
+    "crm",
+    "offering",
+    "booking"
+  ],
+  "features": {
+    "llmFallback": true
+  },
+  "permissions": [
+    "knowledge.read",
+    "memory.read:assistant",
+    "memory.write:assistant",
+    "memory.delete:assistant",
+    "crm.customer.read:assistant",
+    "crm.customer.write:assistant",
+    "crm.activity.write:assistant",
+    "offering.read:offering",
+    "booking.read:booking",
+    "booking.write:booking",
+    "offering.read:booking"
+  ],
+  "id": "driving-school-demo",
+  "name": "City Drive Academy",
+  "domain": "driving_school",
+  "branding": {
+    "assistantName": "City Drive Academy Assistant",
+    "welcomeMessage": "Hello! 😊 I’m the City Drive Academy Assistant. How can I help you today?"
+  },
+  "business": {
+    "description": "Driving lessons for beginners and experienced drivers.",
+    "contact": "+92 300 0000000"
+  }
+}

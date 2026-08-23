@@ -1,0 +1,15 @@
+{
+  "id": "booking",
+  "name": "Generic Booking",
+  "version": "1.0.0",
+  "entry": "./src/index.js",
+  "priority": 96,
+  "permissions": [
+    "booking.read:booking",
+    "booking.write:booking",
+    "offering.read:booking"
+  ],
+  "events": [
+    "booking.created.v1"
+  ]
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "id": "clothing",
+    "name": "Clothing",
+    "emoji": "👕"
+  },
+  {
+    "id": "electronics",
+    "name": "Electronics",
+    "emoji": "📱"
+  },
+  {
+    "id": "accessories",
+    "name": "Accessories",
+    "emoji": "⌚"
+  },
+  {
+    "id": "footwear",
+    "name": "Footwear",
+    "emoji": "👟"
+  },
+  {
+    "id": "home-office",
+    "name": "Home & Office",
+    "emoji": "🏠"
+  },
+  {
+    "id": "bags",
+    "name": "Bags",
+    "emoji": "🎒"
+  },
+  {
+    "id": "stationery",
+    "name": "Stationery",
+    "emoji": "✏️"
+  }
+]

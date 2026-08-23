@@ -1,0 +1,30 @@
+[
+  {
+    "id": "automatic-car-lesson",
+    "name": "Automatic Car Lesson",
+    "aliases": [
+      "automatic lesson",
+      "automatic driving"
+    ],
+    "type": "service",
+    "category": "driving lessons",
+    "description": "One-hour automatic car driving lesson.",
+    "price": 3000,
+    "durationMinutes": 60,
+    "bookable": true
+  },
+  {
+    "id": "manual-car-lesson",
+    "name": "Manual Car Lesson",
+    "aliases": [
+      "manual lesson",
+      "manual driving"
+    ],
+    "type": "service",
+    "category": "driving lessons",
+    "description": "One-hour manual car driving lesson.",
+    "price": 2500,
+    "durationMinutes": 60,
+    "bookable": true
+  }
+]

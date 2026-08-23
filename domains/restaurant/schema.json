@@ -1,0 +1,45 @@
+{
+  "id": "restaurant",
+  "version": 1,
+  "extends": "universal",
+  "entities": [
+    "menu_item",
+    "menu_category",
+    "table_size",
+    "reservation_date",
+    "reservation_time",
+    "dietary_preference",
+    "order_type"
+  ],
+  "actions": [
+    "browse_menu",
+    "ask_price",
+    "request_order",
+    "reserve_table",
+    "cancel_reservation",
+    "ask_restaurant_info"
+  ],
+  "semantics": {
+    "offeringBrowseTerms": [
+      "menu",
+      "manue",
+      "food",
+      "foods",
+      "dishes",
+      "what do you serve",
+      "what food do you serve"
+    ],
+    "offeringInterestTerms": [
+      "biryani",
+      "burger",
+      "pasta",
+      "grilled chicken"
+    ],
+    "bookingTerms": [
+      "reserve",
+      "reservation",
+      "book a table",
+      "table for"
+    ]
+  }
+}

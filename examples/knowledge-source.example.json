@@ -1,0 +1,15 @@
+{
+  "id": "SRC-RETURNS-POLICY",
+  "kind": "document",
+  "title": "Returns Policy",
+  "file": "knowledge/documents/returns-policy.md",
+  "status": "active",
+  "priority": 75,
+  "tags": [
+    "policy",
+    "returns"
+  ],
+  "metadata": {
+    "owner": "operations"
+  }
+}
