@@ -33,7 +33,8 @@ test('quoted property service can be accepted into cleaning workflow',async()=>{
  r=await q('cleaning-demo',u,'ok add this service');
  assert.equal(r.capabilityId,'cleaning');assert.match(r.reply,/selected|quoted/i);assert.match(r.reply,/date/i);assert.equal(r.state.capabilityState.cleaning.step,'date');
 });
-test('direct structured property cleaning request starts booking without service list',async()=>{
+test('direct property cleaning request asks Standard or Deep without listing every service',async()=>{
  const r=await q('cleaning-demo','s3','i want 2 bedroom villa cleaning');
- assert.equal(r.capabilityId,'cleaning');assert.match(r.reply,/AED 40 per hour/i);assert.match(r.reply,/date/i);assert.doesNotMatch(r.reply,/Here are our cleaning services/i);
+ assert.equal(r.capabilityId,'cleaning');assert.match(r.reply,/Standard Cleaning/i);assert.match(r.reply,/Deep Cleaning/i);
+ assert.equal(r.state.capabilityState.cleaning.step,'cleaningType');assert.doesNotMatch(r.reply,/Here are our cleaning services/i);
 });

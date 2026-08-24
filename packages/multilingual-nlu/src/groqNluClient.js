@@ -57,7 +57,7 @@ class GroqNluClient {
           model:this.model,
           messages,
           temperature:0,
-          max_completion_tokens:500,
+          max_completion_tokens:900,
           reasoning_effort:'low',
           response_format:{
             type:'json_schema',

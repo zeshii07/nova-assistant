@@ -75,7 +75,7 @@ test('unsupported product subtypes are not silently substituted by a nearby cata
 
 test('cleaning add-on updates are retained while customer fields are pending',async()=>{
   const customer='cleaning-addon-memory';
-  await ask('cleaning-demo',customer,'I want my 2 bedroom apartment cleaned on Monday at 2 PM');
+  await ask('cleaning-demo',customer,'I want standard cleaning for my 2 bedroom apartment with 1 cleaner for 3 hours on Monday at 2 PM');
   await ask('cleaning-demo',customer,'Dubai Plaza near Clock Tower house 34 apartment 1105');
   const response=await ask('cleaning-demo',customer,'can i add 4 blconies for cleaning');
   const state=response.state.capabilityState.cleaning;
@@ -89,7 +89,7 @@ test('cleaning add-on updates are retained while customer fields are pending',as
 
 test('service replacement at review preserves schedule, scope, identity, and confirmation state',async()=>{
   const customer='cleaning-service-replace';
-  const initial=await ask('cleaning-demo',customer,'I want my 2 bedroom apartment cleaned on Monday at 2 PM');
+  const initial=await ask('cleaning-demo',customer,'I want standard cleaning for my 2 bedroom apartment with 1 cleaner for 3 hours on Monday at 2 PM');
   const originalDate=initial.state.capabilityState.cleaning.preferredDate;
   await ask('cleaning-demo',customer,'Dubai Plaza near Clock Tower house 34 apartment 1105');
   await ask('cleaning-demo',customer,'add 4 balconies to the cleaning');
@@ -114,7 +114,7 @@ test('service replacement at review preserves schedule, scope, identity, and con
 
 test('changing to another hourly property service reuses the existing request details instead of restarting',async()=>{
   const customer='cleaning-quote-resume';
-  const initial=await ask('cleaning-demo',customer,'I want my 2 bedroom apartment cleaned on Monday at 2 PM');
+  const initial=await ask('cleaning-demo',customer,'I want standard cleaning for my 2 bedroom apartment with 1 cleaner for 3 hours on Monday at 2 PM');
   const originalDate=initial.state.capabilityState.cleaning.preferredDate;
   await ask('cleaning-demo',customer,'Dubai Plaza near Clock Tower house 34 apartment 1105');
   await ask('cleaning-demo',customer,'Malik Raheem Bux');
@@ -150,7 +150,7 @@ test('a combined date and time answer advances past both fields',async()=>{
 test('stored identity references and required-field refusals are handled without invalid-value loops',async()=>{
   const customer='cleaning-identity-refusal';
   await container.crmService.updateCustomerProfile({tenantId:'cleaning-demo',customerId:customer,name:'Malik Raheem Bux'});
-  await ask('cleaning-demo',customer,'I want my 2 bedroom apartment cleaned on Monday at 2 PM');
+  await ask('cleaning-demo',customer,'I want standard cleaning for my 2 bedroom apartment with 1 cleaner for 3 hours on Monday at 2 PM');
   await ask('cleaning-demo',customer,'Dubai Plaza near Clock Tower house 34 apartment 1105');
   let response=await ask('cleaning-demo',customer,'I told you my name already');
   assert.equal(response.state.capabilityState.cleaning.name,'Malik Raheem Bux');
@@ -165,7 +165,7 @@ test('stored identity references and required-field refusals are handled without
 
 test('social interruptions do not mutate cleaning review and explicitly resume confirmation',async()=>{
   const customer='cleaning-social-review';
-  await ask('cleaning-demo',customer,'I want my 2 bedroom apartment cleaned on Monday at 2 PM');
+  await ask('cleaning-demo',customer,'I want standard cleaning for my 2 bedroom apartment with 1 cleaner for 3 hours on Monday at 2 PM');
   await ask('cleaning-demo',customer,'Dubai Plaza near Clock Tower house 34 apartment 1105');
   await ask('cleaning-demo',customer,'Malik Raheem Bux');
   const before=await ask('cleaning-demo',customer,'03097865456');

@@ -2,12 +2,22 @@ const { normalizeText, numberFromText } = require('../../../packages/conversatio
 const { extractMultiProducts, extractProductRequests, splitRequests } = require('../../../packages/catalog-engine/src/multiProductExtractor');
 const { AttributeExtractor } = require('../../../packages/catalog-engine/src/attributeExtractor');
 const { isConfirmation, isWorkflowAcceptance } = require('../../../packages/conversation-intelligence/src/confirmation');
+const { extractFieldAmendment } = require('../../../packages/conversation-intelligence/src/fieldAmendmentExtractor');
 const pendingAttributeExtractor=new AttributeExtractor();
 class CommerceConversationAdapter {
   constructor(){this.capabilityId='commerce';this.priority=110;}
   async analyze({ tenant, message, state, services, interruption, correction }) {
     const text=normalizeText(message.text); const cs=state.capabilityState?.commerce;
     const candidates=[]; let entities={};
+    const pendingFieldEdit=cs?.pendingFieldEdit||null;
+    const explicitFieldAmendment=extractFieldAmendment(message.text,{allowedFields:['name','phone','email','city','address','landmark','paymentMethod']});
+    const fieldAmendment=explicitFieldAmendment||(pendingFieldEdit
+      ? {field:pendingFieldEdit.field,rawValue:message.text,action:'replace',explicit:true}
+      : null);
+    if(fieldAmendment&&(cs?.mode==='checkout'||cs?.mode==='review'||cs?.lastOrderId||pendingFieldEdit)){
+      entities={fieldAmendment,target:pendingFieldEdit?.target||(cs?.mode==='checkout'||cs?.mode==='review'?'checkout':'order'),orderId:pendingFieldEdit?.orderId||cs?.lastOrderId||null};
+      return {priority:this.priority,candidates:[{intent:'commerce.customer_field_edit',confidence:1,priority:235,entities,reason:pendingFieldEdit?'pending_commerce_field_edit_value':'explicit_commerce_field_edit'}],entities,vocabularyMatches:[{type:'customer_field_edit',value:fieldAmendment.field,score:1}]};
+    }
     if(tenant?.capabilities?.includes('catalog') && services?.catalogService){
       const products=await services.catalogService.listProducts(tenant.id);
 

@@ -4,6 +4,7 @@ const { createCapabilityResult } = require("../../../packages/capability-sdk/src
 /** Conversational interface for the official tenant CRM record. */
 class CrmCapability extends BaseCapability {
   async canHandle(context) {
+    if(context.intelligence?.selected?.capabilityId==='crm')return {confidence:context.intelligence.selected.confidence||.98,reason:context.intelligence.selected.reason||'crm_intelligence'};
     const text = normalize(context.message.text);
     const patterns = [
       /^(my name is|call me|mera naam|mera name|میرا نام)\b/,
@@ -27,6 +28,7 @@ class CrmCapability extends BaseCapability {
     let reply; let action = "profile_viewed";
 
     const selectedIntent=context.intelligence?.selected?.intent;
+    const crmState=context.state.capabilityState?.crm||{};
     const declared=context.services.engagement?.parseDeclaredName?.(original);
     const name = context.intelligence?.entities?.name || (declared?.valid?declared.value:null);
     const emailRaw = capture(original, /(?:my email is|mera email|میرا ای میل)\s+([^\s]+@[^\s]+)/i);
@@ -36,7 +38,25 @@ class CrmCapability extends BaseCapability {
     const note = capture(original, /(?:add note|remember note|note)\s*[:\-]?\s*(.+)$/i);
     const tag = capture(original, /(?:add tag|tag me as|tag)\s*[:\-]?\s*(.+)$/i);
 
-    if (selectedIntent==='crm.ask_name') {
+    if(selectedIntent==='crm.customer_field_edit'){
+      const amendment=context.intelligence?.entities?.fieldAmendment||{};
+      const field=amendment.field,rawValue=amendment.rawValue;
+      if(!['name','phone','email','address'].includes(field)){reply='Tell me whether you want to change your name, phone, email, or address.';action='field_edit_unknown';}
+      else if(rawValue==null||String(rawValue).trim()===''){
+        reply=`What should I use as your new ${field}?`;action='field_edit_needs_value';
+      }else{
+        const parsed=context.services.engagement?.parseField?.(field,rawValue,field==='phone'?{minDigits:10,maxDigits:15}:{});
+        if(!parsed?.valid){reply=`${parsed?.message||`That ${field} is not valid.`} Your existing ${field} has not been changed.`;action='field_edit_rejected';}
+        else{
+          if(field==='address'){
+            const current=await crm.getCustomer();
+            await crm.updateCustomer({customFields:{...(current?.customFields||{}),primaryAddress:parsed.value}});
+          }else await crm.updateCustomer({[field]:parsed.value});
+          reply=`Updated — your ${field} is now ${parsed.value}.`;action=`${field}_updated`;
+        }
+      }
+    }
+    else if (selectedIntent==='crm.ask_name') {
       const current=await crm.getCustomer();
       reply=current?.name ? `Your name is ${current.name}.` : "You haven't told me your name yet.";
       action="name_viewed";
@@ -51,10 +71,11 @@ class CrmCapability extends BaseCapability {
 
     await crm.recordActivity(`crm.${action}`, { text: original });
     const customer = await crm.getCustomer();
+    const pendingFieldEdit=['field_edit_needs_value','field_edit_rejected'].includes(action)?{field:context.intelligence?.entities?.fieldAmendment?.field}:null;
     return createCapabilityResult({
       reply, confidence: 0.98,
       responseModel: { intent: `CRM_${action.toUpperCase()}`, payload: { name: customer?.name, customer } },
-      statePatch: { lastIntent: `crm_${action}`, activePlugin: "crm" }, metadata: { action },
+      statePatch: { lastIntent: `crm_${action}`, activePlugin: "crm", capabilityState:{crm:{...crmState,pendingFieldEdit}} }, metadata: { action },
       events: [{ name: "crm.conversation.handled.v1", payload: { action } }]
     });
   }

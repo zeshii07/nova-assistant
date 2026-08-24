@@ -20,6 +20,7 @@ async function main(){
     });
     console.log(JSON.stringify({
       tenantId,query,
+      localSemanticRouter:analysis.semanticRouter,
       deterministicWinner:analysis.candidates?.[0]?pick(analysis.candidates[0]):null,
       remoteNlu:{
         provider:'Groq',
@@ -31,6 +32,7 @@ async function main(){
         httpStatus:analysis.nlu.httpStatus,providerErrorType:analysis.nlu.providerErrorType,
         providerMessage:analysis.nlu.providerMessage,providerRequestId:analysis.nlu.providerRequestId
       },
+      languageContract:analysis.nlu.languageContract,
       selected:analysis.selected?pick(analysis.selected):null,
       requiresClarification:analysis.requiresClarification,
       extractedEntities:analysis.entities

@@ -26,7 +26,7 @@ test('provider schema is strict and excludes unsupported Groq constraints',()=>{
   for(const unsupported of ['const','pattern','maxItems','uniqueItems']){
     assert.equal(keys.includes(unsupported),false,`${unsupported} must not be sent to Groq strict mode`);
   }
-  assert.deepEqual(GROQ_NLU_SCHEMA.properties.schema_version.enum,['1.0']);
+  assert.deepEqual(GROQ_NLU_SCHEMA.properties.schema_version.enum,['2.0']);
   assert.deepEqual(GROQ_NLU_SCHEMA.required,Object.keys(GROQ_NLU_SCHEMA.properties));
   assert.equal(GROQ_NLU_SCHEMA.additionalProperties,false);
   assert.deepEqual(
@@ -52,7 +52,7 @@ test('Groq request uses current completion token field and low reasoning effort'
     }
   });
   assert.equal((await client.complete([{role:'user',content:'hello'}])).success,true);
-  assert.equal(requestBody.max_completion_tokens,500);
+  assert.equal(requestBody.max_completion_tokens,900);
   assert.equal(requestBody.reasoning_effort,'low');
   assert.equal(Object.hasOwn(requestBody,'max_tokens'),false);
 });

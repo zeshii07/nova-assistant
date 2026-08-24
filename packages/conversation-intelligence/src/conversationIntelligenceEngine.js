@@ -13,10 +13,13 @@ const { TemporalSemanticExtractor } = require('./temporalSemanticExtractor');
 const { UniversalMessageFrame, mergeUniversalEntities, appendResolvedIntents } = require('./universalMessageFrame');
 
 class ConversationIntelligenceEngine {
-  constructor({ adapterRegistry, llmInterpreter = null, nluInterpreter = null, nluDecisionPolicy = null, nluInvocationPolicy = null, logger = null, socialIntelligenceEngine = null, domainResolver = null } = {}) {
+  constructor({ adapterRegistry, llmInterpreter = null, nluInterpreter = null, aiLanguageLayer = null, semanticRouter = null, semanticRoutePolicy = null, nluDecisionPolicy = null, nluInvocationPolicy = null, logger = null, socialIntelligenceEngine = null, domainResolver = null } = {}) {
     this.adapterRegistry = adapterRegistry;
     this.llmInterpreter = llmInterpreter;
     this.nluInterpreter = nluInterpreter;
+    this.aiLanguageLayer = aiLanguageLayer;
+    this.semanticRouter = semanticRouter;
+    this.semanticRoutePolicy = semanticRoutePolicy;
     this.nluDecisionPolicy = nluDecisionPolicy;
     this.nluInvocationPolicy = nluInvocationPolicy;
     this.logger = logger;
@@ -55,20 +58,44 @@ class ConversationIntelligenceEngine {
     const pending = workflowStack[workflowStack.length - 1] || null;
     const pendingValidation = pending ? this.validation.validatePending({ field: pending.pendingField, message: message.text }) : { valid:true };
 
-    // The configured remote model is interpretation-only. In production Nova
-    // uses adaptive routing, so capability adapters remain the fast path and
-    // the model is requested only for uncertain or conflicting language.
-    const nluEnabled = Boolean(this.nluInterpreter?.isEnabled?.(tenant));
+    // Nova's lightweight statistical router runs locally before capability
+    // adapters. It recognizes paraphrased intent and conversation meaning,
+    // but has no execution authority. Keep its result separate from the
+    // deterministic message frame: feeding probabilistic labels back into
+    // adapter extraction can turn a useful hint into a self-fulfilling route.
+    let localSemantic=null;
+    if(this.semanticRouter){
+      try{
+        localSemantic=await this.semanticRouter.analyze({tenant,message,state,services,pending,messageFrame,clauseSemantics,temporal});
+        annotateMessageFrameWithLocalSemantic(messageFrame,localSemantic);
+      }catch(error){
+        this.logger?.error?.('conversation_semantic_router.failed',{error:error.message});
+        localSemantic={used:true,accepted:false,decision:'failed',primaryIntent:null,intents:[],escalation:{recommended:true,reason:'local_router_failed'},error:error.message,timingMs:0};
+      }
+    }
+
+    // The language model is interpretation-only. In `primary` strategy it
+    // runs before adapters so they receive a strict linguistic contract. In
+    // `adaptive` strategy Nova keeps the deterministic fast path and requests
+    // the model only for uncertain/conflicting language.
+    const nluEnabled = Boolean(this.aiLanguageLayer?.isEnabled?.(tenant) ?? this.nluInterpreter?.isEnabled?.(tenant));
+    const nluStrategy=nluEnabled?(this.aiLanguageLayer?.strategyFor?.(tenant)||this.aiLanguageLayer?.strategy||this.nluInvocationPolicy?.strategy||'adaptive'):'off';
     let nlu = null;
     let nluInvocation = nluEnabled ? {invoke:false,reason:'not_evaluated'} : { invoke:false, reason:'mode_off' };
     const invokeNlu = async () => {
       try {
+        if(this.aiLanguageLayer)return await this.aiLanguageLayer.interpret({tenant,message,state,services,pending});
         return await this.nluInterpreter.interpret({ tenant, message, state, services, pending });
       } catch (error) {
         this.logger?.error('conversation_remote_nlu.failed', { error:error.message });
         return { used:true, validated:false, interpretation:null, error:'interpreter_failed', mode:this.nluInterpreter?.mode || 'on' };
       }
     };
+    if(nluEnabled&&nluStrategy==='primary'){
+      nluInvocation={invoke:true,reason:'primary_language_layer'};
+      nlu=await invokeNlu();
+      enrichMessageFrameFromLanguageContract(messageFrame,nlu?.contract,nlu?.interpretation);
+    }
     const candidates = [];
     const vocabularyMatches = [];
     const entityCandidates = [];
@@ -86,17 +113,18 @@ class ConversationIntelligenceEngine {
     }
 
     const initialChoice = this.confidence.choose(candidates);
+    const semanticPolicy=this.semanticRoutePolicy?.apply?.({choice:initialChoice,route:localSemantic,tenant,pending,messageFrame})||{choice:initialChoice,decision:'not_configured',aligned:false};
     const choice = prioritizeDeterministicInterrupt({
-      choice:initialChoice,
+      choice:semanticPolicy.choice,
       pending,
       pendingValidation,
       interruption:deterministicInterruption,
       messageFrame
     });
     let nluPolicy = { selected:choice.winner, entities:choice.winner?.entities || {}, interruption:null, decision:'not_configured' };
-    if(nluEnabled){
-      nluInvocation=this.nluInvocationPolicy?.evaluate?.({ choice, pending, pendingValidation, correction, deterministicInterruption, clauseSemantics, message, messageFrame }) || { invoke:choice.needsLlm, reason:choice.needsLlm?'low_confidence':'deterministic_confident' };
-      if(nluInvocation.invoke)nlu=await invokeNlu();
+    if(nluEnabled&&nluStrategy!=='primary'){
+      nluInvocation=this.nluInvocationPolicy?.evaluate?.({ choice, pending, pendingValidation, correction, deterministicInterruption, clauseSemantics, message, messageFrame, localSemantic, semanticPolicy }) || { invoke:choice.needsLlm, reason:choice.needsLlm?'low_confidence':'deterministic_confident' };
+      if(nluInvocation.invoke){nlu=await invokeNlu();enrichMessageFrameFromLanguageContract(messageFrame,nlu?.contract,nlu?.interpretation);}
     }
     if (nluEnabled && nluInvocation.invoke && this.nluDecisionPolicy) {
       nluPolicy = this.nluDecisionPolicy.apply({ tenant, deterministic:choice.winner, deterministicCandidates:choice.ordered, nlu, pending, invocationReason:nluInvocation.reason });
@@ -126,7 +154,8 @@ class ConversationIntelligenceEngine {
       'ambiguous_correction',
       'invalid_pending_value',
       'semantic_route_conflict',
-      'complex_multi_intent'
+      'complex_multi_intent',
+      'local_semantic_uncertain'
     ]);
     const weakDeterministicSelection=!selected||Number(selected.confidence||0)<.8;
     const unresolvedArbitration=nluInvocation.invoke&&modelArbitration.has(nluInvocation.reason)
@@ -145,7 +174,7 @@ class ConversationIntelligenceEngine {
     messageFrame.resolvedIntents=appendResolvedIntents(messageFrame,choice.ordered,nlu?.interpretation);
     messageFrame.primaryResolvedIntent=selected?{capabilityId:selected.capabilityId,intent:selected.intent,confidence:selected.confidence}:null;
     const analysis = {
-      version:'1.6', normalizedText, semantic, clauseSemantics, temporal, messageFrame, domain, social, unsupportedDomain, globalCommand, correction, interruption, deterministicInterruption, goal,
+      version:'2.0', normalizedText, semantic, clauseSemantics, temporal, messageFrame, domain, social, unsupportedDomain, globalCommand, correction, interruption, deterministicInterruption, goal,
       requiresClarification,clarificationReason:requiresClarification?(unresolvedArbitration?nluInvocation.reason:'no_resolved_route'):null,
       workflow:{ stack:workflowStack, current:pending },
       validation:{ pending:pendingValidation },
@@ -154,12 +183,24 @@ class ConversationIntelligenceEngine {
       entities,
       selected: selected || null,
       forcedCapabilityId: selected?.capabilityId || null,
+      semanticRouter:{
+        used:Boolean(localSemantic?.used),accepted:Boolean(localSemantic?.accepted),decision:localSemantic?.decision||'not_configured',
+        engine:localSemantic?.engine||null,model:localSemantic?.model||null,language:localSemantic?.language||null,
+        primaryIntent:localSemantic?.primaryIntent||null,intents:localSemantic?.intents||[],
+        message:localSemantic?.message||null,workflow:localSemantic?.workflow||null,
+        tenantMatches:localSemantic?.tenantMatches||[],ambiguity:localSemantic?.ambiguity||[],
+        complexity:localSemantic?.complexity||null,escalation:localSemantic?.escalation||null,
+        authority:localSemantic?.authority||{execution:'nova_deterministic_core',mayExecute:false},
+        policyDecision:semanticPolicy.decision,alignedDeterministicCandidate:Boolean(semanticPolicy.aligned),
+        error:localSemantic?.error||null,timingMs:localSemantic?.timingMs||0
+      },
       nlu:{
         used:Boolean(nlu?.used), validated:Boolean(nlu?.validated), mode:nlu?.mode || this.nluInterpreter?.mode || 'off',
-        strategy:nluEnabled?'adaptive':'off',
+        strategy:nluStrategy,
         deterministicFallback:Boolean(nluEnabled&&nluInvocation.invoke&&!nlu?.validated&&choice.winner),
         executionAuthority:'nova_deterministic_core',
         model:nlu?.model || null, promptVersion:nlu?.promptVersion || null, interpretation:nlu?.interpretation || null,
+        languageContract:nlu?.contract || null,
         decision:nluPolicy.decision, invocationReason:nluInvocation.reason,
         error:nlu?.error || null, httpStatus:nlu?.httpStatus || null,
         providerMessage:nlu?.providerMessage || null, providerErrorType:nlu?.providerErrorType || null,
@@ -172,6 +213,50 @@ class ConversationIntelligenceEngine {
   }
 }
 module.exports = { ConversationIntelligenceEngine };
+
+/**
+ * AI fields are hints, never authority. They are installed as the shared
+ * frame first and the local deterministic extraction is layered over them, so
+ * a proven date/time/name/product match always wins a disagreement.
+ */
+function enrichMessageFrameFromLanguageContract(frame,contract,interpretation){
+  if(!frame||!contract)return frame;
+  frame.entities=mergeUniversalEntities(contract.entities||{},frame.entities||{});
+  const aiIntents=(contract.intents||[]).map(item=>({
+    intent:item.name,
+    confidence:Number(item.confidence||0),
+    clauseIndex:null,
+    modality:contract.message?.certainty==='ambiguous'?'ambiguous':'asserted',
+    source:'ai_language_contract',
+    messageType:item.messageType
+  }));
+  frame.intents=dedupeFrameIntents([...(frame.intents||[]),...aiIntents]);
+  frame.hasMultipleIntents=new Set(frame.intents.map(item=>item.intent).filter(intent=>intent&&!intent.startsWith('conversation.social'))).size>1;
+  frame.languageContractVersion=contract.contractVersion;
+  frame.aiPrimaryIntent=interpretation?.intent||contract.primaryIntent?.name||null;
+  return frame;
+}
+
+function dedupeFrameIntents(items){
+  const seen=new Set(),out=[];
+  for(const item of items){const key=`${item.intent}|${item.clauseIndex??''}`;if(!item.intent||seen.has(key))continue;seen.add(key);out.push(item);}
+  return out;
+}
+
+module.exports.enrichMessageFrameFromLanguageContract=enrichMessageFrameFromLanguageContract;
+
+function annotateMessageFrameWithLocalSemantic(frame,route){
+  if(!frame||!route?.used)return frame;
+  // Telemetry only. The local classifier is consulted later by the semantic
+  // route policy and Groq escalation policy; adapters continue to see only
+  // facts extracted by Nova's deterministic language engines.
+  frame.localSemanticPrimaryIntent=route.primaryIntent?.name||null;
+  frame.localSemanticAccepted=Boolean(route.accepted);
+  frame.detectedLanguage=route.language||null;
+  return frame;
+}
+
+module.exports.annotateMessageFrameWithLocalSemantic=annotateMessageFrameWithLocalSemantic;
 
 /**
  * A validated side question must not be swallowed by the active workflow's

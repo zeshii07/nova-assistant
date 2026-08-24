@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { loadConfig } = require('../packages/config/src/config');
-const { GroqNluClient } = require('../packages/multilingual-nlu/src');
+const { GroqNluClient, validateNluOutput } = require('../packages/multilingual-nlu/src');
 
 async function main() {
   const config=loadConfig();
@@ -28,13 +28,17 @@ async function main() {
     ].filter(Boolean).join(' | ');
     throw new Error(`Groq NLU check failed: ${result.error}${details?` — ${details}`:''} (model=${result.model}, endpoint=${config.groqNluBaseUrl})`);
   }
+  const validated=validateNluOutput(result.data);
+  if(!validated.valid)throw new Error(`Groq returned JSON that Nova rejected: ${validated.errors.join('; ')}`);
   console.log(JSON.stringify({
     ok:true,
     provider:'Groq',
     endpoint:config.groqNluBaseUrl,
     model:result.model,
     latencyMs:result.latencyMs,
-    output:result.data
+    schemaVersion:validated.value.schema_version,
+    executionAuthority:'nova_deterministic_core',
+    output:validated.value
   }, null, 2));
 }
 

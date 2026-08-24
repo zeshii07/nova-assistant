@@ -9,15 +9,29 @@ class NluContextBuilder {
       if (!id || !name) return;
       vocabulary.push({ kind, id, name, aliases:(item.aliases || []).map((x) => clean(x, 80)).filter(Boolean).slice(0, 8) });
     };
-    try { for (const item of services.offeringService?.list?.(tenant.id) || []) add('service', item); } catch {}
+    // Operational catalogs come first. Knowledge-derived offerings are useful
+    // vocabulary, but their synthetic IDs must not displace executable service
+    // IDs such as CLN011. This also keeps the language layer aligned with the
+    // Control Plane's single source of service/pricing truth.
+    try {
+      for(const item of services.pricingService?.getConfig?.(tenant.id)?.services||[]){
+        add('service',{
+          ...item,
+          id:item.operationalServiceId||item.id,
+          aliases:[...(item.aliases||[]),...(item.operationalServiceId&&item.id?[item.id]:[])]
+        });
+      }
+    } catch {}
     try { for (const item of await (services.catalogService?.listProducts?.(tenant.id) || [])) add('product', item); } catch {}
-    try { for (const item of services.pricingService?.getConfig?.(tenant.id)?.services || []) add('service', item); } catch {}
+    try { for (const item of services.offeringService?.list?.(tenant.id) || []) add('service', item); } catch {}
 
     const unique = [];
     const seen = new Set();
+    const seenNames=new Set();
     for (const item of vocabulary) {
       const key = `${item.kind}:${item.id}`;
-      if (!seen.has(key)) { seen.add(key); unique.push(item); }
+      const nameKey=`${item.kind}:${String(item.name).toLowerCase().replace(/[^a-z0-9]+/g,' ')}`;
+      if (!seen.has(key)&&!seenNames.has(nameKey)) { seen.add(key);seenNames.add(nameKey);unique.push(item); }
     }
     const activeState = pending ? state?.capabilityState?.[pending.capabilityId] || {} : {};
     return Object.freeze({

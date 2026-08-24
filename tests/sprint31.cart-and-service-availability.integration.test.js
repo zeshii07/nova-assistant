@@ -42,12 +42,12 @@ test('service availability question distinguishes business hours from live slot 
  assert.doesNotMatch(r.reply,/Here are our cleaning services/i);
 });
 
-test('specific supported service question answers directly instead of listing all services',async()=>{
+test('generic apartment cleaning asks Standard or Deep instead of silently choosing a pricing model',async()=>{
  let r=await q('cleaning-demo','a4','can you clean my 1 bedroom apartment');
- assert.equal(r.capabilityId,'availability');assert.match(r.reply,/Yes/);assert.match(r.reply,/Apartment Cleaning/i);
+ assert.equal(r.capabilityId,'cleaning');assert.match(r.reply,/Standard Cleaning/i);assert.match(r.reply,/Deep Cleaning/i);
  assert.doesNotMatch(r.reply,/Here are our cleaning services/i);
  r=await q('cleaning-demo','a5','can i get my studio apartment cleaned');
- assert.equal(r.capabilityId,'availability');assert.match(r.reply,/Yes/);
+ assert.equal(r.capabilityId,'cleaning');assert.match(r.reply,/Standard Cleaning/i);assert.match(r.reply,/Deep Cleaning/i);
 });
 
 test('unsupported specific service returns direct no instead of service list',async()=>{

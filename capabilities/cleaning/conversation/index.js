@@ -1,13 +1,14 @@
-const { normalizeText, numberFromText } = require('../../../packages/conversation-intelligence/src/text');
+const { normalizeText, numberFromText, normalizeWeekdayTypos, closestKeywordToken } = require('../../../packages/conversation-intelligence/src/text');
 const { extractServiceConstraints } = require('../../../packages/conversation-intelligence/src/serviceConstraintExtractor');
 const { TemporalSemanticExtractor, parseClock } = require('../../../packages/conversation-intelligence/src/temporalSemanticExtractor');
 const { extractQueryFacets } = require('../../../packages/conversation-intelligence/src/queryFacetExtractor');
+const { extractFieldAmendment } = require('../../../packages/conversation-intelligence/src/fieldAmendmentExtractor');
 const temporalExtractor=new TemporalSemanticExtractor();
 class CleaningConversationAdapter {
   constructor(){this.capabilityId='cleaning';this.priority=85;}
   async analyze({ tenant, message, state, services, normalizedText, correction, interruption, clauseSemantics, temporal }) {
     const primaryText=clauseSemantics?.primaryText||message.text;
-    normalizedText=normalizeText(primaryText);
+    normalizedText=normalizeWeekdayTypos(primaryText);
     const step=state.capabilityState?.cleaning?.step; const candidates=[]; let entities={}; const matches=[];
     const previous=state.capabilityState?.cleaning||{};
     const timeEntities={...extractTimeEntities(primaryText,temporal),...extractCleaningContext(message.text)};
@@ -22,7 +23,8 @@ class CleaningConversationAdapter {
     const constraints=extractServiceConstraints(primaryText);
     const policyFacets=extractQueryFacets(message.text).filter(x=>['cancellation','rescheduling','arrival','confirmation','safety','fragrance_free','pets'].includes(x));
     const discountRequested=/\b(discounts?|special offer|best price|price can you offer|what price can you offer|reduce|cheaper|kam kar|riayat|رعایت)\b/.test(normalizedText);
-    const structuredRequest=/\b(i want|i need|book|schedule|add|clean my|cleaned|cleaning chahiye|karwani hai|krani hai|karani hai|saaf krana|saaf karana|saaf karwana)\b/.test(normalizedText);
+    const structuredRequest=/\b(i want|i need|book|schedule|add|clean my|cleaned|cleaning chahiye|karwani hai|krani hai|karani hai|saaf krana|saaf karana|saaf karwana)\b/.test(normalizedText)
+      || /\b(?:can|could|would) you\b[\s\S]{0,35}\b(?:come|clean|arrange|send)\b/.test(normalizedText);
     const customQuoteWords=/\b(custom quote|custom quotation|custom estimate)\b/.test(normalizedText);
 
     // A quotation is durable conversation context, but it is not a booking.
@@ -49,6 +51,23 @@ class CleaningConversationAdapter {
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'quoted_service',score:1}]};
     }
 
+    // A generic apartment/villa request is not enough to choose the pricing
+    // model. Keep every supplied field, ask Standard Cleaning vs Deep
+    // Cleaning, and let the chosen model determine its required scope.
+    const pendingBookingType=previous.pendingBookingType;
+    const resolvedCleaningType=resolveCleaningType(normalizedText);
+    if(pendingBookingType&&resolvedCleaningType){
+      const deep=resolvedCleaningType==='deep';
+      entities={...pendingBookingType.scope,...timeEntities,selectedCleaningType:deep?'deep':'standard'};
+      candidates.push({intent:'cleaning.booking_type_selected',confidence:1,priority:198,entities,reason:'property_cleaning_booking_type_selected'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:deep?'deep_cleaning':'standard_cleaning',score:1}]};
+    }
+    if(pendingBookingType&&step==='cleaningType'&&!interruption){
+      entities={...pendingBookingType.scope,...timeEntities,pendingCleaningType:true};
+      candidates.push({intent:'cleaning.booking_type_clarification',confidence:1,priority:198,entities,reason:'property_cleaning_booking_type_still_missing'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_type_required',score:1}]};
+    }
+
     // A customer can answer a quote-only cleaning-type clarification with a
     // short phrase such as "deep cleaning". Resume the pricing comparison,
     // not a booking workflow.
@@ -59,8 +78,8 @@ class CleaningConversationAdapter {
       candidates.push({intent:'cleaning.standard_multi_service_quote',confidence:1,priority:190,entities,reason:'standard_cleaning_workforce_price_complete'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'pricing',value:'standard_cleaning_total',score:1}]};
     }
-    if(pendingPriceClarification&&/\b(?:deep|standard|general|regular|routine|hourly)\b/.test(normalizedText)){
-      const deep=/\bdeep\b/.test(normalizedText);
+    if(pendingPriceClarification&&resolvedCleaningType){
+      const deep=resolvedCleaningType==='deep';
       const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
       const allServices=await scoped?.listServices?.()||[];
       const chosenId=deep
@@ -90,6 +109,38 @@ class CleaningConversationAdapter {
       entities={customerRequestHistory:true};
       candidates.push({intent:'cleaning.request_history',confidence:1,priority:180,entities,reason:'customer_cleaning_request_history'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'customer_history',value:'cleaning_requests',score:1}]};
+    }
+
+    const pendingFieldEdit=previous.pendingFieldEdit||null;
+    const explicitFieldAmendment=extractFieldAmendment(message.text,{allowedFields:['name','phone','email','address']});
+    const fieldAmendment=explicitFieldAmendment||(pendingFieldEdit
+      ? {field:pendingFieldEdit.field,rawValue:message.text,action:'replace',explicit:true}
+      : null);
+    if(fieldAmendment&&(step||previous.lastRequestId||pendingFieldEdit)){
+      entities={fieldAmendment,requestId:pendingFieldEdit?.requestId||previous.lastRequestId||null,preserveWorkflow:true};
+      candidates.push({intent:'cleaning.customer_field_edit',confidence:1,priority:215,entities,reason:pendingFieldEdit?'pending_cleaning_field_edit_value':'explicit_cleaning_field_edit'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'customer_field_edit',value:fieldAmendment.field,score:1}]};
+    }
+
+    // The active field owns a clear answer.  This route is intentionally more
+    // specific than generic workflow input so catalog/availability adapters or
+    // remote NLU cannot reinterpret "OK 10 AM" as another command.
+    const explicitScheduleEdit=/\b(?:reschedule|change|move|shift|replace|instead)\b[\s\S]{0,35}\b(?:time|hours?|date|day|start)\b|\b(?:better to|please)\s+start\s+at\b/.test(normalizedText);
+    if(step==='time'&&timeEntities.startTime&&!explicitScheduleEdit){
+      entities={pendingField:'time',...timeEntities,preserveWorkflow:true};
+      candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:205,entities,reason:'active_cleaning_time_value'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'time',score:1}]};
+    }
+    const expectedScalarPresent=(step==='cleanerCount'&&Boolean(timeEntities.cleanerCount||scalarPendingNumber(normalizedText)))
+      ||(step==='duration'&&Boolean(timeEntities.durationHours||scalarPendingNumber(normalizedText)))
+      ||(step==='bedrooms'&&Boolean(timeEntities.bedrooms??scalarPendingNumber(normalizedText)))
+      ||(step==='units'&&Boolean(timeEntities.units??scalarPendingNumber(normalizedText)));
+    if(step&&!['date','time','reschedule_time','address','name','phone','confirm'].includes(step)
+      &&(timeEntities.date||timeEntities.dateText||timeEntities.weekday||timeEntities.startTime||timeEntities.timeFlexible)
+      &&!expectedScalarPresent){
+      entities={...timeEntities,preserveWorkflow:true};
+      candidates.push({intent:'cleaning.schedule_edit',confidence:1,priority:204,entities,reason:'schedule_supplied_before_pending_scope'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'schedule',score:1}]};
     }
 
     const scheduleEdit=Boolean(previous.step||previous.serviceId) && (
@@ -242,6 +293,7 @@ class CleaningConversationAdapter {
 
     const propertyContext=tenant.capabilities?.includes('cleaning') && /\b(apartment|flat|studio|villa|vila|house|home|bedroom|bedrooms|bhk|office)\b/.test(normalizedText);
     const cleaningDomain=/\b(clean|cleaned|cleaning|cleaners?|clenr|clnr|maids?|safai|sofas?|couches?|curtains?|drapes?|mattresses?|carpets?|rugs?|upholstery|صفائی|صاف)\b/.test(normalizedText)
+      ||Boolean(closestKeywordToken(normalizedText,['cleaning','cleaner','cleaned'],{maxDistance:2,minLength:5}))
       || (propertyContext && /\b(quote|quotation|estimate|what about|how about|price|cost|clean)\b/.test(normalizedText));
     const structuredQuote=priceFollowUp || discountRequested || /\b(quote|quotation|estimate|price|cost|charges?|how much|kitna|kitne|kitni)\b/.test(normalizedText);
     const propertyAlternative=propertyContext && (
@@ -361,6 +413,25 @@ class CleaningConversationAdapter {
       }
       let m=normalizedText.match(/\b(\d+)\s*(?:bedrooms?|bed|bhk)\b/);if(m)timeEntities.bedrooms=Number(m[1]);
       if(/\b(villa|vila)\b/.test(normalizedText))timeEntities.propertyType='villa';else if(/\b(apartment|flat|studio)\b/.test(normalizedText))timeEntities.propertyType='apartment';
+      const propertyCleaningTypeSpecified=Boolean(resolveCleaningType(normalizedText));
+      const genericPropertyService=explicitService?.service&&isGenericPropertyCleaningService(explicitService.service);
+      const availabilityContext=state.capabilityState?.availability||{};
+      const contextualContinuation=/^(?:so|then|okay|ok|alright|in that case)\b|\b(?:as discussed|same service|that service)\b/.test(normalizedText);
+      const explicitlySpecificService=/\b(?:deep|standard|general|regular|routine|hourly|move[ -]?(?:in|out)|post[ -]?(?:renovation|construction)|office|sofa|couch|carpet|mattress|curtain|laundry)\b/.test(normalizedText);
+      if(contextualContinuation&&!explicitlySpecificService&&availabilityContext.lastDiscussedServiceId&&(!explicitService?.service||genericPropertyService)){
+        const inherited=(await scopedService?.listServices?.()||[]).find(service=>service.id===availabilityContext.lastDiscussedServiceId);
+        if(inherited){
+          explicitService={service:inherited,score:100};
+          timeEntities.serviceId=inherited.id;
+          timeEntities.serviceName=inherited.name;
+        }
+      }
+      const resolvedGenericPropertyService=explicitService?.service&&isGenericPropertyCleaningService(explicitService.service);
+      if(timeEntities.propertyType&&resolvedGenericPropertyService&&!propertyCleaningTypeSpecified){
+        entities={...timeEntities,text:normalizedText,pendingCleaningType:true};
+        candidates.push({intent:'cleaning.booking_type_clarification',confidence:1,priority:198,entities,reason:'property_cleaning_booking_type_missing'});
+        return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_type_required',score:1}]};
+      }
       if(timeEntities.propertyType||timeEntities.bedrooms||timeEntities.units||timeEntities.serviceVariant){
         entities={...timeEntities,text:normalizedText};
         const clearTransaction=isClearTransaction(normalizedText,timeEntities);
@@ -449,6 +520,15 @@ class CleaningConversationAdapter {
     const genericCleaner=/\b(cleaners?|clenr|clnr|maids?)\b/.test(normalizedText);
 
     const explicitCleanerCount=/\b(?:\d{1,2}|one|two|three|four|five|ek|aik|do|teen|char|chaar)\s*(?:cleaners?|maids?|workers?|people|persons?|person)\b/.test(normalizedText);
+    if(step==='cleanerCount'){
+      const cleanerCount=timeEntities.cleanerCount||scalarPendingNumber(normalizedText);
+      if(cleanerCount){
+        entities={pendingField:step,cleanerCount,preserveWorkflow:true};
+        if(timeEntities.durationHours)entities.durationHours=timeEntities.durationHours;
+        candidates.push({intent:'cleaning.cleaner_count_update',confidence:1,priority:182,entities,reason:'active_standard_cleaning_cleaner_count'});
+        return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaner_count',score:1}]};
+      }
+    }
     if(step && previous.serviceId==='CLN-HOURLY' && explicitCleanerCount && timeEntities.cleanerCount && !timeEntities.durationHours && /\b(actually|instead|only|just|i want|i need|mujhy|mujhe|chahiye|chahiyy|cleaners?|maids?)\b/.test(normalizedText)){
       entities={pendingField:step,cleanerCount:timeEntities.cleanerCount,preserveWorkflow:true};
       candidates.push({intent:'cleaning.cleaner_count_update',confidence:1,entities,reason:'active_hourly_cleaner_count_update'});
@@ -476,6 +556,14 @@ class CleaningConversationAdapter {
       candidates.push({intent:'cleaning.duration_update',confidence:.9995,entities,reason:'active_cleaning_duration_update'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_duration_update',score:1}]};
     }
+    if(step==='duration'){
+      const durationHours=scalarPendingNumber(normalizedText);
+      if(durationHours>=1&&durationHours<=24){
+        entities={pendingField:'duration',durationHours,preserveWorkflow:true};
+        candidates.push({intent:'cleaning.duration_update',confidence:1,priority:205,entities,reason:'active_cleaning_duration_scalar'});
+        return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'duration',score:1}]};
+      }
+    }
     if (cleaningDomain && timeEntities.durationHours && (pricingRequested || genericCleaner)) {
       entities={...timeEntities,policyFacets, pricingRequested:true, pricingModel:'hourly_cleaner'};
       candidates.push({intent:'cleaning.pricing_request',confidence:.9993,entities,reason:'cleaning_duration_pricing'});
@@ -495,6 +583,11 @@ class CleaningConversationAdapter {
     const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
     const found=scoped?await scoped.findService(primaryText):null;
     if(found?.service){
+      if(structuredRequest&&timeEntities.propertyType&&isGenericPropertyCleaningService(found.service)&&!resolveCleaningType(normalizedText)){
+        entities={...timeEntities,text:normalizedText,pendingCleaningType:true};
+        candidates.push({intent:'cleaning.booking_type_clarification',confidence:1,priority:198,entities,reason:'matched_property_cleaning_type_missing'});
+        return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_type_required',score:1}]};
+      }
       if(found.service.hidden){
         entities=extractTimeEntities(message.text);
         candidates.push({intent:'cleaning.service_explore',confidence:.97,entities,reason:'cleaning_hidden_operational_service'});
@@ -547,6 +640,23 @@ function extractTimeEntities(text,precomputed=null){
   if(cleaners) entities.cleanerCount=numberFromText(cleaners[1]);
   else if(/\b(?:cleaner|maid|one person)\b/.test(n)) entities.cleanerCount=1;
   return entities;
+}
+
+function isGenericPropertyCleaningService(service){
+  return ['CLN008','CLN009'].includes(service?.id)
+    || (/\b(?:apartment|villa|home) cleaning\b/i.test(service?.name||'')&&!/^Deep\b/i.test(service?.name||''));
+}
+function resolveCleaningType(value){
+  const text=normalizeText(value);
+  if(/\bdeep\b/.test(text))return 'deep';
+  if(/\b(?:standard|general|regular|routine|hourly)\b/.test(text))return 'standard';
+  const fuzzy=closestKeywordToken(text,['standard','regular','routine','hourly'],{maxDistance:2,minLength:5});
+  return fuzzy?'standard':null;
+}
+function scalarPendingNumber(value){
+  const text=normalizeText(value).replace(/^(?:ok|okay|yes|sure|theek hai)\s+/,'').trim();
+  if(!/^(?:\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|ek|aik|do|teen|char|chaar|paanch)$/.test(text))return null;
+  return numberFromText(text);
 }
 function requestScope(source={}){
   const keys=['propertyType','propertyCount','propertyFloor','bedrooms','washrooms','balconies','interiorWindows','insideRefrigerator','insideOven','fragranceFree','petPresent','heavyPetHair','halls','cleaningType','requestedTasks','requiredEquipment','businessProvidesSupplies','businessProvidesEquipment','scopeText','durationHours','cleanerCount','units','serviceVariant'];

@@ -124,8 +124,10 @@ staff/calendar capacity.
 4. ✅ Variant inventory and reservation semantics — delivered in v9.1.0-alpha.1.
 5. 🟡 Scheduling adapter and local live-capacity reservations — local provider delivered in v9.2.0-alpha.1; Google Calendar/Microsoft Graph adapters remain next.
 6. ✅ Unified Products & Prices and Services & Pricing ownership — delivered in v9.2.1-alpha.1.
-7. Production PostgreSQL/object-storage migration and operational monitoring.
+7. ✅ Provider-independent AI Language Contract with AI-first/adaptive routing and deterministic fallback — delivered in v9.3.0-alpha.1.
+8. ✅ Lightweight local probabilistic semantic router with adaptive Groq escalation — delivered in v9.4.0-alpha.1 and workflow/field-amendment stabilized in v9.4.1-alpha.1.
+9. Production PostgreSQL/object-storage migration and operational monitoring.
 
-Remote NLU remains an interpretation helper outside this control plane. Groq may
-propose structured meaning during import, but a human must review operational
-edits and deterministic validators decide whether they can be published.
+The AI Language Layer remains an interpretation boundary outside the control
+plane. It may propose structured meaning, but deterministic validators and
+human publication roles remain the only authorities for operational changes.

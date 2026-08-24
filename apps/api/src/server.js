@@ -1,4 +1,5 @@
 const http = require("http");
+const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { importBusinessFile } = require("../../../packages/tenant-onboarding/src/businessFileImporter");
@@ -420,14 +421,20 @@ function readRaw(req) {
 async function readJson(req) {
   const raw = await readRaw(req);
   try { return raw.length ? JSON.parse(raw.toString("utf8")) : {}; }
-  catch { throw new Error("Invalid JSON body."); }
+  catch { throw new ValidationError("Invalid JSON body."); }
 }
 function sendJson(res, statusCode, payload) { res.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8" }); res.end(JSON.stringify(payload)); }
 function sendText(res, statusCode, text) { res.writeHead(statusCode, { "Content-Type": "text/plain; charset=utf-8" }); res.end(String(text)); }
 function authorizeDeveloperRequest(req) {
-  const expected = process.env.NOVA_DEV_TOKEN;
-  if (!expected) return true; // convenient local development; set it on public hosts
-  return String(req.headers["x-nova-dev-token"] || "") === String(expected);
+  const expected = String(process.env.NOVA_DEV_TOKEN || "");
+  // Local development remains zero-config. Public production deployments fail
+  // closed so replay, CRM, inventory, knowledge, and Control Plane data cannot
+  // become writable merely because a secret was omitted.
+  if (!expected) return String(process.env.NODE_ENV || "development").toLowerCase() !== "production";
+  const supplied = String(req.headers["x-nova-dev-token"] || "");
+  const expectedBytes = Buffer.from(expected);
+  const suppliedBytes = Buffer.from(supplied);
+  return expectedBytes.length === suppliedBytes.length && crypto.timingSafeEqual(expectedBytes, suppliedBytes);
 }
 function controlPlaneActor(req, tenantId) {
   const scopedTenant=String(req.headers['x-nova-tenant-id']||'').trim();
@@ -444,7 +451,8 @@ function serveDeveloperAsset(res, pathname) {
   const root = path.resolve(__dirname, "../../developer-console/public");
   const relative = pathname === "/developer" || pathname === "/developer/" ? "index.html" : pathname.replace(/^\/developer\//, "");
   const file = path.resolve(root, relative);
-  if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return sendText(res, 404, "Not found");
+  const outsideRoot = path.relative(root, file).startsWith("..") || path.isAbsolute(path.relative(root, file));
+  if (outsideRoot || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return sendText(res, 404, "Not found");
   const ext = path.extname(file); const types = { ".html":"text/html; charset=utf-8", ".js":"application/javascript; charset=utf-8", ".css":"text/css; charset=utf-8" };
   res.writeHead(200, { "Content-Type":types[ext] || "application/octet-stream", "Cache-Control":"no-store" }); res.end(fs.readFileSync(file));
 }
@@ -498,4 +506,4 @@ async function runDataset(container, datasetName) {
   return { ok:failures.length===0, dataset:datasetName, total:dataset.cases.length, passed, failed:failures.length, durationMs:Date.now()-started, failures:failures.slice(0,50) };
 }
 if (require.main === module) startServer().catch((error) => { console.error(error); process.exitCode = 1; });
-module.exports = { startServer, readRaw };
+module.exports = { startServer, readRaw, readJson, authorizeDeveloperRequest };

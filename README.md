@@ -2,7 +2,119 @@
 
 Nova is a multi-tenant conversational AI platform. v3.0 adds a reusable Generic Offering Engine, Generic Booking Engine, strict entity resolution, reusable domain semantics, and a knowledge-to-offering fallback so new industries can be onboarded without changing the core engine.
 
-## Current release: v9.2.1 Unified Catalog and Pricing Sources
+## Current release: v9.4.1 Workflow Language Stability
+
+Nova v9.4.1-alpha.1 makes pending workflow fields authoritative and adds a
+shared, validated field-amendment contract. Short replies such as `10 AM`, `4`,
+or `4 cleaners for 5 hours` are consumed by the active Cleaning field instead
+of falling into Catalog or remote NLU. Bounded structural typo handling accepts
+weekday and workflow-choice variants such as `tuseday` and `stndrad` without
+fuzzy-matching customer names or cross-tenant business data.
+
+Generic apartment and villa requests always ask **Standard Cleaning** versus
+**Deep Cleaning** unless the customer has already supplied decisive pricing
+model details. Availability follow-ups retain the previously discussed service,
+so a Move-in Cleaning conversation does not silently become Standard Cleaning.
+
+Explicit changes to name, phone, optional email, address, city, landmark, and
+payment method are extracted as field amendments. Cleaning drafts/submitted
+requests, retail checkouts/orders, generic bookings, and standalone CRM updates
+validate the new value before writing. A rejected value leaves the previous
+value and transaction intact.
+
+Run the release gate:
+
+```powershell
+npm run benchmark:v9.4.1
+```
+
+See `docs/V941_WORKFLOW_LANGUAGE_STABILITY.md`.
+
+## Previous release: v9.4.0 Lightweight Local Semantic Router
+
+Nova v9.4.0-alpha.1 adds a dependency-free probabilistic language router in
+front of adaptive Groq escalation. It learns domain-independent conversational
+meaning from multilingual seed examples using word/bigram, prefix, and character
+n-gram features. Current-tenant service and product vocabulary is added at
+inference time and remains isolated from every other tenant.
+
+The router is evidence, not execution authority. Deterministic extraction still
+owns dates, times, people, quantities, variants, and customer fields; capability
+engines still own validation, pricing, availability, calendar holds, CRM, carts,
+orders, bookings, and every write. A confident aligned local result avoids a
+remote call. Uncertain, conflicting, unresolved-reference, or genuinely complex
+language may be sent to Groq for strict JSON interpretation. If Groq is disabled
+or unavailable, Nova safely continues with its deterministic core or asks for
+clarification.
+
+Cleaning property requests now have an explicit pricing boundary. “Villa
+cleaning” or “apartment cleaning” asks the customer to choose **Standard
+Cleaning** or **Deep Cleaning**. Standard Cleaning collects cleaner count and
+hours; Deep Cleaning collects property type and bedroom count. Supplied dates,
+times, and scope survive the clarification.
+
+Recommended `.env` settings:
+
+```dotenv
+NOVA_SEMANTIC_ROUTER_MODE=on
+NOVA_NLU_MODE=on
+NOVA_NLU_STRATEGY=adaptive
+GROQ_API_KEY=your_key_here
+```
+
+Use `NOVA_NLU_MODE=off` to run the same architecture without Groq. Trace the
+local router and run the full release gate:
+
+```powershell
+npm run model:semantic:trace -- "thora kal wali booking adjust kar do"
+npm run model:groq:trace -- "thora kal wali booking adjust kar do"
+npm run benchmark:v9.4.0
+```
+
+See `docs/V940_LOCAL_SEMANTIC_ROUTER.md`.
+
+## Previous release: v9.3.0 AI Language Contract
+
+Nova v9.3.0-alpha.1 adds a provider-independent AI Language Layer between the
+Conversation Manager and deterministic capability routing. A configured model
+detects language, intent, multiple intents, entities, corrections, workflow
+relationship, ambiguity, missing linguistic information, alternative dates and
+times, and multiple service/product items. Its schema-constrained output is
+normalized into `LanguageContract` v2.0.
+
+The contract cannot call tools or execute anything. It carries
+`authority.mayExecute=false`; Nova validates current-tenant service/product IDs,
+layers deterministic extraction over AI hints, and sends only safe drafts or
+read-only requests to Booking, Cleaning, Commerce, Catalog, Pricing,
+Availability, CRM, and other deterministic capabilities. Provider failure,
+timeout, rejected JSON, or `NOVA_NLU_MODE=off` falls back to the local engine.
+
+Choose one language strategy in `.env`:
+
+```dotenv
+GROQ_API_KEY=your_key_here
+NOVA_NLU_MODE=on
+
+# AI only when local understanding is uncertain (fastest and cheapest)
+NOVA_NLU_STRATEGY=adaptive
+
+# AI interprets every message before deterministic routing
+# NOVA_NLU_STRATEGY=primary
+```
+
+Run and inspect it:
+
+```powershell
+npm run model:groq:check
+npm run model:language:trace -- "kal 4 baje, warna 5 baje 2 cleaners chahiye"
+npm run benchmark:v9.3.0
+npm start
+```
+
+See `docs/V930_AI_LANGUAGE_LAYER.md` and
+`examples/ai-language-contract-v2.json`.
+
+## Previous release: v9.2.1 Unified Catalog and Pricing Sources
 
 Nova v9.2.1-alpha.1 removes the conflicting pricing editor from Knowledge
 Manager. Retail tenants now manage product base prices and variant overrides
@@ -265,11 +377,11 @@ See:
 
 ## Public Developer Console
 
-When hosting publicly, set `NOVA_DEV_TOKEN` and enter it in the Playground. Do not expose customer replay/debug endpoints without access control.
+When hosting publicly, set `NOVA_DEV_TOKEN` and enter it in the Playground. In production, Nova now fails closed when this token is missing, so `/api/dev/*` remains unavailable instead of exposing customer replay/debug and Control Plane endpoints.
 
 ## Development persistence warning
 
-State, memory, CRM, orders, cleaning requests and replays are still in-memory repositories for this development milestone. Public-host restarts clear these records. Persistent PostgreSQL/Redis storage belongs to the production persistence milestone.
+`NOVA_STORAGE_MODE=memory` is file-backed local storage under `.nova-data`; it survives local process restarts but not an ephemeral hosting filesystem. Production business data should use a persistent mounted volume or PostgreSQL + Redis with `NOVA_STORAGE_MODE=persistent`.
 
 ## Goal Engine (v2.3)
 Conversation Intelligence now includes persistent goal continuity. Category browsing, candidate selection, product-detail collection and Commerce checkout can span multiple messages without requiring the customer to repeat context. The Developer Playground shows the current Goal and replays include goal transitions. See `docs/GOAL_ENGINE.md`.

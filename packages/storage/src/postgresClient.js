@@ -1,7 +1,8 @@
 class PostgresClient {
-  constructor({ connectionString, pool = null, logger = null } = {}) {
+  constructor({ connectionString, pool = null, poolMax = 10, logger = null } = {}) {
     this.connectionString = connectionString;
     this.pool = pool;
+    this.poolMax = poolMax;
     this.logger = logger;
     this.ownsPool = !pool;
   }
@@ -11,7 +12,7 @@ class PostgresClient {
     let Pool;
     try { ({ Pool } = require("pg")); }
     catch { throw new Error("Persistent storage requires the 'pg' package. Run npm install."); }
-    this.pool = new Pool({ connectionString: this.connectionString, max: Number(process.env.NOVA_DB_POOL_MAX || 10) });
+    this.pool = new Pool({ connectionString: this.connectionString, max: this.poolMax });
     await this.pool.query("select 1 as ok");
     this.logger?.info("storage.postgres.connected");
     return this;

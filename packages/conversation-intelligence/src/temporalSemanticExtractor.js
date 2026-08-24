@@ -1,4 +1,4 @@
-const { normalizeText, numberFromText } = require('./text');
+const { normalizeText, numberFromText, normalizeWeekdayTypos } = require('./text');
 
 const MONTHS='january february march april may june july august september october november december'.split(' ');
 const DAYS='monday tuesday wednesday thursday friday saturday sunday'.split(' ');
@@ -7,7 +7,7 @@ const DAYS='monday tuesday wednesday thursday friday saturday sunday'.split(' ')
 class TemporalSemanticExtractor {
   extract(value) {
     const raw=String(value||'');
-    const n=normalizeText(raw);
+    const n=normalizeWeekdayTypos(raw);
     const out={version:'1.0'};
     const range=extractTimeRange(raw);
     if(range){
@@ -56,6 +56,7 @@ function extractStartTime(raw){
   }
   const match=String(raw||'').match(/\b(?:start(?:ing)?|at|from|time(?:\s+is)?|for|around|about|approximately|approx\.?)\s*(?:at\s*)?(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)/i)
     || String(raw||'').match(/\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|today|tomorrow)(?:\s+(?:on|at))?\s+(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)/i)
+    || String(raw||'').match(/\b(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\b/i)
     || String(raw||'').match(/\b(\d{1,2}):(\d{2})\s*(a\.?m\.?|p\.?m\.?)?/i);
   if(!match)return null;
   return parseClock(match[1],match[2],match[3])?.value||null;

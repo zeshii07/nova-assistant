@@ -85,6 +85,8 @@ const { UniversalEngagementEngine } = require("../../../packages/universal-engag
 const { OfferingConversationAdapter } = require("../../../capabilities/offering/conversation");
 const { BookingConversationAdapter } = require("../../../capabilities/booking/conversation");
 const { GroqNluClient, RemoteNluInterpreter, NluDecisionPolicy, NluInvocationPolicy, NluContextBuilder } = require("../../../packages/multilingual-nlu/src");
+const { AiLanguageLayer } = require("../../../packages/ai-language-layer/src");
+const { LightweightSemanticRouter, SemanticRoutePolicy } = require("../../../packages/semantic-router/src");
 const { FileControlPlaneRepository, ControlPlaneAccessPolicy, TenantControlPlaneService } = require("../../../packages/tenant-control-plane/src");
 const { InventoryService } = require("../../../packages/inventory-engine/src");
 const { FileCalendarConfigRepository, CalendarService } = require("../../../packages/calendar-engine/src");
@@ -229,14 +231,32 @@ async function buildContainer() {
     actionThreshold:config.nluActionThreshold
   });
   const nluInvocationPolicy = new NluInvocationPolicy({
-    strategy:'adaptive',
+    strategy:config.nluStrategy,
     confidenceThreshold:config.nluInvocationThreshold,
     ambiguityMargin:config.nluAmbiguityMargin
+  });
+  const aiLanguageLayer = new AiLanguageLayer({
+    interpreter:remoteNluInterpreter,
+    strategy:config.nluStrategy,
+    logger
+  });
+  const semanticRouter=new LightweightSemanticRouter({
+    enabled:config.semanticRouterMode==='on',
+    contextBuilder:new NluContextBuilder({defaultTimezone:config.defaultTimezone}),
+    minConfidence:config.semanticRouterMinConfidence,
+    minMargin:config.semanticRouterMinMargin,
+    minSimilarity:config.semanticRouterMinSimilarity,
+    maxLocalIntents:config.semanticRouterMaxLocalIntents,
+    logger
+  });
+  const semanticRoutePolicy=new SemanticRoutePolicy({
+    selectionThreshold:Math.max(.8,config.semanticRouterMinConfidence),
+    selectionMargin:config.semanticRouterMinMargin
   });
   const socialIntelligenceEngine = new SocialIntelligenceEngine();
   const domainSchemaRegistry = new DomainSchemaRegistry({ domainsDir:path.resolve(__dirname, "../../../domains"), logger });
   const domainResolver = new DomainResolver({ schemaRegistry:domainSchemaRegistry });
-  const conversationIntelligenceEngine = new ConversationIntelligenceEngine({ adapterRegistry: conversationAdapterRegistry, llmInterpreter:null, nluInterpreter:remoteNluInterpreter, nluDecisionPolicy, nluInvocationPolicy, logger, socialIntelligenceEngine, domainResolver });
+  const conversationIntelligenceEngine = new ConversationIntelligenceEngine({ adapterRegistry: conversationAdapterRegistry, llmInterpreter:null, nluInterpreter:remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, logger, socialIntelligenceEngine, domainResolver });
   const replayRepository = new InMemoryReplayRepository();
   const replayService = new ReplayService({ repository: replayRepository });
   const executionEngine = new ExecutionEngine({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId: config.defaultTenantId, services: { knowledgeService, llmRouter, memoryService, crmService, customerDataBridge, catalogService, commerceService, inventoryService, cleaningService, offeringService, bookingService, calendarService, offeringOrderService, engagementService, pricingService, handoffService, availabilityService, promptEngine }, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService });
@@ -251,6 +271,6 @@ async function buildContainer() {
     executionEngine,
     logger
   });
-  return { config, logger, storage, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, llmRouter, groqNluClient, remoteNluInterpreter, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService };
+  return { config, logger, storage, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService };
 }
 module.exports = { buildContainer };

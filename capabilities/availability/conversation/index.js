@@ -1,10 +1,10 @@
-const {normalizeText}=require('../../../packages/conversation-intelligence/src/text');
+const {normalizeText,normalizeWeekdayTypos}=require('../../../packages/conversation-intelligence/src/text');
 const {extractServiceConstraints}=require('../../../packages/conversation-intelligence/src/serviceConstraintExtractor');
 class AvailabilityConversationAdapter{
  constructor(){this.capabilityId='availability';this.priority=105;}
- async analyze({tenant,message,services}){
+ async analyze({tenant,message,services,state}){
   if(!tenant.capabilities?.includes('availability'))return empty(this.priority);
-  const text=normalizeText(message.text),constraints=extractServiceConstraints(message.text),constraintText=constraints.text;
+  const text=normalizeWeekdayTypos(message.text),constraints=extractServiceConstraints(message.text),constraintText=constraints.text;
   // "Are you available in Sharjah?" asks about geographic coverage, not a
   // calendar slot. Let the tenant-knowledge path answer it from approved service
   // areas instead of asking for a fake service name.
@@ -13,6 +13,11 @@ class AvailabilityConversationAdapter{
   const pricingQuestion=/\b(price|pricing|cost|charge|charges|rate|quote|quotation|estimate|how much|discount|best price|riayat)\b/.test(text);
   const recurrence=constraints.recurrence;
   if(recurrence)return empty(this.priority); // recurrence is a booking/workflow concern, not a fake service name
+  const discussedService=state?.capabilityState?.availability?.lastDiscussedServiceId||null;
+  const contextualContinuation=Boolean(discussedService)
+    &&/^(?:so|then|okay|ok|alright|in that case)\b/.test(text)
+    &&/\b(?:can|could|would) you\b[\s\S]{0,35}\b(?:come|clean|arrange|send)\b/.test(text);
+  if(contextualContinuation)return empty(this.priority);
 
   // A detailed service request that already supplies property/staff scope and
   // a requested date/time belongs to the transactional workflow. Availability

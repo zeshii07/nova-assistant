@@ -73,5 +73,10 @@ function alternatives(rows){return rows?.length?` Available alternatives: ${rows
 function clean(v){return String(v||'').replace(/^---+|---+$/g,'').trim();}
 function dayLine(day,r){if(r.status==='open')return `${day}: open ${r.hours}.`;if(r.status==='closed')return `${day}: closed.`;return `${day}: hours not configured.`;}
 function title(v){return String(v||'').replace(/^./,x=>x.toUpperCase());}
-function out(reply,intent,payload){return createCapabilityResult({handled:true,reply,responseModel:{intent,payload:{legacyText:reply,...payload}},statePatch:{activePlugin:'availability',lastIntent:intent.toLowerCase()}});}
+function out(reply,intent,payload){
+ const serviceId=payload?.serviceId||null,label=payload?.label||null;
+ const availabilityState={lastIntent:intent.toLowerCase(),lastDiscussedDay:payload?.day||payload?.date||null};
+ if(serviceId){availabilityState.lastDiscussedServiceId=serviceId;availabilityState.lastDiscussedServiceName=label;}
+ return createCapabilityResult({handled:true,reply,responseModel:{intent,payload:{legacyText:reply,...payload}},statePatch:{activePlugin:'availability',lastIntent:intent.toLowerCase(),capabilityState:{availability:availabilityState}}});
+}
 module.exports={Capability:AvailabilityCapability,AvailabilityCapability};

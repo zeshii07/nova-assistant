@@ -1,0 +1,101 @@
+{
+  "contractVersion": "2.0",
+  "providerSchemaVersion": "2.0",
+  "language": {
+    "code": "mixed",
+    "confidence": 0.98
+  },
+  "message": {
+    "type": "request",
+    "actionSemantics": "draft_request",
+    "certainty": "explicit",
+    "confidence": 0.98
+  },
+  "primaryIntent": {
+    "name": "booking.create",
+    "confidence": 0.98
+  },
+  "intents": [
+    {
+      "name": "booking.create",
+      "messageType": "request",
+      "confidence": 0.98
+    },
+    {
+      "name": "availability.check",
+      "messageType": "question",
+      "confidence": 0.96
+    },
+    {
+      "name": "service.price",
+      "messageType": "question",
+      "confidence": 0.94
+    }
+  ],
+  "workflow": {
+    "relationship": "continue",
+    "active": null
+  },
+  "entities": {
+    "serviceId": "CLN-HOURLY",
+    "serviceName": "Hourly Cleaner Hire",
+    "date": "2026-08-24",
+    "dateText": "tomorrow",
+    "time": "16:00",
+    "startTime": "16:00",
+    "alternativeTime": "17:00",
+    "alternativeTimeText": "5 PM",
+    "durationHours": 3,
+    "cleanerCount": 2,
+    "propertyType": "apartment",
+    "bedrooms": 3,
+    "suppliesRequired": true,
+    "requestedInformation": [
+      "availability",
+      "service_price"
+    ],
+    "nluIntents": [
+      "booking.create",
+      "availability.check",
+      "service.price"
+    ]
+  },
+  "items": {
+    "services": [
+      {
+        "serviceId": "CLN-HOURLY",
+        "serviceName": "Hourly Cleaner Hire",
+        "quantity": null,
+        "unit": null,
+        "serviceVariant": null,
+        "propertyType": "apartment",
+        "bedrooms": 3,
+        "staff": 2,
+        "durationHours": 3,
+        "confidence": 0.99
+      }
+    ],
+    "products": []
+  },
+  "customerFields": {
+    "name": null,
+    "phone": null,
+    "email": null
+  },
+  "requestedInformation": [
+    "availability",
+    "service_price"
+  ],
+  "missingInformation": [
+    "address",
+    "customer_name",
+    "phone"
+  ],
+  "corrections": [],
+  "ambiguities": [],
+  "authority": {
+    "interpretation": "ai_language_layer",
+    "execution": "nova_deterministic_core",
+    "mayExecute": false
+  }
+}

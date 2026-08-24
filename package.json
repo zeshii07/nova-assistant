@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "9.2.1-alpha.1",
+  "version": "9.4.1-alpha.1",
   "private": true,
-  "description": "Nova v9.2.1 Unified Product, Service, and Pricing Sources",
+  "description": "Nova v9.4.1 Workflow Language Stability and Validated Field Amendments",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {
@@ -48,8 +48,13 @@
     "benchmark:v9.1.0": "node --require ./tests/test-env.js --test tests/sprint70.v910-variant-inventory-reservations.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
     "benchmark:v9.2.0": "node --require ./tests/test-env.js --test tests/sprint71.v920-calendar-adapter.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
     "benchmark:v9.2.1": "node --require ./tests/test-env.js --test tests/sprint72.v921-unified-catalog-pricing.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
+    "benchmark:v9.3.0": "node --require ./tests/test-env.js --test tests/sprint73.v930-ai-language-layer.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
+    "benchmark:v9.4.0": "node --require ./tests/test-env.js --test tests/sprint74.v940-local-semantic-router.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
+    "benchmark:v9.4.1": "node --require ./tests/test-env.js --test tests/sprint75.v941-workflow-language-stability.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
     "model:groq:check": "node scripts/check-groq-nlu.js",
-    "model:groq:trace": "node scripts/trace-groq-routing.js"
+    "model:groq:trace": "node scripts/trace-groq-routing.js",
+    "model:language:trace": "node scripts/trace-groq-routing.js",
+    "model:semantic:trace": "node scripts/trace-semantic-router.js"
   },
   "dependencies": {
     "pg": "^8.16.3",

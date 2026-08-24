@@ -16,6 +16,7 @@ class BookingService {
       releaseHold: (holdId, reason) => this.calendarService?.releaseHold({ tenantId, customerId, holdId, reason }),
       proposeAmendment: (bookingId, change) => this.proposeAmendment({ tenantId, customerId, bookingId, change }),
       reschedule: (bookingId, change) => this.reschedule({ tenantId, customerId, bookingId, change }),
+      updateDetails: (bookingId, patch) => this.updateDetails({ tenantId, customerId, bookingId, patch }),
       cancel: (bookingId, reason) => this.cancel({ tenantId, customerId, bookingId, reason })
     });
   }
@@ -80,6 +81,19 @@ class BookingService {
     if (operation.status === "unavailable") return operation;
     await this.eventBus?.publish("booking.rescheduled.v1", { tenantId, customerId, bookingId, calendarEventId: record.calendarEventId, slots: nextSlots }, { source: "booking-engine" });
     return { status: "rescheduled", booking: operation.result, event: operation.event };
+  }
+
+  async updateDetails({tenantId,customerId,bookingId,patch={}}){
+    const record=await this.#customerBooking(tenantId,customerId,bookingId);
+    if(["completed","cancelled"].includes(record.status)){const error=new Error(`Booking cannot be changed while it is ${record.status}.`);error.code="BOOKING_NOT_MODIFIABLE";throw error;}
+    const allowed=new Set(['name','phone','email']);const changes={};
+    for(const [field,value] of Object.entries(patch||{}))if(allowed.has(field)&&value!==undefined&&JSON.stringify(record.slots?.[field])!==JSON.stringify(value))changes[field]=value;
+    if(!Object.keys(changes).length)return record;
+    const updatedAt=new Date().toISOString();
+    const updated={...record,slots:{...(record.slots||{}),...changes},revision:Number(record.revision||1)+1,updatedAt,timeline:[...(record.timeline||[]),{action:'customer_details_updated',at:updatedAt,fields:Object.keys(changes)}]};
+    const saved=await this.repository.save(updated);
+    await this.eventBus?.publish('booking.updated.v1',{tenantId,customerId,bookingId,revision:saved.revision,action:'customer_details_updated',fields:Object.keys(changes)},{source:'booking-engine'});
+    return saved;
   }
 
   async cancel({ tenantId, customerId, bookingId, reason = "customer_requested" }) {

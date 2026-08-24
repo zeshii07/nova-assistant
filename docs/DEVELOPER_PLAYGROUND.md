@@ -35,6 +35,6 @@ If the Developer Console is reachable from a public host, set:
 NOVA_DEV_TOKEN=use-a-long-random-secret
 ```
 
-Enter the same value into the Developer Console token field. All `/api/dev/*` endpoints return HTTP 401 without the correct token when this variable is configured.
+Enter the same value into the Developer Console token field. All `/api/dev/*` endpoints return HTTP 401 without the correct token. Production mode also returns HTTP 401 when `NOVA_DEV_TOKEN` is missing, preventing an accidental unprotected deployment; local development remains zero-config.
 
 Do not expose an unprotected Developer Console containing real customer replays in production.

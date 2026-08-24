@@ -21,6 +21,7 @@ class CommerceCapability extends BaseCapability {
     const commerce = context.services.commerce; const catalog = context.services.catalog; const language = detectLanguage(context.message.text, context.state.language);
     const state = context.state.capabilityState?.commerce || {};
     const intent = context.intelligence?.selected?.intent;
+    if(intent==='commerce.customer_field_edit')return this.editCustomerField(context,commerce,language,state);
     if(intent==='commerce.optional_email_update'){
       const parsed=context.services.engagement.parseField('email',context.intelligence?.entities?.email||context.message.text);
       if(!parsed.valid)return result(`${parsed.message}\n${state.pendingField?ask(state.pendingField,language):''}`,language,state,'commerce_optional_email_invalid');
@@ -114,6 +115,53 @@ class CommerceCapability extends BaseCapability {
       ? `${language === "roman_urdu" ? "Added 👍 Item cart mein add ho gaya." : "Added 👍 The item is now in your cart."}\n\n${cartText}`
       : cartText;
     return result(intro + "\n\n" + ask(nextField, language), language, next, added ? "commerce_item_added_checkout_resumed" : "commerce_checkout_started", [{ name: "commerce.checkout.started.v1", payload: { productId: stagedProductId, cartItems: cartNow?.items?.length || 0 } }]);
+  }
+  async editCustomerField(context,commerce,language,state){
+    const amendment=context.intelligence?.entities?.fieldAmendment||{};
+    const field=amendment.field;
+    const allowed=new Set(['name','phone','email','city','address','landmark','paymentMethod']);
+    if(!allowed.has(field))return result('Tell me whether you want to change the name, phone, email, city, address, landmark, or payment method.',language,state,'commerce_field_edit_unknown');
+    const target=context.intelligence?.entities?.target||state.pendingFieldEdit?.target||(state.mode==='checkout'||state.mode==='review'?'checkout':'order');
+    const orderId=context.intelligence?.entities?.orderId||state.pendingFieldEdit?.orderId||state.lastOrderId||null;
+    const rawValue=amendment.rawValue;
+    if(rawValue==null||String(rawValue).trim()===''){
+      const returnToReview=state.mode==='review'||state.returnToReview===true;
+      const next={...state,pendingField:field,returnToReview,pendingFieldEdit:{field,target,orderId,resumeMode:state.mode,resumePendingField:state.pendingField}};
+      return result(`What should I use as the new ${checkoutFieldLabel(field,language)}?`,language,next,'commerce_field_edit_needs_value');
+    }
+    const parsed=context.services.engagement.parseField(field,rawValue,field==='phone'?{minDigits:10,maxDigits:15}:{});
+    if(!parsed.valid){
+      const resumeMode=state.pendingFieldEdit?.resumeMode||state.mode;
+      const next={...state,pendingField:field,returnToReview:resumeMode==='review'||state.returnToReview===true,pendingFieldEdit:{field,target,orderId,resumeMode,resumePendingField:state.pendingFieldEdit?.resumePendingField||state.pendingField}};
+      return result(`${parsed.message} The existing ${checkoutFieldLabel(field,language)} has not been changed. Please provide the new ${checkoutFieldLabel(field,language)}.`,language,next,'commerce_field_edit_invalid');
+    }
+    const resumeMode=state.pendingFieldEdit?.resumeMode||state.mode;
+    const resumePendingField=state.pendingFieldEdit?.resumePendingField||state.pendingField;
+    let next={...state};delete next.pendingFieldEdit;
+    if(target==='order'){
+      if(!orderId)return result('I could not find a recent order to update, so no customer or delivery detail was changed.',language,next,'commerce_order_field_edit_missing');
+      const order=await commerce.updateOrderCustomer(orderId,{[field]:parsed.value});
+      next={mode:'idle',pendingField:null,lastOrderId:order.id};
+      await syncCheckoutFieldToCrm(context,field,parsed.value,language);
+      return result(`Updated — order ${order.id} now uses ${parsed.value} for its ${checkoutFieldLabel(field,language)}. Revision: ${order.revision}.`,language,next,'commerce_order_customer_field_updated');
+    }
+    await commerce.updateCheckout({[field]:parsed.value});
+    await syncCheckoutFieldToCrm(context,field,parsed.value,language);
+    if(resumeMode==='review'){
+      const cart=await commerce.getCart();
+      const review=await checkoutReview(context,cart,language);
+      return result(`Updated — the ${checkoutFieldLabel(field,language)} is now ${parsed.value}.\n\n${review}`,language,{mode:'review',pendingField:'confirmation'},'commerce_review_customer_field_updated');
+    }
+    if(resumeMode==='checkout'&&resumePendingField===field){
+      const fields=['name','phone','city','address','landmark','paymentMethod'];
+      const nextField=fields[fields.indexOf(field)+1]||null;
+      if(nextField)return result(`Updated — the ${checkoutFieldLabel(field,language)} is now ${parsed.value}.\n\n${ask(nextField,language)}`,language,{mode:'checkout',pendingField:nextField},'commerce_checkout_customer_field_updated');
+      const cart=await commerce.getCart();
+      return result(await checkoutReview(context,cart,language),language,{mode:'review',pendingField:'confirmation'},'commerce_checkout_review');
+    }
+    next={...next,mode:resumeMode||'checkout',pendingField:resumePendingField||'name'};
+    const continuation=next.mode==='checkout'&&next.pendingField?`\n\n${ask(next.pendingField,language)}`:'';
+    return result(`Updated — the ${checkoutFieldLabel(field,language)} is now ${parsed.value}.${continuation}`,language,next,'commerce_checkout_customer_field_updated');
   }
   async continueCheckout(context, commerce, catalog, state, language) {
     const field = state.pendingField; const raw = String(context.message.text || "").trim();
@@ -736,6 +784,7 @@ async function syncCheckoutFieldToCrm(context,field,value,language){
   const crm=context.services.crm;if(!crm?.updateCustomer)return;
   if(field==="name")return crm.updateCustomer({name:value,preferredLanguage:language||null});
   if(field==="phone")return crm.updateCustomer({phone:value,preferredLanguage:language||null});
+  if(field==="email")return crm.updateCustomer({email:value,preferredLanguage:language||null});
   if(["city","address","landmark","paymentMethod"].includes(field)){
     const current=await crm.getCustomer?.();
     const lastDelivery={...(current?.customFields?.lastDelivery||{}),[field]:value};

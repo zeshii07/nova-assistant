@@ -24,6 +24,57 @@ class CleaningCapability extends BaseCapability {
     const text = normalize(context.message.text);
     const previous = context.state.capabilityState?.cleaning || {};
 
+    if(context.intelligence?.selected?.intent==='cleaning.booking_type_clarification'){
+      const semantic=context.intelligence?.entities||{};
+      const scope={...(previous.pendingBookingType?.scope||{}),...requestFields(semantic)};
+      const propertyLabel=scope.propertyType==='villa'?'villa/house':scope.propertyType==='apartment'?'apartment/flat':'property';
+      const reply=localized(language,
+        `For your ${propertyLabel}, which cleaning type do you want?\n• Standard Cleaning — hourly; I’ll ask for the number of cleaners and hours\n• Deep Cleaning — scope-based; I’ll ask for the property size/bedroom count`,
+        `${propertyLabel} ke liye kaunsi cleaning chahiye?\n• Standard Cleaning — hourly; cleaners aur hours chahiye honge\n• Deep Cleaning — scope-based; property size/bedrooms chahiye honge`,
+        `${propertyLabel} کے لیے کون سی صفائی چاہیے؟\n• Standard Cleaning — فی گھنٹہ؛ کلینرز اور گھنٹے درکار ہوں گے\n• Deep Cleaning — سائز کے مطابق؛ بیڈ رومز کی تعداد درکار ہوگی`);
+      const next={...previous,step:'cleaningType',pendingBookingType:{scope}};
+      return result(reply,language,next,'cleaning_booking_type_clarification',{intent:'CLEANING_BOOKING_TYPE_CLARIFICATION',payload:{legacyText:reply,propertyType:scope.propertyType||null,pendingField:'cleaningType',choices:['Standard Cleaning','Deep Cleaning']}});
+    }
+
+    if(context.intelligence?.selected?.intent==='cleaning.booking_type_selected'){
+      const semantic={...(previous.pendingBookingType?.scope||{}),...(context.intelligence?.entities||{})};
+      const deep=semantic.selectedCleaningType==='deep';
+      const propertyType=semantic.propertyType||previous.pendingBookingType?.scope?.propertyType||null;
+      const serviceId=deep
+        ? propertyType==='villa'?'CLN011':'CLN010'
+        : propertyType==='villa'?'CLN009':'CLN008';
+      const actual=(await cleaning.listServices()).find(service=>service.id===serviceId);
+      if(!actual){
+        const reply='That cleaning type is not configured for this property. Please choose another configured cleaning service.';
+        return result(reply,language,previous,'cleaning_booking_type_unconfigured',{intent:'CLEANING_SERVICE_UNAVAILABLE',payload:{legacyText:reply,serviceId}});
+      }
+      const requiredPricingFields=deep?['bedrooms']:['cleanerCount','durationHours'];
+      let next=initialRequestState(context,engagement,{...semantic,propertyType,cleaningType:deep?'deep':'standard'}, {
+        serviceId:actual.id,
+        serviceName:deep?'Deep Cleaning':'Standard Cleaning',
+        configuredServiceName:actual.name,
+        pricingServiceId:actual.pricingServiceId||null,
+        requiredPricingFields,
+        pricingFirst:true,
+        pendingBookingType:null
+      });
+      next.step=nextMissingStep(next);
+      const priced=requiredPricingFields.every(field=>field==='cleanerCount'?Number(next.cleanerCount)>0:field==='durationHours'?Number(next.durationHours)>0:next[field]!==null&&next[field]!==undefined&&next[field]!=='');
+      if(priced){
+        const q=quoteConfiguredService(context,actual,next);
+        if(q.ok){next.quotedService=q;next.total=q.total;next.currency=q.currency;}
+      }
+      const selectedLabel=deep?'Deep Cleaning':'Standard Cleaning';
+      const propertyLabel=propertyType==='villa'?'villa/house':'apartment/flat';
+      const quote=next.quotedService?.ok?` The configured estimate is ${currencyAmount(next.quotedService.total,next.quotedService.currency)}.`:'';
+      const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language);
+      const reply=localized(language,
+        `${selectedLabel} selected for your ${propertyLabel}.${quote} ${capturedScheduleLine(next)}${prompt}`,
+        `${propertyLabel} ke liye ${selectedLabel} select ho gayi hai.${quote} ${capturedScheduleLine(next)}${prompt}`,
+        `${propertyLabel} کے لیے ${selectedLabel} منتخب ہو گئی ہے۔${quote} ${capturedScheduleLine(next)}${prompt}`);
+      return result(reply,language,next,'cleaning_booking_type_selected',{intent:intentForStep(next.step),payload:{legacyText:reply,serviceId:actual.id,serviceName:selectedLabel,configuredServiceName:actual.name,pendingField:next.step,requiredPricingFields,quote:next.quotedService||null}});
+    }
+
     if(context.intelligence?.selected?.intent==='cleaning.submitted_cancel_request'){
       const semantic=context.intelligence?.entities||{};
       const request=await findEditableRequest(cleaning,semantic.requestId||previous.lastRequestId);
@@ -49,6 +100,45 @@ class CleaningCapability extends BaseCapability {
       const prompt=previous.step==='confirm'?'If everything looks correct, say confirm.':promptFor(previous.step,language);
       const reply=`Thanks — I’ve saved ${parsed.value} as an optional email contact. ${prompt}`;
       return result(reply,language,next,'cleaning_optional_email_saved',{intent:'CLEANING_OPTIONAL_EMAIL_SAVED',payload:{legacyText:reply,preferLegacyText:true,email:parsed.value,pendingField:previous.step}});
+    }
+
+    if(context.intelligence?.selected?.intent==='cleaning.customer_field_edit'){
+      const semantic=context.intelligence?.entities||{};
+      const amendment=semantic.fieldAmendment||{};
+      const field=amendment.field;
+      const allowed=new Set(['name','phone','email','address']);
+      if(!allowed.has(field))return result('I can update the service name, address, phone, or optional email, but I need you to name the exact field.',language,previous,'cleaning_field_edit_unknown');
+      const requestId=semantic.requestId||previous.pendingFieldEdit?.requestId||previous.lastRequestId||null;
+      const resumeStep=previous.pendingFieldEdit?previous.pendingFieldEdit.resumeStep:(previous.step||null);
+      const submittedEdit=previous.pendingFieldEdit?.submitted??Boolean(requestId&&!previous.step);
+      const rawValue=amendment.rawValue;
+      if(rawValue==null||String(rawValue).trim()===''){
+        const next={...previous,step:'fieldEdit',pendingFieldEdit:{field,resumeStep,requestId,submitted:submittedEdit}};
+        const reply=`What should I use as the new ${customerFieldLabel(field)}?`;
+        return result(reply,language,next,'cleaning_field_edit_needs_value',{intent:'CLEANING_FIELD_EDIT_NEEDS_VALUE',payload:{legacyText:reply,pendingField:field}});
+      }
+      const options=field==='phone'?{minDigits:10,maxDigits:15}:{};
+      const parsed=engagement.parseField(field,rawValue,options);
+      if(!parsed.valid){
+        const next={...previous,step:'fieldEdit',pendingFieldEdit:{field,resumeStep,requestId,submitted:submittedEdit}};
+        const reply=`${parsed.message} The current ${customerFieldLabel(field)} has not been changed. Please provide the new ${customerFieldLabel(field)}.`;
+        return result(reply,language,next,'cleaning_field_edit_invalid',{intent:'CLEANING_FIELD_EDIT_INVALID',payload:{legacyText:reply,pendingField:field,unchanged:true}});
+      }
+      let next={...previous,[field]:parsed.value};
+      delete next.pendingFieldEdit;
+      next.step=resumeStep==='fieldEdit'?nextMissingStep(next):resumeStep;
+      if(next.step===field||!next.step)next.step=nextMissingStep(next);
+      let updatedRequest=null;
+      if(requestId&&submittedEdit){
+        const request=await findEditableRequest(cleaning,requestId);
+        if(!request)return result('I could not find an active cleaning request to update. Your saved details were not changed.',language,previous,'cleaning_field_edit_request_missing');
+        updatedRequest=await cleaning.updateRequest(request.id,{[field]:parsed.value});
+        next={lastRequestId:updatedRequest.id};
+      }
+      if(['name','phone','email'].includes(field))await context.services.crm?.updateCustomer?.({[field]:parsed.value,preferredLanguage:language});
+      const continuation=next.step&&next.step!=='confirm'?` ${promptFor(next.step,language)}`:next.step==='confirm'?' If everything looks correct, say confirm.':'';
+      const reply=`Updated — the ${customerFieldLabel(field)} is now ${parsed.value}.${updatedRequest?` Request ${updatedRequest.id} is now revision ${updatedRequest.revision}.`:''}${continuation}`;
+      return result(reply,language,next,'cleaning_customer_field_updated',{intent:'CLEANING_CUSTOMER_FIELD_UPDATED',payload:{legacyText:reply,field,value:parsed.value,requestId:updatedRequest?.id||null,revision:updatedRequest?.revision||null,pendingField:next.step||null}});
     }
 
     if(context.intelligence?.selected?.intent==='cleaning.request_history'){
@@ -433,13 +523,16 @@ class CleaningCapability extends BaseCapability {
 
     if (previous.step && context.intelligence?.selected?.intent === "cleaning.cleaner_count_update") {
       const cleanerCount=Number(context.intelligence?.entities?.cleanerCount||previous.cleanerCount||1);
-      const durationHours=Number(previous.durationHours||0);
+      const durationHours=Number(context.intelligence?.entities?.durationHours||previous.durationHours||0);
       const q=context.services.pricing.quote({serviceId:'hourly-cleaner',hours:durationHours,workers:cleanerCount,text:context.message.text});
       const configured=(context.services.pricing.getConfig()?.services||[]).find((service)=>service.id==='hourly-cleaner');
       const rate=Number(previous.hourlyRate||configured?.rate||0);
-      const next={...previous,cleanerCount,hourlyRate:rate,total:q.ok?q.total:durationHours*cleanerCount*rate,currency:q.currency||previous.currency||configured?.currency||'AED'};
-      const reply=`Updated 👍 ${cleanerCount} cleaner${cleanerCount===1?'':'s'} × ${durationHours} hours = ${currencyAmount(next.total,next.currency)}. ${promptFor(previous.step,language)}`;
-      return result(reply,language,next,'cleaning_cleaner_count_updated',{intent:'CLEANING_CLEANER_COUNT_UPDATED',payload:{legacyText:reply,cleanerCount,durationHours,total:next.total,pendingField:previous.step}});
+      const next={...previous,cleanerCount,durationHours:durationHours||null,hourlyRate:rate,total:durationHours?(q.ok?q.total:durationHours*cleanerCount*rate):null,currency:q.currency||previous.currency||configured?.currency||'AED'};
+      if(previous.step==='cleanerCount')next.step=nextMissingStep(next);
+      const calculation=durationHours?`${cleanerCount} cleaner${cleanerCount===1?'':'s'} × ${durationHours} hours = ${currencyAmount(next.total,next.currency)}. `:`${cleanerCount} cleaner${cleanerCount===1?'':'s'} selected. `;
+      const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language);
+      const reply=`Updated 👍 ${calculation}${prompt}`;
+      return result(reply,language,next,'cleaning_cleaner_count_updated',{intent:'CLEANING_CLEANER_COUNT_UPDATED',payload:{legacyText:reply,cleanerCount,durationHours:durationHours||null,total:next.total,pendingField:next.step}});
     }
 
     if (previous.step && context.intelligence?.selected?.intent === "cleaning.service_change") {
@@ -657,7 +750,7 @@ class CleaningCapability extends BaseCapability {
         const actual=(await cleaning.listServices()).find(x=>x.id===semantic.serviceId);
         const customQuoteFirst=actual?.priceType==='custom_quote'&&(semantic.cleaningType||(!semantic.date&&!semantic.dateText&&!semantic.weekday&&!semantic.startTime&&semantic.propertyType));
         if(actual&&!customQuoteFirst){
-          const next=initialRequestState(context,engagement,semantic,{serviceId:actual.id,serviceName:actual.name,scopeText:context.message.text});
+          const next=initialRequestState(context,engagement,semantic,{serviceId:actual.id,serviceName:actual.name,scopeText:context.message.text,...bookingRequirementState(actual)});
           const prompt=promptFor(next.step,language);
           const reply=localized(language,
             `${actual.name} selected. ${formatPrice(actual)} is the configured service price. I won’t apply a pricing table linked to a different service. ${capturedScheduleLine(next)}${prompt}`,
@@ -667,7 +760,8 @@ class CleaningCapability extends BaseCapability {
         }
       }
       if(q.ok && q.operationalServiceId){
-        const next=initialRequestState(context,engagement,semantic,{serviceId:q.operationalServiceId,serviceName:q.serviceName,quotedService:q});
+        const actual=(await cleaning.listServices()).find(service=>service.id===q.operationalServiceId);
+        const next=initialRequestState(context,engagement,semantic,{serviceId:q.operationalServiceId,serviceName:q.serviceName,quotedService:q,...bookingRequirementState(actual||{})});
         const prompt=promptFor(next.step,language);
         const reply=localized(language,
           `Yes — I can prepare that ${q.serviceName} request. The configured estimate is ${currencyAmount(q.total,q.currency)}. ${capturedScheduleLine(next)}${prompt}`,
@@ -690,7 +784,7 @@ class CleaningCapability extends BaseCapability {
             const reply=`${actual.name} requires a custom quotation after the team reviews the scope; I will not invent a fixed price. If you want, say “arrange a custom quotation”.`;
             return result(reply,language,{...previous,step:null,customQuotePending:pending},'cleaning_structured_service_unpriced',{intent:'CLEANING_CUSTOM_QUOTE_REQUIRED',payload:{legacyText:reply,serviceId:actual.id,serviceName:actual.name,reason:'scope_review_required'}});
           }
-          const next=initialRequestState(context,engagement,semantic,{serviceId:actual.id,serviceName:actual.name,scopeText:context.message.text});
+          const next=initialRequestState(context,engagement,semantic,{serviceId:actual.id,serviceName:actual.name,scopeText:context.message.text,...bookingRequirementState(actual)});
           const priceNote=actual.priceType==='custom_quote'
             ? 'The final price requires a scope review; I will not invent it.'
             : actual.priceType==='scope_based'
@@ -778,6 +872,8 @@ class CleaningCapability extends BaseCapability {
 
     if (!previous.step && context.intelligence?.selected?.intent === "cleaning.pricing_request") {
       const semantic=context.intelligence?.entities||{};
+      const standardPropertyCleaning=Boolean(semantic.propertyType)||/\b(?:standard|general|regular|routine)\s+(?:home\s+)?clean(?:ing)?\b/.test(text);
+      const customerServiceName=standardPropertyCleaning?'Standard Cleaning':'Hourly Cleaner Hire';
       const duration = Number(semantic.durationHours || 0);
       const cleanerCount = Number(semantic.cleanerCount || 1);
       const configured=context.services.pricing.quote({...semantic,serviceId:'hourly-cleaner',hours:duration,workers:cleanerCount,text:context.message.text});
@@ -789,7 +885,7 @@ class CleaningCapability extends BaseCapability {
       if(semantic.quoteOnly){
         const inquiry={
           ...requestFields(semantic),
-          serviceId:'CLN-HOURLY',serviceName:'Hourly Cleaner Hire',
+          serviceId:'CLN-HOURLY',serviceName:customerServiceName,
           durationHours:duration,cleanerCount,hourlyRate:rate,currency,total,
           noSubstitutionWithoutConsent:Boolean(semantic.noSubstitutionWithoutConsent),
           createdAt:new Date().toISOString()
@@ -809,13 +905,13 @@ class CleaningCapability extends BaseCapability {
       const nextSeed={preferredDate,preferredTime,address,name:suppliedName,phone:suppliedPhone,email:suppliedEmail};
       const nextStep=nextMissingStep(nextSeed);
       const quote = language === "roman_urdu"
-        ? `${cleanerText} ke liye ${duration} ghantay × ${currencyAmount(rate,currency)} per hour = ${currencyAmount(total,currency)}.`
-        : `${cleanerText} × ${duration} hours × ${currencyAmount(rate,currency)} per hour = ${currencyAmount(total,currency)} total.`;
+        ? `${customerServiceName}: ${cleanerText} ke liye ${duration} ghantay × ${currencyAmount(rate,currency)} per hour = ${currencyAmount(total,currency)}.`
+        : `${customerServiceName}: ${cleanerText} × ${duration} hours × ${currencyAmount(rate,currency)} per hour = ${currencyAmount(total,currency)} total.`;
       const requirement=requirementLine(semantic);
       const availability=(semantic.availabilityRequested||preferredDate||preferredTime)?' Live team availability still needs confirmation.':'';
       const history=semantic.returningCustomerClaim?' Your previous-customer status and any eligible offer will be checked only against this tenant’s CRM history; no discount has been assumed in this total.':'';
       const prompt=promptFor(nextStep,language);
-      const next={...requestFields(semantic),serviceId:"CLN-HOURLY",serviceName:"Hourly Cleaner Hire",step:nextStep,preferredDate,preferredTime,startTime:preferredTime,endTime:checked.endTime,address,name:suppliedName,phone:suppliedPhone,email:suppliedEmail,scheduleError:checked.error||null,durationHours:duration,cleanerCount,hourlyRate:rate,currency,total,recurrence:null,recurringDays:null};
+      const next={...requestFields(semantic),serviceId:"CLN-HOURLY",serviceName:customerServiceName,step:nextStep,preferredDate,preferredTime,startTime:preferredTime,endTime:checked.endTime,address,name:suppliedName,phone:suppliedPhone,email:suppliedEmail,scheduleError:checked.error||null,durationHours:duration,cleanerCount,hourlyRate:rate,currency,total,recurrence:null,recurringDays:null};
       const addOnBoundary=unpricedAddOnBoundary(context,semantic);
       const policyNotes=await resolvePolicyNotes(context,semantic.policyFacets,{total,currency});
       const fullReply=`${quote}${requirement}${availability}${history}${addOnBoundary?`\n\n${addOnBoundary}`:''}${policyNotes.length?`\n\n${policyNotes.join('\n')}`:''}${checked.error?`\n\n${checked.error}`:''}${prompt?`\n\n${prompt}`:''}`;
@@ -863,7 +959,7 @@ class CleaningCapability extends BaseCapability {
       if(q?.ok){next.quotedService=q;next.total=q.total;next.currency=q.currency;}
       const quoteLine=q?.ok?` Configured estimate: ${currencyAmount(q.total,q.currency)}.`:q?.reason==='combination_not_priced'?' That exact size needs a custom quotation; no price has been invented.':'';
       const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language);
-      return result(`Got it.${quoteLine} ${prompt}`,language,next,`cleaning_${previous.step}_saved`,{intent:intentForStep(next.step),payload:{legacyText:`Got it.${quoteLine} ${prompt}`,pendingField:next.step,quote:q?.ok?q:null}});
+      return result(`Got it.${quoteLine} ${prompt}`,language,next,`cleaning_${previous.step}_saved`,{intent:intentForStep(next.step),payload:{legacyText:`Got it.${quoteLine} ${prompt}`,preferLegacyText:Boolean(q?.ok),pendingField:next.step,quote:q?.ok?q:null}});
     }
 
     if (previous.step === "date") {
@@ -981,18 +1077,27 @@ class CleaningCapability extends BaseCapability {
     }
     if (previous.step === "confirm") {
       if (isConfirm(text)) {
-        const availability=previous.timeFlexible?{status:'unknown'}:await cleaning.holdSlot?.(previous);
+        let requestState=previous;
+        let availability=previous.timeFlexible?{status:'unknown'}:await cleaning.holdSlot?.(previous);
+        if(availability?.status==='unavailable'&&previous.alternativeTime){
+          const alternative={...previous,preferredDate:previous.alternativeDate||previous.preferredDate,preferredTime:previous.alternativeTime,startTime:previous.alternativeTime};
+          const alternativeAvailability=await cleaning.holdSlot?.(alternative);
+          if(alternativeAvailability?.status==='held'){
+            requestState={...alternative,preferredSlotUnavailable:true};
+            availability=alternativeAvailability;
+          }
+        }
         if(availability?.status==='unavailable'){
           const alternatives=availability.alternatives?.length?` Available alternatives: ${availability.alternatives.map(row=>`${row.date} at ${row.time}`).join(', ')}.`:'';
           const reply=`That cleaning slot is no longer available.${alternatives} Please choose another time.`;
           return result(reply,language,{...previous,preferredTime:null,startTime:null,step:'time'},'cleaning_slot_unavailable',{intent:'CLEANING_SLOT_UNAVAILABLE',payload:{legacyText:reply,pendingField:'time',alternatives:availability.alternatives||[]}});
         }
-        const inputs=[previous];
-        for(const item of previous.additionalServices||[]){
+        const inputs=[requestState];
+        for(const item of requestState.additionalServices||[]){
           inputs.push({
-            ...previous,...item,
-            preferredDate:previous.preferredDate,preferredTime:previous.preferredTime,
-            address:previous.address,name:previous.name,phone:previous.phone,email:previous.email,
+            ...requestState,...item,
+            preferredDate:requestState.preferredDate,preferredTime:requestState.preferredTime,
+            address:requestState.address,name:requestState.name,phone:requestState.phone,email:requestState.email,
             durationHours:item.durationHours??null,cleanerCount:item.cleanerCount??null,hourlyRate:item.hourlyRate??null,
             recurrence:null,recurringDays:null,additionalServices:undefined,step:null
           });
@@ -1001,7 +1106,7 @@ class CleaningCapability extends BaseCapability {
         const request=requests[0],requestIds=requests.map((entry)=>entry.id);
         await context.services.crm?.recordActivity("cleaning.request_created", { requestId:request.id,requestIds,serviceId:request.serviceId,count:requests.length });
         await context.services.memory?.appendHistory("cleaning.request_created", { requestId:request.id,requestIds,serviceId:request.serviceId,count:requests.length });
-        const confirmationText=confirmReply(requests, language, previous);
+        const confirmationText=`${requestState.preferredSlotUnavailable?'Your first time was unavailable, so I used the alternative time you approved.\n':''}${confirmReply(requests, language, requestState)}`;
         return result(confirmationText, language, {lastRequestId:request.id,lastRequestIds:requestIds}, "cleaning_request_created", {
           intent: requests.length > 1 ? "CLEANING_REQUESTS_CREATED" : "CLEANING_REQUEST_CREATED",
           payload: { legacyText:confirmationText,requestId:request.id,requestIds,count:requests.length,serviceName:request.serviceName,preferredDate:request.preferredDate,preferredTime:request.preferredTime,phone:request.phone||previous.phone }
@@ -1074,7 +1179,8 @@ function result(reply, language, cleaningState, lastIntent, responseModel = null
   return createCapabilityResult({ handled: true, reply, confidence: 0.99, responseModel, statePatch: { language, activePlugin: "cleaning", lastIntent, capabilityState: { cleaning: cleaningState } }, events });
 }
 function localized(language,english,roman,urdu){ return language==="urdu"?urdu:language==="roman_urdu"?roman:english; }
-const REQUEST_FIELDS=['propertyType','propertyCount','propertyFloor','bedrooms','washrooms','balconies','interiorWindows','insideRefrigerator','insideOven','fragranceFree','petPresent','heavyPetHair','halls','cleaningType','requestedTasks','requiredEquipment','businessProvidesSupplies','businessProvidesEquipment','returningCustomerClaim','staffPreference','availabilityRequested','quoteOnly','noSubstitutionWithoutConsent','preferredDateOptions','preferredTimeOptions','finishBy','address','name','phone','email','scopeText','date','dateText','weekday','startTime','endTime','timeFlexible','timePreference','durationHours','cleanerCount','units','serviceVariant','policyFacets'];
+function customerFieldLabel(field){return ({name:'customer name',phone:'contact phone number',email:'email address',address:'service address'})[field]||field;}
+const REQUEST_FIELDS=['propertyType','propertyCount','propertyFloor','bedrooms','washrooms','balconies','interiorWindows','insideRefrigerator','insideOven','fragranceFree','petPresent','heavyPetHair','halls','cleaningType','requestedTasks','requiredEquipment','businessProvidesSupplies','businessProvidesEquipment','returningCustomerClaim','staffPreference','availabilityRequested','quoteOnly','noSubstitutionWithoutConsent','preferredDateOptions','preferredTimeOptions','alternativeDate','alternativeTime','finishBy','address','name','phone','email','scopeText','date','dateText','weekday','startTime','endTime','timeFlexible','timePreference','durationHours','cleanerCount','units','serviceVariant','policyFacets'];
 function requestFields(source={}){
   const out={};
   for(const key of REQUEST_FIELDS)if(source[key]!==undefined&&source[key]!==null)out[key]=source[key];
@@ -1104,9 +1210,20 @@ function cleaningRequirementLabels(semantic={}){
   return [...new Set(labels.length?labels:['the requested cleaning requirements'])];
 }
 function nextMissingStep(state={}){
+  if(state.pricingFirst){
+    for(const field of state.requiredPricingFields||[]){
+      if(field==='cleanerCount'&&!Number(state.cleanerCount))return 'cleanerCount';
+      if(field==='durationHours'&&!Number(state.durationHours))return 'duration';
+      if(field==='propertyType'&&!state.propertyType)return 'propertyType';
+      if(field==='bedrooms'&&(state.bedrooms===null||state.bedrooms===undefined||state.bedrooms===''))return 'bedrooms';
+      if(field==='units'&&!Number(state.units))return 'units';
+      if(field==='serviceVariant'&&!state.serviceVariant)return 'serviceVariant';
+    }
+  }
   if(!state.preferredDate)return 'date';
   if(!state.preferredTime&&!state.startTime&&!state.timeFlexible)return 'time';
   for(const field of state.requiredPricingFields||[]){
+    if(field==='cleanerCount'&&!Number(state.cleanerCount))return 'cleanerCount';
     if(field==='durationHours'&&!Number(state.durationHours))return 'duration';
     if(field==='propertyType'&&!state.propertyType)return 'propertyType';
     if(field==='bedrooms'&&(state.bedrooms===null||state.bedrooms===undefined||state.bedrooms===''))return 'bedrooms';
@@ -1204,7 +1321,7 @@ async function quoteOnlyAvailabilityReply(context,inquiry){
     : '';
   return [quote,'Availability check (before booking):',...rows,...deadlines,staffing,'No booking has been created, and I have not started collecting address or customer details. Choose an option only after staff availability is confirmed.'].filter(Boolean).join('\n');
 }
-function intentForStep(step){return ({duration:'CLEANING_ASK_DURATION',propertyType:'CLEANING_ASK_PROPERTY_TYPE',bedrooms:'CLEANING_ASK_BEDROOMS',units:'CLEANING_ASK_UNITS',serviceVariant:'CLEANING_ASK_SERVICE_VARIANT',date:'CLEANING_ASK_DATE',time:'CLEANING_ASK_TIME',address:'CLEANING_ASK_ADDRESS',name:'CLEANING_ASK_NAME',phone:'CLEANING_ASK_PHONE',confirm:'CLEANING_REVIEW'})[step]||'CLEANING_WORKFLOW_CONTINUE';}
+function intentForStep(step){return ({cleaningType:'CLEANING_ASK_TYPE',cleanerCount:'CLEANING_ASK_CLEANER_COUNT',duration:'CLEANING_ASK_DURATION',propertyType:'CLEANING_ASK_PROPERTY_TYPE',bedrooms:'CLEANING_ASK_BEDROOMS',units:'CLEANING_ASK_UNITS',serviceVariant:'CLEANING_ASK_SERVICE_VARIANT',date:'CLEANING_ASK_DATE',time:'CLEANING_ASK_TIME',address:'CLEANING_ASK_ADDRESS',name:'CLEANING_ASK_NAME',phone:'CLEANING_ASK_PHONE',confirm:'CLEANING_REVIEW'})[step]||'CLEANING_WORKFLOW_CONTINUE';}
 function unpricedAddOnBoundary(context,semantic={}){
   const requested=[];
   if(semantic.balconies)requested.push(`${semantic.balconies} balcon${semantic.balconies===1?'y':'ies'}`);
@@ -1248,9 +1365,9 @@ function addHours(time,hours){
   return `${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
 }
 function promptFor(field,language){
-  const en={date:'What date would you prefer? Use DD/MM/YYYY, or say “tomorrow”.',time:'What time would you prefer? For example, 9:00 AM or 14:30, or say “any available time”.',address:'Please share the full service address, including the building/house and area.',name:'May I have your full name?',phone:'What is the best contact phone number to reach you on? You may also include an email address as an optional contact.',duration:'How many hours should each visit be?',propertyType:'Is the property an apartment or a villa/house?',bedrooms:'How many bedrooms does the property have? Say 0 for a studio.',units:'What is the furniture or carpet size/quantity (for example, 3-seater or 6 metres)?',serviceVariant:'What size is it (for example, single/queen/king or small/medium/large)?',recurring_days:'Which day or days do you prefer for the recurring visits?',recurring_service:'Which cleaning service should repeat?'};
-  const ru={date:'Kis date ko service chahiye? DD/MM/YYYY likhein, ya “tomorrow” keh dein.',time:'Kis time service chahiye? Misal: 9:00 AM, 14:30, ya “jo time available ho”.',address:'Service ka poora address bata dein.',name:'Aap ka poora naam bata dein.',phone:'Aap se rabta karne ke liye sahi contact number bata dein.',duration:'Har visit kitne ghantay ki honi chahiye?',propertyType:'Property apartment hai ya villa/house?',bedrooms:'Property mein kitne bedrooms hain? Studio ke liye 0 kahen.',units:'Furniture ya carpet ka size/quantity bata dein, misal 3-seater ya 6 metres.',serviceVariant:'Size bata dein, misal single/queen/king ya small/medium/large.'};
-  const ur={date:'سروس کس تاریخ کو چاہیے؟ DD/MM/YYYY لکھیں، یا “tomorrow” کہیں۔',time:'سروس کس وقت چاہیے؟ مثال: 9:00 AM یا 14:30۔',address:'سروس کا مکمل پتہ بتائیں۔',name:'اپنا پورا نام بتائیں۔',phone:'رابطے کے لیے درست فون نمبر بتائیں۔',duration:'ہر وزٹ کتنے گھنٹے کا ہونا چاہیے؟',propertyType:'پراپرٹی اپارٹمنٹ ہے یا ولا/گھر؟',bedrooms:'پراپرٹی میں کتنے بیڈ روم ہیں؟ اسٹوڈیو کے لیے 0 کہیں۔',units:'فرنیچر یا کارپٹ کا سائز/تعداد بتائیں۔',serviceVariant:'سائز بتائیں، مثلاً سنگل، کوئین، کنگ، چھوٹا، درمیانہ یا بڑا۔'};
+  const en={cleaningType:'Would you like Standard Cleaning or Deep Cleaning?',cleanerCount:'How many cleaners do you need?',date:'What date would you prefer? Use DD/MM/YYYY, or say “tomorrow”.',time:'What time would you prefer? For example, 9:00 AM or 14:30, or say “any available time”.',address:'Please share the full service address, including the building/house and area.',name:'May I have your full name?',phone:'What is the best contact phone number to reach you on? You may also include an email address as an optional contact.',duration:'How many hours should each visit be?',propertyType:'Is the property an apartment or a villa/house?',bedrooms:'How many bedrooms does the property have? Say 0 for a studio.',units:'What is the furniture or carpet size/quantity (for example, 3-seater or 6 metres)?',serviceVariant:'What size is it (for example, single/queen/king or small/medium/large)?',recurring_days:'Which day or days do you prefer for the recurring visits?',recurring_service:'Which cleaning service should repeat?'};
+  const ru={cleaningType:'Standard Cleaning chahiye ya Deep Cleaning?',cleanerCount:'Kitne cleaners chahiye?',date:'Kis date ko service chahiye? DD/MM/YYYY likhein, ya “tomorrow” keh dein.',time:'Kis time service chahiye? Misal: 9:00 AM, 14:30, ya “jo time available ho”.',address:'Service ka poora address bata dein.',name:'Aap ka poora naam bata dein.',phone:'Aap se rabta karne ke liye sahi contact number bata dein.',duration:'Har visit kitne ghantay ki honi chahiye?',propertyType:'Property apartment hai ya villa/house?',bedrooms:'Property mein kitne bedrooms hain? Studio ke liye 0 kahen.',units:'Furniture ya carpet ka size/quantity bata dein, misal 3-seater ya 6 metres.',serviceVariant:'Size bata dein, misal single/queen/king ya small/medium/large.'};
+  const ur={cleaningType:'Standard Cleaning چاہیے یا Deep Cleaning؟',cleanerCount:'کتنے کلینرز چاہیے؟',date:'سروس کس تاریخ کو چاہیے؟ DD/MM/YYYY لکھیں، یا “tomorrow” کہیں۔',time:'سروس کس وقت چاہیے؟ مثال: 9:00 AM یا 14:30۔',address:'سروس کا مکمل پتہ بتائیں۔',name:'اپنا پورا نام بتائیں۔',phone:'رابطے کے لیے درست فون نمبر بتائیں۔',duration:'ہر وزٹ کتنے گھنٹے کا ہونا چاہیے؟',propertyType:'پراپرٹی اپارٹمنٹ ہے یا ولا/گھر؟',bedrooms:'پراپرٹی میں کتنے بیڈ روم ہیں؟ اسٹوڈیو کے لیے 0 کہیں۔',units:'فرنیچر یا کارپٹ کا سائز/تعداد بتائیں۔',serviceVariant:'سائز بتائیں، مثلاً سنگل، کوئین، کنگ، چھوٹا، درمیانہ یا بڑا۔'};
   return (language==='urdu'?ur:language==='roman_urdu'?ru:en)[field]||'';
 }
 function validationMessage(field,language,fallback){
@@ -1339,6 +1456,14 @@ function serviceRequirementState(service={}){
     requiredPricingFields:Array.isArray(service.requiredPricingFields)?[...service.requiredPricingFields]:[],
     pricingServiceId:service.pricingServiceId||null
   };
+}
+function bookingRequirementState(service={}){
+  const base=serviceRequirementState(service);
+  if(['CLN001','CLN008','CLN009','CLN-HOURLY'].includes(service.id)||service.priceType==='hourly'){
+    return {...base,requiredPricingFields:['cleanerCount','durationHours'],pricingFirst:true};
+  }
+  if(['CLN010','CLN011'].includes(service.id))return {...base,requiredPricingFields:['bedrooms'],pricingFirst:true};
+  return base;
 }
 function extractServiceVariant(value){
   const text=normalize(value);

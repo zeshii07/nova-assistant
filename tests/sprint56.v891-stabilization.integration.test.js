@@ -9,8 +9,8 @@ async function q(tenant,user,text){
 
 test.before(async()=>{c=await buildContainer();if(c.llmRouter)c.llmRouter.providers=[];});
 
-test('property booking tolerates a bounded villa typo and consumes supplied date and time',async()=>{
-  const r=await q('cleaning-demo','villa-typo','i want to book a cleaning for my 2 bedroom vila on friday 9 am');
+test('explicit Standard Cleaning tolerates a bounded villa typo and consumes supplied fields',async()=>{
+  const r=await q('cleaning-demo','villa-typo','i want to book standard cleaning for my 2 bedroom vila with 1 cleaner for 3 hours on friday 9 am');
   assert.equal(r.capabilityId,'cleaning');
   assert.doesNotMatch(r.reply,/need the hours/i);
   assert.match(r.reply,/AED 40 per hour/i);
@@ -22,7 +22,7 @@ test('property booking tolerates a bounded villa typo and consumes supplied date
 
 test('weekday plus on plus time fills both pending fields',async()=>{
   const u='weekday-on-time';
-  let r=await q('cleaning-demo',u,'i want my 2 bedroom villa cleaning');
+  let r=await q('cleaning-demo',u,'i want standard cleaning for my 2 bedroom villa with 1 cleaner for 3 hours');
   assert.equal(r.state.capabilityState.cleaning.step,'date');
   r=await q('cleaning-demo',u,'friday on 2 pm');
   assert.equal(r.state.capabilityState.cleaning.step,'address');
@@ -32,7 +32,7 @@ test('weekday plus on plus time fills both pending fields',async()=>{
 
 test('time replacement without the word time owns the cleaning workflow and preserves its pending field',async()=>{
   const u='time-replacement';
-  let r=await q('cleaning-demo',u,'i want my 2 bedroom villa cleaning friday at 2 pm');
+  let r=await q('cleaning-demo',u,'i want standard cleaning for my 2 bedroom villa with 1 cleaner for 3 hours friday at 2 pm');
   assert.equal(r.state.capabilityState.cleaning.step,'address');
   r=await q('cleaning-demo',u,'can i change my request from 2 pm to 6 pm please');
   assert.equal(r.capabilityId,'cleaning');

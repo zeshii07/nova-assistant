@@ -3,7 +3,7 @@ services:
     name: nova-saas-test
     runtime: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm ci --ignore-scripts
     startCommand: npm start
     healthCheckPath: /health
     envVars:
@@ -17,7 +17,7 @@ services:
         value: info
       - key: GROQ_API_KEY
         sync: false
-      - key: GEMINI_API_KEY
+      - key: NOVA_DEV_TOKEN
         sync: false
       - key: WHATSAPP_PHONE_NUMBER_ID_DEFAULT
         sync: false

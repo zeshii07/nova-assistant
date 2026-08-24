@@ -15,9 +15,10 @@ class NluDecisionPolicy {
   apply({ tenant, deterministic, deterministicCandidates = [], nlu, pending = null, invocationReason = null }) {
     const base = deterministic || null;
     const arbitration=MODEL_ARBITRATION_REASONS.has(invocationReason);
+    const primaryLanguageLayer=invocationReason==='primary_language_layer';
     if (!nlu?.validated || !nlu.interpretation) return result(base, base?.entities || {}, null, 'deterministic_only');
     const parsed = nlu.interpretation;
-    const nluEntities = toNovaEntities(parsed, nlu.allowed || {});
+    const nluEntities = mergeMissing(toNovaEntities(parsed, nlu.allowed || {}),nlu.contract?.entities||{});
     const derivedInterruption = parsed.workflow_relationship === 'interrupt' && parsed.confidence >= this.informationThreshold
       ? { type:'business_question', source:'remote_nlu', intent:parsed.intent }
       : null;
@@ -48,7 +49,7 @@ class NluDecisionPolicy {
     // model still cannot invent a capability
     // command: if the core did not independently produce the candidate, no
     // transactional route is created here.
-    const aligned=arbitration ? findModelAlignedCandidate(parsed,deterministicCandidates,pending) : null;
+    const aligned=(arbitration||primaryLanguageLayer) ? findModelAlignedCandidate(parsed,deterministicCandidates,pending) : null;
     const alignedThreshold=isTransactionalIntent(parsed.intent)?this.actionThreshold:this.minConfidence;
     if(aligned&&parsed.confidence>=alignedThreshold){
       const entities=mergeMissing(aligned.entities,nluEntities);
@@ -61,6 +62,45 @@ class NluDecisionPolicy {
     // model classification replacing a proven rule match.
     if (base?.confidence >= 0.98 && !pending && !arbitration) {
       return result({ ...base, entities:mergeMissing(base.entities, nluEntities) }, mergeMissing(base.entities, nluEntities), null, 'high_confidence_deterministic_preserved');
+    }
+
+    // Read-only catalog/cart routes may originate from the strict language
+    // contract. Their capabilities still read current-tenant state and data.
+    if(parsed.intent==='product.list'&&parsed.confidence>=this.informationThreshold&&tenant.capabilities?.includes('catalog')){
+      const selected={capabilityId:'catalog',intent:'catalog.list',confidence:parsed.confidence,reason:'ai_language_read_only_catalog_list',entities:nluEntities};
+      return result(selected,nluEntities,derivedInterruption,'read_only_catalog_route');
+    }
+    if(parsed.intent==='cart.view'&&parsed.confidence>=this.informationThreshold&&tenant.capabilities?.includes('commerce')){
+      const selected={capabilityId:'commerce',intent:'commerce.cart.view',confidence:parsed.confidence,reason:'ai_language_read_only_cart_view',entities:nluEntities};
+      return result(selected,nluEntities,derivedInterruption,'read_only_cart_route');
+    }
+
+    // Explicit product requests can start/update only a cart draft. The model
+    // cannot place an order, reserve stock, charge money, or confirm checkout.
+    const productItems=nlu.contract?.items?.products||nluEntities.productItems||[];
+    const safeProductItems=productItems.filter(item=>item.productId&&Number(item.confidence||parsed.confidence)>=this.minConfidence);
+    const actionSemantics=nlu.contract?.message?.actionSemantics||parsed.action_semantics||null;
+    const linguisticCertainty=nlu.contract?.message?.certainty||parsed.certainty||((parsed.ambiguities||[]).length?'ambiguous':'explicit');
+    if(['order.create','cart.add'].includes(parsed.intent)
+      &&parsed.message_type==='request'
+      &&actionSemantics==='draft_request'
+      &&linguisticCertainty==='explicit'
+      &&parsed.confidence>=this.actionThreshold
+      &&safeProductItems.length
+      &&tenant.capabilities?.includes('commerce')){
+      const entities={...nluEntities,items:safeProductItems,ambiguous:[]};
+      const selected={capabilityId:'commerce',intent:'commerce.multi_item_request',confidence:parsed.confidence,reason:'ai_language_validated_cart_draft',entities};
+      return result(selected,entities,null,'cart_draft_started');
+    }
+    if(parsed.intent==='cart.remove'
+      &&actionSemantics==='change_request'
+      &&linguisticCertainty==='explicit'
+      &&parsed.confidence>=this.actionThreshold
+      &&safeProductItems.length
+      &&tenant.capabilities?.includes('commerce')){
+      const entities={...nluEntities,productIds:safeProductItems.map(item=>item.productId),removals:safeProductItems.map(item=>({productId:item.productId,quantity:item.quantity||1})),target:'auto'};
+      const selected={capabilityId:'commerce',intent:'commerce.cart.remove_request',confidence:parsed.confidence,reason:'ai_language_validated_cart_change',entities};
+      return result(selected,entities,null,'cart_change_requested');
     }
 
     // Read-only information interrupts are safe to originate. The assistant
@@ -85,14 +125,19 @@ class NluDecisionPolicy {
 
     // Starting a draft is permitted only for an explicit, high-confidence
     // request. It never confirms or writes the final business record.
-    if (parsed.intent === 'booking.create' && parsed.message_type === 'request' && parsed.confidence >= this.actionThreshold && !['interrupt', 'unrelated', 'cancel'].includes(parsed.workflow_relationship)) {
+    if (parsed.intent === 'booking.create' && parsed.message_type === 'request'
+      && (actionSemantics==null||actionSemantics==='draft_request')
+      && linguisticCertainty!=='ambiguous'
+      && parsed.confidence >= this.actionThreshold && !['interrupt', 'unrelated', 'cancel'].includes(parsed.workflow_relationship)) {
       if (tenant.capabilities?.includes('booking') && nluEntities.offeringId) {
         const selected = { capabilityId:'booking', intent:'booking.start', confidence:parsed.confidence, reason:'remote_nlu_high_confidence_booking_draft', entities:nluEntities };
         return result(selected, nluEntities, null, 'booking_draft_started');
       }
       if (tenant.capabilities?.includes('cleaning')) {
-        const selected = { capabilityId:'cleaning', intent:'cleaning.structured_service_request', confidence:parsed.confidence, reason:'remote_nlu_high_confidence_cleaning_draft', entities:nluEntities };
-        return result(selected, nluEntities, null, 'cleaning_draft_started');
+        const serviceItems=(nlu.contract?.items?.services||[]).filter(item=>item.serviceId);
+        const entities=serviceItems.length?{...nluEntities,serviceItems}:nluEntities;
+        const selected = { capabilityId:'cleaning', intent:serviceItems.length>1?'cleaning.multi_service_request':'cleaning.structured_service_request', confidence:parsed.confidence, reason:'remote_nlu_high_confidence_cleaning_draft', entities };
+        return result(selected, entities, null, 'cleaning_draft_started');
       }
     }
 
@@ -158,20 +203,33 @@ function toNovaEntities(parsed, allowed) {
     timeText:raw.time_text || null,
     timeNormalizedHint:raw.time_normalized || null,
     endTime:raw.end_time_text || null,
+    alternativeDate:raw.alternative_date_normalized || raw.alternative_date_text || null,
+    alternativeDateText:raw.alternative_date_text || null,
+    alternativeTime:raw.alternative_time_normalized || raw.alternative_time_text || null,
+    alternativeTimeText:raw.alternative_time_text || null,
     durationHours:raw.duration_hours,
     staff:raw.staff,
     quantity:integerOrNull(raw.quantity),
     cleanerCount:integerOrNull(raw.cleaner_count),
     propertyType:raw.property_type,
+    propertySize:raw.property_size,
     bedrooms:integerOrNull(raw.bedrooms),
     balconies:integerOrNull(raw.balconies),
     interiorWindows:integerOrNull(raw.interior_windows),
     washrooms:integerOrNull(raw.washrooms),
     halls:integerOrNull(raw.halls),
     address:raw.address,
+    location:raw.location,
     recurrence:raw.recurrence,
     suppliesRequired:raw.supplies_required,
     equipmentRequired:raw.equipment_required,
+    timeFlexible:raw.time_flexible,
+    bookingId:raw.booking_id,
+    orderId:raw.order_id,
+    serviceVariant:raw.service_variant,
+    size:raw.size,
+    color:raw.color,
+    unit:raw.unit,
     name:parsed.customer_fields?.name || null,
     phone:parsed.customer_fields?.phone || null,
     email:parsed.customer_fields?.email || null,
@@ -211,7 +269,8 @@ const MODEL_ARBITRATION_REASONS=new Set([
   'ambiguous_correction',
   'invalid_pending_value',
   'semantic_route_conflict',
-  'complex_multi_intent'
+  'complex_multi_intent',
+  'local_semantic_uncertain'
 ]);
 
 module.exports = { NluDecisionPolicy, toNovaEntities, mergeMissing, mergeCorrections, findModelAlignedCandidate, candidateMatchesIntent, isTransactionalIntent, MODEL_ARBITRATION_REASONS };

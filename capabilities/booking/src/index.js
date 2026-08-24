@@ -17,6 +17,38 @@ class BookingCapability extends BaseCapability{
     const selected=context.intelligence?.selected||{};
     const extracted=context.intelligence?.entities||{};
 
+    if(selected.intent==='booking.customer_field_edit'){
+      const amendment=extracted.fieldAmendment||{};
+      const field=amendment.field;
+      if(!['name','phone','email'].includes(field))return createCapabilityResult({handled:true,reply:'Tell me whether you want to change the booking name, phone, or optional email.',statePatch:{activePlugin:'booking',capabilityState:{booking:previous}}});
+      const rawValue=amendment.rawValue;
+      const metadata={...(previous.metadata||{})};
+      if(rawValue==null||String(rawValue).trim()===''){
+        metadata.pendingFieldEdit={field,resumePendingField:previous.pendingField||null};
+        const reply=`What should I use as the new ${pretty(field)}?`;
+        return createCapabilityResult({handled:true,reply,responseModel:{intent:'GENERIC_BOOKING_FIELD_EDIT_NEEDS_VALUE',payload:{legacyText:reply,pendingField:field}},statePatch:{activePlugin:'booking',lastIntent:'booking_field_edit_needs_value',capabilityState:{booking:{...previous,metadata}}}});
+      }
+      const parsed=engagement.parseField(field,rawValue,fieldOptions(field,config));
+      if(!parsed.valid){
+        metadata.pendingFieldEdit={field,resumePendingField:metadata.pendingFieldEdit?.resumePendingField||previous.pendingField||null};
+        const reply=`${parsed.message} The existing ${pretty(field).toLowerCase()} has not been changed. Please provide the new ${pretty(field).toLowerCase()}.`;
+        return createCapabilityResult({handled:true,reply,responseModel:{intent:'GENERIC_BOOKING_FIELD_EDIT_INVALID',payload:{legacyText:reply,pendingField:field,unchanged:true}},statePatch:{activePlugin:'booking',lastIntent:'booking_field_edit_invalid',capabilityState:{booking:{...previous,metadata}}}});
+      }
+      const resumePendingField=metadata.pendingFieldEdit?.resumePendingField||previous.pendingField||null;
+      delete metadata.pendingFieldEdit;
+      if(previous.status==='completed'&&previous.bookingId){
+        const record=await booking.updateDetails(previous.bookingId,{[field]:parsed.value});
+        const reply=`Updated — booking ${record.id} now uses ${parsed.value} for ${pretty(field).toLowerCase()}. Revision: ${record.revision}.`;
+        return createCapabilityResult({handled:true,reply,responseModel:{intent:'GENERIC_BOOKING_CUSTOMER_FIELD_UPDATED',payload:{legacyText:reply,bookingId:record.id,field,value:parsed.value,revision:record.revision}},statePatch:{activePlugin:'booking',lastIntent:'booking_customer_field_updated',capabilityState:{booking:{...previous,slots:{...(previous.slots||{}),[field]:parsed.value},metadata}}}});
+      }
+      const flow=engagement.normalizeState({kind:config.mode||'booking',status:previous.status||'collecting',items:previous.items||[],fields:{...(previous.slots||previous.fields||{}),[field]:parsed.value},pendingField:resumePendingField,metadata},config);
+      const missing=engagement.nextMissing(requiredFields(config),flow.fields);
+      flow.pendingField=missing||'confirmation';flow.status=missing?'collecting':'ready';
+      const continuation=missing?engagement.prompt(missing,config,context.language):(config.confirmPrompt||'If everything is correct, say confirm.');
+      const reply=`Updated — the ${pretty(field).toLowerCase()} is now ${parsed.value}. ${continuation}`;
+      return createCapabilityResult({handled:true,reply,responseModel:{intent:'GENERIC_BOOKING_CUSTOMER_FIELD_UPDATED',payload:{legacyText:reply,field,value:parsed.value,pendingField:flow.pendingField}},statePatch:{activePlugin:'booking',lastIntent:'booking_customer_field_updated',capabilityState:{booking:stateShape(flow)}}});
+    }
+
     if(selected.intent==='booking.cancel_request'){
       if(!previous.bookingId)return createCapabilityResult({handled:true,reply:'I could not find a completed booking in this conversation to cancel.',statePatch:{lastIntent:'booking_cancel_missing'}});
       const record=await booking.cancel(previous.bookingId,'customer_requested');
@@ -123,8 +155,19 @@ class BookingCapability extends BaseCapability{
     const notice=availabilityNotice(flow,config);
     if(notice)flow.metadata.availabilityNoticeShown=true;
     if(!missing){
-      const slots=legacySlots(flow,config);
-      const held=await booking.holdSlot?.(slots);
+      let slots=legacySlots(flow,config);
+      let held=await booking.holdSlot?.(slots);
+      if(held?.status==='unavailable'&&flow.metadata.alternativeTime){
+        const alternativeSlots={...slots,date:flow.metadata.alternativeDate||slots.date,time:flow.metadata.alternativeTime};
+        const alternativeHeld=await booking.holdSlot?.(alternativeSlots);
+        if(alternativeHeld?.status==='held'){
+          flow.fields.date=alternativeSlots.date;
+          flow.fields.time=alternativeSlots.time;
+          flow.metadata.preferredSlotUnavailable=true;
+          slots=alternativeSlots;
+          held=alternativeHeld;
+        }
+      }
       if(held?.status==='unavailable'){
         flow.status='collecting';flow.pendingField='time';delete flow.fields.time;
         const alternatives=formatAlternatives(held.alternatives||[]);
@@ -138,7 +181,9 @@ class BookingCapability extends BaseCapability{
       }else flow.metadata.calendarStatus=held?.status||'unknown';
       flow.status='ready';flow.pendingField='confirmation';
       const intro=addedNames.length&&selected.intent==='booking.add_item'?`Added ${addedNames.join(', ')} 👍\n`:'';
-      const liveNotice=held?.status==='held'?`I’ve temporarily held ${held.time}–${held.endTime} while you review the details.`:notice;
+      const liveNotice=held?.status==='held'
+        ?`${flow.metadata.preferredSlotUnavailable?'Your first choice was unavailable, so I checked your alternative. ':''}I’ve temporarily held ${held.time}–${held.endTime} while you review the details.`
+        :notice;
       const reply=`${liveNotice?`${liveNotice}\n\n`:''}${intro}${config.readyLabel||'Everything is ready.'}\n${engagementSummary(flow,config)}\n\n${config.confirmPrompt||'Confirm when you are ready.'}`;
       return createCapabilityResult({handled:true,reply,responseModel:{intent:'GENERIC_BOOKING_READY',payload:{legacyText:reply,engagement:flow}},statePatch:{activePlugin:'booking',pendingQuestion:'confirmation',lastIntent:'booking_ready',capabilityState:{booking:stateShape(flow)}}});
     }
@@ -177,7 +222,7 @@ function formatAlternatives(rows){if(!rows?.length)return '';return `. Available
 function collectingResult(config,flow,field,reply){return createCapabilityResult({handled:true,reply,responseModel:{intent:'GENERIC_BOOKING_COLLECTING',payload:{legacyText:reply,engagement:flow,pendingField:field}},statePatch:{activePlugin:'booking',pendingQuestion:field,lastIntent:'booking_collecting',capabilityState:{booking:stateShape(flow)}}});}
 function requiredFields(config){return (config.requiredFields||['subject','date','time','name','phone']).filter(x=>x!=='subject');}
 function mergeMetadata(flow,e){
-  const keys=['preferredEndTime','timeWindow','hairLength','referenceCode','priceRequested','durationRequested','availabilityRequested','closestTimeRequested'];
+  const keys=['preferredEndTime','alternativeTime','alternativeDate','timeWindow','hairLength','referenceCode','priceRequested','durationRequested','availabilityRequested','closestTimeRequested'];
   for(const key of keys)if(e[key]!=null)flow.metadata[key]=e[key];
 }
 function availabilityNotice(flow,config){

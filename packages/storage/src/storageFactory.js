@@ -30,7 +30,7 @@ async function buildStorage({config,logger}){
     db:null,redis:null,close:async()=>{}
   };
  }
- const db=new PostgresClient({connectionString:config.databaseUrl,logger}); await db.connect();
+ const db=new PostgresClient({connectionString:config.databaseUrl,poolMax:config.dbPoolMax,logger}); await db.connect();
  const redis=new RedisStateRepository({url:config.redisUrl,ttlSeconds:config.stateTtlSeconds,logger}); await redis.connect();
  const storage={mode:"persistent",db,redis,stateRepository:redis,crmRepository:new PostgresCrmRepository({db}),commerceRepository:new PostgresCommerceRepository({db}),bookingRepository:new PostgresBookingRepository({db}),cleaningRequestRepository:new PostgresCleaningRepository({db}),offeringOrderRepository:new PostgresOfferingOrderRepository({db}),inventoryRepository:new FileInventoryRepository({snapshotFile:path.join(config.operationalDataDir,"inventory.json")}),calendarRepository:new FileCalendarRepository({snapshotRoot:path.join(config.operationalDataDir,"calendar")})};
  storage.close=async()=>{await Promise.allSettled([redis.close(),db.close()]);};

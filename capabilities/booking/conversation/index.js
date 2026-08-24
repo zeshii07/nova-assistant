@@ -1,9 +1,10 @@
 const {normalizeText}=require('../../../packages/conversation-intelligence/src/text');
 const {isConfirmation}=require('../../../packages/conversation-intelligence/src/confirmation');
+const {extractFieldAmendment}=require('../../../packages/conversation-intelligence/src/fieldAmendmentExtractor');
 
 class BookingConversationAdapter{
  constructor(){this.capabilityId='booking';}
- async analyze({tenant,message,state,services,normalizedText,domain,clauseSemantics,temporal}){
+ async analyze({tenant,message,state,services,normalizedText,domain,clauseSemantics,temporal,messageFrame}){
    const b=services.bookingService,o=services.offeringService,e=services.engagementService;
    if(!b||!o)return null;
    const config=b.getConfig(tenant.id);if(!config.enabled)return null;
@@ -12,6 +13,19 @@ class BookingConversationAdapter{
    const fullText=normalizedText||normalizeText(message.text);
    const active=state.capabilityState?.booking;
    const entities=extract(text,primaryRaw,config,e,temporal);
+   const pendingFieldEdit=active?.metadata?.pendingFieldEdit||null;
+   const explicitFieldAmendment=extractFieldAmendment(message.text,{allowedFields:['name','phone','email']});
+   const fieldAmendment=explicitFieldAmendment||(pendingFieldEdit
+     ? {field:pendingFieldEdit.field,rawValue:message.text,action:'replace',explicit:true}
+     : null);
+   const includesBusinessInformation=(messageFrame?.intents||[]).some(item=>item.intent==='business.info');
+   // Name/phone/email declarations are persisted by the universal customer
+   // field pipeline. If the same message primarily asks a business question,
+   // let that read-only interrupt answer and then resume this booking.
+   if(fieldAmendment&&active&&(!includesBusinessInformation||pendingFieldEdit)){
+     entities.fieldAmendment=fieldAmendment;
+     return pack('booking.customer_field_edit',1,entities,pendingFieldEdit?'pending_booking_field_edit_value':'explicit_booking_field_edit');
+   }
    const offerings=o.list(tenant.id);
    const mentioned=mentionedOfferings(text,offerings);
    if(mentioned.length){

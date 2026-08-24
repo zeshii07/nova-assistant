@@ -1,4 +1,4 @@
-const { normalizeText, numberFromText } = require('../../conversation-intelligence/src/text');
+const { normalizeText, numberFromText, normalizeWeekdayTypos } = require('../../conversation-intelligence/src/text');
 
 class UniversalEngagementEngine {
   constructor({ now = () => process.env.NOVA_TEST_NOW ? new Date(process.env.NOVA_TEST_NOW) : new Date(), timezone = process.env.NOVA_DEFAULT_TIMEZONE || 'Asia/Karachi' } = {}) { this.now = now; this.timezone=timezone; }
@@ -211,7 +211,7 @@ class UniversalEngagementEngine {
   }
 
   parseDate(raw, options = {}) {
-    const text = normalizeText(raw);
+    const text = normalizeWeekdayTypos(raw);
     const today = calendarDay(options.now ? new Date(options.now) : this.now(),options.timezone||this.timezone);
     let date = null, display = null;
 

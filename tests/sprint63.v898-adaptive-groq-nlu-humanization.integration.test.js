@@ -44,7 +44,7 @@ test('Groq NLU client is key-gated, authenticated, schema-constrained, and tool-
   assert.equal(request.init.headers.authorization,'Bearer secret-test-key');
   assert.equal(request.body.response_format.type,'json_schema');
   assert.equal(request.body.response_format.json_schema.strict,true);
-  assert.equal(request.body.max_completion_tokens,500);
+  assert.equal(request.body.max_completion_tokens,900);
   assert.equal(request.body.reasoning_effort,'low');
   assert.ok(request.body.response_format.json_schema.schema.required.includes('intents'));
   assert.deepEqual(

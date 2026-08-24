@@ -47,6 +47,23 @@ class CommerceService {
       reserveCart: async ({catalog,ttlSeconds}={})=>{assert("write");const cart=await this.repository.getCart(tenant.id,customerId);if(!cart)throw new Error("No active cart");return reserveCart(cart,catalog,ttlSeconds);},
       clearCart: async () => { assert("write");const cart=await this.repository.getCart(tenant.id,customerId);await releaseReservation(cart,"cart_cleared"); await this.repository.clearCart(tenant.id,customerId); return true; },
       updateCheckout: async patch => { assert("write"); const cart = await this.repository.getCart(tenant.id, customerId); if (!cart) throw new Error("No active cart"); cart.checkout = { ...cart.checkout, ...patch }; cart.updatedAt = now(); await this.repository.saveCart(cart);await this.inventoryService?.touchCart({tenantId:tenant.id,cartId:cart.id}); return cart; },
+      updateOrderCustomer: async (orderId, patch = {}) => {
+        assert("order.update");
+        const order=await customerOrder(this.repository,tenant.id,customerId,orderId);
+        assertModifiableOrder(order);
+        const allowed=new Set(['name','phone','email','city','address','landmark','paymentMethod']);
+        const changes={};
+        for(const [field,value] of Object.entries(patch||{}))if(allowed.has(field)&&value!==undefined&&JSON.stringify(order.customer?.[field])!==JSON.stringify(value))changes[field]=value;
+        if(!Object.keys(changes).length)return order;
+        const updatedAt=now();
+        order.customer={...(order.customer||{}),...changes};
+        if(changes.paymentMethod!==undefined)order.paymentMethod=changes.paymentMethod;
+        order.revision=Number(order.revision||1)+1;order.updatedAt=updatedAt;
+        order.timeline=[...(order.timeline||[]),{action:'customer_details_updated',at:updatedAt,fields:Object.keys(changes)}];
+        const saved=await this.repository.saveOrder(order);
+        await this.emit('commerce.order.updated.v1',{tenantId:tenant.id,customerId,orderId:saved.id,revision:saved.revision,action:'customer_details_updated',fields:Object.keys(changes)},capabilityId);
+        return saved;
+      },
       createOrder: async ({ catalog }) => { assert("order.create"); const cart = await this.repository.getCart(tenant.id, customerId); if (!cart) throw new Error("No active cart"); const items = []; let total = 0; for (const item of cart.items) { const valid = await catalog.validateSelection({ productId: item.productId, color: item.color, size: item.size, quantity: item.quantity,cartId:cart.id, requireComplete:item.variantSelectionRequired!==false }); if (!valid.valid) { const error=new Error(`Catalog validation failed: ${valid.reason}`); error.code='CART_VALIDATION_FAILED'; error.reason=valid.reason; error.product=valid.product||null; throw error; } const official = valid.product; const subtotal = valid.unitPrice * item.quantity; total += subtotal; items.push({ productId: official.id,variantId:valid.variant?.id||null,sku:valid.sku, name: official.name, unitPrice: valid.unitPrice, currency: valid.currency, color: item.color || null, size: item.size || null, quantity: item.quantity, subtotal,inventory:valid.variant?valid.variant.inventory:null }); }
         await reserveCart(cart,catalog);
         const idempotencyKey=fingerprint("order",{customerId,cartId:cart.id,items,checkout:cart.checkout});

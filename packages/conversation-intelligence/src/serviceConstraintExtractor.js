@@ -1,3 +1,4 @@
+const {normalizeWeekdayTypos}=require('./text');
 const DAYS=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 const CONSTRAINT_VOCAB=['weekend','week','weekly','booking','bookings','same','day','sunday','saturday','monday','tuesday','wednesday','thursday','friday','monthly','daily','recurring','twice','once'];
 function extractServiceConstraints(value){
@@ -18,7 +19,7 @@ function extractServiceConstraints(value){
   return {text,day,weekend,sameDay,recurrence,conditions};
 }
 function normalizeConstraintText(value){
-  let text=String(value||'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').replace(/\s+/g,' ').trim();
+  let text=normalizeWeekdayTypos(String(value||'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').replace(/\s+/g,' ').trim());
   const direct={dy:'day',wk:'week',wks:'weeks',weak:'week',weeekend:'weekend',weeknd:'weekend',bookigs:'bookings',bookng:'booking',recurng:'recurring'};
   const words=text.split(' ').map(word=>{
     if(direct[word])return direct[word];

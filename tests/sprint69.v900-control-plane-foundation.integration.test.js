@@ -66,8 +66,12 @@ test("drafts stay invisible until validated and published", async (t) => {
 
 test("every shipped tenant can seed and validate its control-plane resources", (t) => {
   const { service } = fixture(t);
-  const tenantsDir = path.resolve(__dirname, "../tenants");
-  for (const tenantId of fs.readdirSync(tenantsDir).filter((id) => fs.existsSync(path.join(tenantsDir, id, "profile.json")))) {
+  // Other integration files create temporary tenants under the project tenant
+  // directory. Node's test runner executes files concurrently, so directory
+  // enumeration can observe a half-built fixture. Validate the actual shipped
+  // demo set explicitly instead of racing unrelated test setup/cleanup.
+  const shippedTenantIds=["cleaning-demo","default","driving-school-demo","education-demo","healthcare-demo","restaurant-demo","salon-demo","tutor-demo"];
+  for (const tenantId of shippedTenantIds) {
     const actor = owner(tenantId);
     for (const resourceType of ["profile", "products", "services", "hours", "calendar"]) {
       const document = service.getResource(tenantId, resourceType, actor).document;

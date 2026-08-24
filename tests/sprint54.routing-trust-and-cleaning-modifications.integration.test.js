@@ -37,14 +37,14 @@ test('bounded typos and a greeting prefix still produce one complete cleaning re
     const response = await request(
       container,
       `typo-compound-${Date.now()}`,
-      'hello i wnt a 2 bedroom apartment clening on monday at 11 am'
+      'hello i wnt standard clening for a 2 bedroom apartment with 1 cleaner for 3 hours on monday at 11 am'
     );
     const state = response.state.capabilityState.cleaning;
 
     assert.equal(groqCalls, 0);
     assert.equal(response.intelligence.nlu.deterministicFallback,false);
     assert.equal(response.capabilityId, 'cleaning');
-    assert.equal(response.intelligence.selected.intent, 'cleaning.structured_service_request');
+    assert.equal(response.intelligence.selected.intent, 'cleaning.pricing_request');
     assert.equal(state.propertyType, 'apartment');
     assert.equal(state.bedrooms, 2);
     assert.ok(state.preferredDate);
@@ -60,12 +60,12 @@ test('a detailed property-cleaning request outranks a generic availability answe
     const response = await request(
       container,
       `booking-over-availability-${Date.now()}`,
-      'i want 2 bedroom apartment cleaning on monday around 11 am'
+      'i want standard cleaning for a 2 bedroom apartment with 1 cleaner for 3 hours on monday around 11 am'
     );
     const state = response.state.capabilityState.cleaning;
 
     assert.equal(response.capabilityId, 'cleaning');
-    assert.equal(response.intelligence.selected.intent, 'cleaning.structured_service_request');
+    assert.equal(response.intelligence.selected.intent, 'cleaning.pricing_request');
     assert.equal(state.bedrooms, 2);
     assert.equal(state.preferredTime, '11:00');
     assert.equal(state.step, 'address');
@@ -78,7 +78,7 @@ test('two two-bedroom apartments retains both property count and bedroom size', 
     const response = await request(
       container,
       `property-count-${Date.now()}`,
-      'i want 2 two bedroom apartment cleaning on monday 1 pm'
+      'i want standard cleaning for 2 two bedroom apartments with 1 cleaner for 3 hours on monday 1 pm'
     );
     const state = response.state.capabilityState.cleaning;
 
@@ -86,7 +86,7 @@ test('two two-bedroom apartments retains both property count and bedroom size', 
     assert.equal(state.propertyCount, 2);
     assert.equal(state.bedrooms, 2);
     assert.equal(state.preferredTime, '13:00');
-    assert.equal(state.serviceId,'CLN008');
+    assert.equal(state.serviceId,'CLN-HOURLY');
     assert.equal(state.quotedService,undefined);
     assert.match(response.reply,/AED 40 per hour/i);
   });

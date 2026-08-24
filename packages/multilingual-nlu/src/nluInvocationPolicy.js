@@ -8,15 +8,49 @@
  */
 class NluInvocationPolicy {
   constructor({ strategy = 'adaptive', confidenceThreshold = 0.86, ambiguityMargin = 0.05 } = {}) {
-    if (strategy !== 'adaptive') throw new Error('NLU invocation strategy must be adaptive');
-    this.strategy = 'adaptive';
+    if (!['adaptive','primary'].includes(strategy)) throw new Error('NLU invocation strategy must be adaptive or primary');
+    this.strategy = strategy;
     this.confidenceThreshold = confidenceThreshold;
     this.ambiguityMargin = ambiguityMargin;
   }
 
-  evaluate({ choice = {}, pending = null, pendingValidation = null, correction = null, deterministicInterruption = null, message = null, messageFrame = null } = {}) {
+  evaluate({ choice = {}, pending = null, pendingValidation = null, correction = null, deterministicInterruption = null, message = null, messageFrame = null, localSemantic = null, semanticPolicy = null } = {}) {
+    if(this.strategy==='primary')return decision(true,'primary_language_layer');
     const winner = choice.winner || null;
     if (!winner) return decision(true, 'no_deterministic_route');
+
+    const localAccepted=Boolean(localSemantic?.accepted&&localSemantic?.primaryIntent);
+    const localAligned=Boolean(semanticPolicy?.aligned);
+    const strongWinner=Number(winner.confidence||0)>=.98;
+    const genericWorkflowWinner=Boolean(pending&&winner.capabilityId===pending.capabilityId
+      &&/\b(?:continue|workflow_input|checkout_input)\b/.test(String(winner.intent||'')));
+    // A compound business-information question plus a validated name/phone/
+    // email declaration is completely represented by Nova's shared message
+    // frame. Persist the customer field, answer locally, and resume without a
+    // remote call. A business-information-only compound question can still use
+    // remote interpretation under the complex-message policy below.
+    if (deterministicInterruption && pending && winner.capabilityId !== pending.capabilityId
+      && winner.capabilityId==='assistant'
+      && frameHas(messageFrame,'business.info')
+      && frameHas(messageFrame,'customer.update')) {
+      return decision(false, 'deterministic_interrupt');
+    }
+    // A scalar-looking reply belongs to the active validator even when it is
+    // invalid (for example a three-digit phone number or impossible clock
+    // value). Groq cannot make that business value valid and would add latency.
+    if(genericWorkflowWinner&&pendingValidation?.valid===false&&isLocalScalarValidation(message?.text,pending?.pendingField)){
+      return decision(false,'deterministic_confident');
+    }
+    if(genericWorkflowWinner&&pendingValidation?.valid===true&&isExplicitValidatedPendingValue(message?.text,pending?.pendingField)){
+      return decision(false,'deterministic_confident');
+    }
+    if(localSemantic?.escalation?.recommended&&!localAligned){
+      if(localSemantic.escalation.reason==='complex_multi_intent'&&(!strongWinner||genericWorkflowWinner))return decision(true,'complex_multi_intent');
+      if(!strongWinner||genericWorkflowWinner)return decision(true,'local_semantic_uncertain');
+    }
+    if(localAccepted&&!localAligned&&semanticConflictWithWinner(localSemantic.primaryIntent.name,winner)){
+      return decision(true,'semantic_route_conflict');
+    }
 
     const confidence = Number(winner.confidence || 0);
     if (confidence < this.confidenceThreshold) return decision(true, 'low_confidence');
@@ -29,11 +63,25 @@ class NluInvocationPolicy {
       return decision(true, 'complex_multi_intent');
     }
 
+    if(localAccepted&&localAligned&&!localSemantic?.escalation?.recommended){
+      const locallyOriginated=/^local_semantic_/.test(String(winner.reason||''));
+      return decision(false,locallyOriginated?'local_semantic_confident':'deterministic_confident');
+    }
+
     if (deterministicInterruption && pending && winner.capabilityId !== pending.capabilityId) {
       return decision(false, 'deterministic_interrupt');
     }
 
-    if (pending && winner.capabilityId === pending.capabilityId && /[\u0600-\u06ff]/.test(String(message?.text || ''))) {
+    if (pending && winner.capabilityId === pending.capabilityId
+      && !localSemantic
+      && /[\u0600-\u06ff]/.test(String(message?.text || ''))) {
+      return decision(true, 'multilingual_pending_utterance');
+    }
+
+    if (pending && winner.capabilityId === pending.capabilityId
+      && pendingValidation?.valid === false
+      && !localAccepted
+      && /[\u0600-\u06ff]/.test(String(message?.text || ''))) {
       return decision(true, 'multilingual_pending_utterance');
     }
 
@@ -67,6 +115,8 @@ class NluInvocationPolicy {
   }
 }
 
+function frameHas(frame,intent){return (frame?.intents||[]).some(item=>item.intent===intent);}
+
 function isCompatibleSupportingCandidate(winner,candidate){
   const primary=String(winner?.intent||''),support=String(candidate?.intent||'');
   // Offering details are evidence used by a booking request, not a competing
@@ -78,6 +128,19 @@ function isCompatibleSupportingCandidate(winner,candidate){
 }
 
 function decision(invoke, reason) { return Object.freeze({ invoke, reason }); }
+
+function isLocalScalarValidation(raw,field){
+  if(!new Set(['phone','date','time','cleanerCount','duration','bedrooms','quantity']).has(String(field||'')))return false;
+  return /^[+\d\s().:/-]{1,32}$/.test(String(raw||'').trim());
+}
+
+function isExplicitValidatedPendingValue(raw,field){
+  const value=String(raw||'').trim();
+  if(field==='time')return /\b\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)\b/i.test(value)||/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/.test(value);
+  if(['cleanerCount','duration','bedrooms','quantity','partySize','units'].includes(field))return /^(?:(?:ok|okay|yes|sure)\s+)?(?:\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|ek|aik|do|teen|char|chaar)(?:\s*(?:hours?|hrs?|cleaners?|people|persons?|units?))?$/i.test(value);
+  if(field==='date')return /\b(?:today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i.test(value)||/\b\d{1,2}[\/-]\d{1,2}(?:[\/-]\d{2,4})?\b/.test(value);
+  return false;
+}
 
 function isSocialOnlyWinnerWithBusinessRemainder(winner,ordered=[],raw=''){
   if(winner.capabilityId!=='assistant'||!/assistant\.(?:greet|small_talk|thanks|social)/.test(winner.intent||''))return false;
@@ -131,3 +194,30 @@ function isComplexMultiIntent(frame = null) {
 
 module.exports.hasSemanticRouteConflict = hasSemanticRouteConflict;
 module.exports.isComplexMultiIntent = isComplexMultiIntent;
+module.exports.isLocalScalarValidation = isLocalScalarValidation;
+
+function semanticConflictWithWinner(intent,winner){
+  const capability=String(winner?.capabilityId||'');
+  const expected={
+    'booking.create':new Set(['booking','cleaning']),'booking.modify':new Set(['booking','cleaning']),
+    'booking.cancel':new Set(['booking','cleaning']),'booking.status':new Set(['booking','cleaning']),
+    'availability.check':new Set(['availability','booking','cleaning']),
+    'service.list':new Set(['offering','cleaning','assistant']),'service.info':new Set(['offering','cleaning','assistant']),
+    'service.price':new Set(['pricing','offering','cleaning','assistant']),'service.duration':new Set(['offering','cleaning','assistant']),
+    'product.list':new Set(['catalog']),'product.info':new Set(['catalog','assistant']),
+    'product.price':new Set(['catalog','assistant']),'product.stock':new Set(['catalog','assistant']),
+    'cart.view':new Set(['commerce']),'cart.add':new Set(['commerce','catalog']),
+    'cart.remove':new Set(['commerce']),'cart.update':new Set(['commerce','catalog']),
+    'order.create':new Set(['commerce','catalog']),'order.modify':new Set(['commerce']),
+    'order.cancel':new Set(['commerce']),'order.return':new Set(['commerce']),
+    'order.exchange':new Set(['commerce']),'order.status':new Set(['commerce']),
+    'business.info':new Set(['assistant']),'business.name':new Set(['assistant']),
+    'business.contact':new Set(['assistant']),'business.hours':new Set(['assistant','availability']),
+    'business.location':new Set(['assistant']),'business.policy':new Set(['assistant']),
+    'conversation.greeting':new Set(['assistant']),'conversation.thanks':new Set(['assistant']),
+    'conversation.small_talk':new Set(['assistant'])
+  }[intent];
+  return Boolean(expected&&!expected.has(capability));
+}
+
+module.exports.semanticConflictWithWinner=semanticConflictWithWinner;
