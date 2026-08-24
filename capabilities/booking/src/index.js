@@ -49,9 +49,19 @@ class BookingCapability extends BaseCapability{
       return createCapabilityResult({handled:true,reply,responseModel:{intent:'GENERIC_BOOKING_CUSTOMER_FIELD_UPDATED',payload:{legacyText:reply,field,value:parsed.value,pendingField:flow.pendingField}},statePatch:{activePlugin:'booking',lastIntent:'booking_customer_field_updated',capabilityState:{booking:stateShape(flow)}}});
     }
 
+    if(selected.intent==='booking.cancel_none'){
+      const reply=`You do not have any active or confirmed ${config.mode==='reservation'?'reservations':'bookings'} to cancel.`;
+      return createCapabilityResult({handled:true,reply,responseModel:{intent:'GENERIC_BOOKING_CANCEL_NONE',payload:{legacyText:reply}},statePatch:{activePlugin:'booking',lastIntent:'booking_cancel_none',capabilityState:{booking:{}}}});
+    }
+    if(selected.intent==='booking.cancel_selection_required'){
+      const bookings=extracted.bookings||previous.metadata?.cancelChoices||[];
+      const reply=`You have more than one active ${config.mode==='reservation'?'reservation':'booking'}. Which one should I cancel?\n${bookings.map(record=>`• ${record.id} — ${record.subject||'Booking'}${record.date?` on ${record.date}`:''}${record.time?` at ${record.time}`:''}`).join('\n')}\n\nSend the reference so I cancel only the correct one.`;
+      return createCapabilityResult({handled:true,reply,responseModel:{intent:'GENERIC_BOOKING_CANCEL_SELECTION_REQUIRED',payload:{legacyText:reply,bookings}},statePatch:{activePlugin:'booking',lastIntent:'booking_cancel_selection_required',capabilityState:{booking:{status:'cancel_selection',pendingField:'bookingId',metadata:{cancelChoices:bookings}}}}});
+    }
     if(selected.intent==='booking.cancel_request'){
-      if(!previous.bookingId)return createCapabilityResult({handled:true,reply:'I could not find a completed booking in this conversation to cancel.',statePatch:{lastIntent:'booking_cancel_missing'}});
-      const record=await booking.cancel(previous.bookingId,'customer_requested');
+      const bookingId=extracted.bookingId||previous.bookingId;
+      if(!bookingId)return createCapabilityResult({handled:true,reply:'I could not find an active booking for this customer to cancel.',statePatch:{lastIntent:'booking_cancel_missing'}});
+      const record=await booking.cancel(bookingId,'customer_requested');
       const reply=`Booking ${record.id} has been cancelled. The reserved calendar capacity is now available again.`;
       return createCapabilityResult({handled:true,reply,responseModel:{intent:'GENERIC_BOOKING_CANCELLED',payload:{legacyText:reply,record}},statePatch:{activePlugin:'booking',pendingQuestion:null,lastIntent:'booking_cancelled',capabilityState:{booking:{...previous,status:'cancelled',metadata:{...(previous.metadata||{}),calendarStatus:'cancelled',cancelledAt:record.cancelledAt}}}}});
     }
@@ -110,6 +120,15 @@ class BookingCapability extends BaseCapability{
 
     if((selected.intent==='booking.continue'||selected.intent==='booking.start')&&flow.pendingField&&flow.pendingField!=='confirmation'){
       const pending=flow.pendingField;
+      if(engagement.referencesStoredDetails?.(context.message.text)||engagement.referencesStoredField?.(pending,context.message.text)){
+        const saved=await savedBookingFields(context);
+        const patch=engagement.referencesStoredDetails?.(context.message.text)?saved:{...(saved[pending]?{[pending]:saved[pending]}:{})};
+        for(const [field,value]of Object.entries(patch))if(requiredFields(config).includes(field)&&has(value))flow.fields[field]=value;
+        if(!Object.keys(patch).length){
+          const reply=`I do not have saved details for this business yet. ${engagement.prompt(pending,config,context.language)}`;
+          return collectingResult(config,flow,pending,reply);
+        }
+      }
       if(!has(flow.fields[pending])){
         if(engagement.isFieldRefusal?.(context.message.text)){
           const reply=`I understand. ${pretty(pending)} is required to submit this ${config.mode==='reservation'?'reservation':'booking'} request. You can provide it, cancel the request, or ask for human support.`;
@@ -193,7 +212,10 @@ class BookingCapability extends BaseCapability{
     if(missing==='time'&&flow.metadata.timeWindow)basePrompt=`You chose the ${flow.metadata.timeWindow}; please give an exact time. ${basePrompt}`;
     const selectedIntro=addedNames.length?`${addedNames.join(', ')} selected 👍\n`:'';
     const currentSummary=engagementSummary(flow,config);
-    const reply=`${notice?`${notice}\n\n`:''}${selectedIntro}${currentSummary?`${currentSummary}\n\n`:''}${basePrompt}`;
+    const saved=await savedBookingFields(context);
+    const reusable=['name','phone','email','city','address','landmark'].includes(missing)&&has(saved[missing]);
+    const savedOffer=reusable?`I found these saved details:\n${Object.entries(saved).filter(([field])=>requiredFields(config).includes(field)).map(([field,value])=>`• ${pretty(field)}: ${value}`).join('\n')}\n\nSay “use my saved details” to reuse them, or provide a new ${pretty(missing).toLowerCase()}.` : basePrompt;
+    const reply=`${notice?`${notice}\n\n`:''}${selectedIntro}${currentSummary?`${currentSummary}\n\n`:''}${savedOffer}`;
     return collectingResult(config,flow,missing,reply);
   }
 }
@@ -221,6 +243,14 @@ async function rescheduleResult(booking,previous,extracted,config){
 function formatAlternatives(rows){if(!rows?.length)return '';return `. Available alternatives: ${rows.map(row=>`${row.date} at ${row.time}`).join(', ')}`;}
 function collectingResult(config,flow,field,reply){return createCapabilityResult({handled:true,reply,responseModel:{intent:'GENERIC_BOOKING_COLLECTING',payload:{legacyText:reply,engagement:flow,pendingField:field}},statePatch:{activePlugin:'booking',pendingQuestion:field,lastIntent:'booking_collecting',capabilityState:{booking:stateShape(flow)}}});}
 function requiredFields(config){return (config.requiredFields||['subject','date','time','name','phone']).filter(x=>x!=='subject');}
+async function savedBookingFields(context){
+  // The Execution Engine already loaded the tenant-scoped customer record.
+  // Reading it here avoids adding CRM permissions to every config-only tenant.
+  const customer=context.customer||{};
+  const location=customer.customFields?.lastKnownLocation||customer.customFields?.lastDelivery||{};
+  const values={name:customer.name||null,phone:customer.phone||null,email:customer.email||null,city:location.city||null,address:location.address||customer.customFields?.primaryAddress||null,landmark:location.landmark||null};
+  return Object.fromEntries(Object.entries(values).filter(([,value])=>has(value)));
+}
 function mergeMetadata(flow,e){
   const keys=['preferredEndTime','alternativeTime','alternativeDate','timeWindow','hairLength','referenceCode','priceRequested','durationRequested','availabilityRequested','closestTimeRequested'];
   for(const key of keys)if(e[key]!=null)flow.metadata[key]=e[key];

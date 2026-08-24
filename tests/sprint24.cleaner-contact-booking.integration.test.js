@@ -14,6 +14,7 @@ test('generic cleaner duration quotes the configured hourly rate directly withou
 test('cleaning uses the same name then contact-number format',async()=>{
  const u='cl3';
  let r=await q('cleaning-demo',u,'i need sofa cleaning');
+ r=await q('cleaning-demo',u,'3 seats');
  r=await q('cleaning-demo',u,'24 august');
  r=await q('cleaning-demo',u,'9 am');
  r=await q('cleaning-demo',u,'House 12 Model Town Lahore');

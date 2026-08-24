@@ -40,13 +40,7 @@ lists, prices, stock, policy documents, or another tenant's identifiers.
 
 ## Configure on Windows PowerShell
 
-Create the local environment file once:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Edit `.env` and set:
+Edit the project-root `.env` file and set:
 
 ```dotenv
 GROQ_API_KEY=gsk_your_key_here

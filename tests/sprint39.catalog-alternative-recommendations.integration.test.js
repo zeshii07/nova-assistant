@@ -8,7 +8,7 @@ test('exact available product is selected and its normal attribute flow starts',
  const r=await q('exact','can i get led desk lamp');
  assert.equal(r.capabilityId,'catalog');
  assert.match(r.reply,/Yes.*LED Desk Lamp.*available/i);
- assert.match(r.reply,/What color would you like/i);
+ assert.match(r.reply,/color and quantity together/i);
  assert.equal(r.state.capabilityState.catalog.selectedProductId,'P013');
 });
 
@@ -44,7 +44,7 @@ test('customer can explicitly choose a suggested alternative afterward',async()=
  r=await q('choose','ok show me gel pen pack');
  assert.match(r.reply,/Yes.*Gel Pen Pack.*available/i);
  assert.equal(r.state.capabilityState.catalog.selectedProductId,'P018');
- assert.match(r.reply,/What color would you like/i);
+ assert.match(r.reply,/color and quantity together/i);
 });
 
 test('unrelated unavailable item does not invent an alternative',async()=>{

@@ -22,7 +22,7 @@ Use the Graph API version shown for your Meta app. Keeping it configurable preve
 
 ## 2. Configure secrets
 
-Copy `.env.example` to `.env` and fill:
+Open the project-root `.env` file and fill:
 
 ```env
 WHATSAPP_PHONE_NUMBER_ID_DEFAULT=

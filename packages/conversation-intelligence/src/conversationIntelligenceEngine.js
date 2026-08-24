@@ -51,8 +51,13 @@ class ConversationIntelligenceEngine {
     const unsupportedDomain = detectUnsupportedDomain(normalizedText, tenant);
     const workflowStack = this.stack.snapshot(state);
     let globalCommand = this.globalCommands.detect(message.text);
-    if(globalCommand?.type==='cancel'&&state.capabilityState?.booking?.status==='completed'&&/\b(?:cancel|stop)\b.*\b(?:booking|appointment|reservation|lesson|session)\b|\bcancel (?:it|this)\b/i.test(message.text))globalCommand=null;
-    if(globalCommand?.type==='cancel'&&state.capabilityState?.cleaning?.lastRequestId&&/\b(?:cancel|stop)\b.*\b(?:cleaning|request|booking|appointment|service)\b|\b(?:cleaning|request|booking|appointment|service)\b.*\b(?:cancel|stop)\b|\bcancel (?:it|this|that)\b/i.test(message.text))globalCommand=null;
+    const explicitBookingCancellation=/\b(?:cancel|stop)\b.*\b(?:booking|appointment|reservation|lesson|session)\b|\b(?:booking|appointment|reservation|lesson|session)\b.*\b(?:cancel|stop)\b|\bcancel (?:it|this)\b/i.test(message.text);
+    const explicitCleaningCancellation=/\b(?:cancel|stop)\b.*\b(?:cleaning|request|booking|appointment|service)\b|\b(?:cleaning|request|booking|appointment|service)\b.*\b(?:cancel|stop)\b|\bcancel (?:it|this|that)\b/i.test(message.text);
+    // A bare "cancel" abandons the current draft. An explicit booking/service
+    // cancellation is a durable-record operation and must reach its domain even
+    // after conversation state was reset, so the domain can find zero/one/many.
+    if(globalCommand?.type==='cancel'&&(!state.capabilityState?.booking?.status||state.capabilityState.booking.status==='completed')&&explicitBookingCancellation&&tenant.capabilities?.includes('booking'))globalCommand=null;
+    if(globalCommand?.type==='cancel'&&!state.capabilityState?.cleaning?.step&&explicitCleaningCancellation&&tenant.capabilities?.includes('cleaning'))globalCommand=null;
     const correction = this.corrections.detect(message.text, state);
     const deterministicInterruption = this.interruptions.detect(message.text, state);
     const pending = workflowStack[workflowStack.length - 1] || null;

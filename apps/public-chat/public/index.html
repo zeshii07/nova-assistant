@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#080a14">
+  <meta name="description" content="Meet Nova, the AI customer automation platform for bookings, sales, service requests and customer support.">
+  <title>Nova — AI Customer Automation</title>
+  <link rel="stylesheet" href="/assistant/style.css">
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <main class="app-shell">
+    <aside class="product-panel">
+      <div class="brand-lockup">
+        <span class="brand-mark" aria-hidden="true"><b>N</b></span>
+        <span>NOVA <small>10.1</small></span>
+      </div>
+
+      <div class="hero-copy">
+        <p class="eyebrow"><i></i> Intelligent customer operations</p>
+        <h1>Turn every conversation into action.</h1>
+        <p class="lede">Nova gives businesses one adaptable assistant for customer questions, bookings, sales, service requests, and support.</p>
+      </div>
+
+      <div class="capability-grid" aria-label="Nova capabilities">
+        <article><span>01</span><strong>Engage</strong><p>Natural multilingual conversations</p></article>
+        <article><span>02</span><strong>Convert</strong><p>Bookings, orders, and qualified leads</p></article>
+        <article><span>03</span><strong>Remember</strong><p>Safe tenant-scoped customer context</p></article>
+        <article><span>04</span><strong>Operate</strong><p>Validated workflows and handoffs</p></article>
+      </div>
+
+      <div class="signal-card">
+        <div class="signal-icon" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div><strong>Built for real operations</strong><p>Configuration-led. Multi-tenant. Human-ready.</p></div>
+      </div>
+    </aside>
+
+    <section class="chat-panel" aria-label="Chat with Nova">
+      <header class="chat-header">
+        <div class="agent-identity">
+          <span class="agent-avatar" aria-hidden="true">N</span>
+          <div><strong>Nova</strong><p><i></i> Online · Public product guide</p></div>
+        </div>
+        <button id="new-chat" class="new-chat" type="button" aria-label="Start a new conversation"><span aria-hidden="true">＋</span> New chat</button>
+      </header>
+
+      <section id="chat" class="chat" aria-live="polite" aria-label="Conversation with Nova"></section>
+
+      <nav id="suggestions" class="suggestions" aria-label="Suggested questions"></nav>
+
+      <form id="composer" autocomplete="off">
+        <label class="composer-field" for="message">
+          <textarea id="message" rows="1" maxlength="4000" placeholder="Ask Nova anything about customer automation…" required></textarea>
+          <span>Enter to send · Shift + Enter for a new line</span>
+        </label>
+        <button class="send" type="submit" aria-label="Send message"><span>Send</span><b aria-hidden="true">↗</b></button>
+      </form>
+
+      <footer><span><i></i> Tenant-neutral public demo</span><span>No customer records are accessed here</span></footer>
+    </section>
+  </main>
+  <script src="/assistant/app.js" defer></script>
+</body>
+</html>

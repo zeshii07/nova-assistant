@@ -65,8 +65,8 @@ test("cleaning tenant lists services and creates a service request", async () =>
 
   result = await chat(c, "cleaning-demo", "clean-user", "i need sofa cleaning");
   assert.equal(result.capabilityId, "cleaning");
-  assert.match(result.reply, /date/i);
-  for (const message of ["12 August", "4 pm", "House 12 Model Town Lahore", "Zeeshan Ahmad", "03019299608"]) result = await chat(c, "cleaning-demo", "clean-user", message);
+  assert.match(result.reply, /size|quantity/i);
+  for (const message of ["3 seats", "12 August", "4 pm", "House 12 Model Town Lahore", "Zeeshan Ahmad", "03019299608"]) result = await chat(c, "cleaning-demo", "clean-user", message);
   assert.match(result.reply, /confirm/i);
   result = await chat(c, "cleaning-demo", "clean-user", "confirm");
   assert.equal(result.capabilityId, "cleaning");

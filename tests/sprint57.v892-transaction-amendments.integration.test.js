@@ -76,8 +76,61 @@ test('a submitted cleaning request is amended in place after confirmation',async
   requests=await container.cleaningRequestRepository.listByCustomer('cleaning-demo',customer);
   assert.equal(requests[0].status,'cancelled');
   const events=container.calendarService.listEvents({tenantId:'cleaning-demo',customerId:customer,includeCancelled:true});
-  assert.equal(events.length,1);
-  assert.equal(events[0].status,'cancelled');
+  assert.equal(events.length,0);
+  assert.equal(requests[0].calendarEventId??null,null);
+});
+
+test('submitted cleaning date, time, address, and contact edits persist independently',async()=>{
+  const customer='submitted-cleaning-detail-edits';
+  await ask('cleaning-demo',customer,'i want cleaning of my apartment on tusedy');
+  await ask('cleaning-demo',customer,'deep cleaning');
+  await ask('cleaning-demo',customer,'1 bedroom');
+  await ask('cleaning-demo',customer,'10 am');
+  await ask('cleaning-demo',customer,'Dubai Plaza Al Barsha building 24 apartment 001');
+  await ask('cleaning-demo',customer,'James Smith');
+  await ask('cleaning-demo',customer,'03016754577 james@example.com');
+  const confirmed=await ask('cleaning-demo',customer,'confirm');
+  const requestId=confirmed.state.capabilityState.cleaning.lastRequestId;
+  assert.ok(requestId);
+  const original=(await container.cleaningRequestRepository.listByCustomer('cleaning-demo',customer)).find(row=>row.id===requestId);
+  const originalTime=original.preferredTime;
+
+  let response=await ask('cleaning-demo',customer,`can you please change date to 27 for the booking ${requestId}`);
+  assert.equal(response.intelligence.selected.intent,'cleaning.submitted_schedule_edit');
+  let request=(await container.cleaningRequestRepository.listByCustomer('cleaning-demo',customer)).find(row=>row.id===requestId);
+  assert.equal(request.preferredDate,'27/08/2026');
+  assert.equal(request.preferredTime,originalTime);
+
+  response=await ask('cleaning-demo',customer,'please change the service date');
+  assert.equal(response.intelligence.selected.intent,'cleaning.submitted_schedule_edit');
+  assert.equal(response.state.capabilityState.cleaning.step,'submitted_reschedule_date');
+  assert.match(response.reply,/what new (?:service )?date/i);
+  response=await ask('cleaning-demo',customer,'29 August 2026');
+  assert.equal(response.intelligence.selected.intent,'cleaning.submitted_schedule_edit');
+  request=(await container.cleaningRequestRepository.listByCustomer('cleaning-demo',customer)).find(row=>row.id===requestId);
+  assert.equal(request.preferredDate,'29/08/2026');
+  assert.equal(request.preferredTime,originalTime);
+
+  response=await ask('cleaning-demo',customer,`change time to 2 pm for booking ${requestId}`);
+  assert.equal(response.intelligence.selected.intent,'cleaning.submitted_schedule_edit');
+  request=(await container.cleaningRequestRepository.listByCustomer('cleaning-demo',customer)).find(row=>row.id===requestId);
+  assert.equal(request.preferredDate,'29/08/2026');
+  assert.equal(request.preferredTime,'14:00');
+
+  await ask('cleaning-demo',customer,'change my address to Office 55 Marina Plaza Dubai UAE');
+  await ask('cleaning-demo',customer,'change my name to James Khan');
+  await ask('cleaning-demo',customer,'change my phone to 03001234567');
+  await ask('cleaning-demo',customer,'change my email to james.khan@example.com');
+  request=(await container.cleaningRequestRepository.listByCustomer('cleaning-demo',customer)).find(row=>row.id===requestId);
+  assert.equal(request.address,'Office 55 Marina Plaza Dubai UAE');
+  assert.equal(request.name,'James Khan');
+  assert.equal(request.phone,'03001234567');
+  assert.equal(request.email,'james.khan@example.com');
+
+  response=await ask('cleaning-demo',customer,'show my booking history');
+  assert.match(response.reply,/Date: 29\/08\/2026/);
+  assert.match(response.reply,/Time: 14:00/);
+  assert.match(response.reply,/Office 55 Marina Plaza Dubai UAE/);
 });
 
 test('multi-item attributes remain bound to their named products and show provisional subtotal',async()=>{

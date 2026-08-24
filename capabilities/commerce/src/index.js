@@ -46,6 +46,7 @@ class CommerceCapability extends BaseCapability {
     if (intent === "commerce.orders") return this.showOrders(context, commerce, language, state);
     if (intent === "commerce.review.confirm") return this.finalizeOrder(context,commerce,catalog,language,state);
     if (intent === "commerce.confirm" && state.mode === "checkout") {
+      if(state.savedDetailsOffered)return this.confirmSavedDetails(context,commerce,catalog,language,state);
       const field=state.pendingField||"name";
       const msg=language==="roman_urdu"
         ? `Cart ready hai 👍 Order complete karne ke liye abhi ${checkoutFieldLabel(field,language)} chahiye. ${ask(field,language)}`
@@ -54,6 +55,7 @@ class CommerceCapability extends BaseCapability {
     }
     if (intent === "commerce.review.change") return this.reviewChange(context,commerce,language,state);
     if (intent === "commerce.checkout_continue") {
+      if(state.savedDetailsOffered&&isWorkflowAcceptance(context.message.text))return this.confirmSavedDetails(context,commerce,catalog,language,state);
       const field=state.pendingField||"name";
       const msg=language==="roman_urdu"
         ? `Cart ready hai 👍 Order complete karne ke liye abhi ${checkoutFieldLabel(field,language)} chahiye. ${ask(field,language)}`
@@ -107,14 +109,18 @@ class CommerceCapability extends BaseCapability {
     await context.services.crm?.recordActivity("commerce.checkout_started", { productId: stagedProductId, cartItems: cartForValidation?.items?.length || 0 });
     const paused = context.state.capabilityState?.commerce?.resumeCheckout;
     const nextField = paused?.pendingField || "name";
-    const next = { mode: "checkout", pendingField: nextField };
+    const saved=await savedCheckoutDetails(context);
+    const next = { mode: "checkout", pendingField: nextField, savedDetailsOffered:Object.keys(saved).length>0 };
     const added = context.state.capabilityState?.commerce?.mode === "paused_add_item";
     const cartNow = await commerce.getCart();
     const cartText = await cartSummary(context, cartNow, language);
     const intro = added && stagedProductId
       ? `${language === "roman_urdu" ? "Added 👍 Item cart mein add ho gaya." : "Added 👍 The item is now in your cart."}\n\n${cartText}`
       : cartText;
-    return result(intro + "\n\n" + ask(nextField, language), language, next, added ? "commerce_item_added_checkout_resumed" : "commerce_checkout_started", [{ name: "commerce.checkout.started.v1", payload: { productId: stagedProductId, cartItems: cartNow?.items?.length || 0 } }]);
+    const savedOffer=Object.keys(saved).length
+      ? `\n\nI found these saved customer details:\n${savedDetailsLines(saved).join('\n')}\n\nSay “use my saved details” to reuse everything shown, or tell me what you want to update.`
+      : `\n\n${ask(nextField,language)}`;
+    return result(intro + savedOffer, language, next, added ? "commerce_item_added_checkout_resumed" : "commerce_checkout_started", [{ name: "commerce.checkout.started.v1", payload: { productId: stagedProductId, cartItems: cartNow?.items?.length || 0 } }]);
   }
   async editCustomerField(context,commerce,language,state){
     const amendment=context.intelligence?.entities?.fieldAmendment||{};
@@ -145,6 +151,14 @@ class CommerceCapability extends BaseCapability {
       await syncCheckoutFieldToCrm(context,field,parsed.value,language);
       return result(`Updated — order ${order.id} now uses ${parsed.value} for its ${checkoutFieldLabel(field,language)}. Revision: ${order.revision}.`,language,next,'commerce_order_customer_field_updated');
     }
+    if(state.savedDetailsOffered){
+      const applied=await applySavedCheckout(context,commerce,{[field]:parsed.value});
+      await syncCheckoutFieldToCrm(context,field,parsed.value,language);
+      const missing=nextRequiredCheckoutField(applied.checkout);
+      if(missing)return result(`Updated — the ${checkoutFieldLabel(field,language)} is now ${parsed.value}. I kept the other saved details.\n\n${ask(missing,language)}`,language,{mode:'checkout',pendingField:missing,savedDetailsOffered:false},'commerce_saved_profile_partial_update');
+      const review=await checkoutReview(context,applied.cart,language);
+      return result(`Updated — the ${checkoutFieldLabel(field,language)} is now ${parsed.value}. I kept all other saved details.\n\n${review}`,language,{mode:'review',pendingField:'confirmation'},'commerce_saved_profile_partial_update_review');
+    }
     await commerce.updateCheckout({[field]:parsed.value});
     await syncCheckoutFieldToCrm(context,field,parsed.value,language);
     if(resumeMode==='review'){
@@ -167,6 +181,26 @@ class CommerceCapability extends BaseCapability {
     const field = state.pendingField; const raw = String(context.message.text || "").trim();
     const correction = context.intelligence?.correction;
     const interruption = context.intelligence?.interruption;
+
+    if(context.services.engagement.referencesStoredDetails?.(raw)||context.services.engagement.referencesStoredField?.(field,raw)){
+      const allDetails=context.services.engagement.referencesStoredDetails?.(raw);
+      const saved=await savedCheckoutDetails(context);
+      const patch=allDetails?saved:{...(saved[field]?{[field]:saved[field]}:{})};
+      if(!Object.keys(patch).length){
+        return result(`I do not have saved ${allDetails?'customer details':checkoutFieldLabel(field,language)} for this business yet. ${ask(field,language)}`,language,state,'commerce_saved_details_missing');
+      }
+      const applied=allDetails?await applySavedCheckout(context,commerce):null;
+      if(!allDetails)await commerce.updateCheckout(patch);
+      const current=applied?.checkout||{...(await commerce.getCart()).checkout,...patch};
+      const nextField=nextRequiredCheckoutField(current);
+      if(nextField){
+        const reply=`Using your saved ${Object.keys(patch).length>1?'details':checkoutFieldLabel(field,language)} 👍\n${savedDetailsLines(patch).join('\n')}\n\n${ask(nextField,language)}`;
+        return result(reply,language,{...state,pendingField:nextField,savedDetailsOffered:false},'commerce_saved_details_reused');
+      }
+      const cart=applied?.cart||await commerce.getCart();
+      const review=await checkoutReview(context,cart,language);
+      return result(`Using your saved details 👍\n${savedDetailsLines(patch).join('\n')}\n\n${review}`,language,{mode:'review',pendingField:'confirmation'},'commerce_saved_details_reused_review');
+    }
 
     if(context.services.engagement.isFieldRefusal?.(raw)){
       if(field==='landmark'){
@@ -266,6 +300,14 @@ class CommerceCapability extends BaseCapability {
       [{name:"commerce.order.completed.v1",payload:{orderId:order.id,total:order.total}}],
       {intent:"COMMERCE_ORDER_CREATED",payload:{orderId:order.id,total:order.total,totalText:money(order.total,order.currency),paymentMethod:order.paymentMethod}},
       {catalog:{selectedProductId:null,selectedAttributes:{}}});
+  }
+  async confirmSavedDetails(context,commerce,catalog,language,state){
+    const applied=await applySavedCheckout(context,commerce);
+    const missing=nextRequiredCheckoutField(applied.checkout);
+    if(missing){
+      return result(`I reused every saved detail available, but I still need your ${checkoutFieldLabel(missing,language)}. ${ask(missing,language)}`,language,{mode:'checkout',pendingField:missing,savedDetailsOffered:false},'commerce_saved_details_incomplete');
+    }
+    return this.finalizeOrder(context,commerce,catalog,language,{...state,mode:'review',pendingField:'confirmation'});
   }
   async reviewOrder(context,commerce,language,state){
     const cart=await commerce.getCart();
@@ -598,12 +640,16 @@ class CommerceCapability extends BaseCapability {
   async addItemRequest(context, commerce, catalog, language, state) {
     const raw=String(context.message.text||"");
     const activeDraft=context.state.capabilityState?.catalog||{};
-    const refersToDraft=/\b(this|it|this one|that one|that item|this item)\b/i.test(raw);
+    // Bare "this" also appears in phrases such as "add shoes in this order".
+    // Treat only explicit item references as references to the prior draft.
+    const refersToDraft=/\b(?:it|this one|that one|that item|this item)\b/i.test(raw)
+      || (/\bthis\b/i.test(raw)&&!/\bthis\s+(?:order|cart|checkout)\b/i.test(raw));
     const draftProductId=activeDraft.selectedProductId || (refersToDraft && activeDraft.suggestedProductIds?.length===1 ? activeDraft.suggestedProductIds[0] : null);
     if(draftProductId && refersToDraft){
       const p=await catalog.getProductById(draftProductId);
       if(p){
         const attrs={...(activeDraft.selectedAttributes||{})};
+        applySoleProductOptions(p,attrs);
         const normalizedRaw=normalize(raw);
         const color=p.colors?.find(c=>normalizedRaw.includes(normalize(c)));
         const size=p.sizes?.find(sz=>new RegExp(`\\b${String(sz).replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')}\\b`,'i').test(raw));
@@ -611,9 +657,7 @@ class CommerceCapability extends BaseCapability {
         const qty=qMatch?numberFromText(qMatch[1]):null;
         if(color)attrs.color=color;if(size)attrs.size=String(size);if(qty)attrs.quantity=qty;
         const valid=await catalog.validateSelection({productId:p.id,...attrs});
-        const missing=!attrs.color&&p.colors?.length?`What color would you like: ${p.colors.join(", ")}?`
-          :!attrs.size&&p.sizes?.length?`What size would you like: ${p.sizes.join(", ")}?`
-          :!attrs.quantity?"How many would you like?":null;
+        const missing=productOptionsPrompt(p,attrs);
         if(missing){
           return createCapabilityResult({handled:true,confidence:.99,reply:`Got it — we're still working with ${p.name}.\n\n${missing}`,statePatch:{language,activePlugin:"commerce",lastIntent:"commerce_add_item_draft_updated",capabilityState:{catalog:{selectedProductId:p.id,selectedAttributes:attrs},commerce:{mode:"paused_add_item",pendingField:null,resumeCheckout:state?.mode==="checkout"?state:state?.resumeCheckout||null}}}});
         }
@@ -634,6 +678,7 @@ class CommerceCapability extends BaseCapability {
     const found=await context.services.catalogService.search(context.tenant.id, cleaned || raw);
     if (found?.product) {
       const p=found.product; const attrs={...(found.attributes||{})};
+      applySoleProductOptions(p,attrs);
       // Product search is responsible for identity/variants, but Commerce owns
       // transaction quantities. Preserve explicit quantities such as
       // "is mi 2kg daal add kr do" even when the catalog search strips units.
@@ -645,7 +690,7 @@ class CommerceCapability extends BaseCapability {
       const patch={ selectedProductId:p.id, selectedAttributes:attrs };
       const detail=[`📦 *${p.name}*`,p.description,`💰 ${money(p.price,p.currency)}`];
       if(p.sizes?.length) detail.push(`📏 Sizes: ${p.sizes.join(", ")}`); if(p.colors?.length) detail.push(`🎨 Colors: ${p.colors.join(", ")}`);
-      const missing=!attrs.color&&p.colors?.length?`What color would you like: ${p.colors.join(", ")}?`:!attrs.size&&p.sizes?.length?`What size would you like: ${p.sizes.join(", ")}?`:!attrs.quantity?"How many would you like?":"Say confirm to add it to your cart.";
+      const missing=productOptionsPrompt(p,attrs)||"Say confirm to add it to your cart.";
       return createCapabilityResult({handled:true,confidence:.99,reply:`Yes 😊 We have ${p.name} available. Let's add it to your order.\n\n${detail.join("\n")}\n\n${missing}`,statePatch:{language,activePlugin:"commerce",lastIntent:"commerce_add_item_started",capabilityState:{catalog:patch,commerce:{mode:"paused_add_item",pendingField:null,resumeCheckout:state?.mode==="checkout"?state:null}}}});
     }
     const category=categories.find(c=>normalize(c.name).includes(normalize(cleaned))||normalize(cleaned).includes(normalize(c.name))|| (c.id==='footwear'&&/shoe|shoes|footwear/.test(normalize(cleaned))));
@@ -793,6 +838,44 @@ async function syncCheckoutFieldToCrm(context,field,value,language){
       customFields:{...(current?.customFields||{}),lastDelivery}
     });
   }
+}
+async function savedCheckoutDetails(context){
+  const customer=context.customer||{};
+  const delivery=customer.customFields?.lastDelivery||customer.customFields?.lastKnownLocation||{};
+  const values={name:customer.name||null,phone:customer.phone||null,email:customer.email||null,city:delivery.city||null,address:delivery.address||customer.customFields?.primaryAddress||null,landmark:delivery.landmark??null,paymentMethod:delivery.paymentMethod||null};
+  return Object.fromEntries(Object.entries(values).filter(([,value])=>value!==null&&value!==undefined&&value!==''));
+}
+async function applySavedCheckout(context,commerce,overrides={}){
+  const saved=await savedCheckoutDetails(context);
+  const current=(await commerce.getCart())?.checkout||{};
+  const retained=Object.fromEntries(Object.entries(current).filter(([,value])=>value!==null&&value!==undefined&&value!==''));
+  const patch={...saved,...retained,...overrides};
+  const cart=await commerce.updateCheckout(patch);
+  return {cart,checkout:cart.checkout||{},patch};
+}
+function nextRequiredCheckoutField(checkout={}){
+  return ['name','phone','city','address','paymentMethod'].find(field=>!checkout[field])||null;
+}
+function applySoleProductOptions(product,attributes){
+  if(!attributes.color&&product.colors?.length===1)attributes.color=product.colors[0];
+  if(!attributes.size&&product.sizes?.length===1)attributes.size=String(product.sizes[0]);
+  return attributes;
+}
+function productOptionsPrompt(product,attributes={}){
+  const missing=[];
+  if(!attributes.color&&product.colors?.length)missing.push('color');
+  if(!attributes.size&&product.sizes?.length)missing.push('size');
+  if(!attributes.quantity)missing.push('quantity');
+  if(!missing.length)return null;
+  const choices=[];
+  if(missing.includes('color'))choices.push(`Colors: ${product.colors.join(', ')}`);
+  if(missing.includes('size'))choices.push(`Sizes: ${product.sizes.join(', ')}`);
+  const joined=missing.length===1?missing[0]:`${missing.slice(0,-1).join(', ')} and ${missing.at(-1)}`;
+  return `Please send the ${joined} together in one message.${choices.length?` ${choices.join('. ')}.`:''}`;
+}
+function savedDetailsLines(details={}){
+  const labels={name:'Name',phone:'Phone',email:'Email',city:'City',address:'Address',landmark:'Landmark',paymentMethod:'Payment'};
+  return Object.entries(details).filter(([,value])=>value!==null&&value!==undefined&&value!=='').map(([key,value])=>`• ${labels[key]||key}: ${value}`);
 }
 async function syncOrderCustomerToCrm(context,order,language){
   const crm=context.services.crm;if(!crm?.updateCustomer||!order?.customer)return;

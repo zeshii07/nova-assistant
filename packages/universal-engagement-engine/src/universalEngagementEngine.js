@@ -17,7 +17,8 @@ class UniversalEngagementEngine {
       parseDeclaredName: (value) => this.parseDeclaredName(value),
       validateFieldAnswer: (field, value, options) => this.validateFieldAnswer(field, value, options),
       isFieldRefusal: (value) => this.isFieldRefusal(value),
-      referencesStoredField: (field, value) => this.referencesStoredField(field, value)
+      referencesStoredField: (field, value) => this.referencesStoredField(field, value),
+      referencesStoredDetails: (value) => this.referencesStoredDetails(value)
     });
   }
 
@@ -119,7 +120,16 @@ class UniversalEngagementEngine {
     const text=normalizeText(raw);
     const labels={name:'name',phone:'(?:phone|number|contact)',address:'address',date:'date',time:'time'};
     const label=labels[field]||String(field||'');
-    return new RegExp(`\\b(?:i (?:already )?(?:told|gave|shared) you (?:my )?${label}|you (?:already )?(?:have|know) (?:my )?${label}|use (?:my )?(?:previous|earlier|old|same|saved) ${label}|same ${label} as before|previous ${label})\\b`,'i').test(text.replace(/previuos/g,'previous'));
+    const normalized=text.replace(/previuos|privious|pervious/g,'previous');
+    // Short answers are safe here because callers only invoke this method
+    // while a prompt has explicitly offered a saved value for one field.
+    if(/^(?:yes\s+)?(?:use|use it|use this|use that|use previous|use old|same|same one|keep it)$/i.test(normalized))return true;
+    return new RegExp(`\\b(?:i (?:already )?(?:told|gave|shared) you (?:my )?${label}|you (?:already )?(?:have|know) (?:my )?${label}|use (?:my )?(?:previous|earlier|old|same|saved|existing|current|configured) ${label}|use (?:the )?(?:existing|current|configured|saved) ${label}|same ${label} as before|previous ${label}|no new ${label}[\\s\\S]{0,24}(?:old|previous|saved) ${label})\\b`,'i').test(normalized);
+  }
+
+  referencesStoredDetails(raw){
+    const text=normalizeText(raw).replace(/previuos|privious|pervious/g,'previous');
+    return /^(?:yes\s+)?use(?:\s+my|\s+the)?\s+(?:(?:previous|old|saved|existing|current|configured)(?:\s+(?:contact|customer|delivery|profile))?\s+)?(?:details|information|info|name and details)$|^(?:yes\s+)?(?:use|keep)\s+(?:all\s+)?(?:the\s+)?other\s+(?:provided\s+)?details$|^(?:yes\s+)?use\s+(?:my\s+)?configured\s+name\s+and\s+details$/i.test(text);
   }
 
   validateFieldAnswer(field, raw, options = {}) {

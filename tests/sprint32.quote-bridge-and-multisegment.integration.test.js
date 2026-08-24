@@ -25,7 +25,7 @@ test('generic daal in multi request is clarified instead of guessed',async()=>{
 });
 test('configured curtain cleaning starts a cleaning request',async()=>{
  const r=await q('cleaning-demo','s1','cn i book curtain cleaning service');
- assert.equal(r.capabilityId,'cleaning');assert.match(r.reply,/Curtain Cleaning/i);assert.match(r.reply,/date/i);assert.doesNotMatch(r.reply,/Here are our cleaning services/i);
+ assert.equal(r.capabilityId,'cleaning');assert.match(r.reply,/Curtain Cleaning/i);assert.match(r.reply,/size/i);assert.doesNotMatch(r.reply,/Here are our cleaning services/i);
 });
 test('quoted property service can be accepted into cleaning workflow',async()=>{
  const u='s2';let r=await q('cleaning-demo',u,'can i get quote for move out cleaning for a 2 bedroom villa what is estimate price');

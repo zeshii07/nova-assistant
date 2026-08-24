@@ -6,6 +6,7 @@ const { importBusinessFile } = require("../../../packages/tenant-onboarding/src/
 const { buildContainer } = require("./container");
 const packageJson = require("../../../package.json");
 const { ForbiddenError, ValidationError } = require("../../../packages/shared/src/errors");
+const { replyToNovaVisitor } = require("./novaMarketingAssistant");
 
 async function startServer() {
   const container = await buildContainer();
@@ -16,8 +17,11 @@ async function startServer() {
 
       // Developer Console is intentionally served by the same process during
       // development so the Playground exercises the exact production engine.
-      if (req.method === "GET" && (url.pathname === "/developer" || url.pathname.startsWith("/developer/"))) {
+      if (req.method === "GET" && (url.pathname === "/developer" || url.pathname.startsWith("/developer/") || url.pathname === "/developers" || url.pathname.startsWith("/developers/"))) {
         return serveDeveloperAsset(res, url.pathname);
+      }
+      if (req.method === "GET" && (url.pathname === "/assistant" || url.pathname.startsWith("/assistant/") || url.pathname === "/chat" || url.pathname.startsWith("/chat/"))) {
+        return servePublicChatAsset(res,url.pathname);
       }
 
       if (req.method === "GET" && url.pathname === "/health") {
@@ -57,6 +61,7 @@ async function startServer() {
       }
 
       if (req.method === "GET" && url.pathname === "/api/crm/customer") {
+        if(!authorizeDeveloperRequest(req))return sendJson(res,401,{ok:false,error:"Developer Console token is required"});
         const tenantId = url.searchParams.get("tenantId") || container.config.defaultTenantId;
         const customerId = url.searchParams.get("customerId");
         if (!customerId) return sendJson(res, 400, { ok: false, error: "customerId is required" });
@@ -69,6 +74,23 @@ async function startServer() {
         const tenantId = url.searchParams.get("tenantId") || container.config.defaultTenantId;
         const products = await container.catalogService.listProducts(tenantId);
         return sendJson(res, 200, { ok: true, products });
+      }
+
+      if(req.method==="GET"&&url.pathname==="/api/public/tenants"){
+        const tenants=listTenants(container.config.tenantsDir,container.tenantRepository).map(item=>{
+          const tenant=container.tenantRepository.getById(item.id);
+          return {id:item.id,name:item.name,domain:item.domain,assistantName:tenant.branding?.assistantName||'Nova'};
+        });
+        return sendJson(res,200,{ok:true,tenants});
+      }
+
+      if(req.method==="POST"&&url.pathname==="/api/assistant/chat"){
+        const body=await readJson(req);
+        const text=String(body.text||'').trim();
+        if(!text)return sendJson(res,400,{ok:false,error:'text is required'});
+        if(text.length>4000)throw new ValidationError('Message is too long. Please keep it under 4,000 characters.');
+        const answer=replyToNovaVisitor(text,{previousTopic:String(body.previousTopic||'').trim()||null});
+        return sendJson(res,200,{ok:true,conversationId:String(body.conversationId||`nova-${crypto.randomUUID()}`),reply:answer.reply,topic:answer.topic,suggestions:answer.suggestions});
       }
 
       if (url.pathname.startsWith("/api/dev/") && !authorizeDeveloperRequest(req)) {
@@ -381,10 +403,13 @@ async function startServer() {
 
       if (req.method === "POST" && url.pathname === "/api/chat") {
         const body = await readJson(req);
+        if(String(body.text||'').trim().length>4000)throw new ValidationError('Message is too long. Please keep it under 4,000 characters.');
         const adapter = container.channelRegistry.get("http");
         const message = adapter.normalizeIncoming(body);
         const result = await container.executionEngine.process(message);
-        return sendJson(res, 200, { ...adapter.formatOutgoing(result), capabilityId: result.capabilityId, state: result.state, experience: result.experience });
+        // Public chat returns only the customer-facing envelope. Routing,
+        // workflow state and experience diagnostics remain developer-only.
+        return sendJson(res, 200, adapter.formatOutgoing(result));
       }
 
       return sendJson(res, 404, { ok: false, error: "Not found" });
@@ -449,12 +474,25 @@ function controlPlaneActor(req, tenantId) {
 function requestCorrelationId(req){return String(req.headers['x-request-id']||req.headers['x-correlation-id']||'').trim()||null;}
 function serveDeveloperAsset(res, pathname) {
   const root = path.resolve(__dirname, "../../developer-console/public");
-  const relative = pathname === "/developer" || pathname === "/developer/" ? "index.html" : pathname.replace(/^\/developer\//, "");
+  const relative = ["/developer","/developer/","/developers","/developers/"].includes(pathname) ? "index.html" : pathname.replace(/^\/developers?\//, "");
   const file = path.resolve(root, relative);
   const outsideRoot = path.relative(root, file).startsWith("..") || path.isAbsolute(path.relative(root, file));
   if (outsideRoot || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return sendText(res, 404, "Not found");
   const ext = path.extname(file); const types = { ".html":"text/html; charset=utf-8", ".js":"application/javascript; charset=utf-8", ".css":"text/css; charset=utf-8" };
   res.writeHead(200, { "Content-Type":types[ext] || "application/octet-stream", "Cache-Control":"no-store" }); res.end(fs.readFileSync(file));
+}
+function servePublicChatAsset(res,pathname){
+  const root=path.resolve(__dirname,'../../public-chat/public');
+  const relative=pathname==='/assistant'||pathname==='/assistant/'||pathname==='/chat'||pathname==='/chat/'
+    ? 'index.html'
+    : pathname.replace(/^\/(?:assistant|chat)\//,'');
+  const file=path.resolve(root,relative);
+  const relation=path.relative(root,file);
+  const outsideRoot=relation.startsWith('..')||path.isAbsolute(relation);
+  if(outsideRoot||!fs.existsSync(file)||fs.statSync(file).isDirectory())return sendText(res,404,'Not found');
+  const ext=path.extname(file);const types={'.html':'text/html; charset=utf-8','.js':'application/javascript; charset=utf-8','.css':'text/css; charset=utf-8'};
+  res.writeHead(200,{'Content-Type':types[ext]||'application/octet-stream','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self' data:"});
+  res.end(fs.readFileSync(file));
 }
 function listTenants(tenantsDir, tenantRepository = null) {
   if (!fs.existsSync(tenantsDir)) return [];
@@ -506,4 +544,4 @@ async function runDataset(container, datasetName) {
   return { ok:failures.length===0, dataset:datasetName, total:dataset.cases.length, passed, failed:failures.length, durationMs:Date.now()-started, failures:failures.slice(0,50) };
 }
 if (require.main === module) startServer().catch((error) => { console.error(error); process.exitCode = 1; });
-module.exports = { startServer, readRaw, readJson, authorizeDeveloperRequest };
+module.exports = { startServer, readRaw, readJson, authorizeDeveloperRequest, servePublicChatAsset };

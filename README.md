@@ -1,8 +1,77 @@
 # Nova SaaS — Universal Multi-Tenant Engagement Engine
 
-Nova is a multi-tenant conversational AI platform. v3.0 adds a reusable Generic Offering Engine, Generic Booking Engine, strict entity resolution, reusable domain semantics, and a knowledge-to-offering fallback so new industries can be onboarded without changing the core engine.
+Nova is a multi-tenant conversational AI platform with reusable offering,
+booking, cleaning, catalog, commerce, CRM, and tenant-knowledge capabilities.
+Its deterministic workflow core keeps customer data and transactions scoped to
+the active tenant while optional language models help interpret ambiguity.
 
-## Current release: v9.4.1 Workflow Language Stability
+## Current release: v10.1.0 Commerce Continuity and Public Marketing Assistant
+
+Nova v10.1.0 prevents previous active-cart lines from leaking into a fresh
+tenant-switch test, treats saved checkout details as one reusable profile, and
+keeps every unchanged delivery field when the customer edits only one value.
+Customers can accept a complete saved profile with `confirm`, `ok`, or `done`,
+and product requests made during checkout no longer re-add the previous catalog
+draft. Product option collection remains compact even while adding another item.
+
+The public `/assistant` and `/chat` pages are now a tenant-neutral Nova marketing
+experience. They explain what Nova is, the business problems it solves, the
+tasks it can perform, and its creator, while keeping tenant workflows and
+customer records outside the public demo. Tenant testing remains in the
+developer console at `/developer` or `/developers`.
+
+The public chat now uses a responsive technology-style interface with adaptive
+follow-up suggestions. Its expanded product guide covers industries, channels,
+onboarding, multilingual support, customer-data isolation, human handoff,
+integrations, deployment, architecture, CRM memory, bookings, commerce, and
+analytics, alongside greetings and other friendly conversation.
+
+Returning cleaning customers are recognized before customer-detail collection.
+Once the service, scope, and schedule are known, Nova displays the saved name,
+phone, optional email, and service address and asks whether to keep everything
+or change a specific field. New customers—and returning customers with a
+genuinely missing required value—are asked only for the missing information.
+
+Run the release gate:
+
+```powershell
+npm run benchmark:v10.1.0
+```
+
+See `docs/V1010_COMMERCE_CONTINUITY_MARKETING_ASSISTANT.md`.
+
+## Previous release: v10.0.0 Universal Customer Workflows and Public Assistant
+
+Nova v10.0.0-alpha.1 makes returning-customer reuse, compact product option
+collection, and zero/one/many cancellation behavior shared platform contracts.
+Furniture cleaning is now selected and priced from tenant configuration,
+single product variants are auto-selected, and numeric dimensions no longer
+overwrite quantities. A customer-only chat interface is available at
+`/assistant` (also `/chat`) while the developer console remains at `/developer`.
+Calendar-backed slot claims are opt-in; the cleaning demo no longer claims a
+time is unavailable unless its calendar is deliberately enabled.
+
+Run the release gate:
+
+```powershell
+npm run benchmark:v10.0.0
+```
+
+See `docs/V1000_UNIVERSAL_CUSTOMER_WORKFLOWS_PUBLIC_CHAT.md`.
+
+## Previous release: v9.5.0 Customer Memory and Friendly Workflow Resilience
+
+Nova v9.5.0-alpha.1 added tenant-scoped saved contact/address reuse, safer
+workflow interruptions, friendly multilingual service answers, compact booking
+references, and broader retail demo data.
+
+```powershell
+npm run benchmark:v9.5.0
+```
+
+See `docs/V950_CUSTOMER_MEMORY_FRIENDLY_RESILIENCE.md`.
+
+## Previous release: v9.4.1 Workflow Language Stability
 
 Nova v9.4.1-alpha.1 makes pending workflow fields authoritative and adds a
 shared, validated field-amendment contract. Short replies such as `10 AM`, `4`,
@@ -329,7 +398,7 @@ This build adds the Universal Semantic Layer and reusable Domain Schemas on top 
 ## Start
 
 ```powershell
-Copy-Item .env.example .env
+# Configure the existing local .env file before starting Nova.
 npm run check
 npm test
 npm start

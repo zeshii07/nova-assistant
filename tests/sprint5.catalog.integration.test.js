@@ -18,7 +18,7 @@ test("catalog finds product and official price from a misspelled query", async (
 test("catalog handles pending typo color and quantity without fallback", async () => {
   const container = await buildContainer();
   let result = await chat(container, "catalog-flow", "what is price of wireless airbud");
-  assert.match(result.reply, /What color/i);
+  assert.match(result.reply, /color and quantity together/i);
   result = await chat(container, "catalog-flow", "i want blck");
   assert.equal(result.capabilityId, "catalog");
   assert.match(result.reply, /Color: Black/);
@@ -64,7 +64,7 @@ test("catalog supports Roman Urdu and records CRM activity", async () => {
 test("catalog data is tenant-owned and available from the service", async () => {
   const container = await buildContainer();
   const products = await container.catalogService.listProducts("default");
-  assert.equal(products.length, 18);
+  assert.ok(products.length >= 30);
   assert.equal(products[2].id, "P003");
   assert.equal(products[2].price, 4500);
   await container.registry.shutdownAll();

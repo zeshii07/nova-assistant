@@ -13,6 +13,21 @@ class BookingConversationAdapter{
    const fullText=normalizedText||normalizeText(message.text);
    const active=state.capabilityState?.booking;
    const entities=extract(text,primaryRaw,config,e,temporal);
+   const bookingId=extractBookingId(message.text);
+   if(active?.status==='cancel_selection'){
+     const choices=active.metadata?.cancelChoices||[];
+     if(bookingId&&choices.some(item=>item.id===bookingId))return pack('booking.cancel_request',1,{bookingId},'booking_cancel_selection');
+     return pack('booking.cancel_selection_required',1,{bookings:choices},'booking_cancel_selection_invalid');
+   }
+   const cancellationRequested=/\b(?:cancel|stop)\b.*\b(?:booking|appointment|reservation|lesson|session)\b|\b(?:booking|appointment|reservation|lesson|session)\b.*\b(?:cancel|stop)\b|\bcancel (?:it|this)\b/.test(fullText);
+   if(cancellationRequested&&(!active||active.status==='completed')){
+     const scoped=b.scope({tenant,capabilityId:'booking',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
+     const records=(await scoped.list()).filter(record=>!['completed','cancelled'].includes(record.status));
+     const exact=bookingId?records.find(record=>record.id===bookingId):null;
+     if(exact||records.length===1)return pack('booking.cancel_request',1,{bookingId:(exact||records[0]).id},'stored_booking_cancel_request');
+     if(records.length>1)return pack('booking.cancel_selection_required',1,{bookings:records.map(record=>({id:record.id,subject:record.slots?.subject||record.subject||'Booking',date:record.slots?.date||null,time:record.slots?.time||null,status:record.status}))},'multiple_bookings_to_cancel');
+     return pack('booking.cancel_none',1,{bookingId:bookingId||null},'no_booking_to_cancel');
+   }
    const pendingFieldEdit=active?.metadata?.pendingFieldEdit||null;
    const explicitFieldAmendment=extractFieldAmendment(message.text,{allowedFields:['name','phone','email']});
    const fieldAmendment=explicitFieldAmendment||(pendingFieldEdit
@@ -46,8 +61,6 @@ class BookingConversationAdapter{
      entities.amendmentAction=action;
      return pack('booking.items_amendment_request',.99985,entities,'completed_booking_items_amendment');
    }
-
-   if(active?.status==='completed'&&/\b(?:cancel|stop)\b.*\b(?:booking|appointment|reservation|lesson|session)\b|\bcancel (?:it|this)\b/.test(fullText))return pack('booking.cancel_request',.9999,{},'completed_booking_cancel_request');
 
    if(active?.status==='completed'&&isRescheduleRequest(fullText)){
      if(/\bsame day\b/.test(fullText)&&active.slots?.date)entities.date=active.slots.date;
@@ -89,6 +102,7 @@ class BookingConversationAdapter{
    return null;
  }
 }
+function extractBookingId(value){const match=String(value||'').toUpperCase().match(/\bBKG[_-][A-Z0-9]{4,16}\b/);return match?match[0].replace('-','_'):null;}
 
 function extract(text,raw,config,engagement,temporal={}){
  const e={};

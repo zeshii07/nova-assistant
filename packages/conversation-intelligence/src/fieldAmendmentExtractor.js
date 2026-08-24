@@ -18,6 +18,11 @@ function extractFieldAmendment(raw,{allowedFields=Object.keys(FIELD_LABELS)}={})
   const source=String(raw||'').trim();
   const text=normalizeText(source);
   if(!source)return null;
+  // Reusing an existing CRM value is acceptance, not a request to replace it.
+  // Let the active workflow resolve the saved value from the tenant-scoped
+  // customer profile instead of opening a field-edit prompt.
+  if(/\b(?:use|keep|take)\b[\s\S]{0,24}\b(?:previous|previuos|earlier|old|same|saved|existing|current|configured)\b[\s\S]{0,20}\b(?:name|phone|number|contact|email|address|details?|information)\b/i.test(source)
+    || /\bno new (?:name|phone|number|contact|email|address)\b[\s\S]{0,24}\b(?:old|previous|saved)\b/i.test(source))return null;
   const updateCue=/\b(?:change|update|edit|correct|replace|switch|set|use|new|instead|should be|kar do|kr do|kardo|badal do|tabdeel)\b/.test(text);
   if(!updateCue)return null;
   for(const field of allowedFields){

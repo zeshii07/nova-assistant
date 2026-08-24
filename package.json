@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "9.4.1-alpha.1",
+  "version": "10.1.0",
   "private": true,
-  "description": "Nova v9.4.1 Workflow Language Stability and Validated Field Amendments",
+  "description": "Nova v10.1 Commerce Continuity and Public Marketing Assistant",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {
@@ -51,6 +51,9 @@
     "benchmark:v9.3.0": "node --require ./tests/test-env.js --test tests/sprint73.v930-ai-language-layer.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
     "benchmark:v9.4.0": "node --require ./tests/test-env.js --test tests/sprint74.v940-local-semantic-router.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
     "benchmark:v9.4.1": "node --require ./tests/test-env.js --test tests/sprint75.v941-workflow-language-stability.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
+    "benchmark:v9.5.0": "node --require ./tests/test-env.js --test tests/sprint76.v950-customer-memory-friendly-resilience.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
+    "benchmark:v10.0.0": "node --require ./tests/test-env.js --test tests/sprint77.v1000-universal-customer-workflows.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
+    "benchmark:v10.1.0": "node --require ./tests/test-env.js --test tests/sprint78.v101-commerce-marketing-assistant.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
     "model:groq:check": "node scripts/check-groq-nlu.js",
     "model:groq:trace": "node scripts/trace-groq-routing.js",
     "model:language:trace": "node scripts/trace-groq-routing.js",

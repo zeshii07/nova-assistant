@@ -49,6 +49,8 @@ test('cleaning understands sofa work, reports multiple supported services, enfor
 
   const customer='validated-cleaning';
   response=await ask('cleaning-demo',customer,'book a mattress cleaning service');
+  assert.equal(response.state.capabilityState.cleaning.step,'serviceVariant');
+  response=await ask('cleaning-demo',customer,'queen mattress');
   assert.equal(response.state.capabilityState.cleaning.step,'date');
 
   response=await ask('cleaning-demo',customer,'monday 4 am');

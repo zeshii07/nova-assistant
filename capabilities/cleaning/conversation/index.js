@@ -12,7 +12,7 @@ class CleaningConversationAdapter {
     const step=state.capabilityState?.cleaning?.step; const candidates=[]; let entities={}; const matches=[];
     const previous=state.capabilityState?.cleaning||{};
     const timeEntities={...extractTimeEntities(primaryText,temporal),...extractCleaningContext(message.text)};
-    let pricingRequested=/\b(charge|charges|price|pricing|cost|rate|rates|quote|quotation|estimate|how much|kitna|kitni|kitne|charges kya|charges kia)\b/.test(normalizedText);
+    let pricingRequested=/\b(charge|charges|price|pricing|cost|rate|rates|quote|quotation|estimate|how much|kitna|kitni|kitne|charges kya|charges kia)\b|(?:قیمت|چارجز|کتنے)/.test(normalizedText);
     const explicitBookingAction=/\b(book|schedule|reserve|arrange|place (?:a )?request|start (?:a )?(?:booking|request)|confirm (?:the )?(?:booking|service))\b/.test(normalizedText);
     const explicitTransactionLanguage=/\b(i want|i need|book|schedule|arrange|add|change|switch|replace|start (?:a )?(?:booking|request))\b/.test(normalizedText);
     const priceFollowUp=Boolean(previous.priceEnquiry?.serviceId)&&!explicitBookingAction&&!explicitTransactionLanguage&&(
@@ -111,15 +111,71 @@ class CleaningConversationAdapter {
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'customer_history',value:'cleaning_requests',score:1}]};
     }
 
+    // Profile lookup is a read-only CRM interruption. Do not compete with it
+    // using a generic pending name/phone/address candidate.
+    if(step&&/\b(?:show|view|tell|give)\b[\s\S]{0,20}\b(?:my )?(?:profile|customer profile|details)\b|\b(?:my profile|customer profile)\b/.test(normalizedText)){
+      return {priority:this.priority,candidates:[],entities:{preserveWorkflow:true},vocabularyMatches:[{type:'interruption',value:'crm_profile',score:1}]};
+    }
+
     const pendingFieldEdit=previous.pendingFieldEdit||null;
-    const explicitFieldAmendment=extractFieldAmendment(message.text,{allowedFields:['name','phone','email','address']});
+    // The normal name step can collect a name and optional email together.
+    // Treat a declared name as an amendment only while another field is
+    // pending, where it is a genuine interruption rather than that answer.
+    const declaredName=step&&step!=='name'?services.engagementService?.parseDeclaredName?.(message.text):null;
+    const explicitFieldAmendment=extractFieldAmendment(message.text,{allowedFields:['name','phone','email','address']})
+      ||(declaredName?.valid?{field:'name',rawValue:declaredName.value,action:'replace',explicit:true}:null);
     const fieldAmendment=explicitFieldAmendment||(pendingFieldEdit
       ? {field:pendingFieldEdit.field,rawValue:message.text,action:'replace',explicit:true}
       : null);
     if(fieldAmendment&&(step||previous.lastRequestId||pendingFieldEdit)){
-      entities={fieldAmendment,requestId:pendingFieldEdit?.requestId||previous.lastRequestId||null,preserveWorkflow:true};
+      entities={fieldAmendment,requestId:extractCleaningRequestId(message.text)||pendingFieldEdit?.requestId||previous.lastRequestId||null,preserveWorkflow:true};
       candidates.push({intent:'cleaning.customer_field_edit',confidence:1,priority:215,entities,reason:pendingFieldEdit?'pending_cleaning_field_edit_value':'explicit_cleaning_field_edit'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'customer_field_edit',value:fieldAmendment.field,score:1}]};
+    }
+
+    const referencedCustomerField=step
+      ? ['name','phone','email','address'].find(field=>field!==step&&services.engagementService?.referencesStoredField?.(field,message.text))
+      : null;
+    if(referencedCustomerField){
+      entities={field:referencedCustomerField,preserveWorkflow:true};
+      candidates.push({intent:'cleaning.saved_field_reference',confidence:1,priority:216,entities,reason:'saved_customer_field_interrupt'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'saved_customer_field',value:referencedCustomerField,score:1}]};
+    }
+
+    // Submitted-request amendments have their own durable follow-up steps.
+    // Route a bare follow-up value ("27" or "same 2 pm") back to the
+    // submitted request instead of treating it as input for a new booking.
+    if(step==='submitted_reschedule_date'||step==='submitted_reschedule_time'){
+      const scheduleEditField=step==='submitted_reschedule_date'?'date':'time';
+      entities={
+        ...timeEntities,
+        requestId:extractCleaningRequestId(message.text)||previous.editingRequestId||previous.lastRequestId||null,
+        scheduleEditField,
+        preserveWorkflow:true
+      };
+      const dateDay=extractExplicitDateDay(primaryText,{allowBare:scheduleEditField==='date'});
+      if(dateDay)entities.dateDay=dateDay;
+      candidates.push({intent:'cleaning.submitted_schedule_edit',confidence:1,priority:220,entities,reason:`pending_cleaning_submitted_reschedule_${scheduleEditField}`});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:`submitted_reschedule_${scheduleEditField}`,score:1}]};
+    }
+
+    const dateChoices=extractWeekdayOptions(primaryText);
+    if(step==='date'&&dateChoices.length>1){
+      entities={dateOptions:dateChoices,startTime:timeEntities.startTime||null,time:timeEntities.time||null,preserveWorkflow:true};
+      candidates.push({intent:'cleaning.date_choice_clarification',confidence:1,priority:220,entities,reason:'multiple_cleaning_date_choices'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:dateChoices.map(value=>({type:'date_option',value,score:1}))};
+    }
+
+    if(step==='date'&&(timeEntities.date||timeEntities.dateText||timeEntities.weekday)){
+      entities={pendingField:'date',...timeEntities,preserveWorkflow:true};
+      candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:210,entities,reason:'active_cleaning_date_value'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'date',score:1}]};
+    }
+
+    if(step&&/\b(?:for )?how (?:much|many|long) (?:time|hours?)\b[\s\S]{0,30}\b(?:cleaner|cleaning|service|work)|\bhow long\b[\s\S]{0,25}\b(?:cleaner|cleaning|service|work)|\b(?:cleaner|cleaning)\b[\s\S]{0,25}\b(?:duration|take|work for)\b/.test(normalizedText)){
+      entities={preserveWorkflow:true};
+      candidates.push({intent:'cleaning.duration_info',confidence:1,priority:218,entities,reason:'cleaning_duration_information_interrupt'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'information',value:'cleaning_duration',score:1}]};
     }
 
     // The active field owns a clear answer.  This route is intentionally more
@@ -164,7 +220,20 @@ class CleaningConversationAdapter {
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_schedule_edit',score:1}]};
     }
 
-    const submittedCancellation=!previous.step&&(
+    if(previous.step==='cancelSelection'){
+      const requestId=extractCleaningRequestId(message.text);
+      const choices=Array.isArray(previous.cancelChoices)?previous.cancelChoices:[];
+      if(requestId&&choices.some(request=>request.id===requestId)){
+        entities={requestId};
+        candidates.push({intent:'cleaning.submitted_cancel_request',confidence:1,priority:200,entities,reason:'cleaning_cancel_selection'});
+      }else{
+        entities={requests:choices};
+        candidates.push({intent:'cleaning.cancel_selection_required',confidence:1,priority:200,entities,reason:'cleaning_cancel_selection_invalid'});
+      }
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_cancel_selection',score:1}]};
+    }
+
+    const submittedCancellation=!previous.step&&!/\b(?:don t|do not|won t|will not)\b[\s\S]{0,20}\bcancel\b/.test(normalizedText)&&!/\b(?:can i|could i|may i|how (?:can|do) i|if i cancel)\b|\bcancel(?:lation)?\b[\s\S]{0,30}\b(?:policy|fee|charge|possible|allowed)\b|\b(?:fee|charge)\b[\s\S]{0,30}\bcancel/.test(normalizedText)&&(
       /\b(?:cancel|stop)\b[\s\S]{0,45}\b(?:cleaning|request|booking|appointment|service)\b/.test(normalizedText)
       || /\b(?:cleaning|request|booking|appointment|service)\b[\s\S]{0,45}\b(?:cancel|stop|cancel kar)\b/.test(normalizedText)
       || Boolean(previous.lastRequestId)&&/\bcancel (?:it|this|that)\b/.test(normalizedText)
@@ -172,12 +241,22 @@ class CleaningConversationAdapter {
     if(submittedCancellation){
       const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
       const stored=scoped?await scoped.listRequests():[];
-      const active=[...stored].filter(request=>!['completed','cancelled'].includes(request.status)).sort((a,b)=>String(b.updatedAt||b.createdAt||'').localeCompare(String(a.updatedAt||a.createdAt||'')))[0];
-      if(active){
-        entities={requestId:previous.lastRequestId||active.id};
+      const active=[...stored].filter(request=>!['completed','cancelled'].includes(request.status)).sort((a,b)=>String(b.updatedAt||b.createdAt||'').localeCompare(String(a.updatedAt||a.createdAt||'')));
+      const requestedId=extractCleaningRequestId(message.text);
+      const exact=requestedId?active.find(request=>request.id===requestedId):null;
+      if(exact||active.length===1){
+        entities={requestId:(exact||active[0]).id};
         candidates.push({intent:'cleaning.submitted_cancel_request',confidence:1,priority:195,entities,reason:'submitted_cleaning_cancel_request'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'submitted_cleaning_cancel_request',score:1}]};
       }
+      if(active.length>1){
+        entities={requests:active.map(request=>({id:request.id,serviceName:request.serviceName,date:request.preferredDate,time:request.preferredTime,status:request.status}))};
+        candidates.push({intent:'cleaning.cancel_selection_required',confidence:1,priority:195,entities,reason:'multiple_cleaning_requests_to_cancel'});
+        return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_cancel_selection_required',score:1}]};
+      }
+      entities={requestId:requestedId||null};
+      candidates.push({intent:'cleaning.cancel_none',confidence:1,priority:195,entities,reason:'no_cleaning_request_to_cancel'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'no_cleaning_request_to_cancel',score:1}]};
     }
 
     // A submitted request is durable even though the interactive collection
@@ -194,7 +273,15 @@ class CleaningConversationAdapter {
     if(!previous.step && submittedRequestAvailable && submittedEditVerb && submittedScheduleSubject && (
       correction?.target==='startTime' || timeEntities.startTime || timeEntities.time || timeEntities.date || timeEntities.dateText || timeEntities.weekday || /\b(?:date|day|time|hours?|start)\b/.test(normalizedText)
     )){
-      entities={...timeEntities,requestId:previous.lastRequestId||null};
+      const mentionsDate=/\b(?:date|day)\b/.test(normalizedText);
+      const mentionsTime=/\b(?:time|hours?|start|starting)\b/.test(normalizedText);
+      entities={
+        ...timeEntities,
+        requestId:extractCleaningRequestId(message.text)||previous.lastRequestId||null,
+        scheduleEditField:mentionsDate&&!mentionsTime?'date':mentionsTime&&!mentionsDate?'time':'schedule'
+      };
+      const dateDay=extractExplicitDateDay(primaryText);
+      if(dateDay)entities.dateDay=dateDay;
       if(correction?.type==='replace'&&correction.target==='startTime'&&correction.value){
         entities.startTime=correction.value;entities.time=correction.value;entities.correction=correction;
         delete entities.endTime;delete entities.durationHours;
@@ -295,7 +382,7 @@ class CleaningConversationAdapter {
     const cleaningDomain=/\b(clean|cleaned|cleaning|cleaners?|clenr|clnr|maids?|safai|sofas?|couches?|curtains?|drapes?|mattresses?|carpets?|rugs?|upholstery|صفائی|صاف)\b/.test(normalizedText)
       ||Boolean(closestKeywordToken(normalizedText,['cleaning','cleaner','cleaned'],{maxDistance:2,minLength:5}))
       || (propertyContext && /\b(quote|quotation|estimate|what about|how about|price|cost|clean)\b/.test(normalizedText));
-    const structuredQuote=priceFollowUp || discountRequested || /\b(quote|quotation|estimate|price|cost|charges?|how much|kitna|kitne|kitni)\b/.test(normalizedText);
+    const structuredQuote=priceFollowUp || discountRequested || /\b(quote|quotation|estimate|price|cost|charges?|how much|kitna|kitne|kitni)\b|(?:قیمت|چارجز|کتنے)/.test(normalizedText);
     const propertyAlternative=propertyContext && (
       /\b(what about|how about|what for|and what for|instead|other)\b/.test(normalizedText)
       || /\band (?:a|the)\s+(?:(?:\d+|one|two|three|four|five)\s*(?:bedrooms?|bed|bhk)\s+)?(?:apartment|flat|studio|villa|vila|house|home|office)\b/.test(normalizedText)
@@ -620,6 +707,7 @@ class CleaningConversationAdapter {
     return {priority:this.priority,candidates,entities,vocabularyMatches:matches};
   }
 }
+function extractCleaningRequestId(value){const match=String(value||'').toUpperCase().match(/\bCLN[-_][A-Z0-9]{4,16}\b/);return match?match[0].replace('_','-'):null;}
 function extractTimeEntities(text,precomputed=null){
   const n=normalizeText(text); const entities={};
   const temporal=precomputed&&Object.keys(precomputed).length?precomputed:temporalExtractor.extract(text);
@@ -640,6 +728,25 @@ function extractTimeEntities(text,precomputed=null){
   if(cleaners) entities.cleanerCount=numberFromText(cleaners[1]);
   else if(/\b(?:cleaner|maid|one person)\b/.test(n)) entities.cleanerCount=1;
   return entities;
+}
+
+function extractCleaningRequestId(value){
+  const match=String(value||'').match(/\bCLN-[A-Z0-9]+(?:-[A-Z0-9]+)*\b/i);
+  return match?match[0].toUpperCase():null;
+}
+
+function extractExplicitDateDay(value,{allowBare=false}={}){
+  const source=String(value||'').trim();
+  let match=source.match(/\b(?:date|day)\s*(?:to|on|for|is|=|:)?\s*(\d{1,2})(?:st|nd|rd|th)?\b/i);
+  if(!match&&allowBare)match=source.match(/^(?:the\s+)?(\d{1,2})(?:st|nd|rd|th)?(?:\s+please)?[.! ]*$/i);
+  const day=match?Number(match[1]):null;
+  return day>=1&&day<=31?day:null;
+}
+
+function extractWeekdayOptions(value){
+  const text=normalizeWeekdayTypos(value);
+  const days=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  return days.filter(day=>new RegExp(`\\b${day}\\b`).test(text));
 }
 
 function isGenericPropertyCleaningService(service){

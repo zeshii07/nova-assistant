@@ -1,6 +1,6 @@
 const {AttributeExtractor,levenshtein}=require('./attributeExtractor');
 
-const STOP=new Set(['super','premium','quality','pack','packet','litre','liter','kg','g','gram','grams','the','a','an']);
+const STOP=new Set(['super','premium','quality','pack','packet','litre','liter','kg','g','gram','grams','the','a','an','phone']);
 const NUMBER_WORDS={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,ek:1,aik:1,do:2,teen:3,char:4,chaar:4,paanch:5};
 const attributes=new AttributeExtractor();
 

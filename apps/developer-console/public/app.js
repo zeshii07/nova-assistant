@@ -11,9 +11,9 @@ $('runDataset').onclick=async()=>{const r=await fetch('/api/dev/datasets/run',{m
 function json(v){return v==null?'—':JSON.stringify(v,null,2)}loadReplays();
 
 $('tenant').addEventListener('change',async()=>{
-  await fetch('/api/dev/reset',{method:'POST',headers:headers(),body:JSON.stringify({tenantId:$('tenant').value,customerId:$('customer').value,channel:'playground'})});
+  await fetch('/api/dev/reset',{method:'POST',headers:headers(),body:JSON.stringify({tenantId:$('tenant').value,customerId:$('customer').value,channel:'playground',clearCart:true})});
   chat.innerHTML='';
-  add('bot',`Switched to ${$('tenant').selectedOptions[0].text}. Conversation state reset.`);
+  add('bot',`Switched to ${$('tenant').selectedOptions[0].text}. Conversation and active cart reset; saved CRM and order history were preserved.`);
   ['selected','entities','messageframe','nlu','workflow','goal','social','semantic','domain','timing','vocabulary','candidates','statejson'].forEach(x=>$(x).textContent='—');
 });
 
@@ -68,7 +68,7 @@ $('obKnowledgeFile').addEventListener('change',async e=>{const f=e.target.files?
 $('createTenant').onclick=async()=>{
   $('onboardingResult').textContent='Generating tenant...';const body={name:$('obName').value.trim(),id:$('obId').value.trim(),domain:$('obDomain').value.trim()||'generic',assistantName:$('obAssistant').value.trim(),description:$('obDescription').value.trim(),hours:$('obHours').value.trim(),contact:$('obContact').value.trim(),location:$('obLocation').value.trim(),currency:window.__novaImportedCurrency||'PKR',paymentMethods:window.__novaImportedPaymentMethods||[],faqs:window.__novaImportedFaqs||[],businessFacts:window.__novaImportedBusinessFacts||{},offerings:collectOfferings(),overwrite:$('obOverwrite').checked,knowledgeDocuments:$('obKnowledge').value.trim()?[{name:'onboarding-notes',text:$('obKnowledge').value.trim()}]:[]};
   const r=await fetch('/api/dev/onboarding/tenant',{method:'POST',headers:headers(),body:JSON.stringify(body)});const d=await r.json();$('onboardingResult').textContent=json(d);if(d.ok){createdTenantId=d.tenant.id;$('testCreatedTenant').disabled=false;await loadTenants(createdTenantId)}};
-$('testCreatedTenant').onclick=async()=>{if(!createdTenantId)return;await loadTenants(createdTenantId);$('tenant').value=createdTenantId;await fetch('/api/dev/reset',{method:'POST',headers:headers(),body:JSON.stringify({tenantId:createdTenantId,customerId:$('customer').value,channel:'playground'})});chat.innerHTML='';add('bot',`Testing ${$('tenant').selectedOptions[0].text}. Try a greeting, knowledge question, browse request, or booking/order request.`);document.querySelector('[data-tab="decision"]').click()};
+$('testCreatedTenant').onclick=async()=>{if(!createdTenantId)return;await loadTenants(createdTenantId);$('tenant').value=createdTenantId;await fetch('/api/dev/reset',{method:'POST',headers:headers(),body:JSON.stringify({tenantId:createdTenantId,customerId:$('customer').value,channel:'playground',clearCart:true})});chat.innerHTML='';add('bot',`Testing ${$('tenant').selectedOptions[0].text}. Try a greeting, knowledge question, browse request, or booking/order request.`);document.querySelector('[data-tab="decision"]').click()};
 function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 loadTenants();
 

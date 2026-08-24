@@ -39,18 +39,26 @@ class CatalogCapability extends BaseCapability {
       if(!recommendations.length && intelligenceEntities.suggestedProductId){
         recommendations=available.filter(x=>x.id===intelligenceEntities.suggestedProductId&&x.inStock);
       }
-      const reply=unavailableWithAlternatives(requested,recommendations,language);
+      const categories=await catalog.listCategories();
+      const reply=unavailableWithAlternatives(requested,recommendations,language,{available,categories});
       return result(
         reply,language,
-        {...previous,selectedProductId:null,selectedAttributes:{},suggestedProductIds:recommendations.map(x=>x.id)},
+        // An unavailable add-on is informational. Keep an existing product
+        // draft intact so the customer can continue or confirm it afterwards.
+        {
+          ...previous,
+          selectedProductId:previous.selectedProductId||null,
+          selectedAttributes:previous.selectedProductId?(previous.selectedAttributes||{}):{},
+          suggestedProductIds:recommendations.map(x=>x.id)
+        },
         "catalog_unavailable",[],
         {intent:"CATALOG_UNAVAILABLE",payload:{
           requested,
           recommendations:recommendations.map(x=>({id:x.id,name:x.name,price:x.price,currency:x.currency})),
-          preferLegacyText:recommendations.length>0,
+          preferLegacyText:true,
           legacyText:reply,
           availableNames:available.filter((item)=>item.inStock).map((item)=>item.name).join(", "),
-          categoryNames:(await catalog.listCategories()).map((item)=>item.name).join(", ")
+          categoryNames:categories.map((item)=>item.name).join(", ")
         }}
       );
     }
@@ -74,7 +82,7 @@ class CatalogCapability extends BaseCapability {
     if (intelligenceIntent === "catalog.goal_missing_details" && intelligenceEntities.productId) {
       product = await catalog.getProductById(intelligenceEntities.productId);
       if (product) {
-        const merged = previous.selectedProductId === product.id ? (previous.selectedAttributes || {}) : {};
+        const merged = applyAutomaticSelections(product,previous.selectedProductId === product.id ? (previous.selectedAttributes || {}) : {});
         const reply = formatProduct(product, merged, language);
         return result(reply, language, { selectedProductId:product.id, selectedAttributes:merged }, "catalog_goal_missing_details", [{ name:"catalog.goal.details_required.v1", payload:{ productId:product.id } }], { intent:"CATALOG_PRODUCT_VIEWED", payload:{ product, selected:merged, legacyText:reply } });
       }
@@ -147,13 +155,13 @@ class CatalogCapability extends BaseCapability {
       const available = await catalog.listProducts();
       const categories = await catalog.listCategories();
       const categoryNames = categories.map((item) => item.name).join(", ");
-      return result(unavailableReply(requested, available, language), language, previous, "catalog_unavailable", [{ name: "catalog.product.unavailable.v1", payload: { query: requested } }], {
+      return result(unavailableReply(requested, available, categories, language), language, previous, "catalog_unavailable", [{ name: "catalog.product.unavailable.v1", payload: { query: requested } }], {
         intent: "CATALOG_UNAVAILABLE",
-        payload: { requested, availableNames: available.filter((item) => item.inStock).map((item) => item.name).join(", "), categoryNames }
+        payload: { requested, availableNames: available.filter((item) => item.inStock).map((item) => item.name).join(", "), categoryNames,preferLegacyText:true,legacyText:unavailableReply(requested,available,categories,language) }
       });
     }
 
-    const merged = mergeAttributes(previous.selectedProductId === product.id ? previous.selectedAttributes : {}, attributes);
+    const merged = applyAutomaticSelections(product,mergeAttributes(previous.selectedProductId === product.id ? previous.selectedAttributes : {}, attributes));
     const validation = await catalog.validateSelection({ productId: product.id, ...merged });
     if (!validation.valid) return result(invalidSelectionReply(validation, product, language, merged), language, previous, "catalog_invalid_selection");
 
@@ -212,9 +220,11 @@ function formatProduct(product, selected, language, options={}) {
   if (selected.size) lines.push(`✅ ${label(language, "selectedSize")}: ${selected.size}`);
   if (selected.quantity) lines.push(`✅ ${label(language, "quantity")}: ${selected.quantity}`);
   if (selected.quantity) lines.push(`💵 ${label(language, "subtotal")}: ${formatMoney(product.price * selected.quantity, product.currency)}`);
-  if (!selected.color && product.colors.length) lines.push("", question(language, "color", product.colors));
-  else if (!selected.size && product.sizes.length) lines.push("", question(language, "size", product.sizes));
-  else if (!selected.quantity) lines.push("", question(language, "quantity"));
+  const missing=[];
+  if(!selected.color&&product.colors.length)missing.push('color');
+  if(!selected.size&&product.sizes.length)missing.push('size');
+  if(!selected.quantity)missing.push('quantity');
+  if(missing.length)lines.push("",combinedAttributeQuestion(product,missing,language));
   else lines.push("", language === "urdu" ? "تفصیلات مکمل ہیں۔ آرڈر کی تصدیق کر دیں یا جو چیز بدلنی ہو بتا دیں۔" : language === "roman_urdu" ? "Details complete hain. Order confirm kar dein, ya jo cheez change karni ho bata dein." : "Everything is ready. Confirm the order or tell me what you would like to change.");
   return lines.filter((line) => line !== undefined).join("\n");
 }
@@ -276,19 +286,14 @@ function applyBrowseFilters(products, filters = {}) {
 }
 function browseFilterLabel(filters = {}) { return [filters.color, filters.size ? `size ${filters.size}` : null].filter(Boolean).join(' '); }
 
-function unavailableWithAlternatives(requested,recommendations,language){
+function unavailableWithAlternatives(requested,recommendations,language,{available=[],categories=[]}={}){
   const first = language==="urdu"
     ? `معذرت، ${requested} اس وقت دستیاب نہیں ہے۔`
     : language==="roman_urdu"
       ? `Maazrat 😊 ${requested} filhal available nahi hai.`
-      : `Sorry 😊 We don't have ${requested} available right now.`;
+      : `Sorry 😊 The requested item “${requested}” is not available in our catalog right now.`;
   if(!recommendations?.length){
-    const follow = language==="roman_urdu"
-      ? "Aap type, style ya category bata dein, main available options dhoond deta hoon."
-      : language==="urdu"
-        ? "آپ قسم، انداز یا کیٹیگری بتا دیں، میں دستیاب آپشنز تلاش کر دوں گا۔"
-        : "Tell me the type, style, or category you want and I'll help find an available option.";
-    return `${first}\n\n${follow}`;
+    return unavailableOverview(first,available,categories,language);
   }
   const heading = language==="roman_urdu"
     ? "Lekin ye qareebi available options dekh sakte hain:"
@@ -307,11 +312,17 @@ function unavailableWithAlternatives(requested,recommendations,language){
   return [first,"",heading,...lines,"",close].join("\n");
 }
 
-function unavailableReply(requested, products, language) {
-  const names = products.filter((item) => item.inStock).map((item) => item.name).join(", ");
-  if (language === "urdu") return `معذرت، ہمارے کیٹلاگ میں ${requested} دستیاب نہیں ہے۔\n\nاس وقت دستیاب مصنوعات: ${names}`;
-  if (language === "roman_urdu") return `Maazrat, hamare catalog mein ${requested} available nahi hai.\n\nFilhal available products: ${names}`;
-  return `Sorry 😊 We don’t have ${requested} available right now.\n\nIf you tell me what kind of item you need, I can help you find the closest available option.`;
+function unavailableReply(requested, products, categories, language) {
+  const first=language==='urdu'?`معذرت، ہمارے کیٹلاگ میں ${requested} دستیاب نہیں ہے۔`:language==='roman_urdu'?`Maazrat 😊 Hamare catalog mein ${requested} available nahi hai.`:`Sorry 😊 We don’t currently carry ${requested}.`;
+  return unavailableOverview(first,products,categories,language);
+}
+function unavailableOverview(first,products=[],categories=[],language='english'){
+  const categoryNames=categories.map(item=>item.name).join(', ');
+  const examples=products.filter(item=>item.inStock).slice(0,6).map(item=>`• ${item.name} — ${formatMoney(item.price,item.currency)}`);
+  const heading=language==='urdu'?`آپ یہ کیٹیگریز دیکھ سکتے ہیں: ${categoryNames}`:language==='roman_urdu'?`Aap ye categories browse kar sakte hain: ${categoryNames}`:`You can browse these categories: ${categoryNames}`;
+  const popular=language==='urdu'?'چند دستیاب مصنوعات:':language==='roman_urdu'?'Kuch available products:':'A few available products:';
+  const close=language==='urdu'?'کسی کیٹیگری یا مصنوع کا نام بتائیں، میں اس کی مکمل تفصیل دکھا دوں گا۔':language==='roman_urdu'?'Kisi category ya product ka naam bata dein, main poori details dikha dunga.':'Tell me a category or product name and I’ll show its full details.';
+  return [first,'',heading,'',popular,...examples,'',close].join('\n');
 }
 function invalidSelectionReply(validation, product, language, attempted = {}) {
   const reason = validation?.reason;
@@ -330,6 +341,23 @@ function question(language, field, options = []) {
   if (language === "urdu") return field === "color" ? `کون سا رنگ چاہیے؟ ${options.join(", ")}` : field === "size" ? `کون سا سائز چاہیے؟ ${options.join(", ")}` : "کتنی تعداد چاہیے؟";
   if (language === "roman_urdu") return field === "color" ? `Kaunsa color chahiye? ${options.join(", ")}` : field === "size" ? `Kaunsa size chahiye? ${options.join(", ")}` : "Quantity kitni chahiye?";
   return field === "color" ? `What color would you like: ${options.join(", ")}?` : field === "size" ? `What size would you like: ${options.join(", ")}?` : "How many would you like?";
+}
+function applyAutomaticSelections(product,selected={}){
+  const next={...(selected||{})};
+  // A sole configured value is not a customer decision. Selecting it here
+  // keeps this behavior universal for every present and future retail tenant.
+  if(!next.color&&product?.colors?.length===1)next.color=product.colors[0];
+  if(!next.size&&product?.sizes?.length===1)next.size=product.sizes[0];
+  return next;
+}
+function combinedAttributeQuestion(product,missing,language){
+  if(missing.length===1)return question(language,missing[0],missing[0]==='color'?product.colors:missing[0]==='size'?product.sizes:[]);
+  const fields=missing.join(', ').replace(/, ([^,]+)$/,' and $1');
+  const options=[missing.includes('color')?`Colors: ${product.colors.join(', ')}`:null,missing.includes('size')?`Sizes: ${product.sizes.join(', ')}`:null].filter(Boolean).join('. ');
+  const example=[missing.includes('color')?product.colors[0]:null,missing.includes('size')?product.sizes[0]:null,missing.includes('quantity')?'2 pieces':null].filter(Boolean).join(', ');
+  if(language==='urdu')return `براہِ کرم ${fields} ایک ہی پیغام میں بھیجیں۔ ${options}۔ مثال: “${example}”`;
+  if(language==='roman_urdu')return `Meherbani karke ${fields} aik hi message mein bhej dein. ${options}. Misal: “${example}”`;
+  return `Please send the ${fields} together in one message. ${options}. For example: “${example}”.`;
 }
 function label(language, key) {
   const values = {

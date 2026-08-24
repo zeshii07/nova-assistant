@@ -55,7 +55,7 @@ Requirements: Node.js 20–22 and either Docker Desktop or a local `llama-server
 binary.
 
 ```powershell
-Copy-Item .env.example .env
+# Configure the existing project-root .env file first.
 npm install
 npm run model:qwen:download
 docker compose -f docker-compose.qwen.yml up -d

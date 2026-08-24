@@ -11,7 +11,12 @@ const CATEGORY_ALIASES = {
   accessories:aliasesFor('catalog.accessories'),
   bags:aliasesFor('catalog.bags'),
   stationery:aliasesFor('catalog.stationery'),
-  'home-office':aliasesFor('catalog.home_office')
+  'home-office':aliasesFor('catalog.home_office'),
+  'personal-care':['personal care','skin care','skincare','beauty'],
+  kitchen:['kitchen','cookware'],
+  fitness:['fitness','exercise','gym'],
+  'mobile-accessories':['mobile accessories','phone accessories','mobile accessory'],
+  travel:['travel','travel accessories']
 };
 const REQUEST_CUES = ['do you have','do you sell','can i get','can i have','i want','i need','show me','looking for','buy','purchase','order','mujhe','mujhy','mujhay','chahiye','chahiyy','chahy','lyni','leni','lyna','lena','ap k pass','aap ke paas','dikhao','ہے','چاہیے'];
 const PRODUCT_FAMILIES = { shirts:aliasesFor('catalog.shirts'), jeans:aliasesFor('catalog.jeans') };
@@ -44,6 +49,10 @@ class CatalogConversationAdapter {
     // still selected underneath Commerce.
     const checkoutActive = state.capabilityState?.commerce?.mode === "checkout";
     const explicitCatalogInterruption = hasAny(normalizedText, REQUEST_CUES);
+    const referentialCheckoutValue=/\b(?:i want|send|deliver|ship)(?: it)? (?:in|to)\b/.test(normalizedText);
+    if(checkoutActive&&referentialCheckoutValue){
+      return {priority:this.priority,candidates:[],entities:{},vocabularyMatches:[]};
+    }
     if (checkoutActive && !explicitCatalogInterruption) return { priority:this.priority, candidates:[], entities:{}, vocabularyMatches:[] };
     const selectedId = state.capabilityState?.catalog?.selectedProductId;
     const selectedAttrs = state.capabilityState?.catalog?.selectedAttributes || {};
@@ -212,11 +221,12 @@ class CatalogConversationAdapter {
     } else if (category) {
       candidates.push({ intent:'catalog.category_browse', confidence:.9, entities:{ categoryId:category.id, categoryTerm:category.term }, reason:'category_without_request_cue' });
     } else if (hasAny(normalizedText, REQUEST_CUES) && /\b(do you sell|do you have|can i get|can i have|i want|i need|looking for|buy|purchase|mujhe|chahiye|ap k pass|aap ke paas)\b/.test(normalizedText)) {
+      const safeAlternatives=(result?.alternatives||[]).filter(product=>isRelevantAlternative(message.text,product));
       entities = {
         requestedText: cleanRequestedText(message.text),
-        recommendationIds:(result?.alternatives||[]).map(x=>x.id).slice(0,3)
+        recommendationIds:safeAlternatives.map(x=>x.id).slice(0,3)
       };
-      candidates.push({ intent:'catalog.unavailable_request', confidence:.955, entities, reason:'explicit_unmatched_catalog_request' });
+      candidates.push({ intent:'catalog.unavailable_request', confidence:1, priority:180, entities, reason:'explicit_unmatched_catalog_request' });
       matches.push({ type:'request', value:'unmatched_catalog_item', score:.955 });
     }
     return { priority:this.priority, candidates, entities, vocabularyMatches:matches };
@@ -304,7 +314,21 @@ function looksLikeAttribute(text) {
   return numberFromText(text) != null && /\b(i meant|make it|instead|pieces?|qty|quantity)\b/.test(text);
 }
 function matchFamily(text){ for(const [id,terms] of Object.entries(PRODUCT_FAMILIES)){ if(terms.some(t=>` ${text} `.includes(` ${normalizeText(t)} `))) return {id,terms}; } return null; }
-function cleanRequestedText(value){ return normalizeCatalogRequest(String(value||'')).replace(/^\s*(?:a|an|the)\s+/i,' ').replace(/[?.!,]/g,' ').replace(/\s+/g,' ').trim() || 'that item'; }
+function cleanRequestedText(value){
+  return normalizeCatalogRequest(String(value||''))
+    .replace(/^\s*(?:i am |i m |im )?(?:looking|searching) for\s+/i,'')
+    .replace(/^\s*(?:do you have|do you sell|i want|i need|can i get|can i have)\s+/i,'')
+    .replace(/\s+(?:do you have|have you got) (?:one|it|this)\s*$/i,'')
+    .replace(/^\s*(?:a|an|the)\s+/i,' ')
+    .replace(/[?.!,]/g,' ').replace(/\s+/g,' ').trim() || 'that item';
+}
+function isRelevantAlternative(requested,product={}){
+  const ignored=new Set(['i','am','is','are','a','an','the','for','my','your','do','you','have','want','need','one','it','this','looking','searching','get','can','with','of']);
+  const tokens=normalizeText(cleanRequestedText(requested)).split(' ').filter(token=>token.length>2&&!ignored.has(token));
+  const productText=normalizeText([product.name,product.description,...(product.aliases||[]),...(product.tags||[])].join(' '));
+  const singular=value=>value.endsWith('ies')?`${value.slice(0,-3)}y`:value.endsWith('s')&&!value.endsWith('ss')?value.slice(0,-1):value;
+  return tokens.some(token=>productText.split(' ').some(candidate=>singular(candidate)===singular(token)));
+}
 function isExactRequestedProductPhrase(value,product){
   const core=normalizeText(normalizeCatalogRequest(String(value||'')));
   return [product.name,...(product.aliases||[])].some(candidate=>normalizeText(candidate)===core);

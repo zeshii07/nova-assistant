@@ -1,4 +1,5 @@
 const { createCleaningRequest } = require("../../cleaning-sdk/src");
+const { createId } = require("../../shared/src/ids");
 
 /** Cleaning domain service. Owns service discovery and service-request records. */
 class CleaningService {
@@ -134,7 +135,7 @@ class CleaningService {
       const requests = (inputs || []).map((input, index) => {
         const service = configured.find((entry) => entry.id === input.serviceId);
         if (!service) throw new Error("Cleaning service is not available.");
-        return createCleaningRequest({ ...input, id:`CLN-${Date.now().toString(36).toUpperCase()}-${index}-${Math.random().toString(36).slice(2,7).toUpperCase()}`, tenantId:tenant.id, customerId, serviceName:service.name, status:holdId?"confirmed":"requested", createdAt });
+        return createCleaningRequest({ ...input, id:createId('CLN').replace('_','-'), tenantId:tenant.id, customerId, serviceName:service.name, status:holdId?"confirmed":"requested", createdAt });
       });
       const save = async () => { for (const request of requests) await owner.requestRepository.save(request); return requests; };
       let saved = requests, event = null;
@@ -163,6 +164,7 @@ function normalize(value) {
     // tenant configure "deep cleaning" once while customers naturally say
     // "deep clean" or "deep cleaned" without falling back to routine service.
     .replace(/\b(?:clean(?:ing|ed|s)?|clening|cleening|clning|clen)\b/g, "clean")
+    .replace(/\bsof\b/g,"sofa")
     .replace(/\s+/g, " ")
     .trim();
 }

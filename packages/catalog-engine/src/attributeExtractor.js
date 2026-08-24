@@ -3,8 +3,9 @@ class AttributeExtractor {
   extract(text, product) {
     if (!product) return {};
     const normalized = normalize(text);
-    const color = resolveKnownValue(normalized, product.colors, COLOR_ALIASES);
-    const size = resolveKnownValue(normalized, product.sizes, SIZE_ALIASES);
+    const comparable = normalizeDimensions(normalized);
+    const color = resolveKnownValue(comparable, product.colors, COLOR_ALIASES);
+    const size = resolveKnownValue(comparable, product.sizes, SIZE_ALIASES);
     return {
       color,
       size,
@@ -30,8 +31,8 @@ const SIZE_ALIASES = {
 };
 function resolveKnownValue(text, validValues, aliases) {
   for (const value of validValues || []) {
-    const canonical = normalize(value);
-    const candidates = new Set([canonical, ...(aliases[canonical] || []).map(normalize)]);
+    const canonical = normalizeDimensions(normalize(value));
+    const candidates = new Set([canonical, ...(aliases[canonical] || []).map((item)=>normalizeDimensions(normalize(item)))]);
     if ([...candidates].some((candidate) => candidate && hasPhrase(text, candidate))) return value;
     const words = text.split(" ");
     if (canonical.length >= 4 && words.some((word) => levenshtein(word, canonical) <= 1)) return value;
@@ -45,7 +46,9 @@ function resolveQuantity(text, product, resolvedSize) {
   // are never mistaken for an order quantity.
   const afterCue = normalized.match(/(?:qty|quantity|pieces?|pcs?|items?|kitne|kitni|تعداد)\s*(\d{1,3})\b/);
   const beforeCue = normalized.match(/\b(\d{1,3})\s*(?:pieces?|pcs?|items?)\b/);
-  const explicit = afterCue || beforeCue;
+  // In "2 pieces 24cm", the number before "pieces" is the quantity and the
+  // following dimension is a product size. Prefer that unambiguous grammar.
+  const explicit = beforeCue || afterCue;
   if (explicit) {
     const value = Number(explicit[1]);
     return value >= 1 && value <= 100 ? value : null;
@@ -72,8 +75,8 @@ function resolveQuantity(text, product, resolvedSize) {
   const digits = [...normalized.matchAll(/\b(\d{1,3})\b/g)].map((match) => Number(match[1])).filter((value) => value >= 1 && value <= 100);
   if (!digits.length) return null;
 
-  const numericSizes = new Set((product?.sizes || []).map((value) => Number(value)).filter(Number.isFinite));
-  const resolvedNumericSize = Number(resolvedSize);
+  const numericSizes = new Set((product?.sizes || []).map(numericPart).filter(Number.isFinite));
+  const resolvedNumericSize = numericPart(resolvedSize);
 
   // A bare numeric reply is quantity only if it is not itself a valid numeric
   // variant. Thus shoe "42" means size 42, while grocery "4" means quantity 4.
@@ -88,6 +91,8 @@ function resolveQuantity(text, product, resolvedSize) {
 }
 function hasPhrase(text, phrase) { return (` ${text} `).includes(` ${phrase} `); }
 function normalize(value) { return String(value || "").toLowerCase().replace(/[-_/]+/g, " ").replace(/[^\p{L}\p{N}]+/gu, " ").replace(/\s+/g, " ").trim(); }
+function normalizeDimensions(value){return String(value||'').replace(/\b(\d{1,4})\s+(cm|mm|ml|l|kg|g|inch|inches)\b/gi,'$1$2');}
+function numericPart(value){const match=String(value||'').trim().match(/^(\d{1,4})(?:\s*(?:cm|mm|ml|l|kg|g|inch|inches))?$/i);return match?Number(match[1]):NaN;}
 function levenshtein(a, b) {
   const rows = Array.from({ length: a.length + 1 }, (_, i) => [i]);
   for (let j = 1; j <= b.length; j += 1) rows[0][j] = j;
