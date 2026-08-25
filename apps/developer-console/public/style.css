@@ -3,3 +3,37 @@
 .studio-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}.studio-head h2{margin:0 0 4px;font-size:18px}.studio-head p,.studio-card p{margin:0;color:#91a0bd;font-size:12px}.studio-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.studio-card{margin:0}.studio-card label{display:block;font-size:12px;color:#a9b8d4;margin:8px 0}.studio-card label span,.hint{color:#7485a8;font-size:11px}.studio-card input,.studio-card textarea,.studio-card select{width:100%;margin-top:4px;background:#172139;color:#e8edf7;border:1px solid #34415f;border-radius:8px;padding:9px}.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.offering-row{border:1px solid #34415f;background:#0e1527;border-radius:10px;padding:9px;margin:8px 0}.offering-main{display:grid;grid-template-columns:2fr 1.4fr 1.2fr .8fr;gap:6px}.offering-extra{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto auto;gap:6px;align-items:end}.offering-extra .check{display:flex;align-items:center;gap:5px;margin:0;padding:8px}.offering-extra .check input{width:auto;margin:0}.primary{background:#2d5bd1;border-color:#4773e5;font-weight:700}#onboardingResult{margin-top:10px;max-height:260px;overflow:auto}@media(max-width:1200px){.studio-grid{grid-template-columns:1fr}.offering-main,.offering-extra{grid-template-columns:1fr 1fr}}
 .control-context{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-bottom:12px}.control-context label{font-size:11px;color:#91a0bd}.control-context input,.control-context select{display:block;margin-top:4px;background:#172139;color:#e8edf7;border:1px solid #34415f;border-radius:8px;padding:9px}.cp-editor-card textarea{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;line-height:1.45}.cp-actions{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}#cpStatus,#cpPreviewResult,#cpAudit,#cpRevisions{max-height:260px;overflow:auto}#cpRevision{width:100%;margin:4px 0 8px;background:#172139;color:#e8edf7;border:1px solid #34415f;border-radius:8px;padding:9px}
 .control-context{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-bottom:12px}.control-context label{font-size:11px;color:#91a0bd}.control-context input,.control-context select{display:block;margin-top:4px;background:#172139;color:#e8edf7;border:1px solid #34415f;border-radius:8px;padding:9px}.cp-editor-card textarea{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;line-height:1.45}.cp-actions{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}#cpStatus,#cpPreviewResult,#cpAudit,#cpRevisions,#cpInventory{max-height:260px;overflow:auto}#cpRevision{width:100%;margin:4px 0 8px;background:#172139;color:#e8edf7;border:1px solid #34415f;border-radius:8px;padding:9px}
+
+/* Responsive console shell. The field labels are intentionally visible: on a
+   phone a pre-filled customer ID or password field otherwise has no context. */
+:root{--console-header-height:78px}html,body{min-height:100%;max-width:100%;overflow-x:hidden}header{height:var(--console-header-height);gap:18px;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}.header-brand{min-width:max-content}.header-brand span{display:block;margin:3px 0 0}.controls{align-items:flex-end;min-width:0}.control-field{display:flex;min-width:0;flex-direction:column;gap:4px}.control-field>span{margin:0;color:#91a0bd;font-size:10px;line-height:1;text-transform:uppercase;letter-spacing:.06em}.control-field select,.control-field input{width:100%;min-width:0;height:38px}.tenant-field{width:min(31vw,390px)}.customer-field{width:min(16vw,190px)}.token-field{width:min(18vw,220px)}.header-actions{display:flex;gap:8px}.header-actions button{height:38px;white-space:nowrap}main{height:calc(100dvh - var(--console-header-height))}nav{display:flex;gap:2px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}.tab{flex:0 0 auto;white-space:nowrap}.chat,.inspect-panel{-webkit-overflow-scrolling:touch}
+
+@media(max-width:900px){
+  :root{--console-header-height:auto}
+  header{height:auto;display:block;padding:14px max(12px,env(safe-area-inset-right)) 12px max(12px,env(safe-area-inset-left))}
+  .header-brand{min-width:0;margin-bottom:12px}.header-brand strong{font-size:17px}.header-brand span{font-size:12px}
+  .controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;width:100%}
+  .tenant-field{grid-column:1/-1;width:auto}.customer-field,.token-field{width:auto}.header-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .control-field select,.control-field input,.header-actions button{height:44px;font-size:16px}
+  main{display:block;height:auto;min-height:100dvh}
+  .chat-panel{height:68dvh;min-height:500px;max-height:720px;border-right:0;border-bottom:1px solid #28324b}
+  .chat{padding:14px 12px;overscroll-behavior:contain}.bubble{max-width:92%;font-size:14px}
+  form{position:sticky;bottom:0;z-index:3;align-items:stretch;padding:10px max(10px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));background:#11182a}
+  form textarea{min-width:0;min-height:48px;font-size:16px}form button{min-width:72px;min-height:48px}
+  .quick{flex-wrap:nowrap;overflow-x:auto;padding:0 12px 12px;overscroll-behavior-x:contain;scrollbar-width:thin}.quick button{flex:0 0 auto;min-height:38px}
+  .inspect-panel{overflow:visible}nav{position:sticky;top:0;z-index:10;padding:8px max(8px,env(safe-area-inset-right)) 8px max(8px,env(safe-area-inset-left))}.tab{min-height:42px;padding:9px 12px}
+  .tabbody{padding:10px}.cards,.studio-grid{grid-template-columns:minmax(0,1fr)}article{min-width:0;padding:11px}.studio-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start}.studio-head>button,.studio-head>div>button{min-height:42px}
+  .offering-main,.offering-extra{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .dataset-actions,.replay-head{align-items:stretch}.dataset-actions select,.dataset-actions button,.replay-head button{min-height:44px;font-size:16px}
+  .control-context>*{flex:1 1 145px;min-width:0}.control-context input,.control-context select{width:100%;font-size:16px}
+  .cp-actions button,.studio-card>button{min-height:42px}pre{max-width:100%;overflow-wrap:anywhere}.replay-item{overflow-wrap:anywhere}
+}
+
+@media(max-width:560px){
+  .controls{grid-template-columns:1fr}.tenant-field,.customer-field,.token-field,.header-actions{grid-column:1}
+  .header-actions{grid-template-columns:1fr 1fr}.chat-panel{height:70dvh;min-height:480px}
+  .studio-head{grid-template-columns:1fr}.studio-head>button,.studio-head>div{width:100%}.studio-head>button{margin-top:4px}
+  .studio-head>div:last-child{display:flex;gap:8px;flex-wrap:wrap}.two,.offering-main,.offering-extra{grid-template-columns:minmax(0,1fr)}
+  .dataset-actions{display:grid;grid-template-columns:1fr}.dataset-actions select,.dataset-actions button{width:100%}
+  .cp-actions{display:grid;grid-template-columns:1fr 1fr}.cp-actions button{width:100%}
+}
