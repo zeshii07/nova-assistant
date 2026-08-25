@@ -13,7 +13,7 @@ class CleaningConversationAdapter {
     const step=state.capabilityState?.cleaning?.step; const candidates=[]; let entities={}; const matches=[];
     const previous=state.capabilityState?.cleaning||{};
     const timeEntities={...extractTimeEntities(primaryText,temporal),...extractCleaningContext(message.text)};
-    let pricingRequested=/\b(charge|charges|price|pricing|cost|rate|rates|quote|quotation|estimate|how much|kitna|kitni|kitne|charges kya|charges kia)\b|(?:قیمت|چارجز|کتنے)/.test(normalizedText);
+    let pricingRequested=/\b(charge|charges|price|pricing|cost|rate|rates|quote|quotation|estimate|how much|kitna|kitni|kitne|kitny|kitnay|charges kya|charges kia)\b|(?:قیمت|چارجز|کتنے)/.test(normalizedText);
     const explicitBookingAction=/\b(book|schedule|reserve|arrange|place (?:a )?request|start (?:a )?(?:booking|request)|confirm (?:the )?(?:booking|service))\b/.test(normalizedText);
     const explicitTransactionLanguage=/\b(i want|i need|book|schedule|arrange|add|change|switch|replace|start (?:a )?(?:booking|request))\b/.test(normalizedText);
     const priceFollowUp=Boolean(previous.priceEnquiry?.serviceId)&&!explicitBookingAction&&!explicitTransactionLanguage&&(
@@ -26,7 +26,10 @@ class CleaningConversationAdapter {
     const discountRequested=/\b(discounts?|special offer|best price|price can you offer|what price can you offer|reduce|cheaper|kam kar|riayat|رعایت)\b/.test(normalizedText);
     const frameBooking=(messageFrame?.intents||[]).some(item=>item.intent==='booking.create');
     const structuredRequest=hasAcquisitionCue(normalizedText)||frameBooking
-      || /\b(clean my|cleaned|cleaning chahiye|karwani hai|krani hai|karani hai|saaf krana|saaf karana|saaf karwana)\b/.test(normalizedText);
+      || /\b(clean my|cleaned|cleaning chahiye|karwani hai|krani hai|karani hai|saaf krana|saaf karana|saaf karwana|can you do[\s\S]{0,50}(?:cleaning|clening|clenening|cleening|clning))\b/.test(normalizedText);
+    // A pure price question is informational even when it includes workforce
+    // and duration. Only explicit acquisition language may open a booking.
+    if(pricingRequested&&!structuredRequest&&!explicitBookingAction)timeEntities.quoteOnly=true;
     const customQuoteWords=/\b(custom quote|custom quotation|custom estimate)\b/.test(normalizedText);
 
     // A quotation is durable conversation context, but it is not a booking.
@@ -382,11 +385,12 @@ class CleaningConversationAdapter {
 
     const propertyContext=tenant.capabilities?.includes('cleaning') && (/\b(apartment|flat|studio|villa|vila|vill|house|home|bedroom|bedrooms|bhk|office)\b/.test(normalizedText)
       || Boolean(closestKeywordToken(normalizedText,['apartment','villa'],{maxDistance:2,minLength:4})));
-    const cleaningDomain=/\b(clean|cleaned|cleaning|cleaners?|clenr|clnr|maids?|safai|sofas?|couches?|curtains?|drapes?|mattresses?|carpets?|rugs?|upholstery|صفائی|صاف)\b/.test(normalizedText)
+    const cleaningDomain=/\b(clean|cleaned|cleaning|cleaners?|clenr|clnr|maids?|safai|sofas?|couches?|curtains?|drapes?|mattresses?|carpets?|rugs?|upholstery)\b/.test(normalizedText)
+      || /صفائی|صاف/.test(normalizedText)
       ||Boolean(closestKeywordToken(normalizedText,['cleaning','cleaner','cleaned'],{maxDistance:2,minLength:5}))
       || (propertyContext && /\b(quote|quotation|estimate|what about|how about|price|cost|clean)\b/.test(normalizedText));
-    const structuredQuote=priceFollowUp || discountRequested || /\b(quote|quotation|estimate|price|cost|charges?|how much|kitna|kitne|kitni)\b|(?:قیمت|چارجز|کتنے)/.test(normalizedText);
-    const propertyServiceQuestion=!step&&!structuredRequest&&!structuredQuote&&propertyContext&&cleaningDomain
+    const structuredQuote=priceFollowUp || discountRequested || /\b(quote|quotation|estimate|price|cost|charges?|how much|kitna|kitne|kitni|kitny|kitnay)\b|(?:قیمت|چارجز|کتنے)/.test(normalizedText);
+    const propertyServiceQuestion=!step&&!structuredRequest&&!structuredQuote&&!resolveCleaningType(normalizedText)&&propertyContext&&cleaningDomain
       && /\b(?:do you|can you|could you|would you|is there|have you got)\b[\s\S]{0,45}\b(?:provide|offer|do|have|clean|cleaning|service|available)\b/.test(normalizedText);
     if(propertyServiceQuestion){
       const propertyType=/\b(?:villa|vila|vill|house|home)\b/.test(normalizedText)||closestKeywordToken(normalizedText,['villa'],{maxDistance:2,minLength:4})?'villa':'apartment';
@@ -430,8 +434,16 @@ class CleaningConversationAdapter {
     if(step && pricingRequested){
       const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
       const explicit=await scoped?.findService?.(cleaningServiceSubjectText(primaryText));
-      const explicitService=explicit?.service&&(explicit.score||0)>=60?explicit.service:null;
+      let explicitService=explicit?.service&&(explicit.score||0)>=60?explicit.service:null;
       const allServices=await scoped?.listServices?.()||[];
+      // A generic "deep cleaning" price interruption must not silently widen
+      // an active Deep Apartment/Villa request back to Deep Home Cleaning.
+      // Only an explicit property change is allowed to replace that scope.
+      const activeService=allServices.find(service=>service.id===previous.serviceId)||null;
+      const explicitPropertyChange=/\b(?:villa|vila|house|apartment|flat|studio)\b/.test(normalizedText);
+      if(explicitService?.id==='CLN002'&&['CLN010','CLN011'].includes(activeService?.id)&&!explicitPropertyChange){
+        explicitService=activeService;
+      }
       const inheritedPriceService=!explicitService&&previous.priceEnquiry?.serviceId
         ? allServices.find(service=>service.id===previous.priceEnquiry.serviceId)
         : null;
@@ -485,7 +497,7 @@ class CleaningConversationAdapter {
     const explicitWorkforce=/\b(?:cleaners?|maids?|workers?|people|persons?|person)\b/.test(normalizedText);
     if(!step && cleaningDomain && (pricingRequested||structuredRequest) && timeEntities.durationHours && timeEntities.cleanerCount && explicitWorkforce && new Set(serviceHeads).size<=1){
       entities={...timeEntities,policyFacets,pricingRequested:true,pricingModel:'hourly_cleaner'};
-      candidates.push({intent:'cleaning.pricing_request',confidence:1,entities,reason:'explicit_hourly_staffing_quote'});
+      candidates.push({intent:'cleaning.pricing_request',confidence:1,priority:structuredRequest?200:undefined,entities,reason:'explicit_hourly_staffing_quote'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'semantic_role',value:'duration_and_staffing',score:1},{type:'domain',value:'cleaning',score:1}]};
     }
 
@@ -543,7 +555,7 @@ class CleaningConversationAdapter {
         candidates.push({
           intent:'cleaning.structured_service_request',
           confidence:clearTransaction?1:.99996,
-          priority:clearTransaction?130:undefined,
+          priority:clearTransaction?200:undefined,
           entities,
           reason:clearTransaction?'explicit_structured_cleaning_transaction':'structured_cleaning_service_request'
         });
@@ -674,7 +686,7 @@ class CleaningConversationAdapter {
       candidates.push({intent:'cleaning.pricing_request',confidence:.9993,entities,reason:'cleaning_duration_pricing'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'semantic_role',value:'duration',score:.9993},{type:'domain',value:'cleaning',score:.99}]};
     }
-    if (/\b(what|which|show|list|tell me|do you have|do you offer|provide)\b[\s\S]{0,35}\b(cleaning )?services\b|\b(what cleaning services|cleaning services do you|services do you offer|kia cleaning services|kya cleaning services)\b/.test(normalizedText)) {
+    if (/\b(what|which|show|list|tell me|do you have|do you offer|provide)\b[\s\S]{0,35}\b(cleaning )?services\b|\b(what cleaning services|cleaning services do you|services do you offer|kia cleaning services|kya cleaning services)\b|\b(?:ap|aap)\s+log\b[\s\S]{0,25}\b(?:kis kis|kon kon|kya kya|kia kia)\b[\s\S]{0,30}\b(?:cleaning|clening|safai)\b/.test(normalizedText)) {
       candidates.push({intent:'cleaning.service_list',confidence:.985,entities:{},reason:'cleaning_service_list_phrase'});
       return {priority:this.priority,candidates,entities:{},vocabularyMatches:[{type:'phrase',value:'cleaning services',score:.985}]};
     }
@@ -686,6 +698,10 @@ class CleaningConversationAdapter {
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning',score:1}]};
     }
     const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
+    if(!previous.step&&!previous.priceEnquiry&&!previous.quotedService&&/\b(?:book|schedule|reserve)\s+(?:it|this)\b/.test(normalizedText)&&!cleaningDomain){
+      candidates.push({intent:'cleaning.service_explore',confidence:1,priority:205,entities:{},reason:'ungrounded_referential_cleaning_booking'});
+      return {priority:this.priority,candidates,entities:{},vocabularyMatches:[{type:'clarification',value:'cleaning_service_required',score:1}]};
+    }
     const found=scoped?await scoped.findService(primaryText):null;
     if(found?.service){
       if(structuredRequest&&timeEntities.propertyType&&isGenericPropertyCleaningService(found.service)&&!resolveCleaningType(normalizedText)){
@@ -711,7 +727,7 @@ class CleaningConversationAdapter {
         candidates.push({
           intent:'cleaning.service_request',
           confidence:clearTransaction?1:Math.min(.99,.86+(found.score||0)/500),
-          priority:clearTransaction?130:undefined,
+          priority:clearTransaction?200:undefined,
           entities,
           reason:clearTransaction?'explicit_cleaning_service_transaction':'cleaning_service_match'
         });
@@ -773,8 +789,8 @@ function isGenericPropertyCleaningService(service){
 }
 function resolveCleaningType(value){
   const text=normalizeText(value);
-  if(/\bdeep\b/.test(text))return 'deep';
-  if(/\b(?:standard|general|regular|routine|hourly)\b/.test(text))return 'standard';
+  if(/\bdeep\b|گہری/.test(text))return 'deep';
+  if(/\b(?:standard|stndrad|standrd|general|regular|routine|hourly)\b/.test(text))return 'standard';
   const fuzzy=closestKeywordToken(text,['standard','regular','routine','hourly'],{maxDistance:2,minLength:5});
   return fuzzy?'standard':null;
 }
@@ -798,6 +814,7 @@ function extractCleaningContext(text){
     m=n.match(new RegExp(`\\b(${numberToken})\\s*(?:bedrooms?|bed|bhk)\\b`));
     if(m)out.bedrooms=numberFromText(m[1]);
   }
+  if(out.bedrooms==null){m=n.match(/(\d+|ایک|دو|تین|چار|پانچ|چھ|سات|آٹھ|نو|دس)\s*(?:کمروں?|کمرے|کمرہ)/);if(m)out.bedrooms=numberFromText(m[1]);}
   m=n.match(/\b(\d+)\s*(?:washrooms?|bathrooms?)\b/);if(m)out.washrooms=Number(m[1]);
   else if(out.bedrooms&&/\beach\s+(?:bedroom\s+)?(?:has|with)\s+(?:an\s+)?attached\s+(?:washroom|bathroom)\b/.test(n))out.washrooms=out.bedrooms;
   m=n.match(/\b(\d+)\s*(?:balcon(?:y|ies)|balconys|blcon(?:y|ies)|blconies|blcony)\b/);if(m)out.balconies=Number(m[1]);
@@ -816,8 +833,8 @@ function extractCleaningContext(text){
   else if(/\bmedium\b/.test(n))out.serviceVariant='medium';
   else if(/\blarge\b/.test(n))out.serviceVariant='large';
   else if(/\bsmall\b/.test(n))out.serviceVariant='small';
-  if(/\b(villa|vila)\b/.test(n))out.propertyType='villa';
-  else if(/\b(apartment|flat|studio)\b/.test(n))out.propertyType='apartment';
+  if(/\b(villa|vila)\b|ولا/.test(n))out.propertyType='villa';
+  else if(/\b(apartment|flat|studio)\b|(?:فلیٹ|اپارٹمنٹ)/.test(n))out.propertyType='apartment';
   if(/\bstudio\b/.test(n)&&out.bedrooms==null)out.bedrooms=0;
   if(/\bupper floor\b/.test(n))out.propertyFloor='upper';
   if(/\b(?:inside|interior) (?:the )?refrigerator|\binside refrigerator cleaning\b/.test(n))out.insideRefrigerator=true;
@@ -851,7 +868,8 @@ function extractCleaningContext(text){
     if(value&&value!==out.finishBy)clockOptions.push(value);
   }
   if(clockOptions.length)out.preferredTimeOptions=[...new Set(clockOptions)];
-  const location=raw.match(/(?:\blocation\s*:\s*|\bi live in\s+)([^.\n]+?)(?=\s+(?:thank you|thanks)\b|[.!?]|$)/i);
+  const location=raw.match(/(?:\blocation\s*:\s*|\baddress(?:\s+is)?\s*:?\s*|\bi live in\s+)([^.\n]+?)(?=\s+(?:thank you|thanks)\b|[.!?]|$)/i)
+    || [...raw.matchAll(/\bat\s+(?=((?:(?:house|villa|building|apartment|flat|office|shop)\b[^.!?\n]{3,120}|\d{1,5}\s+[\p{L}][\p{L} .'-]{1,80}\s+(?:road|street|lane|avenue|block|phase)\b[^.!?\n]{0,60}))(?=\s+(?:and\s+)?(?:my\s+)?(?:name|phone|contact|email)\b|[.!?]|$))/giu)].at(-1);
   if(location)out.address=location[1].trim().replace(/[,;]+$/,'');
   const name=raw.match(/\b(?:my name is|name\s*:)\s*([\p{L}][\p{L} .'-]{1,70}?)(?=\s+(?:(?:and\s+)?(?:my\s+)?(?:phone|contact|number)|what is|what's|who are|can i|could i|i want|i need|i would|do you|please|but|because)\b|[.!?,;\n]|$)/iu);
   if(name)out.name=name[1].trim().replace(/\b\p{L}/gu,c=>c.toUpperCase());
@@ -869,6 +887,7 @@ function isAnyAvailableTime(text){
 }
 function isClearTransaction(text,entities={}){
   if(/\b(i want|i need|book|schedule|arrange|would like)\b/.test(text))return true;
+  if(/\bcan you do\b[\s\S]{0,50}\b(?:cleaning|clening|clenening|cleening|clning)\b/.test(text))return true;
   // "Can I get ...?" is a service-availability question until the customer
   // also supplies a scheduling constraint. With a date/time it is actionable.
   return /\bcan i (?:get|have)\b/.test(text)&&Boolean(entities.date||entities.dateText||entities.weekday||entities.startTime||entities.time);
@@ -886,13 +905,13 @@ function cleaningServiceSubjectText(value){
     const match=n.match(/\b(mattress|carpet|rug|curtain|drape|office|commercial|laundry|pest|duct)\b/);
     return `${match[1]} cleaning`;
   }
-  if(/\bdeep\b/.test(n)){
-    if(/\b(villa|vila)\b/.test(n))return 'deep villa cleaning';
-    if(/\b(apartment|flat|studio)\b/.test(n))return 'deep apartment cleaning';
+  if(/\bdeep\b|گہری/.test(n)){
+    if(/\b(villa|vila)\b|ولا/.test(n))return 'deep villa cleaning';
+    if(/\b(apartment|flat|studio)\b|(?:فلیٹ|اپارٹمنٹ)/.test(n))return 'deep apartment cleaning';
     return 'deep home cleaning';
   }
   const standardNegated=/\b(?:standard|general|regular|routine)\b[\s\S]{0,18}\b(?:not|nahi|nahin|nhn)\b|\b(?:not|nahi|nahin|nhn)\b[\s\S]{0,18}\b(?:standard|general|regular|routine)\b/.test(n);
-  if(!standardNegated&&/\b(?:standard|general|regular|routine|hourly)\b/.test(n))return 'standard home cleaning';
+  if(!standardNegated&&/\b(?:standard|stndrad|standrd|general|regular|routine|hourly)\b/.test(n))return 'standard home cleaning';
   return priceSubjectText(text);
 }
 module.exports={CleaningConversationAdapter,extractTimeEntities,extractCleaningContext,isAnyAvailableTime};

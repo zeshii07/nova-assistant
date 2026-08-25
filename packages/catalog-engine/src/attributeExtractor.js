@@ -51,7 +51,7 @@ function resolveQuantity(text, product, resolvedSize) {
   const explicit = beforeCue || afterCue;
   if (explicit) {
     const value = Number(explicit[1]);
-    return value >= 1 && value <= 100 ? value : null;
+    return value >= 1 ? value : null;
   }
 
   const numberWords = {
@@ -72,7 +72,13 @@ function resolveQuantity(text, product, resolvedSize) {
     if (tokens.length === 1 || quantityCue.test(normalized) || new RegExp(`\\b${token}\\s*(?:pieces?|pcs?|items?)\\b`).test(normalized)) return numberWords[token];
   }
 
-  const digits = [...normalized.matchAll(/\b(\d{1,3})\b/g)].map((match) => Number(match[1])).filter((value) => value >= 1 && value <= 100);
+  const leadingOrder=normalized.match(/\b(?:i want|i need|buy|purchase|order|add)\s+(\d{1,5})\b/);
+  if(leadingOrder){
+    const value=Number(leadingOrder[1]);
+    const numericSizes=new Set((product?.sizes || []).map(numericPart).filter(Number.isFinite));
+    if(value>=1&&!numericSizes.has(value))return value;
+  }
+  const digits = [...normalized.matchAll(/\b(\d{1,5})\b/g)].map((match) => Number(match[1])).filter((value) => value >= 1);
   if (!digits.length) return null;
 
   const numericSizes = new Set((product?.sizes || []).map(numericPart).filter(Number.isFinite));

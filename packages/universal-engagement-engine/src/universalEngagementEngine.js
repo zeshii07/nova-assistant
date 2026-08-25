@@ -130,7 +130,7 @@ class UniversalEngagementEngine {
 
   referencesStoredDetails(raw){
     const text=normalizeText(raw).replace(/previuos|privious|pervious/g,'previous');
-    return /^(?:yes\s+)?use(?:\s+my|\s+the)?\s+(?:(?:previous|old|saved|existing|current|configured)(?:\s+(?:contact|customer|delivery|profile))?\s+)?(?:details|information|info|name and details)$|^(?:yes\s+)?(?:use|keep)\s+(?:all\s+)?(?:the\s+)?other\s+(?:provided\s+)?details$|^(?:yes\s+)?use\s+(?:my\s+)?configured\s+name\s+and\s+details$|^(?:meri|meray|mere)\s+(?:purani|pehli|saved)\s+(?:details|maloomat|information)\s+(?:use|rakh|laga)\s*(?:karo|kar dein)?$|^(?:purani|pehli)\s+(?:details|maloomat)\s+(?:theek|same|use)|^(?:میری|میرے)\s+(?:پرانی|محفوظ)\s+(?:تفصیلات|معلومات)\s+(?:استعمال|رکھ)/i.test(text);
+    return /^(?:yes\s+)?use(?:\s+my|\s+the)?\s+(?:(?:previous|old|saved|existing|current|configured)(?:\s+(?:contact|customer|delivery|profile))?\s+)?(?:details|information|info|name and details)$|^(?:yes\s+)?(?:use|keep)\s+(?:all\s+)?(?:the\s+)?(?:other\s+)?(?:provided\s+)?details(?:\s+(?:the\s+)?same)?$|^(?:yes\s+)?(?:keep|use)\s+(?:everything|all information|all info)\s+(?:the\s+)?same$|^(?:yes\s+)?use\s+(?:my\s+)?configured\s+name\s+and\s+details$|^(?:sab|sari|saari)\s+(?:details|information|info|maloomat)\s+(?:same\s+)?(?:rakho|rakhna|rakh dein|use karo|use kar dein)$|^(?:meri|meray|mere)\s+(?:purani|pehli|saved)\s+(?:details|maloomat|information)\s+(?:use|rakh|laga)\s*(?:karo|kar dein)?$|^(?:purani|pehli)\s+(?:details|maloomat)\s+(?:theek|same|use)|^(?:میری|میرے)\s+(?:پرانی|محفوظ)\s+(?:تفصیلات|معلومات)\s+(?:استعمال|رکھ)/i.test(text);
   }
 
   validateFieldAnswer(field, raw, options = {}) {
@@ -139,7 +139,7 @@ class UniversalEngagementEngine {
     // Approval/continuation language belongs to the active workflow. It must
     // never become a customer's name, address, city, phone, or email even if a
     // routing adapter fails to claim the turn first.
-    if(['name','address','city','landmark','phone','email'].includes(field)&&(isConfirmation(text)||isWorkflowAcceptance(text)))
+    if(['name','address','city','landmark','phone','email'].includes(field)&&(isConfirmation(text)||isWorkflowAcceptance(text)||this.referencesStoredDetails(text)))
       return invalid(field,`That looks like a workflow confirmation, not your ${pretty(field).toLowerCase()}.`);
     // A pending customer-detail field must never consume a new question,
     // catalog/service request, cancellation, confirmation, or unrelated command.

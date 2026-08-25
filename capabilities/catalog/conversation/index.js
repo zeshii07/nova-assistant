@@ -23,7 +23,7 @@ const REQUEST_CUES = ['do you have','do you sell','can i get','can i have','coul
 const PRODUCT_FAMILIES = { shirts:aliasesFor('catalog.shirts'), jeans:aliasesFor('catalog.jeans') };
 const BROWSE_COLORS = { black:'Black', white:'White', blue:'Blue', navy:'Navy', grey:'Grey', gray:'Grey', brown:'Brown', silver:'Silver', gold:'Gold', olive:'Olive', maroon:'Maroon', red:'Red' };
 const BROWSE_SIZES = { small:'S', s:'S', medium:'M', m:'M', large:'L', l:'L', xl:'XL', xxl:'XXL' };
-const LIST_CUES = ['what products','what other products','other products','which products','what do you have','what do you sell','show products','show me your products','list products','list items','ap k pass kia kia','ap k pass kya kya','aap ke paas kya kya hai','kon sy products','konsay products','products dikhao','konsy chezyn ap k pss hain','konsi cheezen ap k pas hain','ap k pass kon kon c chez hai','ap k pas kon kon si cheezein hain','kon kon c chez','kya kya cheezen hain','kia kia cheezen hain'];
+const LIST_CUES = ['what products','what other products','other products','which products','what do you have','what do you sell','show products','show me your products','list products','list items','ap k pass kia kia','ap k pass kya kya','aap ke paas kya kya hai','kon sy products','konsay products','products dikhao','konsy chezyn ap k pss hain','konsi cheezen ap k pas hain','ap k pass kon kon c chez hai','ap k pas kon kon si cheezein hain','ap k pas kon kon si cheezen available hain','kon kon c chez','kya kya cheezen hain','kia kia cheezen hain'];
 
 const activeAttributeExtractor = new AttributeExtractor();
 
@@ -200,9 +200,13 @@ class CatalogConversationAdapter {
     if (result?.product) {
       // Strict resolution: a partial/fuzzy product hit is evidence, not identity.
       // Example: "skinny jeans" must not silently become "Denim Jeans".
-      const explicitRequest = hasAny(normalizedText, REQUEST_CUES)||hasAcquisitionCue(normalizedText);
+      const explicitRequest = hasAny(normalizedText, REQUEST_CUES)||hasAcquisitionCue(normalizedText)||/\badd\b/.test(normalizedText);
       const unmatchedModifiers = findUnmatchedProductModifiers(normalizedText, result);
-      const weakPartial = explicitRequest && unmatchedModifiers.length > 0;
+      // Description/tag overlap alone is not product identity. A fabricated
+      // "Quantum Laptop" must not become a backpack merely because that real
+      // product mentions a laptop compartment in its approved description.
+      const weakSemanticEvidence=Number(result.score||0)<60&&!category&&!family&&catalogIdentityTerms(normalizedText).length>1;
+      const weakPartial = explicitRequest && (unmatchedModifiers.length > 0||weakSemanticEvidence);
       if (weakPartial) {
         const recommendations=[result.product,...(result.alternatives||[])].filter((x,i,a)=>x&&a.findIndex(y=>y.id===x.id)===i).slice(0,3);
         entities = {
@@ -341,6 +345,10 @@ function unmatchedCategoryDescriptors(text){
 }
 function hasIdentityModifier(text){
   return /\b(skinny|slim|bootcut|straight|cargo|formal|maxi|girls?|boys?|women|mens?|men)\b/.test(normalizeText(text));
+}
+function catalogIdentityTerms(value){
+  const ignored=new Set(['i','we','a','an','the','my','your','to','for','from','of','in','into','do','you','have','want','need','please','add','buy','purchase','order','get','can','could','would','show','me','cart','item','product','products','color','colour','size','black','white','blue','navy','brown','silver','gold','rs','chahiye','chahiyy','chahy','mujhe','mujhy','mujhay','kro','kar','do']);
+  return normalizeText(value).split(' ').filter(token=>token.length>=3&&!ignored.has(token)&&!/^\d+$/.test(token)&&!/^rs\d+$/.test(token));
 }
 function findUnmatchedProductModifiers(text,result){
   // Domain-semantic modifiers that materially change product identity. They

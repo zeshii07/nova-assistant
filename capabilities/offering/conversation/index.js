@@ -306,9 +306,9 @@ function isMenuFirst(text, clauses) {
 }
 function extractPartySize(text) {
   const m = text.match(
-    /\b(?:for\s+)?(\d+)\s*(?:people|persons|guests|seats)\b/,
+    /\b(?:for\s+)?(\d+)\s*(?:people|persons|guests|seats)\b|\b(?:table|reservation)\s+for\s+(\d{1,2})\b/,
   );
-  return m ? Number(m[1]) : null;
+  return m ? Number(m[1] || m[2]) : null;
 }
 function matchingBrowseItems(text, items) {
   const stop = new Set([

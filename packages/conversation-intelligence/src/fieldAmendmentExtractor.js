@@ -1,7 +1,7 @@
 const {normalizeText}=require('./text');
 
 const FIELD_LABELS=Object.freeze({
-  name:'(?:full\s+)?(?:name|naam|nme)',
+  name:'(?:full\s+)?(?:name|naam|nme|nam)',
   phone:'(?:phone|mobile|contact)(?:\s+(?:number|no))?|number',
   email:'e[ -]?mail(?:\s+address)?',
   address:'(?:delivery|service|home|full)?\s*address|location',
@@ -21,7 +21,7 @@ function extractFieldAmendment(raw,{allowedFields=Object.keys(FIELD_LABELS)}={})
   // Reusing an existing CRM value is acceptance, not a request to replace it.
   // Let the active workflow resolve the saved value from the tenant-scoped
   // customer profile instead of opening a field-edit prompt.
-  if(/\b(?:use|keep|take)\b[\s\S]{0,24}\b(?:previous|previuos|earlier|old|same|saved|existing|current|configured)\b[\s\S]{0,20}\b(?:name|phone|number|contact|email|address|details?|information)\b/i.test(source)
+  if(/\b(?:use|keep|take)\b[\s\S]{0,24}\b(?:previous|previuos|earlier|old|same|saved|existing|current|configured|purana|pahly wala)\b[\s\S]{0,20}\b(?:name|phone|number|contact|email|address|details?|information)\b/i.test(source)
     || /\bno new (?:name|phone|number|contact|email|address)\b[\s\S]{0,24}\b(?:old|previous|saved)\b/i.test(source))return null;
   const updateCue=/\b(?:change|update|edit|correct|replace|switch|set|use|new|instead|should be|kar do|kr do|kardo|badal do|tabdeel)\b/.test(text);
   if(!updateCue)return null;
@@ -30,6 +30,12 @@ function extractFieldAmendment(raw,{allowedFields=Object.keys(FIELD_LABELS)}={})
     const labelRegex=new RegExp(`\\b(?:my|the|mera|meri|apna|apni)?\\s*(?:${label})\\b`,'iu');
     if(!labelRegex.test(source))continue;
     let value=extractValue(source,field,label);
+    // A cue elsewhere in a long, multi-intent message is not enough to turn
+    // an informational field mention into an amendment. For example, "tell
+    // me your phone ... do not change the number of cleaners" is not a phone
+    // replacement request.
+    if(value==null)continue;
+    if(field==='phone'&&/^of\s+(?:cleaners?|workers?|people|items?|products?|pieces?|hours?|bedrooms?)\b/i.test(value))continue;
     return {field,rawValue:value,action:'replace',explicit:true};
   }
   return null;

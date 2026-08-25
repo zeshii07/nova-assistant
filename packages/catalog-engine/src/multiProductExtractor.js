@@ -104,6 +104,9 @@ function extractProductRequests(text,products=[]){
      if(inheritedProduct){
        const attrs=attributes.extract(segment,inheritedProduct);
        if((attrs.color||attrs.size)&&isVariantContinuation(segment,attrs)){
+         const prior=[...items].reverse().find(item=>item.productId===inheritedProduct.id);
+         if(!attrs.color&&prior?.color)attrs.color=prior.color;
+         if(!attrs.size&&prior?.size&&/\b(?:same size|usi size)\b/.test(norm(segment)))attrs.size=prior.size;
          items.push(toItem(inheritedProduct,segment,quantityFromSegment(segment,inheritedProduct,attrs.size),attrs,true));
        }
      }else if(looksLikeDetachedVariant(segment)){

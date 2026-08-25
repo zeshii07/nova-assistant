@@ -24,6 +24,12 @@ class CleaningCapability extends BaseCapability {
     const text = normalize(context.message.text);
     const previous = context.state.capabilityState?.cleaning || {};
 
+    if(context.intelligence?.selected?.intent==='cleaning.service_list'){
+      const services=await cleaning.listServices();
+      const reply=formatServices(services,language);
+      return result(reply,language,{...previous,step:null},'cleaning_services_listed',{intent:'CLEANING_SERVICES_LISTED',payload:{legacyText:reply,preferLegacyText:true,serviceLines:services.map(service=>`• ${service.name} — ${formatPrice(service)}`).join('\n')}});
+    }
+
     if(context.intelligence?.selected?.intent==='cleaning.date_choice_clarification'){
       const options=context.intelligence?.entities?.dateOptions||[];
       const labels=options.map(title);

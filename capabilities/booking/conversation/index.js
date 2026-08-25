@@ -374,9 +374,9 @@ function extract(text, raw, config, engagement, temporal = {}) {
   const time = engagement?.parseField?.("time", raw);
   if (time?.valid) e.time = time.value;
   const party = text.match(
-    /\b(?:for\s+)?(\d+)\s*(?:people|persons|guests|seats)\b/,
+    /\b(?:for\s+)?(\d+)\s*(?:people|persons|guests|seats)\b|\b(?:table|reservation)\s+for\s+(\d{1,2})\b/,
   );
-  if (party) e.partySize = Number(party[1]);
+  if (party) e.partySize = Number(party[1] || party[2]);
   const grade = text.match(
     /\b(?:grade|class)\s*(\d{1,2})(?:st|nd|rd|th)?\b|\b(\d{1,2})(?:st|nd|rd|th)?\s*(?:grade|class)\b/,
   );

@@ -1,22 +1,24 @@
-const { normalizeText, numberFromText, normalizeWeekdayTypos } = require('./text');
+const { normalizeText, numberFromText, normalizeWeekdayTypos, normalizeUrduDigits } = require('./text');
 const { TIME_WINDOWS } = require('./multilingualLexicon');
 
 const MONTHS='january february march april may june july august september october november december'.split(' ');
+const URDU_MONTHS=Object.freeze({جنوری:'January',فروری:'February',مارچ:'March',اپریل:'April',مئی:'May',جون:'June',جولائی:'July',اگست:'August',ستمبر:'September',اکتوبر:'October',نومبر:'November',دسمبر:'December'});
 const DAYS='monday tuesday wednesday thursday friday saturday sunday'.split(' ');
 
 /** Extracts universal date/time structure without making availability claims. */
 class TemporalSemanticExtractor {
   extract(value) {
     const raw=String(value||'');
+    const digitRaw=normalizeUrduDigits(raw);
     const n=normalizeWeekdayTypos(raw);
     const out={version:'1.0'};
-    const range=extractTimeRange(raw);
+    const range=extractTimeRange(digitRaw);
     if(range){
       out.startTime=range.startTime;
       out.endTime=range.endTime;
       out.durationHours=range.durationHours;
     } else {
-      const start=extractStartTime(raw);
+      const start=extractStartTime(digitRaw);
       if(start)out.startTime=start;
     }
     const duration=extractDuration(n);
@@ -26,7 +28,9 @@ class TemporalSemanticExtractor {
     else if(/\btoday\b|\baaj\b|آج/.test(n))out.dateReference='today';
     const weekday=DAYS.find((day)=>new RegExp(`\\b${day}\\b`).test(n));
     if(weekday)out.weekday=weekday;
-    const natural=extractNaturalDate(raw);
+    const numeric=digitRaw.match(/\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})\b/);
+    if(numeric)out.dateText=`${numeric[1].padStart(2,'0')}/${numeric[2].padStart(2,'0')}/${numeric[3]}`;
+    const natural=extractNaturalDate(digitRaw);
     if(natural)out.dateText=natural;
     for(const [window,aliases] of Object.entries(TIME_WINDOWS)){
       if(aliases.some(alias=>n.split(' ').includes(alias))){out.timeWindow=window;break;}
@@ -41,20 +45,31 @@ function extractDuration(n){
 }
 function extractTimeRange(raw){
   const value=String(raw||'');
+  const romanRange=normalizeText(value).match(/\b(\d{1,2})(?::(\d{2}))?\s*(?:bjy|baje|bajay|bajy|بجے)?\s+(?:sy|se|say)\s+(\d{1,2})(?::(\d{2}))?\s*(?:bjy|baje|bajay|bajy|بجے)?(?:\s+tak)?\b/i);
   const match=value.match(/\b(?:from\s+)?(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?\s+(?:to|until|till|-)\s+(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?/i)
     || value.match(/\bbetween\s+(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?\s+and\s+(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?/i);
-  if(!match)return null;
-  const start=parseClock(match[1],match[2],match[3]||match[6]);
-  const end=parseClock(match[4],match[5],match[6]||match[3]);
+  if(!match&&!romanRange)return null;
+  const window=normalizeText(value);
+  const inferred=/\b(?:shaam|sham|evening|dopahar|dopehar|dupehar|afternoon|raat|rat|night|شام|دوپہر|رات)\b/.test(window)?'pm':/\b(?:subah|subha|morning|savere|sawere|صبح|سویرے)\b/.test(window)?'am':null;
+  const start=romanRange?parseClock(romanRange[1],romanRange[2],inferred):parseClock(match[1],match[2],match[3]||match[6]||inferred);
+  let end=romanRange?parseClock(romanRange[3],romanRange[4],inferred):parseClock(match[4],match[5],match[6]||match[3]||inferred);
   if(!start||!end)return null;
+  // In conversational ranges such as "subha 10 bjy sy 1 bjy tak", the
+  // second clock is naturally the next occurrence (13:00), not 01:00 before
+  // the start. Preserve a maximum twelve-hour same-day interpretation.
+  if(end.minutes<=start.minutes&&start.minutes-end.minutes<12*60){
+    const adjusted=end.minutes+12*60;
+    end={minutes:adjusted,value:`${String(Math.floor(adjusted/60)%24).padStart(2,'0')}:${String(adjusted%60).padStart(2,'0')}`};
+  }
   const delta=end.minutes-start.minutes;
   return {startTime:start.value,endTime:end.value,durationHours:delta>0?delta/60:null};
 }
 function extractStartTime(raw){
   const normalized=normalizeText(raw);
   const window='(?:subah|subha|sabah|savere|sawere|savera|fajr|morning|shaam|sham|evening|dopahar|dopehar|dupehar|afternoon|raat|rat|night|صبح|سویرے|شام|دوپہر|رات)';
-  const roman=normalized.match(new RegExp(`(?:^|\\s)(${window})\\s+(\\d{1,2})(?::(\\d{2}))?\\s*(?:bjy|baje|bajay|bajy|بجے)?(?:$|\\s)`,'iu'))
-    || normalized.match(new RegExp(`(?:^|\\s)(\\d{1,2})(?::(\\d{2}))?\\s*(?:bjy|baje|bajay|bajy|بجے)?\\s+(${window})(?:$|\\s)`,'iu'));
+  const hourToken='(?:\\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|ek|aik|do|teen|char|chaar|paanch|ایک|دو|تین|چار|پانچ|چھ|سات|آٹھ|نو|دس)';
+  const roman=normalized.match(new RegExp(`(?:^|\\s)(${window})\\s+(${hourToken})(?::(\\d{2}))?\\s*(?:bjy|baje|bajay|bajy|بجے)?(?:$|\\s)`,'iu'))
+    || normalized.match(new RegExp(`(?:^|\\s)(${hourToken})(?::(\\d{2}))?\\s*(?:bjy|baje|bajay|bajy|بجے)?\\s+(${window})(?:$|\\s)`,'iu'));
   if(roman){
     const windowFirst=!/^\d/.test(roman[0]);
     const windowValue=windowFirst?roman[1]:roman[3];
@@ -71,7 +86,7 @@ function extractStartTime(raw){
   return parseClock(match[1],match[2],match[3])?.value||null;
 }
 function parseClock(hourValue,minuteValue,meridiem){
-  let hour=Number(hourValue),minute=Number(minuteValue||0);
+  let hour=/^\d+$/.test(String(hourValue))?Number(hourValue):numberFromText(hourValue),minute=Number(minuteValue||0);
   if(!Number.isInteger(hour)||!Number.isInteger(minute)||minute<0||minute>59)return null;
   const marker=String(meridiem||'').toLowerCase().replace(/\./g,'');
   if(marker){
@@ -87,6 +102,9 @@ function extractNaturalDate(raw){
   if(m)return `${Number(m[1])} ${title(m[2])}${m[3]?` ${m[3]}`:''}`;
   m=String(raw||'').match(new RegExp(`\\b(${monthPattern})\\s+(\\d{1,2})(?:,?\\s+(\\d{4}))?\\b`,'i'));
   if(m)return `${title(m[1])} ${Number(m[2])}${m[3]?` ${m[3]}`:''}`;
+  const urduPattern=Object.keys(URDU_MONTHS).join('|');
+  m=String(raw||'').match(new RegExp(`(\\d{1,2})\\s+(${urduPattern})(?:\\s+(\\d{4}))?`,'u'));
+  if(m)return `${Number(m[1])} ${URDU_MONTHS[m[2]]}${m[3]?` ${m[3]}`:''}`;
   return null;
 }
 function title(value){const s=String(value||'').toLowerCase();return s.charAt(0).toUpperCase()+s.slice(1);}

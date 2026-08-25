@@ -31,12 +31,14 @@ test('cleaning confirmation accepts a bounded common typo',async()=>{
 });
 
 test('salon compound request preserves services, explicit date, window, price, duration, and hair length',async()=>{
-  const response=await ask('salon-demo','salon-compound',`Hi, I’d like to book a hair color, haircut, and blow-dry for Friday, 21 August, preferably between 2:00 PM and 5:00 PM. My hair is shoulder-length. Could you tell me the estimated price and how long the appointment will take?`);
+  // Keep the year explicit and comfortably in the future so this regression
+  // does not change meaning when the real calendar passes its original date.
+  const response=await ask('salon-demo','salon-compound',`Hi, I’d like to book a hair color, haircut, and blow-dry for Friday, 23 August 2030, preferably between 2:00 PM and 5:00 PM. My hair is shoulder-length. Could you tell me the estimated price and how long the appointment will take?`);
   assert.equal(response.capabilityId,'booking');
   assert.equal(response.intelligence.selected.intent,'booking.start');
   const state=response.state.capabilityState.booking;
   assert.deepEqual(state.items.map(x=>x.id),['hair-color','haircut','hair-styling']);
-  assert.equal(state.slots.date,'21/08/2026');
+  assert.equal(state.slots.date,'23/08/2030');
   assert.equal(state.slots.time,'2:00 pm');
   assert.equal(state.metadata.preferredEndTime,'17:00');
   assert.equal(state.metadata.hairLength,'shoulder-length');

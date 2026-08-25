@@ -2,7 +2,7 @@ const {normalizeText,normalizeWeekdayTypos}=require('../../../packages/conversat
 const {extractServiceConstraints}=require('../../../packages/conversation-intelligence/src/serviceConstraintExtractor');
 class AvailabilityConversationAdapter{
  constructor(){this.capabilityId='availability';this.priority=105;}
- async analyze({tenant,message,services,state}){
+ async analyze({tenant,message,services,state,temporal={}}){
   if(!tenant.capabilities?.includes('availability'))return empty(this.priority);
   const text=normalizeWeekdayTypos(message.text),constraints=extractServiceConstraints(message.text),constraintText=constraints.text;
   // "Are you available in Sharjah?" asks about geographic coverage, not a
@@ -44,8 +44,13 @@ class AvailabilityConversationAdapter{
 
   const openQuestion=/\b(are you open|open on|closed on|working on|work on|opening hours)\b/.test(text);
   const genericDayService=Boolean(constraints.day||constraints.weekend) && /\b(service|services|cleaning|appointment|booking|bookings|come|available)\b/.test(constraintText);
-  const availabilityQuestion=!pricingQuestion && /\b(are you available|available on|availability|slot|free on|free at|can i get .* on|can i book .* on)\b/.test(constraintText);
+  const availabilityQuestion=!pricingQuestion && /\b(are you available|is .{0,80} available|available on|availability|slot|free on|free at|can i get .* on|can i book .* on)\b/.test(constraintText);
   const exactTimeQuestion=/\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b|\b(?:at|around)\s+\d{1,2}(?::\d{2})?\b/.test(text);
+  const transactionalServiceRequest=/\b(i want|i need|i would like|i'd like|please book|book|schedule|arrange)\b/.test(text)
+    && !/\bi want to (?:know|check|ask)\b/.test(text)
+    && /\b(clean|cleaning|service|appointment|consultation|lesson|repair|treatment|massage|haircut|grooming|visit|meeting)\b/.test(text)
+    && exactTimeQuestion;
+  if(transactionalServiceRequest)return empty(this.priority);
   const policyChangeQuestion=/\b(cancel|cancellation|cancelled|canceled|reschedule|rescheduling|move (?:my|the) (?:booking|appointment))\b/.test(text);
   const sameDayQuestion=!policyChangeQuestion&&constraints.sameDay && /\b(book|booking|bookings|service|cleaning|available|availability|come)\b/.test(constraintText);
   const arrivalQuestion=/\b(?:when|what time|how soon)\b.*\b(?:cleaner|provider|staff|technician|driver|teacher|doctor)\b.*\b(?:arrive|arrival|come|reach)\b|\b(?:when|what time)\b.*\b(?:arrive|arrival)\b/.test(text);
@@ -57,7 +62,7 @@ class AvailabilityConversationAdapter{
   // An exact date/time availability question must reach the live calendar.
   // Opening-hours answers are useful only when the customer has not supplied
   // a concrete slot to check.
-  if(availabilityQuestion&&exactTimeQuestion)return out('availability.slot_question',{...constraints,text},1,'exact_live_slot_question');
+  if(availabilityQuestion&&exactTimeQuestion)return out('availability.slot_question',{...constraints,...scheduleEntities(temporal),text},1,'exact_live_slot_question',220);
   if(genericDayService)return out('availability.day_service_question',{...constraints,text},.999995,'day_service_constraint');
   if(availabilityQuestion)return out('availability.slot_question',{...constraints,text},.99999,'service_slot_question');
 
@@ -83,8 +88,19 @@ class AvailabilityConversationAdapter{
     return out('availability.service_support',{...constraints,text},.99997,'specific_service_support_question');
   }
   return empty(this.priority);
- }
+}
+}
+function scheduleEntities(temporal={}){
+ const out={};
+ if(temporal.dateReference)out.date=temporal.dateReference;
+ else if(temporal.dateText)out.date=temporal.dateText;
+ if(temporal.dateText)out.dateText=temporal.dateText;
+ if(temporal.weekday)out.weekday=temporal.weekday;
+ if(temporal.startTime){out.startTime=temporal.startTime;out.time=temporal.startTime;}
+ if(temporal.endTime)out.endTime=temporal.endTime;
+ if(temporal.durationHours)out.durationHours=temporal.durationHours;
+ return out;
 }
 function empty(priority){return {priority,candidates:[],entities:{},vocabularyMatches:[]};}
-function out(intent,entities,confidence,reason){return {priority:105,candidates:[{intent,confidence,entities,reason}],entities,vocabularyMatches:[{type:'availability',value:intent,score:1}]};}
+function out(intent,entities,confidence,reason,candidatePriority=null){const candidate={intent,confidence,entities,reason};if(candidatePriority!=null)candidate.priority=candidatePriority;return {priority:105,candidates:[candidate],entities,vocabularyMatches:[{type:'availability',value:intent,score:1}]};}
 module.exports={AvailabilityConversationAdapter};

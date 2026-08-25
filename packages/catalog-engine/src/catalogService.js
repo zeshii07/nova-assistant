@@ -19,7 +19,7 @@ class CatalogService {
         if (requireComplete && product.sizes?.length && !size) return { valid:false, reason:"missing_size", product };
         if (color && !product.colors.some((value) => same(value, color))) return { valid: false, reason: "invalid_color", product };
         if (size && !product.sizes.some((value) => same(value, size))) return { valid: false, reason: "invalid_size", product };
-        if (quantity && (!Number.isInteger(quantity) || quantity < 1 || quantity > 100)) return { valid: false, reason: "invalid_quantity", product };
+        if (quantity && (!Number.isInteger(quantity) || quantity < 1)) return { valid: false, reason: "invalid_quantity", product };
         const variant = product.variants?.length ? resolveProductVariant(product, { color, size }) : null;
         if (product.variants?.length && !variant) return { valid:false, reason:"variant_unavailable", product };
         const descriptor = inventoryDescriptor(product, variant);

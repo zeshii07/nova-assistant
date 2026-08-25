@@ -8,7 +8,7 @@ class CommerceConversationAdapter {
   constructor(){this.capabilityId='commerce';this.priority=110;}
   async analyze({ tenant, message, state, services, interruption, correction }) {
     const text=normalizeText(message.text); const cs=state.capabilityState?.commerce;
-    const candidates=[]; let entities={};
+    const candidates=[]; let entities={};let groundedProductRequest=false;
     const pendingFieldEdit=cs?.pendingFieldEdit||null;
     const explicitFieldAmendment=extractFieldAmendment(message.text,{allowedFields:['name','phone','email','city','address','landmark','paymentMethod']});
     const fieldAmendment=explicitFieldAmendment||(pendingFieldEdit
@@ -29,7 +29,7 @@ class CommerceConversationAdapter {
         return {priority:this.priority,candidates:[{intent:'commerce.cart.clear',confidence:1,priority:230,entities,reason:'cart_clear_global_commerce'}],entities,vocabularyMatches:[{type:'commerce_operation',value:'commerce.cart.clear',score:1}]};
       }
       const inlineProductMutation=/\b(?:i want|i need|add|buy|purchase|order)\b[\s\S]{0,1000}\b(?:what(?:'s| is) in|show|view|see)\s+(?:my\s+)?(?:full\s+)?cart\b/.test(text);
-      if(/\b(show|view|see|open|what(?:'s| is) in)\s+(my\s+)?(?:full\s+)?cart\b|\bmy\s+(?:full\s+)?cart\b/.test(text)&&!/\b(track|status)\b/.test(text)&&!inlineProductMutation){
+      if(/\b(show|view|see|open|what(?:'s| is) in)\s+(my\s+)?(?:full\s+)?cart\b|\bmy\s+(?:full\s+)?cart\b/.test(text)&&!/\b(track|status)\b/.test(text)&&!inlineProductMutation&&!/\b(?:add|put|include|buy|purchase)\b/.test(text)){
         const checkoutToo=/\b(confirm|checkout|place order)\b/.test(text);
         entities={};
         return {priority:this.priority,candidates:[{intent:checkoutToo?'commerce.cart.view_checkout':'commerce.cart.view',confidence:1,priority:225,entities,reason:checkoutToo?'cart_view_checkout':'cart_view'}],entities,vocabularyMatches:[{type:'commerce_operation',value:checkoutToo?'commerce.cart.view_checkout':'commerce.cart.view',score:1}]};
@@ -117,6 +117,7 @@ class CommerceConversationAdapter {
       }
 
       const requests=extractProductRequests(message.text,products);
+      groundedProductRequest=Boolean(requests.items.length);
       const alternativeChoice=/\b(?:like|either)\b/.test(text);
       if(!alternativeChoice && (requests.items.length>1 || (requests.items.length && requests.ambiguous.length) || requests.ambiguous.length>1)){
         const entities={items:requests.items,ambiguous:requests.ambiguous};
@@ -135,18 +136,18 @@ class CommerceConversationAdapter {
       }
     }
 
-    if(/\badd\b/.test(text) && tenant?.capabilities?.includes('catalog') && services?.catalogService){
+    if(/\badd\b/.test(text) && groundedProductRequest && tenant?.capabilities?.includes('catalog') && services?.catalogService){
       const found=await services.catalogService.search(tenant.id,message.text);
       if(found?.product) candidates.push({intent:'commerce.cart.add_request',confidence:.99975,entities:{requestedText:text},reason:'catalog_product_add_request'});
     }
 
     // Universal cart operations always outrank a pending checkout field.
-    if (/\b(show|view|see|open|what(?:'s| is) in)\s+(my\s+)?(?:full\s+)?cart\b|\bmy\s+(?:full\s+)?cart\b|(?:^|\b)show\s+(?:me\s+)?my\s+order\b/.test(text) && !/\b(track|status)\b/.test(text)) {
+    if (/\b(show|view|see|open|what(?:'s| is) in)\s+(my\s+)?(?:full\s+)?cart\b|\bmy\s+(?:full\s+)?cart\b|(?:^|\b)show\s+(?:me\s+)?my\s+order\b/.test(text) && !/\b(track|status)\b/.test(text) && !/\b(?:add|put|include|buy|purchase)\b/.test(text)) {
       const checkoutToo=/\b(confirm|checkout|place order)\b/.test(text);
       candidates.push({intent:checkoutToo?'commerce.cart.view_checkout':'commerce.cart.view',confidence:.9998,entities:{},reason:checkoutToo?'cart_view_checkout':'cart_view'});
     }
     if (/\b(clear|empty|remove everything from)\s+(my\s+)?cart\b/.test(text)) candidates.push({intent:'commerce.cart.clear',confidence:.9998,entities:{},reason:'cart_clear'});
-    if (/\b(add|include|put)\b.*\b(order|cart)\b|\badd\b.+\b(also|too)\b|\bi want .* (also|too)\b|\b(do you have|do you sell|can i get|can i have)\b.*\b(also|too)\b|\b(add (?:kr|kar) do|is (?:me|mein|mi).*(?:bhi|add)|order (?:me|mein).*add)\b|\b(?:mujhy|mujhe|mujhay|mai|main)?[^.]{0,40}\b(?:bhi)\b[^.]{0,30}\b(?:chahiye|chahiyy|chahy|lyni|leni|lyna|lena)\b|\b(?:chahiye|chahiyy|chahy)\b.*\b(?:bhi|also|too)\b/.test(text)) candidates.push({intent:'commerce.cart.add_request',confidence:.9997,entities:{requestedText:text},reason:'cart_add_request'});
+    if ((groundedProductRequest||Boolean(cs?.mode))&&/\b(add|include|put)\b.*\b(order|cart)\b|\badd\b.+\b(also|too)\b|\bi want .* (also|too)\b|\b(do you have|do you sell|can i get|can i have)\b.*\b(also|too)\b|\b(add (?:kr|kar) do|is (?:me|mein|mi).*(?:bhi|add)|order (?:me|mein).*add)\b|\b(?:mujhy|mujhe|mujhay|mai|main)?[^.]{0,40}\b(?:bhi)\b[^.]{0,30}\b(?:chahiye|chahiyy|chahy|lyni|leni|lyna|lena)\b|\b(?:chahiye|chahiyy|chahy)\b.*\b(?:bhi|also|too)\b/.test(text)) candidates.push({intent:'commerce.cart.add_request',confidence:.9997,entities:{requestedText:text},reason:'cart_add_request'});
     if (/\b(remove|delete|take out)\b.*\b(from )?(my )?(?:cart|order)\b/.test(text)) candidates.push({intent:'commerce.cart.remove_request',confidence:.9996,entities:{requestedText:text,target:/\border\b/.test(text)?'order':'auto'},reason:'cart_remove_request'});
     if (/\b(change|update|make|set|reduce|decrease|lower)\b.*\b(quantity|qty|pieces?|pcs?)\b/.test(text)) candidates.push({intent:'commerce.cart.update_quantity',confidence:.9996,entities:{requestedText:text},reason:'cart_quantity_update'});
     if (/\badd\s+\d{1,3}\s+more\b/.test(text)) candidates.push({intent:'commerce.cart.increment_quantity',confidence:.9999,entities:{requestedText:text},reason:'cart_quantity_increment'});
