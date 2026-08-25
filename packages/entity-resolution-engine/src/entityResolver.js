@@ -11,8 +11,22 @@ function scoreSimilarity(a,b){
   const at=a.split(' ').filter(Boolean), bt=b.split(' ').filter(Boolean);
   if(at.length>1 && bt.length>1 && at.length===bt.length && [...at].sort().join(' ')===[...bt].sort().join(' ')) return .94;
   if(a.includes(b)||b.includes(a)) return .88;
-  const distance=levenshtein(a,b); return Math.max(0,1-distance/Math.max(a.length,b.length));
+  const qTokens=meaningfulTokens(a),nameTokens=meaningfulTokens(b);
+  // Compare tenant nouns against individual request tokens/windows. This
+  // recognizes "mujhe hair cut karwana hai" and small spelling mistakes while
+  // keeping the configured offering as the source of truth.
+  let tokenScore=0;
+  if(nameTokens.length){
+    const matched=nameTokens.filter(name=>qTokens.some(query=>query===name||levenshtein(query,name)<=boundedTokenDistance(name))).length;
+    tokenScore=matched/nameTokens.length;
+    if(tokenScore===1)tokenScore=nameTokens.length===1?.9:.93;
+  }
+  const distance=levenshtein(a,b);
+  return Math.max(tokenScore,Math.max(0,1-distance/Math.max(a.length,b.length)));
 }
+const REQUEST_STOPWORDS=new Set('i me my we our you please want need looking for interested get have can could would mujhe mujhay mujy main mai mein ny ne ko ka ki ke apna apni apne karna karani karwana karwani krani krwana chahiye chaheye chahye lena leni hai hn hoon hun service product item the a an do does'.split(' '));
+function meaningfulTokens(value){return normalizeText(value).split(' ').filter(token=>token.length>1&&!REQUEST_STOPWORDS.has(token));}
+function boundedTokenDistance(token){return token.length>=8?2:token.length>=5?1:0;}
 class EntityResolver {
   resolve(query, records=[], { fuzzyThreshold=.72, suggestionThreshold=.55 }={}) {
     const q=normalizeText(query); const exact=[]; const scored=[];

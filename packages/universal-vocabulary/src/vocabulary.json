@@ -168,7 +168,34 @@
       "book karna",
       "booking karni",
       "appointment chahiye",
-      "reserve karna"
+      "reserve karna",
+      "booking karwani hai",
+      "booking krwani hai",
+      "waqt rakh dein",
+      "mulaqat rakh dein",
+      "بکنگ کرنی ہے",
+      "وقت رکھ دیں",
+      "ملاقات چاہیے"
+    ],
+    "calendar.relative_day": [
+      "today", "tomorrow", "day after tomorrow",
+      "aaj", "aj", "kal", "parson", "parso", "aglay din",
+      "آج", "کل", "پرسوں", "اگلے دن"
+    ],
+    "calendar.time_window": [
+      "morning", "afternoon", "evening", "night",
+      "subah", "subha", "savere", "sawere", "dopahar", "dupehar", "shaam", "sham", "raat",
+      "صبح", "سویرے", "دوپہر", "شام", "رات"
+    ],
+    "conversation.accept": [
+      "yes", "ok", "okay", "sure", "go ahead", "keep it", "same details",
+      "haan", "han", "ji", "jee", "theek hai", "bilkul", "kar dein", "rehne dein same",
+      "ہاں", "جی", "ٹھیک ہے", "بالکل", "کر دیں"
+    ],
+    "conversation.change": [
+      "change", "update", "edit", "replace", "use another",
+      "badal", "badalna", "tabdeel", "tabdeeli", "naya", "doosra", "purana rehne dein",
+      "بدل", "تبدیل", "نیا", "دوسرا"
     ],
     "catalog.footwear": [
       "footwear",
@@ -347,5 +374,16 @@
     "hve": "have",
     "offcourse": "of course",
     "thoar": "thokar"
+    ,"mujhay": "mujhe"
+    ,"mujy": "mujhe"
+    ,"chaheye": "chahiye"
+    ,"chahyee": "chahiye"
+    ,"krwani": "karwani"
+    ,"krwana": "karwana"
+    ,"krani": "karani"
+    ,"bjy": "baje"
+    ,"bajy": "baje"
+    ,"jumerat": "jumeraat"
+    ,"itwar": "itwaar"
   }
 }

@@ -12,13 +12,13 @@ function isConfirmation(value){
 // mistakes for the workflow keyword, not a general fuzzy matcher that could
 // turn an unrelated customer message into a destructive confirmation.
 function normalizeConfirmationTypos(value){
- return String(value||'').replace(/\b(?:confim|confrim|cnfirm)\b/g,'confirm');
+ return String(value||'').replace(/\b(?:confim|confrim|cnfirm|conirm|cofirm|confirmm)\b/g,'confirm');
 }
 
 function isWorkflowAcceptance(value){
  const raw=normalizeText(value);
  if(isConfirmation(raw))return true;
  const t=raw.replace(/\b(?:please|pls|plz|bhai|bhaijan|bhai jan|jan|jaan|sir|g|ji|jee|yar|yaar)\b/g,' ').replace(/\s+/g,' ').trim();
- return /^(?:ok|okay|theek|thik|theek hai|thik hai|ok theek hai|ok thik hai|add kro|add karo|add kar do|add kr do|ok add kro|ok add karo|ok add kar do|ok add kr do|theek hai add kro|thik hai add kro|kar do|kr do|haan theek hai|han theek hai|haan kar do|han kar do)$/i.test(t);
+ return /^(?:ok|okay|theek|thik|theek hai|thik hai|ok theek hai|ok thik hai|add kro|add karo|add kar do|add kr do|ok add kro|ok add karo|ok add kar do|ok add kr do|theek hai add kro|thik hai add kro|kar do|kr do|haan theek hai|han theek hai|haan kar do|han kar do|(?:ok\s+)?(?:theek|thik)(?:\s+hai)?\s+(?:bhej|bhyj|bhj|send|mangwa)\s+do|(?:order\s+)?(?:bhej|bhyj|bhj|send|mangwa)\s+do|place it|send it)$/i.test(t);
 }
 module.exports={isConfirmation,isWorkflowAcceptance,normalizeConfirmationTypos};

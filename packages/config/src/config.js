@@ -13,7 +13,10 @@ function loadConfig() {
   const localDataDir = path.resolve(process.cwd(), process.env.NOVA_LOCAL_DATA_DIR || (testRunToken ? `./.nova-data/test-${process.pid}-${testRunToken}` : "./.nova-data"));
   const storageMode = String(process.env.NOVA_STORAGE_MODE || "memory").toLowerCase();
   if (!["memory", "persistent"].includes(storageMode)) throw new Error("NOVA_STORAGE_MODE must be memory or persistent");
-  const nluMode = String(process.env.NOVA_NLU_MODE || "off").toLowerCase();
+  const groqNluApiKey = process.env.GROQ_API_KEY || process.env.NOVA_GROQ_NLU_API_KEY || "";
+  // A configured provider key opts Nova into adaptive interpretation. Explicit
+  // NOVA_NLU_MODE=off always wins, which keeps offline/test deployments cheap.
+  const nluMode = String(process.env.NOVA_NLU_MODE || (groqNluApiKey ? "on" : "off")).toLowerCase();
   if (!["off", "on"].includes(nluMode)) throw new Error("NOVA_NLU_MODE must be off or on");
   const nluStrategy = String(process.env.NOVA_NLU_STRATEGY || "adaptive").toLowerCase();
   if (!["adaptive", "primary"].includes(nluStrategy)) throw new Error("NOVA_NLU_STRATEGY must be adaptive or primary");
@@ -49,7 +52,7 @@ function loadConfig() {
     semanticRouterMaxLocalIntents:boundedInteger("NOVA_SEMANTIC_ROUTER_MAX_LOCAL_INTENTS",2,1,8),
     groqNluBaseUrl: process.env.NOVA_GROQ_NLU_BASE_URL || "https://api.groq.com/openai/v1",
     groqNluModel: process.env.NOVA_GROQ_NLU_MODEL || "openai/gpt-oss-20b",
-    groqNluApiKey: process.env.GROQ_API_KEY || process.env.NOVA_GROQ_NLU_API_KEY || "",
+    groqNluApiKey,
     defaultTimezone,
     groqNluTimeoutMs: boundedInteger("NOVA_GROQ_NLU_TIMEOUT_MS", 4000, 250, 30000),
     groqNluFailureCooldownMs: boundedInteger("NOVA_GROQ_NLU_FAILURE_COOLDOWN_MS", 15000, 0, 300000),

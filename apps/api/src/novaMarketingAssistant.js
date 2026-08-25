@@ -6,7 +6,19 @@
  * follow-up suggestions are deterministic so the public endpoint stays safe,
  * quick, and useful even when no external language-model provider is enabled.
  */
-function replyToNovaVisitor(rawText,{previousTopic=null}={}){
+function replyToNovaVisitor(rawText,{previousTopic=null,language='auto'}={}){
+  const result=replyToNovaVisitorEnglish(rawText,{previousTopic});
+  const resolved=resolveLanguage(rawText,language);
+  if(resolved!=='roman_urdu')return {...result,language:'english'};
+  return {
+    ...result,
+    language:'roman_urdu',
+    reply:ROMAN_REPLIES[result.topic]||ROMAN_REPLIES.fallback,
+    suggestions:ROMAN_SUGGESTIONS[result.topic]||ROMAN_SUGGESTIONS.default
+  };
+}
+
+function replyToNovaVisitorEnglish(rawText,{previousTopic=null}={}){
   const text=String(rawText||'').trim();
   const normalized=normalize(text);
   if(!normalized)return answer('empty','Please ask me anything about Nova. I can explain what I do, how onboarding works, or which business problems I solve.');
@@ -136,5 +148,54 @@ function answer(topic,reply){return {topic,reply,suggestions:SUGGESTIONS[topic]|
 function matches(text,patterns){return patterns.some(pattern=>pattern.test(text));}
 function normalize(value){return String(value||'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();}
 function isShortAcceptance(value){return /^(?:yes|yes please|sure|okay|ok|please|tell me more|go ahead|bilkul|jee|ji)$/.test(value);}
+
+function resolveLanguage(value,requested='auto'){
+  if(requested==='english'||requested==='roman_urdu')return requested;
+  const text=normalize(value);
+  return /\b(?:aap|ap|main|mai|mein|mujhe|mujhy|mujhay|mera|meri|kya|kia|kaise|kese|kis ne|kon|kyun|kyu|hai|hain|ho|bata|batao|bataye|kar sak|karna|chahiye|samjhao|shukriya|salam|bhai|theek|bilkul|kaam|zabaan|banaya|bnaya)\b/.test(text)?'roman_urdu':'english';
+}
+
+const ROMAN_REPLIES=Object.freeze({
+  empty:'Nova ke bare mein kuch bhi poochhein. Main apni capabilities, onboarding, security ya business problems ke bare mein bata sakti hoon.',
+  creator:'Zeeshan ne mujhe businesses ki customer-related automation solve karne ke liye bohat pyar se banaya hai 😊 Kya aap dekhna chahenge ke main kaun se business tasks handle kar sakti hoon?',
+  small_talk:'Main bilkul theek hoon, shukriya 😊 Aap sunayein? Kya aap mujhe personal assistant, booking agent, sales agent ya customer-support agent ke tor par explore kar rahe hain?',
+  greeting:'Salam! 👋 Main Nova hoon—customer conversations aur business automation ke liye AI assistant. Aap pooch sakte hain main kya karti hoon, kyun banayi gayi, ya aapke business mein kaise help kar sakti hoon.',
+  thanks:'Bohat shukriya 😊 Jab chahein bookings, sales, customer support ya automation ke bare mein poochhein. Ab kis cheez ko explore karna chahenge?',
+  goodbye:'Allah hafiz 👋 Jab wapas aayein to kisi bhi customer workflow ya business problem ke bare mein poochh sakte hain.',
+  compliment:'Bohat shukriya 😊 Mera maqsad natural conversation ke sath reliable business work karna hai. Kya aap koi practical use case dekhna chahenge?',
+  identity:'Main Nova hoon—configurable AI customer-engagement platform. Main friendly conversation ko bookings, service requests, product discovery, checkout, CRM aur customer support ke reliable workflows ke sath jorti hoon. Short overview chahiye ya technical detail?',
+  industries:'Nova cleaning, home services, retail, restaurants, clinics, education, salons, repairs, consultants, property services aur dusre booking/order businesses ko support kar sakti hai. Shared engine same rehta hai; har business apne products, services aur rules deta hai. Aapka business kis type ka hai?',
+  channels:'Nova website chat, HTTP API, developer testing aur WhatsApp workflows par kaam kar sakti hai. Central business rules multiple channels par reuse hote hain. Aapke liye kaunsa channel sab se important hai?',
+  privacy:'Nova tenant isolation use karti hai: har business ki configuration, customers, carts, bookings aur orders alag rehte hain. Public chat tenant customer data nahi parhti. Customer memory ya deployment security mein se kis bare mein jan-na chahenge?',
+  onboarding:'Business apna naam, branding, products ya services, prices, policies, contact information aur required fields provide karta hai. Nova ka shared engine in details se working tenant banata hai—normal setup ke liye naya tenant code zaroori nahi. Aap service business onboard karna chahte hain ya retail?',
+  languages:'Nova English, Urdu aur Roman Urdu mein friendly conversation support karti hai, common typos aur mixed-language messages samet. Aapke customers zyada kaunsi language use karte hain?',
+  human_handoff:'Ji haan. Nova workflow ko safe rakh kar human team ko handoff kar sakti hai jab request sensitive, unsupported ya staff judgment wali ho. Aap kin situations mein human takeover chahenge?',
+  comparison:'Basic chatbot aksar sirf text answer karta hai. Nova validated business actions bhi karti hai—configured price, required details, carts, bookings, CRM updates aur transaction changes. Booking ya retail example dekhna chahenge?',
+  customization:'Ji haan. Har business assistant name, branding, services, products, prices, policies, prompts aur tone configure kar sakta hai. Aap pehle brand voice, services ya customer flow customize karna chahenge?',
+  architecture:'Nova deterministic workflow core se validation, pricing, state, tenant boundaries, carts aur bookings control karti hai. Optional language model ambiguous wording samajhne mein help karta hai, lekin transaction authority core ke paas rehti hai. Tenant configuration ya testing ke bare mein poochhna chahenge?',
+  integrations:'Nova CRM, calendar, inventory, payment workflows, knowledge sources aur business APIs ke sath integrate ho sakti hai. Jo integration configured na ho Nova uska jhoota claim nahi karti. Aapko kaunsi integration chahiye?',
+  deployment:'Nova Node.js service hai jo Render ya dusre cloud environment par host ho sakti hai. Production mein persistent storage, secrets, HTTPS, access protection, logs aur webhooks configure karne chahiye. Demo deployment chahiye ya production rollout?',
+  analytics:'Nova leads, conversations, activities, bookings, orders aur outcomes ka structured record bana sakti hai. In events ko dashboards se connect kiya ja sakta hai. Aap leads, bookings, orders ya support resolution mein se kya measure karna chahenge?',
+  capabilities:'Nova business ke liye ye kaam kar sakti hai:\n• Products, services, prices, policies aur availability answer karna\n• Bookings, service requests, carts, checkout aur changes handle karna\n• Saved customer details aur tenant-scoped CRM reuse karna\n• English, Urdu aur Roman Urdu conversation\n• Configuration se naye businesses support karna\n\nAap booking agent, sales assistant ya customer-support agent explore karna chahenge?',
+  purpose:'Nova missed leads, repetitive support, slow booking/order, inconsistent answers aur manual follow-up kam karne ke liye banayi gayi hai. Har business ka data aur business truth alag rehta hai. Aap sab se pehle kaunsi problem automate karna chahenge?',
+  bookings:'Booking businesses ke liye Nova services aur prices explain karti hai, scope/date/time/address/contact leti hai, saved details reuse karti hai, final review dikhati hai aur phir correct request create, change ya cancel karti hai. Cleaning, restaurant ya clinic example chahiye?',
+  commerce:'Retail ke liye Nova categories browse, product details, color/size/quantity, isolated cart, saved delivery profile, checkout confirmation aur order changes handle karti hai. Product discovery ya checkout ka example chahiye?',
+  crm:'Nova har tenant ka customer profile alag rakh kar saved name, phone, email aur delivery/service details reuse kar sakti hai. Customer sirf aik field change kare to baqi details dobara nahi poochhi jatin. Repeat bookings ya purchases mein yeh useful hoga?',
+  pricing:'Public demo fixed pricing plan show nahi karta, kyun ke cost channels, integrations, traffic, storage aur workflows par depend karti hai. Aap apna business aur expected customer volume batana chahenge?',
+  get_started:'Yahan aap Nova ki capabilities explore kar sakte hain aur Developer Console mein configured tenant workflows test kar sakte hain. Real rollout ke liye business type, channels, services/products aur automate hone wale actions define karein. Aap kis business se start karna chahenge?',
+  fit:'Main booking, sales, service requests, product discovery, checkout aur support ke liye business assistant ban sakti hoon. Business apna catalog, services aur rules deta hai; Nova reusable workflows deti hai. Aapka business kis type ka hai?',
+  tenant_boundary:'Yeh public chat Nova ki product guide hai, is liye yahan real tenant booking ya order place nahi hota. Onboarded business mein Nova pricing, customer details, changes aur confirmation ke sath yeh workflows chala sakti hai. Kya aap iska business example samajhna chahenge?',
+  fallback:'Main Nova hoon. Is public chat mein aap customer automation, capabilities, industries, onboarding, security, integrations, deployment, pricing ya practical workflows ke bare mein English ya Roman Urdu mein poochh sakte hain. Kis topic se start karein?'
+});
+
+const ROMAN_SUGGESTIONS=Object.freeze({
+  greeting:['Nova kya kar sakti hai?','Nova kyun banayi gayi?','Nova ko kis ne banaya?'],
+  identity:['Nova ki capabilities dikhao','Kon se businesses Nova use kar sakte hain?','Nova chatbot se kaise different hai?'],
+  capabilities:['Kon se businesses use kar sakte hain?','Onboarding kaise hoti hai?','Customer data safe hai?'],
+  industries:['Nova bookings kaise handle karti hai?','Retail mein kaise help karti hai?','Kya branding customize ho sakti hai?'],
+  commerce:['Checkout kaise kaam karta hai?','Delivery details kaise yaad rehti hain?','Catalog customize ho sakta hai?'],
+  bookings:['Customer details kaise yaad rehti hain?','Booking change ho sakti hai?','Kin businesses ke liye hai?'],
+  default:['Nova kya kar sakti hai?','Kon se businesses use kar sakte hain?','Start kaise karein?']
+});
 
 module.exports={replyToNovaVisitor};

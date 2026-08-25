@@ -21,7 +21,9 @@ class NluInvocationPolicy {
 
     const localAccepted=Boolean(localSemantic?.accepted&&localSemantic?.primaryIntent);
     const localAligned=Boolean(semanticPolicy?.aligned);
-    const strongWinner=Number(winner.confidence||0)>=.98;
+    const genericAssistantFallback=winner.capabilityId==='assistant'
+      && /^(?:knowledge_question_abstention|assistant_fallback|no_approved_answer)$/.test(String(winner.reason||''));
+    const strongWinner=Number(winner.confidence||0)>=.98&&!genericAssistantFallback;
     const genericWorkflowWinner=Boolean(pending&&winner.capabilityId===pending.capabilityId
       &&/\b(?:continue|workflow_input|checkout_input)\b/.test(String(winner.intent||'')));
     // A compound business-information question plus a validated name/phone/

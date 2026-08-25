@@ -1,6 +1,7 @@
 const {canonicalize}=require('../../universal-vocabulary/src');
 const {NluContextBuilder}=require('../../multilingual-nlu/src/nluContextBuilder');
 const {TRAINING_EXAMPLES}=require('./trainingExamples');
+const {hasAcquisitionCue}=require('../../conversation-intelligence/src/acquisitionIntent');
 
 const INFORMATION_INTENTS=new Set([
   'service.list','service.info','service.price','service.duration',
@@ -193,6 +194,8 @@ function contextualBoost(intent,raw,{tenant,context,tenantMatches,pending}){
   if(pending&&['conversation.confirm','conversation.reject','conversation.correct'].includes(intent))boost+=.035;
   if(/\b(?:price|cost|charges?|rate|kitn|qeemat|قیمت|سعر)\b/.test(n)&&/\.(?:price)$/.test(intent))boost+=.04;
   if(/\b(?:book|appointment|schedule|reserve|booking|chahiye|karwa|حجز|موعد)\b/.test(n)&&intent==='booking.create')boost+=.035;
+  if(hasAcquisitionCue(n)&&serviceMatch&&intent==='booking.create')boost+=.075;
+  if(hasAcquisitionCue(n)&&productMatch&&['cart.add','order.create'].includes(intent))boost+=.065;
   if(/\b(?:return|wapas|واپس|إرجاع)\b/.test(n)&&intent==='order.return')boost+=.045;
   if(/\b(?:exchange|replace|swap|badal|بدل|استبدال)\b/.test(n)&&intent==='order.exchange')boost+=.045;
   return boost;

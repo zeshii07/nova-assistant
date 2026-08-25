@@ -169,9 +169,9 @@ class CommerceConversationAdapter {
       }
       // A confirmation while required checkout details are still missing means
       // "continue/finish my order", not a value for name/city/address.
-      if(isConfirmation(text)){
+      if(isConfirmation(text)||isWorkflowAcceptance(text)){
         entities={pendingField:cs.pendingField||null};
-        return {priority:this.priority,candidates:[{intent:'commerce.checkout_continue',confidence:.9998,entities,reason:'checkout_confirmation_before_required_field'}],entities,vocabularyMatches:[{type:'workflow',value:'checkout_continue',score:1}]};
+        return {priority:this.priority,candidates:[{intent:'commerce.checkout_continue',confidence:.9998,entities,reason:cs.savedDetailsOffered?'checkout_saved_profile_accepted':'checkout_confirmation_before_required_field'}],entities,vocabularyMatches:[{type:'workflow',value:'checkout_continue',score:1}]};
       }
 
       if(interruption?.type==='price_comment'){

@@ -209,6 +209,14 @@ class ExecutionEngine {
       if (resume && !result.reply.includes(resume)) result.reply = `${result.reply}\n\n${resume}`;
     }
 
+    // Lead extraction is passive and cross-cutting. It observes the validated
+    // result after state persistence, but cannot execute a booking/order or
+    // manufacture contact data. Failures are isolated from the customer reply.
+    if(this.services.leadService){
+      const latestCustomer=await this.services.crmService?.getCustomer?.(tenant.id,message.customerId)||customer;
+      await this.services.leadService.observe({tenantId:tenant.id,conversationId,customerId:message.customerId,channel:message.channel,message,customer:latestCustomer,capabilityId,intelligence,result,state});
+    }
+
     await this.eventBus.publish("message.processed.v1", { tenantId:tenant.id, conversationId, capabilityId }, { source:"execution-engine" });
     const timingMs = Number((performance.now()-processStarted).toFixed(3));
     logger.info("execution.completed", { capabilityId, confidence:intelligence?.selected?.confidence || result.confidence, timingMs });

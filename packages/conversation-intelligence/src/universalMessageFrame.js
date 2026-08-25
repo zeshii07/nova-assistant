@@ -1,4 +1,5 @@
 const { normalizeText } = require('./text');
+const { acquisitionIntent } = require('./acquisitionIntent');
 
 /**
  * Domain-neutral representation of one customer message.
@@ -67,11 +68,9 @@ function detectClauseIntents(value){
   add(out,/\b(what services|which services|services do you offer|what do you provide)\b/.test(n),'service.browse',.95);
   add(out,/\b(?:do you|can you|could you)\s+(?:offer|provide|have|do)\b.*\b(?:service|clean|cleaning|hair|treatment|appointment|lesson|class|repair|removal)\b/.test(n),'service.browse',.94);
   add(out,/\b(what products|which products|show products|list products|what do you sell)\b/.test(n),'product.browse',.95);
-  const acquire=/\b(i want|i need|i would like|i'd like|can i get|can i have|book|schedule|reserve|arrange|appointment|request)\b/.test(n);
-  const service=/\b(service|clean|cleaning|cleaner|appointment|consultation|lesson|class|haircut|facial|repair|reservation)\b/.test(n);
-  const product=/\b(product|item|buy|purchase|order|cart|shoes?|shirts?|jeans?|food|meal)\b/.test(n);
-  add(out,acquire&&service,'booking.create',.95);
-  add(out,acquire&&product,'order.create',.95);
+  const acquisition=acquisitionIntent(n);
+  add(out,acquisition.requested&&acquisition.service,'booking.create',.96);
+  add(out,acquisition.requested&&acquisition.product,'order.create',.96);
   return out;
 }
 

@@ -89,7 +89,7 @@ async function startServer() {
         const text=String(body.text||'').trim();
         if(!text)return sendJson(res,400,{ok:false,error:'text is required'});
         if(text.length>4000)throw new ValidationError('Message is too long. Please keep it under 4,000 characters.');
-        const answer=replyToNovaVisitor(text,{previousTopic:String(body.previousTopic||'').trim()||null});
+        const answer=replyToNovaVisitor(text,{previousTopic:String(body.previousTopic||'').trim()||null,language:String(body.language||'auto')});
         return sendJson(res,200,{ok:true,conversationId:String(body.conversationId||`nova-${crypto.randomUUID()}`),reply:answer.reply,topic:answer.topic,suggestions:answer.suggestions});
       }
 
@@ -122,6 +122,22 @@ async function startServer() {
       if (req.method === "GET" && url.pathname === "/api/dev/replays") {
         const replays = await container.replayService.list({ conversationId:url.searchParams.get("conversationId") || null, limit:Number(url.searchParams.get("limit") || 50) });
         return sendJson(res, 200, { ok:true, replays });
+      }
+
+      if(req.method==="GET"&&url.pathname==="/api/dev/leads"){
+        const tenantId=String(url.searchParams.get("tenantId")||container.config.defaultTenantId);
+        container.tenantRepository.getById(tenantId);
+        const leads=await container.leadService.list(tenantId,{status:url.searchParams.get("status")||null,grade:url.searchParams.get("grade")||null,limit:Number(url.searchParams.get("limit")||100)});
+        const summary=await container.leadService.summary(tenantId);
+        return sendJson(res,200,{ok:true,tenantId,summary,leads});
+      }
+
+      const leadMatch=url.pathname.match(/^\/api\/dev\/leads\/([^/]+)$/);
+      if(req.method==="GET"&&leadMatch){
+        const tenantId=String(url.searchParams.get("tenantId")||container.config.defaultTenantId);
+        container.tenantRepository.getById(tenantId);
+        const lead=await container.leadService.get(tenantId,decodeURIComponent(leadMatch[1]));
+        return lead?sendJson(res,200,{ok:true,lead}):sendJson(res,404,{ok:false,error:"Lead not found"});
       }
 
       const replayMatch = url.pathname.match(/^\/api\/dev\/replays\/([^/]+)$/);

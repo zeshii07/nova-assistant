@@ -1,4 +1,5 @@
-const { normalizeText, numberFromText, normalizeWeekdayTypos } = require('../../conversation-intelligence/src/text');
+const { normalizeText, numberFromText, normalizeWeekdayTypos, normalizeUrduDigits } = require('../../conversation-intelligence/src/text');
+const {isConfirmation,isWorkflowAcceptance}=require('../../conversation-intelligence/src/confirmation');
 
 class UniversalEngagementEngine {
   constructor({ now = () => process.env.NOVA_TEST_NOW ? new Date(process.env.NOVA_TEST_NOW) : new Date(), timezone = process.env.NOVA_DEFAULT_TIMEZONE || 'Asia/Karachi' } = {}) { this.now = now; this.timezone=timezone; }
@@ -129,18 +130,23 @@ class UniversalEngagementEngine {
 
   referencesStoredDetails(raw){
     const text=normalizeText(raw).replace(/previuos|privious|pervious/g,'previous');
-    return /^(?:yes\s+)?use(?:\s+my|\s+the)?\s+(?:(?:previous|old|saved|existing|current|configured)(?:\s+(?:contact|customer|delivery|profile))?\s+)?(?:details|information|info|name and details)$|^(?:yes\s+)?(?:use|keep)\s+(?:all\s+)?(?:the\s+)?other\s+(?:provided\s+)?details$|^(?:yes\s+)?use\s+(?:my\s+)?configured\s+name\s+and\s+details$/i.test(text);
+    return /^(?:yes\s+)?use(?:\s+my|\s+the)?\s+(?:(?:previous|old|saved|existing|current|configured)(?:\s+(?:contact|customer|delivery|profile))?\s+)?(?:details|information|info|name and details)$|^(?:yes\s+)?(?:use|keep)\s+(?:all\s+)?(?:the\s+)?other\s+(?:provided\s+)?details$|^(?:yes\s+)?use\s+(?:my\s+)?configured\s+name\s+and\s+details$|^(?:meri|meray|mere)\s+(?:purani|pehli|saved)\s+(?:details|maloomat|information)\s+(?:use|rakh|laga)\s*(?:karo|kar dein)?$|^(?:purani|pehli)\s+(?:details|maloomat)\s+(?:theek|same|use)|^(?:میری|میرے)\s+(?:پرانی|محفوظ)\s+(?:تفصیلات|معلومات)\s+(?:استعمال|رکھ)/i.test(text);
   }
 
   validateFieldAnswer(field, raw, options = {}) {
     const text=String(raw||'').trim();
     const n=normalizeText(text);
+    // Approval/continuation language belongs to the active workflow. It must
+    // never become a customer's name, address, city, phone, or email even if a
+    // routing adapter fails to claim the turn first.
+    if(['name','address','city','landmark','phone','email'].includes(field)&&(isConfirmation(text)||isWorkflowAcceptance(text)))
+      return invalid(field,`That looks like a workflow confirmation, not your ${pretty(field).toLowerCase()}.`);
     // A pending customer-detail field must never consume a new question,
     // catalog/service request, cancellation, confirmation, or unrelated command.
     const questionOrAction =
       /[?؟]\s*$/.test(text)
       || /^(?:what|which|where|when|why|how|who|do you|does|can i|can you|could you|is there|are there|show|list|tell me|i want|i need|add|remove|cancel|confirm|track|book|order|buy|purchase|mujhy|mujhe|mujhay|main|mai)\b/i.test(text)
-      || /\b(?:do you have|do you sell|do you offer|what products|what services|show my cart|track my order|cancel my|confirm my|add .* (?:order|cart)|chahiye|chahiyy|chahy|lyni|leni|lyna|lena|kharidna|bhi chahi)\b/i.test(text);
+      || /\b(?:do you have|do you sell|do you offer|what products|what services|show my cart|track my order|cancel my|confirm my|add .* (?:order|cart)|chahiye|chahiyy|chahy|chaheye|karwani|karwana|krani|lyni|leni|lyna|lena|khareedna|kharidna|bhi chahi)\b|^(?:کیا|کون|کہاں|کب|کیسے|کیوں|مجھے|میں)|(?:چاہیے|خریدنا|بکنگ|منسوخ|دکھائیں)/i.test(text);
     if(['name','address','city','landmark','phone','email'].includes(field) && questionOrAction)
       return invalid(field, `That looks like a separate question or request, not your ${pretty(field).toLowerCase()}. I’ll keep this request paused. ${this.prompt(field,{},'english')}`);
 
@@ -252,9 +258,9 @@ class UniversalEngagementEngine {
       }
     }
     if (!date) {
-      if (/\bday after tomorrow\b/.test(text)) date = addDays(today, 2);
-      else if (/\b(tomorrow|kal)\b/.test(text)) date = addDays(today, 1);
-      else if (/\b(today|aaj)\b/.test(text)) date = today;
+      if (/\b(day after tomorrow|parson|parso)\b|پرسوں/.test(text)) date = addDays(today, 2);
+      else if (/\b(tomorrow|kal|agl[aeiy]+ din)\b|کل|اگلے دن/.test(text)) date = addDays(today, 1);
+      else if (/\b(today|aaj|aj)\b|آج/.test(text)) date = today;
       else {
         const weekday=WEEKDAYS.find(x=>new RegExp(`\\b${x}\\b`).test(text));
         if(weekday) date=nextWeekday(today,WEEKDAYS.indexOf(weekday));
@@ -267,13 +273,23 @@ class UniversalEngagementEngine {
   }
 
   parseTime(raw) {
-    const value = String(raw).trim().toLowerCase();
-    let roman=value.match(/\b(subah|subha|sabah|savere|sawere|morning|shaam|sham|evening|dopahar|afternoon)\s+(\d{1,2})(?:(?::|\s)(\d{2}))?\s*(?:bjy|baje|bajay)?\b/);
+    // Preserve ':' for 24-hour clocks while still accepting Urdu/Arabic digits.
+    const value = normalizeUrduDigits(String(raw)).trim().toLowerCase();
+    const window='(?:subah|subha|sabah|savere|sawere|savera|fajr|morning|shaam|sham|evening|dopahar|dopehar|dupehar|afternoon|raat|rat|night|صبح|سویرے|شام|دوپہر|رات)';
+    let roman=value.match(new RegExp(`(?:^|\\s)(${window})\\s+(\\d{1,2})(?:(?::|\\s)(\\d{2}))?\\s*(?:bjy|baje|bajay|bajy|بجے)?(?:$|\\s)`,'iu'));
     if(roman){
       const hour=Number(roman[2]),min=Number(roman[3]||0);
       if(hour>=1&&hour<=12&&min<=59){
-        const marker=/^(?:shaam|sham|evening|dopahar|afternoon)$/.test(roman[1])?'pm':'am';
+        const marker=/^(?:shaam|sham|evening|dopahar|dopehar|dupehar|afternoon|raat|rat|night|شام|دوپہر|رات)$/iu.test(roman[1])?'pm':'am';
         return valid(`${hour}${roman[3]?':'+String(min).padStart(2,'0'):''} ${marker}`);
+      }
+    }
+    roman=value.match(new RegExp(`(?:^|\\s)(\\d{1,2})(?:(?::|\\s)(\\d{2}))?\\s*(?:bjy|baje|bajay|bajy|بجے)?\\s+(${window})(?:$|\\s)`,'iu'));
+    if(roman){
+      const hour=Number(roman[1]),min=Number(roman[2]||0);
+      if(hour>=1&&hour<=12&&min<=59){
+        const marker=/^(?:shaam|sham|evening|dopahar|dopehar|dupehar|afternoon|raat|rat|night|شام|دوپہر|رات)$/iu.test(roman[3])?'pm':'am';
+        return valid(`${hour}${roman[2]?':'+String(min).padStart(2,'0'):''} ${marker}`);
       }
     }
     let m = value.match(/\b(\d{1,2})(?:(?::|\s)(\d{2}))?\s*(am|pm)\b/);

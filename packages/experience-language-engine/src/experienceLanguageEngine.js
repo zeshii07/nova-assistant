@@ -17,7 +17,7 @@ class ExperienceLanguageEngine {
 function detect(value) {
   const text = String(value || "");
   if (/[\u0600-\u06FF]/.test(text)) return "urdu";
-  if (/\b(aap|ap|mujhe|mujhy|mera|meri|kya|kia|kaise|kaisay|hai|hain|chahiye|chahiy|karo|kro|kar dein|bata|shukriya|kon sy|kitne|kal|aaj|subah|shaam|bhai|jnab)\b/i.test(text)) return "roman_urdu";
+  if (/\b(aap|ap|mujhe|mujhy|mujhay|mujy|main|mai|mein|ny|mera|meri|kya|kia|kaise|kaisay|hai|hain|chahiye|chahiy|chaheye|karo|kro|kar dein|karwani|karwana|krani|bata|batao|batain|shukriya|kon sy|kitna|kitni|kitne|kal|aaj|aj|parson|subah|subha|shaam|sham|raat|jumma|hafta waly|bhai|jnab|janab|theek|haan|han|bilkul|safai|saaf)\b/i.test(text)) return "roman_urdu";
   return "english";
 }
 module.exports = { ExperienceLanguageEngine, detect };

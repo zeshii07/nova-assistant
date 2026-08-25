@@ -73,8 +73,9 @@ class CleaningCapability extends BaseCapability {
       const semantic=context.intelligence?.entities||{};
       const scope={...(previous.pendingBookingType?.scope||{}),...requestFields(semantic)};
       const propertyLabel=scope.propertyType==='villa'?'villa/house':scope.propertyType==='apartment'?'apartment/flat':'property';
+      const availabilityLead=semantic.serviceAvailabilityQuestion?'Yes — we provide cleaning for that property type. ':'';
       const reply=localized(language,
-        `For your ${propertyLabel}, which cleaning type do you want?\n• Standard Cleaning — hourly; I’ll ask for the number of cleaners and hours\n• Deep Cleaning — scope-based; I’ll ask for the property size/bedroom count`,
+        `${availabilityLead}For your ${propertyLabel}, which cleaning type do you want?\n• Standard Cleaning — hourly; I’ll ask for the number of cleaners and hours\n• Deep Cleaning — scope-based; I’ll ask for the property size/bedroom count`,
         `${propertyLabel} ke liye kaunsi cleaning chahiye?\n• Standard Cleaning — hourly; cleaners aur hours chahiye honge\n• Deep Cleaning — scope-based; property size/bedrooms chahiye honge`,
         `${propertyLabel} کے لیے کون سی صفائی چاہیے؟\n• Standard Cleaning — فی گھنٹہ؛ کلینرز اور گھنٹے درکار ہوں گے\n• Deep Cleaning — سائز کے مطابق؛ بیڈ رومز کی تعداد درکار ہوگی`);
       const next={...previous,step:'cleaningType',pendingBookingType:{scope}};

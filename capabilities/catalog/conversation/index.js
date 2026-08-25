@@ -3,6 +3,7 @@ const { normalizeText, hasAny, numberFromText } = require('../../../packages/con
 const { aliasesFor, hasConcept } = require('../../../packages/universal-vocabulary/src');
 const { AttributeExtractor } = require('../../../packages/catalog-engine/src/attributeExtractor');
 const { extractMultiProducts, extractProductRequests } = require('../../../packages/catalog-engine/src/multiProductExtractor');
+const { hasAcquisitionCue } = require('../../../packages/conversation-intelligence/src/acquisitionIntent');
 
 const CATEGORY_ALIASES = {
   footwear:aliasesFor('catalog.footwear'),
@@ -18,7 +19,7 @@ const CATEGORY_ALIASES = {
   'mobile-accessories':['mobile accessories','phone accessories','mobile accessory'],
   travel:['travel','travel accessories']
 };
-const REQUEST_CUES = ['do you have','do you sell','can i get','can i have','i want','i need','show me','looking for','buy','purchase','order','mujhe','mujhy','mujhay','chahiye','chahiyy','chahy','lyni','leni','lyna','lena','ap k pass','aap ke paas','dikhao','ہے','چاہیے'];
+const REQUEST_CUES = ['do you have','do you sell','can i get','can i have','could i get','i want','i need','show me','looking for','searching for','shopping for','trying to find','interested in','help me find','buy','purchase','order','mujhe','mujhy','mujhay','chahiye','chahiyy','chahy','lyni','leni','lyna','lena','ap k pass','aap ke paas','dikhao','ہے','چاہیے'];
 const PRODUCT_FAMILIES = { shirts:aliasesFor('catalog.shirts'), jeans:aliasesFor('catalog.jeans') };
 const BROWSE_COLORS = { black:'Black', white:'White', blue:'Blue', navy:'Navy', grey:'Grey', gray:'Grey', brown:'Brown', silver:'Silver', gold:'Gold', olive:'Olive', maroon:'Maroon', red:'Red' };
 const BROWSE_SIZES = { small:'S', s:'S', medium:'M', m:'M', large:'L', l:'L', xl:'XL', xxl:'XXL' };
@@ -48,7 +49,7 @@ class CatalogConversationAdapter {
     // phone number, address, payment choice, etc. just because a product is
     // still selected underneath Commerce.
     const checkoutActive = state.capabilityState?.commerce?.mode === "checkout";
-    const explicitCatalogInterruption = hasAny(normalizedText, REQUEST_CUES);
+    const explicitCatalogInterruption = hasAny(normalizedText, REQUEST_CUES)||hasAcquisitionCue(normalizedText);
     const referentialCheckoutValue=/\b(?:i want|send|deliver|ship)(?: it)? (?:in|to)\b/.test(normalizedText);
     if(checkoutActive&&referentialCheckoutValue){
       return {priority:this.priority,candidates:[],entities:{},vocabularyMatches:[]};
@@ -199,7 +200,7 @@ class CatalogConversationAdapter {
     if (result?.product) {
       // Strict resolution: a partial/fuzzy product hit is evidence, not identity.
       // Example: "skinny jeans" must not silently become "Denim Jeans".
-      const explicitRequest = hasAny(normalizedText, REQUEST_CUES);
+      const explicitRequest = hasAny(normalizedText, REQUEST_CUES)||hasAcquisitionCue(normalizedText);
       const unmatchedModifiers = findUnmatchedProductModifiers(normalizedText, result);
       const weakPartial = explicitRequest && unmatchedModifiers.length > 0;
       if (weakPartial) {
@@ -220,7 +221,7 @@ class CatalogConversationAdapter {
       for (const term of result.matchedTerms || []) matches.push({ type:'product_term', value:term, canonical:result.product.id, score:result.confidence || .9 });
     } else if (category) {
       candidates.push({ intent:'catalog.category_browse', confidence:.9, entities:{ categoryId:category.id, categoryTerm:category.term }, reason:'category_without_request_cue' });
-    } else if (hasAny(normalizedText, REQUEST_CUES) && /\b(do you sell|do you have|can i get|can i have|i want|i need|looking for|buy|purchase|mujhe|chahiye|ap k pass|aap ke paas)\b/.test(normalizedText)) {
+    } else if ((hasAny(normalizedText, REQUEST_CUES)||hasAcquisitionCue(normalizedText)) && /\b(do you sell|do you have|can i get|can i have|could i get|i want|i need|looking for|searching for|shopping for|trying to find|interested in|help me find|buy|purchase|mujhe|chahiye|ap k pass|aap ke paas)\b/.test(normalizedText)) {
       const safeAlternatives=(result?.alternatives||[]).filter(product=>isRelevantAlternative(message.text,product));
       entities = {
         requestedText: cleanRequestedText(message.text),

@@ -1,6 +1,7 @@
 const { canonicalize } = require('../../universal-vocabulary/src');
+const { normalizeUrduDigits, canonicalWeekdayToken } = require('./multilingualLexicon');
 function normalizeText(value) {
-  return canonicalize(String(value || ""))
+  return canonicalize(normalizeUrduDigits(String(value || "")))
     .toLowerCase()
     .replace(/[’']/g, "'")
     .replace(/[-_/]+/g, " ")
@@ -54,6 +55,8 @@ function normalizeWeekdayTypos(value) {
   const normalized=normalizeText(value);
   const exact=new Set(weekdays);
   return normalized.split(' ').map((token)=>{
+    const multilingual=canonicalWeekdayToken(token);
+    if(multilingual)return multilingual;
     if(exact.has(token))return token;
     const match=closestKeywordToken(token,weekdays,{maxDistance:2,minLength:5});
     return match?.keyword||token;
@@ -78,4 +81,4 @@ function damerauLevenshtein(a,b){
   return matrix[left.length][right.length];
 }
 
-module.exports = { normalizeText, words, hasAny, numberFromText, closestKeywordToken, normalizeWeekdayTypos, damerauLevenshtein };
+module.exports = { normalizeText, words, hasAny, numberFromText, closestKeywordToken, normalizeWeekdayTypos, damerauLevenshtein, normalizeUrduDigits };

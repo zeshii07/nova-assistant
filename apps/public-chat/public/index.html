@@ -15,13 +15,13 @@
     <aside class="product-panel">
       <div class="brand-lockup">
         <span class="brand-mark" aria-hidden="true"><b>N</b></span>
-        <span>NOVA <small>10.1</small></span>
+        <span>NOVA <small>10.2</small></span>
       </div>
 
       <div class="hero-copy">
         <p class="eyebrow"><i></i> Intelligent customer operations</p>
         <h1>Turn every conversation into action.</h1>
-        <p class="lede">Nova gives businesses one adaptable assistant for customer questions, bookings, sales, service requests, and support.</p>
+        <p class="lede">Nova gives businesses one adaptable assistant for customer questions, bookings, sales, service requests, and support—in English or Roman Urdu.</p>
       </div>
 
       <div class="capability-grid" aria-label="Nova capabilities">
@@ -43,7 +43,10 @@
           <span class="agent-avatar" aria-hidden="true">N</span>
           <div><strong>Nova</strong><p><i></i> Online · Public product guide</p></div>
         </div>
-        <button id="new-chat" class="new-chat" type="button" aria-label="Start a new conversation"><span aria-hidden="true">＋</span> New chat</button>
+        <div class="header-actions">
+          <label class="language-picker" for="language"><span>Language</span><select id="language" aria-label="Conversation language"><option value="auto">Auto</option><option value="english">English</option><option value="roman_urdu">Roman Urdu</option></select></label>
+          <button id="new-chat" class="new-chat" type="button" aria-label="Start a new conversation"><span aria-hidden="true">＋</span> New chat</button>
+        </div>
       </header>
 
       <section id="chat" class="chat" aria-live="polite" aria-label="Conversation with Nova"></section>

@@ -1,4 +1,5 @@
 const { normalizeText, numberFromText, normalizeWeekdayTypos } = require('./text');
+const { TIME_WINDOWS } = require('./multilingualLexicon');
 
 const MONTHS='january february march april may june july august september october november december'.split(' ');
 const DAYS='monday tuesday wednesday thursday friday saturday sunday'.split(' ');
@@ -20,15 +21,16 @@ class TemporalSemanticExtractor {
     }
     const duration=extractDuration(n);
     if(duration&&!out.durationHours)out.durationHours=duration;
-    if(/\btomorrow\b|\bkal\b|کل/.test(n))out.dateReference='tomorrow';
+    if(/\bday after tomorrow\b|\bparson\b|\bparso\b|پرسوں/.test(n))out.dateReference='day_after_tomorrow';
+    else if(/\btomorrow\b|\bkal\b|کل|\bagl[aeiy]+ din\b|اگلے دن/.test(n))out.dateReference='tomorrow';
     else if(/\btoday\b|\baaj\b|آج/.test(n))out.dateReference='today';
     const weekday=DAYS.find((day)=>new RegExp(`\\b${day}\\b`).test(n));
     if(weekday)out.weekday=weekday;
     const natural=extractNaturalDate(raw);
     if(natural)out.dateText=natural;
-    if(/\bmorning\b|subah|صبح/.test(n))out.timeWindow='morning';
-    else if(/\bafternoon\b|dopahar|دوپہر/.test(n))out.timeWindow='afternoon';
-    else if(/\bevening\b|shaam|شام/.test(n))out.timeWindow='evening';
+    for(const [window,aliases] of Object.entries(TIME_WINDOWS)){
+      if(aliases.some(alias=>n.split(' ').includes(alias))){out.timeWindow=window;break;}
+    }
     return out;
   }
 }
@@ -49,10 +51,17 @@ function extractTimeRange(raw){
   return {startTime:start.value,endTime:end.value,durationHours:delta>0?delta/60:null};
 }
 function extractStartTime(raw){
-  const roman=String(raw||'').match(/\b(?:subah|subha|sabah|savere|sawere|morning|shaam|sham|evening|dopahar|afternoon)\s+(\d{1,2})(?::(\d{2}))?\s*(?:bjy|baje|bajay)?\b/i);
+  const normalized=normalizeText(raw);
+  const window='(?:subah|subha|sabah|savere|sawere|savera|fajr|morning|shaam|sham|evening|dopahar|dopehar|dupehar|afternoon|raat|rat|night|صبح|سویرے|شام|دوپہر|رات)';
+  const roman=normalized.match(new RegExp(`(?:^|\\s)(${window})\\s+(\\d{1,2})(?::(\\d{2}))?\\s*(?:bjy|baje|bajay|bajy|بجے)?(?:$|\\s)`,'iu'))
+    || normalized.match(new RegExp(`(?:^|\\s)(\\d{1,2})(?::(\\d{2}))?\\s*(?:bjy|baje|bajay|bajy|بجے)?\\s+(${window})(?:$|\\s)`,'iu'));
   if(roman){
-    const marker=/^(?:shaam|sham|evening|dopahar|afternoon)$/i.test((roman[0].match(/^\w+/)||[])[0]||'')?'pm':'am';
-    return parseClock(roman[1],roman[2],marker)?.value||null;
+    const windowFirst=!/^\d/.test(roman[0]);
+    const windowValue=windowFirst?roman[1]:roman[3];
+    const hour=windowFirst?roman[2]:roman[1];
+    const minute=windowFirst?roman[3]:roman[2];
+    const marker=/^(?:shaam|sham|evening|dopahar|dopehar|dupehar|afternoon|raat|rat|night|شام|دوپہر|رات)$/iu.test(windowValue)?'pm':'am';
+    return parseClock(hour,minute,marker)?.value||null;
   }
   const match=String(raw||'').match(/\b(?:start(?:ing)?|at|from|time(?:\s+is)?|for|around|about|approximately|approx\.?)\s*(?:at\s*)?(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)/i)
     || String(raw||'').match(/\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|today|tomorrow)(?:\s+(?:on|at))?\s+(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)/i)

@@ -20,10 +20,10 @@ test('active cleaning date step lets deep-cleaning change outrank slot validatio
  assert.equal(r.candidates[0].intent,'cleaning.service_change');
  assert.equal(r.entities.serviceName,'Deep Home Cleaning');
 });
-test('villa cleaning is recognized as a structured service request',async()=>{
+test('generic villa cleaning asks for its pricing model before starting the request',async()=>{
  const a=new CleaningConversationAdapter();
  const tenant={id:'cleaning-demo',capabilities:['cleaning']};
  const r=await a.analyze({tenant,message:{text:'i want my villa cleaned',customerId:'x',channel:'test'},state:{capabilityState:{}},services:{},normalizedText:'i want my villa cleaned'});
- assert.equal(r.candidates[0].intent,'cleaning.structured_service_request');
+ assert.equal(r.candidates[0].intent,'cleaning.booking_type_clarification');
  assert.equal(r.entities.propertyType,'villa');
 });

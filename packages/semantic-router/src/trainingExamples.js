@@ -34,6 +34,10 @@ const TRAINING_EXAMPLES=Object.freeze({
   'booking.create':[
     'i want to book an appointment','please schedule this service','arrange a visit for tomorrow',
     'i need a cleaner on friday','book a consultation at 3 pm','reserve this service for me',
+    'i am looking for a service for my villa','i was looking to get my apartment cleaned',
+    'could someone clean my place','help me arrange a cleaner','set me up with this service',
+    'i need someone to sort out the cleaning','can your team come and clean my house',
+    'i am interested in getting this treatment','save me a table for friday evening',
     'mujhe kal booking karwani hai','appointment rakh dein','service book kr do','mujhy kal ghar saaf krwana hai',
     'مجھے کل اپائنٹمنٹ چاہیے','أريد حجز موعد','احجز لي هذه الخدمة غدا'
   ],
@@ -111,6 +115,8 @@ const TRAINING_EXAMPLES=Object.freeze({
   'cart.add':[
     'add this item to my cart','put two shirts in the cart','i want to buy this product',
     'add jeans and shoes','i will take this one','yeh cart mein add kar do',
+    'i am looking for running shoes','trying to find a kettle','help me find a black shirt',
+    'i am interested in these headphones','shopping for a water bottle',
     'mujhe do shirts chahiye','is item ko shamil karo','اس چیز کو کارٹ میں ڈالیں',
     'أضف المنتج إلى السلة','أريد شراء هذا المنتج'
   ],

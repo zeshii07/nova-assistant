@@ -5,7 +5,78 @@ booking, cleaning, catalog, commerce, CRM, and tenant-knowledge capabilities.
 Its deterministic workflow core keeps customer data and transactions scoped to
 the active tenant while optional language models help interpret ambiguity.
 
-## Current release: v10.1.0 Commerce Continuity and Public Marketing Assistant
+## Current release: v10.2.0 Multilingual Acquisition and Lead Intelligence
+
+Nova v10.2.0 expands the shared language layer for Roman Urdu and Urdu script.
+Booking grammar now understands common weekday names such as `jumma`, `hafta
+waly din`, and `جمعہ والے دن`; relative phrases such as `kal`, `parson`, and
+`پرسوں`; morning/afternoon/evening/night phrases; either time-word order; and
+Urdu or Arabic numerals. Structural typo correction remains bounded so Nova
+does not rewrite customer names, addresses, products, or tenant offerings.
+
+The same tenant-neutral acquisition semantics now recognize common Urdu and
+Roman Urdu ways to request a service or product. Offering resolution ignores
+request filler grammar and tolerates small bounded noun typos, while the local
+statistical router and optional adaptive Groq layer remain interpretation-only.
+Validated deterministic workflows continue to own all writes and transactions.
+
+Nova now includes a central inbound lead engine. Meaningful product, service,
+price, availability, booking, and order conversations create or enrich one
+tenant-isolated lead for that customer. The lead records validated contact and
+location data from CRM, interests, requirements, recent intent signals, a
+0–100 score, cold/warm/hot grade, missing qualification fields, and conversion
+when Nova creates a booking or order. It does not invent contacts, scrape
+people, or derail a customer workflow with a second lead form.
+
+Protected operator endpoints expose tenant lead lists and individual records:
+`GET /api/dev/leads?tenantId=...` and
+`GET /api/dev/leads/:leadId?tenantId=...`.
+
+Roman Urdu checkout confirmations such as `conirm kr do`, `ok thik hai`, and
+`theek hai bhej do` now accept the current review and can never be stored as a
+customer name, phone, city, or address. If Nova has displayed a complete saved
+checkout profile, that acceptance reuses the profile without asking for the
+same customer details again. The public `/chat` marketing experience is fluid
+on large screens and offers English, Roman Urdu, and automatic language modes.
+
+Run the release gate:
+
+```powershell
+npm run benchmark:v10.2.0
+```
+
+See `docs/V1020_MULTILINGUAL_LEAD_INTELLIGENCE.md`.
+
+## Previous release: v10.1.1 Adaptive Semantic Acquisition and Customer Memory
+
+Nova v10.1.1 recognizes service acquisition, booking, and product-search intent
+across broader natural paraphrases such as “I was looking for…”, “set me up
+with…”, “trying to find…”, and “could your team…”. The shared local statistical
+router uses current-tenant service and product vocabulary, tolerates bounded
+property-name typos, and gives transactional tenant workflows priority over a
+greeting or generic knowledge abstention.
+
+Clear requests stay on the local deterministic path. When language is genuinely
+uncertain or conflicting, adaptive Groq interpretation is now eligible even if
+the generic assistant produced a high numerical abstention score. Supplying a
+Groq API key enables adaptive NLU by default; set `NOVA_NLU_MODE=off` explicitly
+to disable every provider call.
+
+Returning customers still provide the service-specific facts that cannot be
+stored safely as defaults, such as cleaning type, property scope, date, and
+time. Once those are known, Nova displays the tenant-scoped saved customer and
+address profile and asks whether to keep it or change a field. It does not ask
+again for already saved name, phone, email, or address values.
+
+Run the release gate:
+
+```powershell
+npm run benchmark:v10.1.1
+```
+
+See `docs/V1011_ADAPTIVE_SEMANTIC_ACQUISITION.md`.
+
+## Previous release: v10.1.0 Commerce Continuity and Public Marketing Assistant
 
 Nova v10.1.0 prevents previous active-cart lines from leaking into a fresh
 tenant-switch test, treats saved checkout details as one reusable profile, and
@@ -32,7 +103,7 @@ phone, optional email, and service address and asks whether to keep everything
 or change a specific field. New customers—and returning customers with a
 genuinely missing required value—are asked only for the missing information.
 
-Run the release gate:
+Run the previous release gate:
 
 ```powershell
 npm run benchmark:v10.1.0

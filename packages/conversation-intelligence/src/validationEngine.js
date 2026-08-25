@@ -16,7 +16,7 @@ class ValidationEngine {
       reason:'invalid_time'
     };
     if (field === 'date') return {
-      valid:/\b(today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i.test(normalizeWeekdayTypos(raw))
+      valid:/\b(today|tomorrow|aaj|aj|kal|parson|parso|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i.test(normalizeWeekdayTypos(raw))
         ||/\b\d{1,2}[\/-]\d{1,2}(?:[\/-]\d{2,4})?\b/.test(raw)
         ||/\b\d{1,2}\s+(?:january|february|march|april|may|june|july|august|september|october|november|december)\b/i.test(raw),
       reason:'invalid_date'

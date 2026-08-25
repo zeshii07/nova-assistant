@@ -3,10 +3,11 @@ const { extractServiceConstraints } = require('../../../packages/conversation-in
 const { TemporalSemanticExtractor, parseClock } = require('../../../packages/conversation-intelligence/src/temporalSemanticExtractor');
 const { extractQueryFacets } = require('../../../packages/conversation-intelligence/src/queryFacetExtractor');
 const { extractFieldAmendment } = require('../../../packages/conversation-intelligence/src/fieldAmendmentExtractor');
+const { hasAcquisitionCue } = require('../../../packages/conversation-intelligence/src/acquisitionIntent');
 const temporalExtractor=new TemporalSemanticExtractor();
 class CleaningConversationAdapter {
   constructor(){this.capabilityId='cleaning';this.priority=85;}
-  async analyze({ tenant, message, state, services, normalizedText, correction, interruption, clauseSemantics, temporal }) {
+  async analyze({ tenant, message, state, services, normalizedText, correction, interruption, clauseSemantics, temporal, messageFrame }) {
     const primaryText=clauseSemantics?.primaryText||message.text;
     normalizedText=normalizeWeekdayTypos(primaryText);
     const step=state.capabilityState?.cleaning?.step; const candidates=[]; let entities={}; const matches=[];
@@ -23,8 +24,9 @@ class CleaningConversationAdapter {
     const constraints=extractServiceConstraints(primaryText);
     const policyFacets=extractQueryFacets(message.text).filter(x=>['cancellation','rescheduling','arrival','confirmation','safety','fragrance_free','pets'].includes(x));
     const discountRequested=/\b(discounts?|special offer|best price|price can you offer|what price can you offer|reduce|cheaper|kam kar|riayat|رعایت)\b/.test(normalizedText);
-    const structuredRequest=/\b(i want|i need|book|schedule|add|clean my|cleaned|cleaning chahiye|karwani hai|krani hai|karani hai|saaf krana|saaf karana|saaf karwana)\b/.test(normalizedText)
-      || /\b(?:can|could|would) you\b[\s\S]{0,35}\b(?:come|clean|arrange|send)\b/.test(normalizedText);
+    const frameBooking=(messageFrame?.intents||[]).some(item=>item.intent==='booking.create');
+    const structuredRequest=hasAcquisitionCue(normalizedText)||frameBooking
+      || /\b(clean my|cleaned|cleaning chahiye|karwani hai|krani hai|karani hai|saaf krana|saaf karana|saaf karwana)\b/.test(normalizedText);
     const customQuoteWords=/\b(custom quote|custom quotation|custom estimate)\b/.test(normalizedText);
 
     // A quotation is durable conversation context, but it is not a booking.
@@ -378,11 +380,20 @@ class CleaningConversationAdapter {
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'incomplete_confirmation',score:1}]};
     }
 
-    const propertyContext=tenant.capabilities?.includes('cleaning') && /\b(apartment|flat|studio|villa|vila|house|home|bedroom|bedrooms|bhk|office)\b/.test(normalizedText);
+    const propertyContext=tenant.capabilities?.includes('cleaning') && (/\b(apartment|flat|studio|villa|vila|vill|house|home|bedroom|bedrooms|bhk|office)\b/.test(normalizedText)
+      || Boolean(closestKeywordToken(normalizedText,['apartment','villa'],{maxDistance:2,minLength:4})));
     const cleaningDomain=/\b(clean|cleaned|cleaning|cleaners?|clenr|clnr|maids?|safai|sofas?|couches?|curtains?|drapes?|mattresses?|carpets?|rugs?|upholstery|صفائی|صاف)\b/.test(normalizedText)
       ||Boolean(closestKeywordToken(normalizedText,['cleaning','cleaner','cleaned'],{maxDistance:2,minLength:5}))
       || (propertyContext && /\b(quote|quotation|estimate|what about|how about|price|cost|clean)\b/.test(normalizedText));
     const structuredQuote=priceFollowUp || discountRequested || /\b(quote|quotation|estimate|price|cost|charges?|how much|kitna|kitne|kitni)\b|(?:قیمت|چارجز|کتنے)/.test(normalizedText);
+    const propertyServiceQuestion=!step&&!structuredRequest&&!structuredQuote&&propertyContext&&cleaningDomain
+      && /\b(?:do you|can you|could you|would you|is there|have you got)\b[\s\S]{0,45}\b(?:provide|offer|do|have|clean|cleaning|service|available)\b/.test(normalizedText);
+    if(propertyServiceQuestion){
+      const propertyType=/\b(?:villa|vila|vill|house|home)\b/.test(normalizedText)||closestKeywordToken(normalizedText,['villa'],{maxDistance:2,minLength:4})?'villa':'apartment';
+      entities={...timeEntities,propertyType,pendingCleaningType:true,serviceAvailabilityQuestion:true};
+      candidates.push({intent:'cleaning.booking_type_clarification',confidence:1,priority:198,entities,reason:'property_cleaning_availability_question'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'service_availability',value:`${propertyType}_cleaning`,score:1}]};
+    }
     const propertyAlternative=propertyContext && (
       /\b(what about|how about|what for|and what for|instead|other)\b/.test(normalizedText)
       || /\band (?:a|the)\s+(?:(?:\d+|one|two|three|four|five)\s*(?:bedrooms?|bed|bhk)\s+)?(?:apartment|flat|studio|villa|vila|house|home|office)\b/.test(normalizedText)
@@ -460,7 +471,7 @@ class CleaningConversationAdapter {
     // "what about a 4 bedroom villa" from being validated as a date.
     if(propertyAlternative){
       let m=normalizedText.match(/\b(\d+)\s*(?:bedrooms?|bed|bhk)\b/);if(m)timeEntities.bedrooms=Number(m[1]);
-      if(/\b(villa|vila)\b/.test(normalizedText))timeEntities.propertyType='villa';else if(/\b(apartment|flat|studio)\b/.test(normalizedText))timeEntities.propertyType='apartment';
+      if(/\b(villa|vila|vill)\b/.test(normalizedText)||closestKeywordToken(normalizedText,['villa'],{maxDistance:2,minLength:4}))timeEntities.propertyType='villa';else if(/\b(apartment|flat|studio)\b/.test(normalizedText)||closestKeywordToken(normalizedText,['apartment'],{maxDistance:2,minLength:6}))timeEntities.propertyType='apartment';
       const scopedService=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
       const explicitService=scopedService?await scopedService.findService(cleaningServiceSubjectText(primaryText)):null;
       if(explicitService?.service&&(explicitService.score||0)>=60){timeEntities.serviceId=explicitService.service.id;timeEntities.serviceName=explicitService.service.name;}
@@ -499,8 +510,15 @@ class CleaningConversationAdapter {
         timeEntities.serviceName=explicitService.service.name;
       }
       let m=normalizedText.match(/\b(\d+)\s*(?:bedrooms?|bed|bhk)\b/);if(m)timeEntities.bedrooms=Number(m[1]);
-      if(/\b(villa|vila)\b/.test(normalizedText))timeEntities.propertyType='villa';else if(/\b(apartment|flat|studio)\b/.test(normalizedText))timeEntities.propertyType='apartment';
+      if(/\b(villa|vila|vill)\b/.test(normalizedText)||closestKeywordToken(normalizedText,['villa'],{maxDistance:2,minLength:4}))timeEntities.propertyType='villa';else if(/\b(apartment|flat|studio)\b/.test(normalizedText)||closestKeywordToken(normalizedText,['apartment'],{maxDistance:2,minLength:6}))timeEntities.propertyType='apartment';
       const propertyCleaningTypeSpecified=Boolean(resolveCleaningType(normalizedText));
+      const namesOnlyPropertyCleaning=!/\b(?:office|sofa|couch|carpet|rug|mattress|chair|curtain|laundry|ac|duct|pest|disinfection|kitchen|bathroom|window|balcony|floor|move[ -]?(?:in|out)|post[ -]?(?:renovation|construction))\b/.test(normalizedText);
+      const discussedSpecificService=Boolean(state.capabilityState?.availability?.lastDiscussedServiceId);
+      if(timeEntities.propertyType&&namesOnlyPropertyCleaning&&!propertyCleaningTypeSpecified&&!discussedSpecificService){
+        entities={...timeEntities,text:normalizedText,pendingCleaningType:true};
+        candidates.push({intent:'cleaning.booking_type_clarification',confidence:1,priority:198,entities,reason:'property_cleaning_booking_type_missing'});
+        return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_type_required',score:1}]};
+      }
       const genericPropertyService=explicitService?.service&&isGenericPropertyCleaningService(explicitService.service);
       const availabilityContext=state.capabilityState?.availability||{};
       const contextualContinuation=/^(?:so|then|okay|ok|alright|in that case)\b|\b(?:as discussed|same service|that service)\b/.test(normalizedText);

@@ -13,7 +13,7 @@ class UniversalSemanticEngine {
     add(acts, /\b(thanks|thank you|shukriya|شکریہ)\b/.test(n), 'gratitude');
     add(acts, /\b(cancel|stop|never mind|nevermind|cancel kar|rehne do|منسوخ)\b/.test(n), 'cancel');
     add(acts, /\b(i meant|actually|sorry i want|change|instead|not my|mera matlab|بلکہ)\b/.test(n), 'correction');
-    add(acts, /\b(confirm|book|order|buy|purchase|reserve|schedule|appointment|admission|register|request|chahiye|karwa|کروا|چاہیے)\b/.test(n), 'action_request');
+    add(acts, /\b(confirm|book|order|buy|purchase|reserve|schedule|appointment|admission|register|request|chahiye|chaheye|chahye|karwa|karwana|karwani|krani|krwani|lena|leni|khareed|kharid)\b|کروا|چاہیے|خرید|لینا/.test(n), 'action_request');
     add(acts, /\b(what|which|who|where|when|how|do you|can i|kya|kia|kon|kons|kab|kahan|kitn|کیا|کون|کب|کہاں)\b/.test(n), 'question');
     add(acts, /\b(other|another|else|more|aur|mazeed|dusre|doosre|مزید)\b/.test(n), 'alternative_request');
 
@@ -23,11 +23,13 @@ class UniversalSemanticEngine {
     if (duration) genericEntities.duration = duration;
     const quantity = numberFromText(n);
     if (!duration && quantity && /\b(qty|quantity|piece|pieces|pcs|items?|units?|one|two|three|four|five|ek|aik|do|teen|char|chaar|paanch|ایک|دو|تین|چار|پانچ|\d+)\b/.test(n)) genericEntities.quantity = quantity;
-    if (/\b(today|aaj|آج)\b/.test(n)) genericEntities.dateReference = 'today';
-    else if (/\b(tomorrow|kal|کل)\b/.test(n)) genericEntities.dateReference = 'tomorrow';
-    if (/\b(morning|subah|صبح)\b/.test(n)) genericEntities.timeWindow = 'morning';
-    else if (/\b(afternoon|dopahar|دوپہر)\b/.test(n)) genericEntities.timeWindow = 'afternoon';
-    else if (/\b(evening|shaam|شام)\b/.test(n)) genericEntities.timeWindow = 'evening';
+    if (/\b(today|aaj|aj)\b|آج/.test(n)) genericEntities.dateReference = 'today';
+    else if (/\b(day after tomorrow|parson|parso)\b|پرسوں/.test(n)) genericEntities.dateReference = 'day_after_tomorrow';
+    else if (/\b(tomorrow|kal)\b|کل/.test(n)) genericEntities.dateReference = 'tomorrow';
+    if (/\b(morning|subah|subha|savere|sawere|fajr)\b|صبح|سویرے/.test(n)) genericEntities.timeWindow = 'morning';
+    else if (/\b(afternoon|dopahar|dopehar|dupehar)\b|دوپہر/.test(n)) genericEntities.timeWindow = 'afternoon';
+    else if (/\b(evening|shaam|sham)\b|شام/.test(n)) genericEntities.timeWindow = 'evening';
+    else if (/\b(night|raat|rat)\b|رات/.test(n)) genericEntities.timeWindow = 'night';
 
     return {
       version: '1.0',
@@ -53,7 +55,7 @@ function inferOperation(n, acts) {
   if (acts.some((a) => a.type === 'cancel')) return 'cancel';
   if (/\b(reschedule|change.*time|change.*date)\b/.test(n)) return 'reschedule';
   if (/\b(confirm|final|done)\b/.test(n)) return 'confirm';
-  if (/\b(book|reserve|schedule|appointment|order|buy|purchase|request|register|admission|chahiye|karwa)\b/.test(n)) return 'acquire_or_book';
+  if (/\b(book|reserve|schedule|appointment|order|buy|purchase|request|register|admission|chahiye|chaheye|chahye|karwa|karwani|karwana|krani|krwani|lena|leni|khareed|kharid)\b|کروا|چاہیے|خرید|لینا/.test(n)) return 'acquire_or_book';
   if (/\b(show|list|what do you have|what.*available|kya kya|kia kia|kon kon|kons[ayi]* chee|کیا کیا)\b/.test(n)) return 'browse';
   if (acts.some((a) => a.type === 'question')) return 'ask';
   return 'converse';

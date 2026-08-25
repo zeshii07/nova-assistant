@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "10.1.0",
+  "version": "10.2.0",
   "private": true,
-  "description": "Nova v10.1 Commerce Continuity and Public Marketing Assistant",
+  "description": "Nova v10.2.0 Multilingual Acquisition and Lead Intelligence",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {
@@ -54,6 +54,8 @@
     "benchmark:v9.5.0": "node --require ./tests/test-env.js --test tests/sprint76.v950-customer-memory-friendly-resilience.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
     "benchmark:v10.0.0": "node --require ./tests/test-env.js --test tests/sprint77.v1000-universal-customer-workflows.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
     "benchmark:v10.1.0": "node --require ./tests/test-env.js --test tests/sprint78.v101-commerce-marketing-assistant.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
+    "benchmark:v10.1.1": "node --require ./tests/test-env.js --test tests/sprint79.semantic-acquisition-breadth.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
+    "benchmark:v10.2.0": "node --require ./tests/test-env.js --test tests/sprint80.v1020-multilingual-leads.integration.test.js && npm test && npm run test:conversations && npm run check && node scripts/audit-state-safety.js",
     "model:groq:check": "node scripts/check-groq-nlu.js",
     "model:groq:trace": "node scripts/trace-groq-routing.js",
     "model:language:trace": "node scripts/trace-groq-routing.js",
