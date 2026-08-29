@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "10.2.0",
+  "version": "11.6.0",
   "private": true,
-  "description": "Nova v10.2.0 Multilingual Acquisition and Lead Intelligence",
+  "description": "Nova v11.6 Quote Follow-Up & Multilingual Fixes",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {

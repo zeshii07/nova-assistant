@@ -1,61 +1,56 @@
-# Nova v9.4.1 Stress-Test Patch — File Manifest (v4)
+# Nova v11.6 Patch — File Manifest
 
-## What's new in v4
+## What's new in v11.6
 
-1. **"do you provide deep cleaning"** — now lists ALL deep cleaning services
-   (Deep Home, Move-in/Move-out, Deep Apartment, Deep Villa, Post-renovation)
-   instead of a single match.
+1. **Bedroom typo tolerance** — "3 bdroom" (missing 'e') now recognized.
+2. **Quote follow-up context** — "3 bedroom" after a pricing question
+   correctly completes the quote (AED 440 for Deep Villa) instead of
+   losing context to the assistant fallback.
+3. **Bare service mention → quote** — "villa deep cleaning" (no pricing
+   keyword, no booking action) now shows the price and asks whether to
+   book, instead of auto-starting a booking workflow.
 
-2. **"do you provide furniture cleaning service"** — now lists ALL furniture
-   cleaning services (Sofa, Carpet, Mattress, Dining Chair, Curtain,
-   Furniture Package, Office Chair, Table) instead of only "Furniture
-   Cleaning Package".
+## All patches in this release (v11.0 → v11.6)
 
-3. **"what type of cleaning you do"** — now routes to the cleaning service
-   list (grouped by category with prices) instead of a vague knowledge
-   abstention.
+| Patch | Doc | Summary |
+|-------|-----|---------|
+| v11.0 | `docs/V110_MULTILINGUAL_AND_CONTEXT_PATCHES.md` | Urdu/Arabic field labels, Unicode canonicalize, color aliases, conversation memory window |
+| v11.2 | `docs/V112_MULTI_SERVICE_EXTRACTION.md` | Multi-service extraction from compound messages |
+| v11.3 | `docs/V113_MULTI_SERVICE_SCOPE_CLARIFICATION.md` | Ask scope (Std/Deep, bedrooms, seater) BEFORE pricing |
+| v11.4 | `docs/V114_CATEGORY_DETECTION_AND_MOVE_IN_PRICING.md` | Category detection, Move-in/Move-out = Deep pricing |
+| v11.5 | `docs/V115_QUOTE_ONLY_PRICING_AND_SERVICE_MATCHING.md` | Quote-only pricing flow, office chair fix, carpet metres prompt |
+| v11.6 | `docs/V116_QUOTE_FOLLOWUP_AND_BEDROOM_TYPO_FIXES.md` | Bedroom typo tolerance, quote follow-up context, bare service mention → quote |
 
-4. **"i was looking for a cheap cleaning service for my apartment"** — now
-   asks Standard vs Deep (doesn't auto-select Standard). This was already
-   fixed in v3 but the user was testing on an unpatched clone.
+## All patched files (15 source + 6 docs + README + package.json)
 
-5. **Move-in/Move-out cleaning** — now uses the same pricing model as Deep
-   cleaning (scope_based, bedrooms-based matrix). Updated service definition
-   from `priceType: "starting_from"` to `priceType: "scope_based"` with
-   `pricingServiceId: "move-in-out-cleaning"` and
-   `requiredPricingFields: ["propertyType", "bedrooms"]`. Added CLN006 to the
-   `isDeepProperty` and `bookingRequirementState` checks so it asks for
-   bedrooms before pricing, just like Deep Apartment/Villa Cleaning.
+### Source files
+1. `packages/conversation-intelligence/src/fieldAmendmentExtractor.js`
+2. `packages/conversation-intelligence/src/clauseSemanticEngine.js`
+3. `packages/conversation-intelligence/src/temporalSemanticExtractor.js`
+4. `packages/conversation-intelligence/src/text.js`
+5. `packages/conversation-intelligence/src/acquisitionIntent.js`
+6. `packages/catalog-engine/src/attributeExtractor.js`
+7. `packages/universal-vocabulary/src/index.js`
+8. `packages/universal-vocabulary/src/vocabulary.json`
+9. `packages/multilingual-nlu/src/nluContextBuilder.js`
+10. `packages/execution-engine/src/executionEngine.js`
+11. `capabilities/cleaning/conversation/index.js`
+12. `capabilities/cleaning/src/index.js`
+13. `capabilities/availability/conversation/index.js`
+14. `capabilities/assistant/conversation/index.js`
+15. `tenants/cleaning-demo/cleaning/services.json`
 
-## Files changed in v4 (over v3)
+### Documentation
+- `docs/V110_MULTILINGUAL_AND_CONTEXT_PATCHES.md`
+- `docs/V112_MULTI_SERVICE_EXTRACTION.md`
+- `docs/V113_MULTI_SERVICE_SCOPE_CLARIFICATION.md`
+- `docs/V114_CATEGORY_DETECTION_AND_MOVE_IN_PRICING.md`
+- `docs/V115_QUOTE_ONLY_PRICING_AND_SERVICE_MATCHING.md`
+- `docs/V116_QUOTE_FOLLOWUP_AND_BEDROOM_TYPO_FIXES.md`
 
-| File | What changed |
-|------|--------------|
-| `capabilities/availability/conversation/index.js` | NEW `detectCategoryServices()` async helper — detects category questions ("do you provide furniture/deep/laundry cleaning") and returns ALL services in that category instead of a single best match. |
-| `capabilities/assistant/conversation/index.js` | `looksInformational()` now returns `false` for "what type/kind of cleaning" so the cleaning adapter's `service_list` wins over the assistant's `knowledge_question`. |
-| `capabilities/cleaning/conversation/index.js` | Extended `cleaning.service_list` regex to match "what type of cleaning", "what kind of cleaning", "what cleaning do you do", "which cleaning". Added `priority:230` so it beats the assistant's knowledge_question (priority 150, confidence 1.0). |
-| `capabilities/cleaning/src/index.js` | Added CLN006 (Move-in/Move-out) to `isDeepProperty` array and `bookingRequirementState` so it's treated as a Deep-cleaning-style service (bedrooms-based pricing). |
-| `tenants/cleaning-demo/cleaning/services.json` | Updated CLN006 from `priceType: "starting_from"` to `priceType: "scope_based"` with `pricingServiceId: "move-in-out-cleaning"` and `requiredPricingFields: ["propertyType", "bedrooms"]`. |
-
-## All patched files (15)
-
-| File | v1-v3 changes | v4 changes |
-|------|---------------|------------|
-| `packages/conversation-intelligence/src/fieldAmendmentExtractor.js` | Urdu/Arabic field labels, Unicode boundaries, SOV patterns, action-verb guard | — |
-| `packages/conversation-intelligence/src/clauseSemanticEngine.js` | Urdu/Arabic conjunction splitting | — |
-| `packages/conversation-intelligence/src/temporalSemanticExtractor.js` | `detectInvalidClock()` | — |
-| `packages/conversation-intelligence/src/text.js` | `numberFromText` 1-20 | — |
-| `packages/conversation-intelligence/src/acquisitionIntent.js` | Mixed-script support | — |
-| `packages/catalog-engine/src/attributeExtractor.js` | COLOR_ALIASES 7→16 | — |
-| `packages/universal-vocabulary/src/index.js` | Unicode-aware canonicalize | — |
-| `packages/universal-vocabulary/src/vocabulary.json` | 129 Urdu replacements | — |
-| `packages/multilingual-nlu/src/nluContextBuilder.js` | `recent_turns[]` | — |
-| `packages/execution-engine/src/executionEngine.js` | `recentTurns[]` window | — |
-| `capabilities/cleaning/conversation/index.js` | Multi-service extraction + clarification flow | Extended `service_list` regex for "what type of cleaning" |
-| `capabilities/cleaning/src/index.js` | Multi-service clarification handler + helpers | Added CLN006 to deep-property checks |
-| `capabilities/availability/conversation/index.js` | — | NEW `detectCategoryServices()` for category questions |
-| `capabilities/assistant/conversation/index.js` | — | `looksInformational()` excludes "what type of cleaning" |
-| `tenants/cleaning-demo/cleaning/services.json` | — | CLN006 Move-in/Move-out → scope_based pricing (same as Deep) |
+### Updated files
+- `README.md` (updated with v11.6 release notes)
+- `package.json` (version bumped to 11.6.0)
 
 ## How to apply
 
@@ -63,11 +58,14 @@
 cd /path/to/your/nova-assistant
 git stash
 
-unzip /path/to/nova-v9.4.1-patches-v4.zip -d /tmp/nova-patch-v4
-cp -r /tmp/nova-patch-v4/packages/* packages/
-cp -r /tmp/nova-patch-v4/capabilities/* capabilities/
-cp -r /tmp/nova-patch-v4/tenants/* tenants/
-cp -r /tmp/nova-patch-v4/scripts/* scripts/
+unzip /path/to/nova-v11.6-patches.zip -d /tmp/nova-patch-v6
+cp -r /tmp/nova-patch-v6/packages/* packages/
+cp -r /tmp/nova-patch-v6/capabilities/* capabilities/
+cp -r /tmp/nova-patch-v6/tenants/* tenants/
+cp -r /tmp/nova-patch-v6/docs/* docs/
+cp /tmp/nova-patch-v6/README.md .
+cp /tmp/nova-patch-v6/package.json .
+cp -r /tmp/nova-patch-v6/scripts/* scripts/
 
 npm install
 PORT=3000 NOVA_NLU_MODE=off NOVA_SEMANTIC_ROUTER_MODE=on npm start
@@ -75,11 +73,9 @@ PORT=3000 NOVA_NLU_MODE=off NOVA_SEMANTIC_ROUTER_MODE=on npm start
 
 ## How to verify
 
-1. `npm run benchmark:v9.4.1` → 9/9 pass.
-2. `node scripts/stress-test-harness.js` → 49/49 pass.
-3. Spot-check the 5 reported issues:
-   - "do you provide deep cleaning" → lists 5 Deep services
-   - "do you provide furniture cleaning service" → lists 8 Furniture services
-   - "what type of cleaning you do" → shows grouped service list with prices
-   - "i was looking for a cheap cleaning service for my apartment" → asks Standard vs Deep
-   - "book move in cleaning for my 3 bedroom apartment" → prices at AED 2,609.10 (matrix), asks for date
+1. `npm run benchmark:v9.4.1` → 9/9 pass
+2. Spot-check the key fixes:
+   - "hello what are charges for 3 bdroom apartment deep cleaning" → "AED 350"
+   - "villa deep cleaning" → "tell me the bedroom count"
+   - "3 bedroom" (follow-up) → "AED 440. Would you like me to start a booking?"
+   - "do you provide deep cleaning for villa" → lists 5 Deep services
