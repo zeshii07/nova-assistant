@@ -804,29 +804,6 @@ class CleaningConversationAdapter {
     // trigger inside an answer like "deep cleaning and 3 seater sofa" does
     // not steal the turn. The block below remains for the simple
     // step-based workflow_input fallthrough.
-    if(step==='multi_service_clarify'){
-      entities={pendingField:'multi_service_clarify',...timeEntities};
-      const ct=resolveCleaningType(normalizedText);
-      if(ct)entities.selectedCleaningType=ct;
-      if(timeEntities.bedrooms!=null)entities.bedrooms=timeEntities.bedrooms;
-      if(timeEntities.cleanerCount!=null)entities.cleanerCount=timeEntities.cleanerCount;
-      if(timeEntities.durationHours!=null)entities.durationHours=timeEntities.durationHours;
-      if(timeEntities.units!=null)entities.units=timeEntities.units;
-      if(timeEntities.serviceVariant)entities.serviceVariant=timeEntities.serviceVariant;
-      if(interruption && interruption.type!=='business_question' && (!correction || correction.type==='generic')) return {priority:this.priority,candidates:[],entities:{...entities,interruption},vocabularyMatches:[{type:'workflow',value:'cleaning_paused',score:1}]};
-      candidates.push({intent:'cleaning.multi_service_clarify',confidence:1,priority:300,entities,reason:'multi_service_clarify_turn'});
-      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'multi_service_clarify',score:1}]};
-    }
-    // Quote follow-up: when there's an active priceEnquiry (the user was
-    // asked for a missing scope field like bedrooms), a bare answer like
-    // "3 bedroom" should be routed to the cleaning.standalone_quote handler
-    // so it computes the price and asks whether to book — NOT fall through
-    // to the generic workflow_input which loses context.
-    if(!step && previous.priceEnquiry && timeEntities.bedrooms!=null && !pricingRequested && !structuredRequest){
-      entities={...timeEntities,serviceId:previous.priceEnquiry.serviceId,serviceName:previous.priceEnquiry.serviceName,propertyType:previous.priceEnquiry.propertyType||timeEntities.propertyType,bedrooms:timeEntities.bedrooms,pricingRequested:true,quoteOnly:true,text:normalizedText};
-      candidates.push({intent:'cleaning.standalone_quote',confidence:1,priority:200,entities,reason:'quote_follow_up_bedrooms'});
-      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'pricing',value:'quote_follow_up',score:1}]};
-    }
     if(step){
       entities={pendingField:step,...timeEntities};
       if(interruption && (!correction || correction.type==='generic')) return {priority:this.priority,candidates:[],entities:{...entities,interruption},vocabularyMatches:[{type:'workflow',value:'cleaning_paused',score:1}]};
@@ -841,19 +818,25 @@ class CleaningConversationAdapter {
     }
     const found=scoped?await scoped.findService(primaryText):null;
     if(found?.service){
-      // Pricing/quote question: "what are you charging for deep cleaning a 3
-      // bedroom apartment" OR a bare service mention like "villa deep cleaning"
-      // (no pricing keyword, no booking action). When there's no explicit
-      // booking action ("book/schedule/i want"), treat the service mention as
-      // a quote request so Nova shows the price and asks whether to book —
-      // NOT auto-selects the service and pushes for a date.
-      if(!structuredRequest && !explicitBookingAction && step!=='multi_service_clarify' && !step){
-        entities={...timeEntities,serviceId:found.service.id,serviceName:found.service.name,pricingRequested:pricingRequested||true,quoteOnly:true,text:normalizedText};
-        candidates.push({intent:'cleaning.standalone_quote',confidence:1,priority:175,entities,reason:'explicit_cleaning_service_price_question'});
+      // Pricing question: "what are you charging for deep cleaning a 3 bedroom
+      // apartment" — the user is asking for the CHARGE, not starting a booking.
+      // When pricingRequested is true AND structuredRequest is false AND there's
+      // no explicit booking action AND no date constraint, route to quote-only
+      // so Nova shows the estimate and asks whether to book. If the user
+      // supplied a date ("on monday"), treat it as a booking request — they
+      // want to actually book, not just get a price.
+      const hasDateConstraint=Boolean(timeEntities.date||timeEntities.dateText||timeEntities.weekday||timeEntities.dateReference);
+      // Bare service mention ("villa deep cleaning") OR pricing question
+      // ("what are charges for...") — when there's no explicit booking action
+      // and no date constraint, route to quote-only so Nova shows the price
+      // and asks whether to book. Do NOT auto-start a booking.
+      if(!structuredRequest && !explicitBookingAction && step!=='multi_service_clarify' && !step && !hasDateConstraint){
+        entities={...timeEntities,serviceId:found.service.id,serviceName:found.service.name,pricingRequested:true,quoteOnly:true,text:normalizedText};
+        candidates.push({intent:'cleaning.standalone_quote',confidence:1,priority:175,entities,reason:'bare_service_mention_or_price_question'});
         matches.push({type:'pricing',value:'explicit_service_quote',canonical:found.service.id,score:1});
         return {priority:this.priority,candidates,entities,vocabularyMatches:matches};
       }
-      if(pricingRequested && !structuredRequest && !explicitBookingAction && step!=='multi_service_clarify'){
+      if(pricingRequested && !structuredRequest && !explicitBookingAction && step!=='multi_service_clarify' && !hasDateConstraint){
         entities={...timeEntities,serviceId:found.service.id,serviceName:found.service.name,pricingRequested:true,quoteOnly:true,text:normalizedText};
         candidates.push({intent:'cleaning.standalone_quote',confidence:1,priority:175,entities,reason:'explicit_cleaning_service_price_question'});
         matches.push({type:'pricing',value:'explicit_service_quote',canonical:found.service.id,score:1});

@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "11.6.0",
+  "version": "11.7.0",
   "private": true,
-  "description": "Nova v11.6 Quote Follow-Up & Multilingual Fixes",
+  "description": "Nova v11.7 Availability Priority & Bare Service Quote",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {

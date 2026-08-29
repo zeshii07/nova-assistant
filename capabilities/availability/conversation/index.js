@@ -46,7 +46,7 @@ class AvailabilityConversationAdapter{
   const genericDayService=Boolean(constraints.day||constraints.weekend) && /\b(service|services|cleaning|appointment|booking|bookings|come|available)\b/.test(constraintText);
   const availabilityQuestion=!pricingQuestion && /\b(are you available|is .{0,80} available|available on|availability|slot|free on|free at|can i get .* on|can i book .* on)\b/.test(constraintText);
   const exactTimeQuestion=/\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b|\b(?:at|around)\s+\d{1,2}(?::\d{2})?\b/.test(text);
-  const transactionalServiceRequest=/\b(i want|i need|i would like|i'd like|please book|book|schedule|arrange)\b/.test(text)
+  const transactionalServiceRequest=/\b(i want|i need|i would like|i'd like|please book|book|schedule|arrange|i was looking for|i am looking for)\b/.test(text)
     && !/\bi want to (?:know|check|ask)\b/.test(text)
     && /\b(clean|cleaning|service|appointment|consultation|lesson|repair|treatment|massage|haircut|grooming|visit|meeting)\b/.test(text)
     && exactTimeQuestion;
@@ -55,16 +55,24 @@ class AvailabilityConversationAdapter{
   const sameDayQuestion=!policyChangeQuestion&&constraints.sameDay && /\b(book|booking|bookings|service|cleaning|available|availability|come)\b/.test(constraintText);
   const arrivalQuestion=/\b(?:when|what time|how soon)\b.*\b(?:cleaner|provider|staff|technician|driver|teacher|doctor)\b.*\b(?:arrive|arrival|come|reach)\b|\b(?:when|what time)\b.*\b(?:arrive|arrival)\b/.test(text);
 
+  // When the user is BOTH asking for a service ("do you provide deep cleaning
+  // for my villa") AND mentioning a day ("on monday"), the service-support
+  // question is the primary intent. The day constraint should NOT cause the
+  // genericDayService block to fire first and answer only the hours question
+  // while ignoring the "do you provide" question entirely.
+  const hasExplicitSupportQuestion=/\b(can you|are you able to|do you provide|do you offer)\b/.test(text)
+    && /\b(clean|cleaning|service|deep|sofa|carpet|mattress|furniture)\b/.test(text);
+
   if(arrivalQuestion)return out('availability.arrival_question',{...constraints,text},1,'service_arrival_question');
   if(openQuestion&&constraints.weekend&&!constraints.day)return out('availability.weekend_hours',{...constraints,text},1,'weekend_hours_question');
   if(openQuestion&&constraints.day)return out('availability.hours_for_day',{...constraints,text},1,'day_hours_question');
-  if(sameDayQuestion)return out('availability.same_day_question',{...constraints,text},1,'same_day_availability_constraint');
+  if(sameDayQuestion && !hasExplicitSupportQuestion)return out('availability.same_day_question',{...constraints,text},1,'same_day_availability_constraint');
   // An exact date/time availability question must reach the live calendar.
   // Opening-hours answers are useful only when the customer has not supplied
   // a concrete slot to check.
-  if(availabilityQuestion&&exactTimeQuestion)return out('availability.slot_question',{...constraints,...scheduleEntities(temporal),text},1,'exact_live_slot_question',220);
-  if(genericDayService)return out('availability.day_service_question',{...constraints,text},.999995,'day_service_constraint');
-  if(availabilityQuestion)return out('availability.slot_question',{...constraints,text},.99999,'service_slot_question');
+  if(availabilityQuestion&&exactTimeQuestion && !hasExplicitSupportQuestion)return out('availability.slot_question',{...constraints,...scheduleEntities(temporal),text},1,'exact_live_slot_question',220);
+  if(genericDayService && !hasExplicitSupportQuestion)return out('availability.day_service_question',{...constraints,text},.999995,'day_service_constraint');
+  if(availabilityQuestion && !hasExplicitSupportQuestion)return out('availability.slot_question',{...constraints,text},.99999,'service_slot_question');
 
   const listQuestion=/\b(what|which|list|show)\b.*\bservices?\b|\bservices?\b.*\b(do you offer|do you provide|available)\b/.test(text);
   const explicitSupport=/\b(can you|are you able to|do you provide|do you offer)\b/.test(text);

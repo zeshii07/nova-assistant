@@ -5,43 +5,27 @@ booking, cleaning, catalog, commerce, CRM, and tenant-knowledge capabilities.
 Its deterministic workflow core keeps customer data and transactions scoped to
 the active tenant while optional language models help interpret ambiguity.
 
-## Current release: v11.6 Quote Follow-Up & Multilingual Fixes
+## Current release: v11.7 Availability Priority & Bare Service Quote
 
-Nova v11.6 closes several conversation gaps reported during stress-testing:
+Nova v11.7 fixes conversation gaps where the availability adapter was
+stealing turns from the cleaning adapter:
 
-- **Quote-only pricing flow** — "what are you charging for deep cleaning a 3
-  bedroom apartment" now shows the estimate (AED 350) and asks "Would you like
-  me to start a booking?" instead of auto-selecting the service.
-- **Bedroom typo tolerance** — "3 bdroom" (missing 'e') is now recognized
-  alongside "3 bedroom", "3 bed", "3 bhk", "3 bd", "3 bdrm".
-- **Quote follow-up context** — after Nova asks for the bedroom count, "3
-  bedroom" correctly completes the quote (AED 440 for Deep Villa) instead of
-  losing context to the assistant fallback.
+- **Availability priority fix** — "i was looking for deep cleaning service
+  for my villa on monday do you provide deep cleaning service" now routes
+  to the cleaning capability (asks for bedrooms, captures the date)
+  instead of the availability adapter (which was only answering the hours
+  question and ignoring the "do you provide" part).
 - **Bare service mention → quote** — "villa deep cleaning" (no pricing
-  keyword, no booking action) now shows the price and asks whether to book,
-  instead of auto-starting a booking workflow.
-- **Category detection** — "do you provide furniture cleaning service" lists
-  ALL 8 furniture services (Sofa, Carpet, Mattress, Chair, Curtain, etc.)
-  instead of only "Furniture Cleaning Package".
-- **Move-in/Move-out pricing** — now uses the same scope-based matrix as Deep
-  cleaning (bedrooms-based), not a flat starting_from price.
-- **Multi-service extraction** — "cleaning of my apartment and also sofa
-  cleaning" correctly extracts BOTH services.
-- **Multi-service scope clarification** — asks Standard vs Deep + sofa size
-  BEFORE showing prices.
-- **Multilingual support** — Urdu-script field labels, Urdu/Arabic clause
-  splitting, 16-color aliases with Urdu/Arabic, conversation memory window,
-  and 129 Urdu canonical replacements.
+  keyword, no booking action) now shows the price and asks whether to
+  book, instead of auto-starting a booking workflow. When a date is
+  supplied ("on monday"), the booking workflow fires correctly.
+- **Bedroom typo tolerance** — "3 bdroom" (missing 'e') now recognized.
+- **Quote follow-up context** — "3 bedroom" after a pricing question
+  correctly completes the quote (AED 440 for Deep Villa) instead of
+  losing context to the assistant fallback.
 
-See `docs/V116_QUOTE_FOLLOWUP_AND_BEDROOM_TYPO_FIXES.md` for the latest
-patch details, and `docs/V110_MULTILINGUAL_AND_CONTEXT_PATCHES.md` through
-`docs/V115_QUOTE_ONLY_PRICING_AND_SERVICE_MATCHING.md` for earlier patches.
-
-Run the release gate:
-
-```powershell
-npm run benchmark:v9.4.1
-```
+See `docs/V117_AVAILABILITY_PRIORITY_AND_BARE_SERVICE_QUOTE.md` for
+details, and `docs/V110_*.md` through `docs/V116_*.md` for earlier patches.
 
 ## Previous release: v10.2.0 Multilingual Acquisition and Lead Intelligence
 
