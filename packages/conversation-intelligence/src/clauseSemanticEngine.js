@@ -29,8 +29,14 @@ class ClauseSemanticEngine {
 function splitClauses(value){
   return String(value||'')
     .replace(/\s*,\s*(?=(?:as\s+)?i(?:\s+am|'m)\s+(?:considering|thinking)|(?:as\s+)?we(?:\s+are|'re)\s+(?:considering|thinking))/gi,'\n')
-    .split(/(?:\r?\n)+|(?<=[.!?;])\s+/u)
-    .map((part)=>part.trim().replace(/^[,;]+|[,;]+$/g,''))
+    // Urdu-script punctuation and conjunctions: full-stop ۔, Arabic comma ،,
+    // "اور" (and), "لیکن"/"مگر"/"پر" (but/however), "کیونکہ" (because).
+    // Arabic: ، ، و لكن لأن.
+    .replace(/([۔!?؛])/gu,'$1\n')
+    .replace(/\s*،\s*/gu,' ، ')
+    .replace(/(\s(?:aur|لیکن|مگر|پر|کیونکہ|لہذا|اگر|و|لكن|لأن|لأنه|لأنها)\s)/giu,'\n$1')
+    .split(/(?:\r?\n)+|(?<=[.!?;۔])\s+/u)
+    .map((part)=>part.trim().replace(/^[,;،]+|[,;،]+$/g,''))
     .filter(Boolean);
 }
 function futureOrConditional(value){
@@ -38,7 +44,9 @@ function futureOrConditional(value){
   return /^if\b/.test(n)
     || /\b(?:as\s+)?(?:i|we)\s+(?:am|are|m|re)\s+(?:considering|thinking)(?:\s+about)?\b/.test(n)
     || /\b(?:considering|thinking about|might|may|possibly|perhaps|in the future|later on)\b/.test(n)
-    || /\bif (?:it|this|that|the service) (?:works|goes well|is good)\b/.test(n);
+    || /\bif (?:it|this|that|the service) (?:works|goes well|is good)\b/.test(n)
+    || /(?:شاید|ہو سکتا|ہو\s*سکتی|मुमकिन|agar|اگر)/.test(String(value||''))
+    || /(?:ربما|قد|يحتمل)/.test(String(value||''));
 }
 
 module.exports={ClauseSemanticEngine,splitClauses,futureOrConditional};

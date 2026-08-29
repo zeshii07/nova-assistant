@@ -14,20 +14,29 @@ class AttributeExtractor {
   }
 }
 const COLOR_ALIASES = {
-  black: ["black", "blck", "blk", "kala", "kali", "کالا", "کالی"],
-  white: ["white", "wht", "safed", "سفید"],
-  navy: ["navy", "navy blue"],
-  blue: ["blue", "blu", "neela", "neeli", "نیلا", "نیلی"],
-  brown: ["brown", "brwn", "bhura", "بھورا"],
-  silver: ["silver", "slvr", "چاندی"],
-  gold: ["gold", "golden", "سنہری"]
+  black: ["black", "blck", "blk", "kala", "kali", "کالا", "کالی", "سیاہ", "أسود", "اسود", "siyah", "siyahi"],
+  white: ["white", "wht", "safed", "سفید", "ابیض", "ابيض", "abyad"],
+  navy: ["navy", "navy blue", "گہرا نیلا"],
+  blue: ["blue", "blu", "neela", "neeli", "نیلا", "نیلی", "أزرق", "ازرق", "azraq"],
+  brown: ["brown", "brwn", "bhura", "بھورا", "بنی", "بنى", "bunny"],
+  silver: ["silver", "slvr", "چاندی", "chandi", "فضة", "فضه", "fidda"],
+  gold: ["gold", "golden", "سنہری", "sona", "ذهبی", "ذہبی", "dhahabi"],
+  red: ["red", "laal", "lal", "سرخ", "أحمر", "احمر", "ahmar", "surkh"],
+  green: ["green", "sabz", "سبز", "hara", "ہرا", "أخضر", "اخضر", "akhdar", "khadra"],
+  yellow: ["yellow", "peela", "peela", "پیلا", "زرد", "zard", "أصفر", "اصفر", "asfar"],
+  grey: ["grey", "gray", "surmai", "سرمئی", "رمادی", "رمادى", "ramadi"],
+  maroon: ["maroon", "مرون", "marooni", "خمري", "خمرى"],
+  olive: ["olive", "زیتونی", "zaitooni", "زيتوني", "zaytuni"],
+  pink: ["pink", "گلابی", "gulabi", "وردي", "وردی", "wardi"],
+  purple: ["purple", "جامنی", "jamni", "بنفشی", "بنفشى", "banafshi", "ارجوانی"],
+  orange: ["orange", "narangi", "سنتری", "santari", "برتقالی", "برتقالى", "burtuqali"]
 };
 const SIZE_ALIASES = {
-  s: ["s", "small", "chota", "چھوٹا"],
-  m: ["m", "medium", "med", "درمیانہ"],
-  l: ["l", "large", "bara", "بڑا"],
-  xl: ["xl", "extra large"],
-  xxl: ["xxl", "double xl"]
+  s: ["s", "small", "chota", "چھوٹا", "chhoti", "چھوٹی", "صغير", "صغيرة"],
+  m: ["m", "medium", "med", "درمیانہ", "darmiyana", "متوسط", "متوسطه"],
+  l: ["l", "large", "bara", "بڑا", "بڑی", "bari", "كبير", "كبيرة", "kabir"],
+  xl: ["xl", "extra large", "بہت بڑا", "بحت برا", "كبير جدا"],
+  xxl: ["xxl", "double xl", "double extra large", "سب سے بڑا", "اكبر"]
 };
 function resolveKnownValue(text, validValues, aliases) {
   for (const value of validValues || []) {

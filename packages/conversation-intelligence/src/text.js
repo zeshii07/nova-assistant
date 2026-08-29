@@ -20,8 +20,11 @@ function numberFromText(value) {
   if (direct) return Number(direct[1]);
   const map = {
     one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,
+    eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,
     ek:1,aik:1,do:2,teen:3,char:4,chaar:4,paanch:5,che:6,chay:6,saat:7,aath:8,nau:9,das:10,
-    ایک:1,دو:2,تین:3,چار:4,پانچ:5,چھ:6,سات:7,آٹھ:8,نو:9,دس:10
+    gyara:11,gyarah:11,baara:12,baarah:12,tera:13,terah:13,chauda:14,chaudah:14,pandra:15,pandrah:15,sola:16,solah:16,satra:17,satrah:17,athara:18,atrah:18,unnees:19,bees:20,
+    ایک:1,دو:2,تین:3,چار:4,پانچ:5,چھ:6,سات:7,آٹھ:8,نو:9,دس:10,
+    گیارہ:11,بارہ:12,تیرہ:13,چودہ:14,پندرہ:15,سولہ:16,سترہ:17,اٹھارہ:18,انیس:19,بیس:20
   };
   for (const token of words(text)) if (map[token]) return map[token];
   return null;

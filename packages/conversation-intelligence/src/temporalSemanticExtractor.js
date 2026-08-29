@@ -21,6 +21,15 @@ class TemporalSemanticExtractor {
       const start=extractStartTime(digitRaw);
       if(start)out.startTime=start;
     }
+    // Detect clock-like tokens that look like a time but parse to an invalid
+    // value (e.g. "25:90", "13:99", "30 am"). Surfacing this flag lets the
+    // active workflow reject the value instead of silently skipping it and
+    // continuing as if the user never supplied a time.
+    const invalidClock=detectInvalidClock(digitRaw);
+    if(invalidClock){
+      out.invalidClockText=invalidClock.text;
+      out.invalidClockReason=invalidClock.reason;
+    }
     const duration=extractDuration(n);
     if(duration&&!out.durationHours)out.durationHours=duration;
     if(/\bday after tomorrow\b|\bparson\b|\bparso\b|پرسوں/.test(n))out.dateReference='day_after_tomorrow';
@@ -37,6 +46,30 @@ class TemporalSemanticExtractor {
     }
     return out;
   }
+}
+
+function detectInvalidClock(raw){
+  const value=String(raw||'');
+  // "HH:MM" with out-of-range hours/minutes, with or without am/pm suffix.
+  const matches=[...value.matchAll(/\b(\d{1,2}):(\d{2})\s*(a\.?m\.?|p\.?m\.?)?/gi)];
+  for(const match of matches){
+    const hour=Number(match[1]);
+    const minute=Number(match[2]);
+    const marker=String(match[3]||'').toLowerCase().replace(/\./g,'');
+    // If the match would have been accepted by parseClock, skip it; the
+    // caller already gets a valid startTime. We surface only the impossible
+    // tokens that parseClock silently dropped (e.g. 25:90, 13:99, 99 am).
+    const parsed=parseClock(match[1],match[2],match[3]);
+    if(parsed)continue;
+    // Reject obviously impossible hours/minutes regardless of marker.
+    if(hour<0||hour>23||minute<0||minute>59){
+      return {text:match[0].trim(),reason:minute>59?'invalid_minute':'invalid_hour'};
+    }
+    if(marker&&(hour<1||hour>12)){
+      return {text:match[0].trim(),reason:'invalid_12hour_with_marker'};
+    }
+  }
+  return null;
 }
 
 function extractDuration(n){

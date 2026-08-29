@@ -11,13 +11,21 @@ const {normalizeText}=require('./text');
 function hasAcquisitionCue(value){
   const n=normalizeText(value);
   if(!n)return false;
+  // Also keep the original raw value because canonicalize may rewrite
+  // Urdu-script pronouns (e.g. "مجھے" → "mujhe") while leaving the Urdu
+  // acquisition verb in script (e.g. "کروانی"). Both forms need to be tested.
+  const raw=String(value||'');
   return /\b(?:(?:i\s+(?:(?:am|was|'m)\s+)?)?(?:looking|searching|shopping)\s+for|looking to|trying to (?:find|get|buy|book|arrange)|interested in|hoping to (?:get|book|arrange)|i want|i need|i would like|i'd like|would love|can i get|can i have|could i get|may i get|help me (?:get|find|book|arrange|with)|set me up with|sort out|arrange|book|schedule|reserve|purchase|buy|order|send (?:me|someone|a team)|need someone|want someone)\b/.test(n)
     || /\b(?:get|have|want|need)\b[\s\S]{0,45}\b(?:cleaned|fixed|repaired|done|delivered|booked|scheduled)\b/.test(n)
     || /\b(?:can|could|would)\s+(?:you|someone|your team|a team)\s+(?:come|clean|repair|fix|deliver|arrange|book|schedule|reserve|send|help)\b/.test(n)
     || /\b(?:save|hold)\s+(?:me|us)\s+(?:a|an|the)?\s*(?:table|slot|appointment|session|place)\b/.test(n)
-    || /\b(?:mujhe|mujhay|mujy|humain|humein|main|mai|mein)\b[\s\S]{0,80}\b(?:chahiye|chaheye|chahye|karna|karani|krani|karwana|karwani|krwana|lena|leni|khareed(?:na|ne|ni)?|kharid(?:na|ne|ni)?|book|booking)\b/.test(n)
+    // Roman-Urdu subject + acquisition verb. The verb alternation now ALSO
+    // covers Urdu-script equivalents (چاہیے/کروان/خرید/لین/بکنگ) so a
+    // mixed-script phrase such as "mujhe صفائی کروانی ہے" (after canonicalize
+    // rewrote "مجھے" → "mujhe") still matches.
+    || /\b(?:mujhe|mujhay|mujy|humain|humein|main|mai|mein)\b[\s\S]{0,80}\b(?:chahiye|chaheye|chahye|karna|karani|krani|karwana|karwani|krwana|lena|leni|khareed(?:na|ne|ni)?|kharid(?:na|ne|ni)?|book|booking|چاہیے|چاہئیے|چاہئے|کروان|کرانی|کران|خرید|لین|بکنگ)\b/.test(n)
     || /\b(?:karwa|karwani|karwana|krwa|krwani|krwana|krani|leni|lena|khareed(?:na|ne|ni)?|kharid(?:na|ne|ni)?)\b/.test(n)
-    || /(?:مجھے|ہمیں)[\s\S]{0,80}(?:چاہیے|کروان|کران|خرید|لین|بکنگ)/.test(n);
+    || /(?:مجھے|ہمیں|\bmujhe\b|\bhumain\b|\bhumein\b)[\s\S]{0,80}(?:چاہیے|کروان|کران|خرید|لین|بکنگ|کرانی|کروانی)/.test(raw);
 }
 
 function isServiceEvidence(value){

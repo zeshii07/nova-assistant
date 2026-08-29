@@ -146,7 +146,7 @@ class ExecutionEngine {
       }
     } else if (command === "reset") {
       reply = state.language === "roman_urdu" ? "Theek hai, hum fresh start karte hain 😊 Aap ko kis cheez mein madad chahiye?" : state.language === "urdu" ? "ٹھیک ہے، ہم نئے سرے سے شروع کرتے ہیں 😊 آپ کو کس چیز میں مدد چاہیے؟" : "Sure — let’s start fresh 😊 How can I help you?";
-      patch = { activePlugin:null, pendingQuestion:null, mode:"chatting", lastIntent:"conversation_reset", context:{ goal:null, goalHistory:[] }, capabilityState:{} };
+      patch = { activePlugin:null, pendingQuestion:null, mode:"chatting", lastIntent:"conversation_reset", context:{ goal:null, goalHistory:[], recentTurns:[] }, capabilityState:{} };
     } else {
       const handoff=await this.services?.handoffService?.create({
         tenantId:tenant.id,conversationId,customerId:message.customerId,reason:"customer_requested",
@@ -171,12 +171,21 @@ class ExecutionEngine {
       ? appendGoalHistory(state, { ...intelligence.goal.transition, goalId: nextGoal?.id || intelligence?.goal?.current?.id || null })
       : (state.context?.goalHistory || []);
     const replaceCapabilityState = intelligence?.globalCommand?.type === "reset";
+    // Conversation memory window: keep the last 6 customer turns + the
+    // capability/intent that handled each. PII is NOT stored here — only
+    // the customer's message text (already shown to the user) and the
+    // capability/intent label. This lets the remote NLU resolver resolve
+    // pronouns like "book it again" or "the same time as last week" without
+    // leaking customer contact data to the provider.
+    const MAX_RECENT_TURNS = 6;
+    const previousTurns = Array.isArray(state.context?.recentTurns) ? state.context.recentTurns : [];
+    const recentTurns = [...previousTurns, { text: message.text, capabilityId: capabilityId || null, intent: intelligence?.selected?.intent || null, at: new Date().toISOString() }].slice(-MAX_RECENT_TURNS);
     state = applyStatePatch(state, {
       ...result.statePatch,
       capabilityState: replaceCapabilityState
         ? (result.statePatch.capabilityState || {})
         : { ...(state.capabilityState || {}), ...(result.statePatch.capabilityState || {}) },
-      context: { ...state.context, ...(result.statePatch.context || {}), goal: nextGoal, goalHistory, lastMessage: message.text, lastCapability: capabilityId, conversationIntelligence: summarizeIntelligence(intelligence) }
+      context: { ...state.context, ...(result.statePatch.context || {}), goal: nextGoal, goalHistory, lastMessage: message.text, lastCapability: capabilityId, conversationIntelligence: summarizeIntelligence(intelligence), recentTurns }
     });
     await this.stateRepository.save(state);
 

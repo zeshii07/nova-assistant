@@ -76,8 +76,18 @@ class AvailabilityConversationAdapter{
   if(serviceQuestion&&services?.availabilityService){
     const a=services.availabilityService.scope({tenant}),supports=a.serviceSupports(text),support=a.serviceSupport(text);
     const bookingPhrase=/\b(?:can|cn) i book|\bbook (?:a|the|my|this)\b|\bschedule\b/.test(text);
-    if(!bookingPhrase&&supports.length>1){
-      return out('availability.multi_service_support',{...constraints,text,services:supports.map(item=>({serviceId:item.serviceId,label:item.label}))},.999995,'multiple_supported_services_question');
+    // Category question: "do you provide furniture cleaning", "do you do deep
+    // cleaning", "do you provide laundry service" — the user is asking about
+    // a CATEGORY of services, not one specific service. Detect this and return
+    // ALL services in that category instead of a single best match.
+    if(!bookingPhrase){
+      const categoryServices=await detectCategoryServices(text,services,tenant);
+      if(categoryServices&&categoryServices.length>1){
+        return out('availability.multi_service_support',{...constraints,text,services:categoryServices.map(item=>({serviceId:item.id,label:item.name}))},.999996,'category_services_question');
+      }
+      if(supports.length>1){
+        return out('availability.multi_service_support',{...constraints,text,services:supports.map(item=>({serviceId:item.serviceId,label:item.label}))},.999995,'multiple_supported_services_question');
+      }
     }
     if(support?.supported){
       if(bookingPhrase)return empty(this.priority); // actual booking/service workflow owns explicit booking actions
@@ -101,6 +111,38 @@ function scheduleEntities(temporal={}){
  if(temporal.durationHours)out.durationHours=temporal.durationHours;
  return out;
 }
+
+// Detects when the user is asking about a CATEGORY of cleaning services
+// (e.g. "do you provide furniture cleaning", "do you do deep cleaning",
+// "do you offer laundry service") and returns ALL active, non-hidden
+// services in that category. Without this, "do you provide furniture
+// cleaning" matched only the "Furniture Cleaning" choice-group service
+// (CLN023) and hid Sofa, Carpet, Mattress, Curtain, Chair, Table.
+async function detectCategoryServices(text,services,tenant){
+  if(!tenant||!services.cleaningService)return null;
+  const scoped=services.cleaningService.scope({tenant,capabilityId:'cleaning',customerId:null,conversationId:null});
+  let cleaningServices=[];
+  try{cleaningServices=await scoped.listServices();}catch{return null;}
+  if(!cleaningServices.length)return null;
+  const t=String(text||'').toLowerCase();
+  const categoryMap=[
+    {keywords:['furniture cleaning','furniture clean','furniture service','upholstery'],category:'Furniture cleaning'},
+    {keywords:['deep cleaning','deep clean','deep service'],category:'Deep cleaning'},
+    {keywords:['standard cleaning','standard clean','routine cleaning','regular cleaning','home cleaning','hourly'],category:'Home cleaning'},
+    {keywords:['laundry','wash and fold','ironing'],category:'Laundry'},
+    {keywords:['business cleaning','office cleaning','commercial'],category:'Business cleaning'},
+    {keywords:['specialised cleaning','specialized cleaning','kitchen cleaning','bathroom cleaning','floor cleaning','window cleaning','balcony cleaning'],category:'Specialised cleaning'},
+    {keywords:['home maintenance','ac cleaning','duct cleaning','pest control'],category:'Home maintenance cleaning'},
+  ];
+  for(const entry of categoryMap){
+    if(entry.keywords.some(kw=>t.includes(kw))){
+      const matches=cleaningServices.filter(s=>s.active!==false&&!s.hidden&&s.category===entry.category);
+      if(matches.length>1)return matches;
+    }
+  }
+  return null;
+}
+
 function empty(priority){return {priority,candidates:[],entities:{},vocabularyMatches:[]};}
 function out(intent,entities,confidence,reason,candidatePriority=null){const candidate={intent,confidence,entities,reason};if(candidatePriority!=null)candidate.priority=candidatePriority;return {priority:105,candidates:[candidate],entities,vocabularyMatches:[{type:'availability',value:intent,score:1}]};}
 module.exports={AvailabilityConversationAdapter};

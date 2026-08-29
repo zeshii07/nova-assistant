@@ -317,6 +317,12 @@ function looksInformational(text, detectedIntent = "other") {
     return false;
   if (/^\s*what\b.*\bdo you (?:have|sell|teach|serve|offer|provide)\b/.test(n))
     return false;
+  // "what type/kind of cleaning do you do" is an operational service-list
+  // question for the cleaning capability, not a knowledge/policy question.
+  if (/\bwhat (?:type|kind|sort) of (?:cleaning|service)/i.test(n))
+    return false;
+  if (/\bwhat (?:cleaning|services?) do you\b/i.test(n))
+    return false;
   if (/\bwhat (?:subjects?|courses?|classes?|programs?) do you teach\b/.test(n))
     return false;
   if (

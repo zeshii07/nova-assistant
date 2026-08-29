@@ -1,7 +1,7 @@
 const { BaseCapability } = require("../../../packages/capability-sdk/src/baseCapability");
 const { createCapabilityResult } = require("../../../packages/capability-sdk/src/capabilityResult");
 const { isConfirmation } = require("../../../packages/conversation-intelligence/src/confirmation");
-const { numberFromText } = require("../../../packages/conversation-intelligence/src/text");
+const { numberFromText, normalizeText } = require("../../../packages/conversation-intelligence/src/text");
 
 /** Service-request capability for cleaning businesses with deterministic live-calendar confirmation. */
 class CleaningCapability extends BaseCapability {
@@ -47,13 +47,13 @@ class CleaningCapability extends BaseCapability {
       const configuredDuration=Number(previous.durationHours||0);
       const reply=configuredDuration
         ? localized(language,
-          `This request is currently set for ${configuredDuration} hour${configuredDuration===1?'':'s'}. Your booking details are still safe — ${promptFor(previous.step,language)}`,
-          `Is request ke liye ${configuredDuration} ghantay note hain. Aapki booking details safe hain — ${promptFor(previous.step,language)}`,
-          `اس درخواست کے لیے ${configuredDuration} گھنٹے درج ہیں۔ آپ کی بکنگ کی تفصیلات محفوظ ہیں۔ ${promptFor(previous.step,language)}`)
+          `This request is currently set for ${configuredDuration} hour${configuredDuration===1?'':'s'}. Your booking details are still safe — ${promptFor(previous.step,language,previous.serviceName)}`,
+          `Is request ke liye ${configuredDuration} ghantay note hain. Aapki booking details safe hain — ${promptFor(previous.step,language,previous.serviceName)}`,
+          `اس درخواست کے لیے ${configuredDuration} گھنٹے درج ہیں۔ آپ کی بکنگ کی تفصیلات محفوظ ہیں۔ ${promptFor(previous.step,language,previous.serviceName)}`)
         : localized(language,
-          `${service?.name||'This cleaning service'} has no fixed duration in the approved service data; how long it takes depends on the scope and the team will confirm it. Your request is still paused safely — ${promptFor(previous.step,language)}`,
-          `${service?.name||'Is cleaning service'} ka fixed duration configured nahi hai; time scope par depend karta hai aur team confirm karegi. Aapki request safe paused hai — ${promptFor(previous.step,language)}`,
-          `${service?.name||'اس صفائی کی سروس'} کا مقررہ دورانیہ درج نہیں؛ وقت کام کی نوعیت پر منحصر ہے اور ٹیم تصدیق کرے گی۔ آپ کی درخواست محفوظ ہے۔ ${promptFor(previous.step,language)}`);
+          `${service?.name||'This cleaning service'} has no fixed duration in the approved service data; how long it takes depends on the scope and the team will confirm it. Your request is still paused safely — ${promptFor(previous.step,language,previous.serviceName)}`,
+          `${service?.name||'Is cleaning service'} ka fixed duration configured nahi hai; time scope par depend karta hai aur team confirm karegi. Aapki request safe paused hai — ${promptFor(previous.step,language,previous.serviceName)}`,
+          `${service?.name||'اس صفائی کی سروس'} کا مقررہ دورانیہ درج نہیں؛ وقت کام کی نوعیت پر منحصر ہے اور ٹیم تصدیق کرے گی۔ آپ کی درخواست محفوظ ہے۔ ${promptFor(previous.step,language,previous.serviceName)}`);
       return result(reply,language,previous,'cleaning_duration_info',{intent:'CLEANING_DURATION_INFO',payload:{legacyText:reply,durationHours:configuredDuration||null,pendingField:previous.step}});
     }
 
@@ -65,13 +65,13 @@ class CleaningCapability extends BaseCapability {
       const value=field&&next[field];
       const reply=value
         ? localized(language,
-          `Yes — I’m using your saved ${customerFieldLabel(field)}: ${value}. ${promptFor(previous.step,language)}`,
-          `Ji — aapka saved ${customerFieldLabel(field)} ${value} use ho raha hai. ${promptFor(previous.step,language)}`,
-          `جی — آپ کا محفوظ ${customerFieldLabel(field)} ${value} استعمال ہو رہا ہے۔ ${promptFor(previous.step,language)}`)
+          `Yes — I’m using your saved ${customerFieldLabel(field)}: ${value}. ${promptFor(previous.step,language,previous.serviceName)}`,
+          `Ji — aapka saved ${customerFieldLabel(field)} ${value} use ho raha hai. ${promptFor(previous.step,language,previous.serviceName)}`,
+          `جی — آپ کا محفوظ ${customerFieldLabel(field)} ${value} استعمال ہو رہا ہے۔ ${promptFor(previous.step,language,previous.serviceName)}`)
         : localized(language,
-          `I don’t have a saved ${customerFieldLabel(field)} yet. ${promptFor(previous.step,language)}`,
-          `Aapka saved ${customerFieldLabel(field)} nahi mila. ${promptFor(previous.step,language)}`,
-          `آپ کا محفوظ ${customerFieldLabel(field)} موجود نہیں۔ ${promptFor(previous.step,language)}`);
+          `I don’t have a saved ${customerFieldLabel(field)} yet. ${promptFor(previous.step,language,previous.serviceName)}`,
+          `Aapka saved ${customerFieldLabel(field)} nahi mila. ${promptFor(previous.step,language,previous.serviceName)}`,
+          `آپ کا محفوظ ${customerFieldLabel(field)} موجود نہیں۔ ${promptFor(previous.step,language,previous.serviceName)}`);
       return result(reply,language,next,'cleaning_saved_field_referenced',{intent:'CLEANING_SAVED_FIELD_REFERENCED',payload:{legacyText:reply,field,pendingField:previous.step,savedValueUsed:Boolean(value)}});
     }
 
@@ -119,7 +119,7 @@ class CleaningCapability extends BaseCapability {
       const selectedLabel=deep?'Deep Cleaning':'Standard Cleaning';
       const propertyLabel=propertyType==='villa'?'villa/house':'apartment/flat';
       const quote=next.quotedService?.ok?` The configured estimate is ${currencyAmount(next.quotedService.total,next.quotedService.currency)}.`:'';
-      const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language);
+      const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language,next.serviceName);
       const reply=localized(language,
         `${selectedLabel} selected for your ${propertyLabel}.${quote} ${capturedScheduleLine(next)}${prompt}`,
         `${propertyLabel} ke liye ${selectedLabel} select ho gayi hai.${quote} ${capturedScheduleLine(next)}${prompt}`,
@@ -161,7 +161,7 @@ class CleaningCapability extends BaseCapability {
       if(!parsed.valid)return result(parsed.message,language,previous,'cleaning_invalid_optional_email',{intent:'CLEANING_OPTIONAL_EMAIL_INVALID',payload:{legacyText:parsed.message,preferLegacyText:true,pendingField:previous.step}});
       await context.services.crm?.updateCustomer?.({email:parsed.value,preferredLanguage:language});
       const next={...previous,email:parsed.value};
-      const prompt=previous.step==='confirm'?'If everything looks correct, say confirm.':promptFor(previous.step,language);
+      const prompt=previous.step==='confirm'?'If everything looks correct, say confirm.':promptFor(previous.step,language,previous.serviceName);
       const reply=`Thanks — I’ve saved ${parsed.value} as an optional email contact. ${prompt}`;
       return result(reply,language,next,'cleaning_optional_email_saved',{intent:'CLEANING_OPTIONAL_EMAIL_SAVED',payload:{legacyText:reply,preferLegacyText:true,email:parsed.value,pendingField:previous.step}});
     }
@@ -200,7 +200,7 @@ class CleaningCapability extends BaseCapability {
         next={lastRequestId:updatedRequest.id};
       }
       if(['name','phone','email'].includes(field))await context.services.crm?.updateCustomer?.({[field]:parsed.value,preferredLanguage:language});
-      const continuation=next.step&&next.step!=='confirm'?` ${promptFor(next.step,language)}`:next.step==='confirm'?' If everything looks correct, say confirm.':'';
+      const continuation=next.step&&next.step!=='confirm'?` ${promptFor(next.step,language,next.serviceName)}`:next.step==='confirm'?' If everything looks correct, say confirm.':'';
       const reply=`Updated — the ${customerFieldLabel(field)} is now ${parsed.value}.${updatedRequest?` Request ${updatedRequest.id} is now revision ${updatedRequest.revision}.`:''}${continuation}`;
       return result(reply,language,next,'cleaning_customer_field_updated',{intent:'CLEANING_CUSTOMER_FIELD_UPDATED',payload:{legacyText:reply,field,value:parsed.value,requestId:updatedRequest?.id||null,revision:updatedRequest?.revision||null,pendingField:next.step||null}});
     }
@@ -244,7 +244,7 @@ class CleaningCapability extends BaseCapability {
       const checked=validateSchedule(context,engagement,{...semantic,timeFlexible:semantic.timeFlexible||retainFlexibleTime,date:rawDate,startTime:rawTime,durationHours:request.durationHours,endTime:semantic.endTime||request.endTime});
       if(checked.error){
         const next={lastRequestId:request.id,editingRequestId:request.id,preferredDate:checked.preferredDate||request.preferredDate,preferredTime:request.preferredTime,step:checked.errorField==='date'?'submitted_reschedule_date':'submitted_reschedule_time'};
-        return result(`${checked.error} ${promptFor(checked.errorField,language)}`,language,next,'cleaning_submitted_schedule_invalid',{intent:'CLEANING_SUBMITTED_SCHEDULE_INVALID',payload:{legacyText:checked.error,pendingField:next.step}});
+        return result(`${checked.error} ${promptFor(checked.errorField,language,previous.serviceName)}`,language,next,'cleaning_submitted_schedule_invalid',{intent:'CLEANING_SUBMITTED_SCHEDULE_INVALID',payload:{legacyText:checked.error,pendingField:next.step}});
       }
       const preferredDate=checked.preferredDate||request.preferredDate;
       const startTime=checked.preferredTime;
@@ -364,7 +364,7 @@ class CleaningCapability extends BaseCapability {
       const days=parseDays(context.message.text);
       if(!days.length)return result('Tell me the preferred day or days, for example “Monday and Thursday”.',language,previous,'cleaning_recurring_invalid_days',{intent:'CLEANING_RECURRING_ASK_DAYS',payload:{pendingField:'recurring_days'}});
       const next={...previous,recurringDays:days,step:'time'};
-      return result(promptFor('time',language),language,next,'cleaning_recurring_ask_time',{intent:'CLEANING_ASK_TIME',payload:{pendingField:'time',recurringDays:days}});
+      return result(promptFor('time',language,previous.serviceName),language,next,'cleaning_recurring_ask_time',{intent:'CLEANING_ASK_TIME',payload:{pendingField:'time',recurringDays:days}});
     }
 
     // A customer may compare/change the property while a date/time is pending.
@@ -386,7 +386,7 @@ class CleaningCapability extends BaseCapability {
       if(actual){
         const next={...previous,...semantic,serviceId:actual.id,serviceName:actual.name,step:previous.step};
         delete next.quotedService;delete next.customQuotePending;
-        const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language);
+        const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language,next.serviceName);
         const reply=`Changed the request to ${actual.name} for the ${semantic.bedrooms!=null?`${semantic.bedrooms}-bedroom `:''}${semantic.propertyType}. ${formatPrice(actual)} is the configured rate. I kept the existing date, time, address and customer details. ${prompt}`;
         return result(reply,language,next,'cleaning_property_alternative_selected',{intent:'CLEANING_SERVICE_CHANGED',payload:{legacyText:reply,serviceId:actual.id,pendingField:next.step}});
       }
@@ -399,7 +399,7 @@ class CleaningCapability extends BaseCapability {
       const service=(await cleaning.listServices()).find(x=>x.id===previous.serviceId);
       const next={...previous,scopeText:e.scopeText||context.message.text,scopeCount:e.scopeCount||null,scopeUnit:e.scopeUnit||null};
       const scopeLabel=e.scopeCount&&e.scopeUnit?`${e.scopeCount} ${e.scopeUnit}`:String(e.scopeText||context.message.text).trim();
-      const reply=`Got it — I’ve noted the scope as ${scopeLabel}. ${service?`${service.name} is configured at ${formatPrice(service)}. `:''}${promptFor(previous.step,language)}`;
+      const reply=`Got it — I’ve noted the scope as ${scopeLabel}. ${service?`${service.name} is configured at ${formatPrice(service)}. `:''}${promptFor(previous.step,language,previous.serviceName)}`;
       return result(reply,language,next,"cleaning_scope_updated",{intent:"CLEANING_SCOPE_UPDATED",payload:{legacyText:reply,scopeText:next.scopeText,pendingField:previous.step}});
     }
 
@@ -415,16 +415,16 @@ class CleaningCapability extends BaseCapability {
       }
       const labels=cleaningRequirementLabels(updates);
       const priceBoundary=unpricedAddOnBoundary(context,updates);
-      const reply=`Updated 👍 I’ve added ${labels.join(', ')} to this cleaning request.${priceBoundary?` ${priceBoundary}`:''}\n\n${previous.step==='confirm'?'If everything looks correct, say confirm.':promptFor(previous.step,language)}`;
+      const reply=`Updated 👍 I’ve added ${labels.join(', ')} to this cleaning request.${priceBoundary?` ${priceBoundary}`:''}\n\n${previous.step==='confirm'?'If everything looks correct, say confirm.':promptFor(previous.step,language,previous.serviceName)}`;
       return result(reply,language,next,"cleaning_requirements_updated",{intent:"CLEANING_REQUIREMENTS_UPDATED",payload:{legacyText:reply,requirements:updates,pendingField:previous.step}});
     }
 
     if (previous.step && context.intelligence?.selected?.intent === 'cleaning.incomplete_confirmation') {
       const serviceName=previous.serviceName||'this cleaning service';
       const reply=localized(language,
-        `Sure — ${serviceName} is selected. ${promptFor(previous.step,language)}`,
-        `Ji — ${serviceName} select hai. ${promptFor(previous.step,language)}`,
-        `جی — ${serviceName} منتخب ہے۔ ${promptFor(previous.step,language)}`);
+        `Sure — ${serviceName} is selected. ${promptFor(previous.step,language,previous.serviceName)}`,
+        `Ji — ${serviceName} select hai. ${promptFor(previous.step,language,previous.serviceName)}`,
+        `جی — ${serviceName} منتخب ہے۔ ${promptFor(previous.step,language,previous.serviceName)}`);
       return result(reply,language,previous,'cleaning_incomplete_confirmation',{intent:intentForStep(previous.step),payload:{legacyText:reply,pendingField:previous.step,missingRequiredField:previous.step}});
     }
 
@@ -539,17 +539,86 @@ class CleaningCapability extends BaseCapability {
       return result(reply,language,{...previous,step:null,pendingPriceClarification:null},'cleaning_multi_service_quote_missing',{intent:'CLEANING_MULTI_SERVICE_QUOTE_NEEDS_DETAILS',payload:{legacyText:reply,missing,noBookingCreated:true}});
     }
 
-    if (context.intelligence?.selected?.intent === "cleaning.standalone_service_quote") {
+    if (context.intelligence?.selected?.intent === 'cleaning.multi_variant_quote_request') {
+      // A multi-variant pricing info request like "Give me mattress-cleaning
+      // prices for crib, single, queen and king" should produce a price LIST
+      // for each mentioned variant, NOT start a booking workflow. We compute
+      // each variant's price using the configured matrix and present a
+      // friendly summary line per variant.
+      const semantic=context.intelligence?.entities||{};
+      const variants=Array.isArray(semantic.variants)?semantic.variants:[];
+      const serviceId=semantic.serviceId||null;
+      const serviceName=semantic.serviceName||null;
+      const allServices=await cleaning.listServices();
+      const target=allServices.find(entry=>entry.id===serviceId)||null;
+      if(!target||!variants.length){
+        const reply=localized(language,
+          `I can give you prices for each mattress size, but I need to know which cleaning service and which sizes (crib, single, queen, king).`,
+          `Main har mattress size ki price bata sakta hoon, lekin service aur sizes (crib, single, queen, king) batayein.`,
+          `میں ہر میٹریس سائز کی قیمت بتا سکتا ہوں، لیکن سروس اور سائز (کرائب، سنگل، کوئین، کنگ) بتائیں۔`);
+        return result(reply,language,{...previous,step:null},'cleaning_multi_variant_quote_missing',{intent:'CLEANING_MULTI_VARIANT_QUOTE_NEEDS_DETAILS',payload:{legacyText:reply,noBookingCreated:true}});
+      }
+      const lines=[];
+      for(const variant of variants){
+        const quote=context.services.pricing.quote({...semantic,serviceId:target.id,serviceName:target.name,serviceVariant:variant,propertyType:null,bedrooms:null,units:null,text:context.message.text});
+        if(quote.ok){
+          lines.push(localized(language,
+            `• ${capitalize(variant)}: ${currencyAmount(quote.total,quote.currency)}`,
+            `• ${capitalize(variant)}: ${currencyAmount(quote.total,quote.currency)}`,
+            `• ${capitalize(variant)}: ${currencyAmount(quote.total,quote.currency)}`));
+        } else {
+          lines.push(localized(language,
+            `• ${capitalize(variant)}: price on scope review`,
+            `• ${capitalize(variant)}: scope review ke baad`,
+            `• ${capitalize(variant)}: اسکوپ نظرثانی کے بعد`));
+        }
+      }
+      const intro=localized(language,
+        `Here are the ${target.name.toLowerCase()} prices for each size you asked about:`,
+        `${target.name} ki prices har size ke liye:`,
+        `${target.name} کی قیمتیں آپ کے بتائے ہوئے ہر سائز کے لیے:`);
+      const closing=localized(language,
+        `Would you like me to start a booking for any of these sizes?`,
+        `Kya aap in mein se kisi size ki booking shuru karna chahte hain?`,
+        `کیا آپ ان میں سے کسی سائز کی بکنگ شروع کرنا چاہتے ہیں؟`);
+      const reply=`${intro}\n${lines.join('\n')}\n\n${closing}`;
+      const next={...previous,step:null,priceEnquiry:{serviceId:target.id,serviceName:target.name,variants,...requestFields(semantic)},quotedService:null};
+      return result(reply,language,next,'cleaning_multi_variant_quote',{intent:'CLEANING_MULTI_VARIANT_QUOTE_GENERATED',payload:{legacyText:reply,serviceId:target.id,serviceName:target.name,variants,noBookingCreated:true}});
+    }
+
+    if (context.intelligence?.selected?.intent === "cleaning.standalone_quote" || context.intelligence?.selected?.intent === "cleaning.standalone_service_quote") {
       const e=context.intelligence?.entities||{};
       const service=(await cleaning.listServices()).find(x=>x.id===e.serviceId);
       if(service){
         const configured=formatPrice(service);
-        const reply=service.priceType==='custom_quote'||service.price==null
-          ? `${service.name} needs a scope review for an exact price. Tell me the property size and the areas that need cleaning, and I’ll prepare the quotation.`
+        const quoteInput={...requestFields(e),serviceId:service.pricingServiceId||undefined,requestedOperationalServiceId:service.id,text:context.message.text};
+        const q=context.services.pricing.quote(quoteInput);
+        if(q.ok){
+          // We have a concrete estimate (e.g. "deep cleaning 3 bedroom apartment
+          // = AED 350"). Show it as a quote and ask whether the customer wants
+          // to book — do NOT auto-select the service or push for a date.
+          const amount=currencyAmount(q.total,q.currency);
+          const reply=localized(language,
+            `${service.name} for ${describeScope(e)} would be ${amount}. Would you like me to start a booking for this, or is there anything else you'd like to know?`,
+            `${service.name} (${describeScope(e)}) ki estimate ${amount} hai. Kya aap iski booking shuru karna chahte hain, ya kuch aur poochna chahte hain?`,
+            `${service.name} (${describeScope(e)}) کی تخمینہ ${amount} ہے۔ کیا آپ اس کی بکنگ شروع کرنا چاہتے ہیں، یا کچھ اور پوچھنا چاہتے ہیں؟`);
+          const next={...previous,step:null,priceEnquiry:{serviceId:service.id,serviceName:service.name,...requestFields(e),quote:q},quotedService:q,quotedServiceRequirements:requestFields(e)};
+          delete next.pendingClarifications;
+          return result(reply,language,next,'cleaning_standalone_quote',{intent:'CLEANING_STANDALONE_QUOTE',payload:{legacyText:reply,preferLegacyText:true,serviceId:service.id,serviceName:service.name,...q,noBookingCreated:true}});
+        }
+        // No concrete estimate — show the base price and ask for the missing
+        // scope (or explain it's custom_quote).
+        if(service.priceType==='custom_quote'||service.price==null){
+          const reply=`${service.name} needs a scope review for an exact price. Tell me the property size and the areas that need cleaning, and I’ll prepare the quotation.`;
+          const next={...previous,step:null,priceEnquiry:{serviceId:service.id,serviceName:service.name,...requestFields(e)}};
+          return result(reply,language,next,'cleaning_standalone_quote',{intent:'CLEANING_STANDALONE_QUOTE',payload:{legacyText:reply,serviceId:service.id,serviceName:service.name,noBookingCreated:true}});
+        }
+        const missing=(q.missing||[]);
+        const reply=missing.length
+          ? `${service.name} is ${configured}. To calculate the exact price, tell me ${humanPricingFields(missing)}.`
           : `${service.name} is ${configured}.${service.priceType==='hourly'?' Tell me the number of cleaners and hours if you would like the total.':''}`;
-        const next={...previous,priceEnquiry:{serviceId:service.id,serviceName:service.name,...requestFields(e)}};
-        delete next.quotedService;delete next.quotedServiceRequirements;
-        return result(reply,language,next,'cleaning_standalone_service_quote',{intent:'CLEANING_STANDALONE_SERVICE_QUOTE',payload:{legacyText:reply,serviceId:service.id,serviceName:service.name,priceText:configured,noBookingCreated:true}});
+        const next={...previous,step:null,priceEnquiry:{serviceId:service.id,serviceName:service.name,...requestFields(e)}};
+        return result(reply,language,next,'cleaning_standalone_quote',{intent:'CLEANING_STANDALONE_QUOTE',payload:{legacyText:reply,serviceId:service.id,serviceName:service.name,priceText:configured,noBookingCreated:true}});
       }
     }
 
@@ -614,7 +683,7 @@ class CleaningCapability extends BaseCapability {
         const reply=`Updated 👍 ${calculation}\n\n${returning.reply}`;
         return result(reply,language,returning.state,'cleaning_saved_customer_review',{intent:intentForStep(returning.state.step),payload:{legacyText:reply,preferLegacyText:true,cleanerCount,durationHours:durationHours||null,total:returning.state.total,pendingField:returning.state.step,savedDetailsUsed:true}});
       }
-      const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language);
+      const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language,next.serviceName);
       const reply=`Updated 👍 ${calculation}${prompt}`;
       return result(reply,language,next,'cleaning_cleaner_count_updated',{intent:'CLEANING_CLEANER_COUNT_UPDATED',payload:{legacyText:reply,cleanerCount,durationHours:durationHours||null,total:next.total,pendingField:next.step}});
     }
@@ -652,7 +721,7 @@ class CleaningCapability extends BaseCapability {
           if(configuredQuote.ok){next.quotedService=configuredQuote;next.total=configuredQuote.total;next.currency=configuredQuote.currency;}
         }
         next.step=nextMissingStep(next);
-        const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language);
+        const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language,next.serviceName);
         const quote=service.id==="CLN-HOURLY"&&next.durationHours
           ? localized(language,
               ` ${next.cleanerCount} cleaner${next.cleanerCount===1?'':'s'} × ${next.durationHours} hours = ${currencyAmount(next.total,next.currency)}.`,
@@ -675,14 +744,14 @@ class CleaningCapability extends BaseCapability {
       if(checked.error){
         const step=checked.errorField==='date'?'date':'reschedule_time';
         const next={...previous,preferredDate:checked.preferredDate||previous.preferredDate,step,rescheduleResumeStep:previous.rescheduleResumeStep||previous.step};
-        return result(`${checked.error} ${promptFor(checked.errorField,language)}`,language,next,'cleaning_schedule_invalid',{intent:'CLEANING_SCHEDULE_INVALID',payload:{legacyText:checked.error,pendingField:step}});
+        return result(`${checked.error} ${promptFor(checked.errorField,language,previous.serviceName)}`,language,next,'cleaning_schedule_invalid',{intent:'CLEANING_SCHEDULE_INVALID',payload:{legacyText:checked.error,pendingField:step}});
       }
       const requestedDate=checked.preferredDate||previous.preferredDate||null;
       const startTime=checked.preferredTime;
       if(!startTime&&semantic.timeFlexible){
         const resumeStep=previous.rescheduleResumeStep||previous.step||nextMissingStep(previous);
         const next={...previous,preferredDate:requestedDate,preferredTime:null,startTime:null,endTime:null,timeFlexible:true,timePreference:'any_available',rescheduleResumeStep:null,step:resumeStep==='reschedule_time'?nextMissingStep({...previous,timeFlexible:true}):resumeStep};
-        const prompt=next.step&&next.step!=='confirm'?` ${promptFor(next.step,language)}`:'';
+        const prompt=next.step&&next.step!=='confirm'?` ${promptFor(next.step,language,next.serviceName)}`:'';
         const reply=`Updated — I’ve recorded any available team time${requestedDate?` on ${requestedDate}`:''}. This is a flexible preference, not a confirmed slot; live availability still needs confirmation.${prompt}`;
         return result(reply,language,next,'cleaning_schedule_flexible',{intent:'CLEANING_SCHEDULE_FLEXIBLE',payload:{legacyText:reply,preferredDate:requestedDate,timeFlexible:true,pendingField:next.step}});
       }
@@ -702,7 +771,7 @@ class CleaningCapability extends BaseCapability {
       const restoredStep=resumeStep==='reschedule_time'?nextMissingStep(previous):resumeStep;
       const next={...previous,preferredDate:requestedDate,preferredTime:startTime,startTime,endTime,rescheduleResumeStep:null,step:restoredStep};
       const range=endTime?`${startTime}–${endTime}`:startTime;
-      const prompt=restoredStep?promptFor(restoredStep,language):'';
+      const prompt=restoredStep?promptFor(restoredStep,language,previous.serviceName):'';
       const reply=`Updated — the requested cleaning time is now ${range}${requestedDate?` on ${requestedDate}`:''}. Team availability still needs confirmation.${prompt?` ${prompt}`:''}`;
       return result(reply,language,next,'cleaning_schedule_updated',{intent:'CLEANING_SCHEDULE_UPDATED',payload:{legacyText:reply,preferredDate:requestedDate,startTime,endTime,pendingField:restoredStep}});
     }
@@ -723,7 +792,7 @@ class CleaningCapability extends BaseCapability {
         }
       }
       if(!requested.length){
-        const reply=`I could not identify a different configured service to add. Your current request is unchanged. ${promptFor(previous.step,language)}`;
+        const reply=`I could not identify a different configured service to add. Your current request is unchanged. ${promptFor(previous.step,language,previous.serviceName)}`;
         return result(reply,language,previous,'cleaning_additional_service_unresolved',{intent:'CLEANING_ADDITIONAL_SERVICE_UNRESOLVED',payload:{legacyText:reply,pendingField:previous.step}});
       }
       const next={...previous,additionalServices,step:previous.step};
@@ -732,7 +801,7 @@ class CleaningCapability extends BaseCapability {
         .map((item)=>`• ${item.serviceName}${item.total!=null?` — ${currencyAmount(item.total,item.currency)}${item.priceIsStartingFrom?' starting estimate':''}`:' — custom quotation required'}`)
         .join('\n');
       const status=added.length?'Added as additional service(s) to this cleaning request:':'Already included as additional service(s) in this cleaning request:';
-      const prompt=previous.step==='confirm'?'If everything looks correct, say confirm.':promptFor(previous.step,language);
+      const prompt=previous.step==='confirm'?'If everything looks correct, say confirm.':promptFor(previous.step,language,previous.serviceName);
       const reply=`${status}\n${listed}\n\nThe original ${previous.serviceName||'cleaning service'}, schedule, and collected customer details remain unchanged.${totals.total!=null?` Current combined priced estimate: ${currencyAmount(totals.total,totals.currency)}${totals.hasCustomQuote?' plus custom-quoted service(s)':''}.`:totals.hasCustomQuote?' One or more services require a custom quotation.':''} ${prompt}`;
       return result(reply,language,next,added.length?'cleaning_additional_services_added':'cleaning_additional_services_duplicate',{
         intent:added.length?'CLEANING_ADDITIONAL_SERVICES_ADDED':'CLEANING_ADDITIONAL_SERVICES_ALREADY_INCLUDED',
@@ -745,14 +814,207 @@ class CleaningCapability extends BaseCapability {
       const allServices=await cleaning.listServices();
       const selected=(semantic.serviceItems||[]).map((entry)=>allServices.find((service)=>service.id===entry.serviceId)).filter(Boolean);
       if(selected.length>1){
+        // ====== Multi-service scope clarification flow ======
+        // Instead of immediately showing starting/base prices that may not
+        // reflect the customer's actual scope, we first ask each service
+        // for the missing scope facts (Standard vs Deep for property
+        // services; seater count / size for furniture services). Only once
+        // every service's scope is fully determined do we compute the
+        // configured estimate and proceed to date/time/address collection.
+        //
+        // See Nova stress-test kit section C09 + user-reported gap:
+        // "i want cleaning of my apartment and my sofa cleaning" was
+        // jumping straight to "AED 40/hour" + "AED 50" before the customer
+        // had said whether they wanted Standard or Deep cleaning for the
+        // apartment, or what size the sofa is.
+        const pendingClarifications=selected
+          .map((service)=>({service,missing:requiresScopeClarification(service,semantic)}))
+          .filter((entry)=>entry.missing);
+        if(pendingClarifications.length){
+          const base=initialRequestState(context,engagement,semantic,{serviceId:selected[0].id,serviceName:selected[0].name,scopeText:context.message.text});
+          // Park the additional services with placeholder pricing status so
+          // the eventual combined estimate doesn't double-count them.
+          const additionalServices=selected.slice(1).map((service)=>({
+            key:[service.id,'pending'].join('|'),
+            serviceId:service.id,serviceName:service.name,
+            propertyType:semantic.propertyType||null,bedrooms:semantic.bedrooms||null,
+            units:semantic.units||null,total:null,currency:null,
+            pricingStatus:'scope_pending',priceIsStartingFrom:false
+          }));
+          const next={...base,additionalServices,step:'multi_service_clarify',pendingClarifications:pendingClarifications.map((entry)=>({serviceId:entry.service.id,serviceName:entry.service.name,missing:entry.missing}))};
+          const serviceList=selected.map((service)=>`• ${service.name}`).join('\n');
+          const clarificationLines=pendingClarifications.map((entry)=>`• ${entry.service.name}: ${clarificationQuestion(entry.missing,language)}`).join('\n');
+          const reply=localized(language,
+            `I’ve kept these as ${selected.length} separate services in one request:\n${serviceList}\n\nTo give you the configured estimate, I need a few details first:\n${clarificationLines}\n\nPlease share these and I’ll calculate the exact amount for each service.`,
+            `Main in ${selected.length} services ko ek hi request mein rakha hai:\n${serviceList}\n\nConfigured estimate dene ke liye pehle ye details chahiye:\n${clarificationLines}\n\nYe bata dein aur main har service ka exact amount calculate karunga.`,
+            `میں نے ان ${selected.length} سروسز کو ایک ہی درخواست میں رکھا ہے:\n${serviceList}\n\nتشخیصی رقم دینے کے لیے پہلے یہ تفصیلات چاہیے:\n${clarificationLines}\n\nیہ بتائیں اور میں ہر سروس کی درست رقم حساب کروں گا۔`);
+          return result(reply,language,next,'cleaning_multi_service_clarify_started',{intent:'CLEANING_MULTI_SERVICE_CLARIFY',payload:{legacyText:reply,preferLegacyText:true,serviceIds:selected.map((service)=>service.id),pendingField:'multi_service_clarify'}});
+        }
+        // ====== All scopes already known → price and proceed ======
         const primary=selected[0];
         const base=initialRequestState(context,engagement,semantic,{serviceId:primary.id,serviceName:primary.name,scopeText:context.message.text});
         const additionalServices=selected.slice(1).map((service)=>priceAdditionalService(context,service,semantic));
         const next={...base,additionalServices};
         const lines=[`• ${primary.name} — ${formatPrice(primary)}`,...additionalServices.map((item)=>`• ${item.serviceName}${item.total!=null?` — ${currencyAmount(item.total,item.currency)}`:' — custom quotation required'}`)];
-        const reply=`I’ve kept these as ${selected.length} separate services in one request:\n${lines.join('\n')}\n\n${capturedScheduleLine(next)}${promptFor(next.step,language)}`;
-        return result(reply,language,next,'cleaning_multi_service_started',{intent:intentForStep(next.step),payload:{legacyText:reply,serviceIds:selected.map((service)=>service.id),pendingField:next.step}});
+        const reply=`I’ve kept these as ${selected.length} separate services in one request:\n${lines.join('\n')}\n\n${capturedScheduleLine(next)}${promptFor(next.step,language,next.serviceName)}`;
+        // preferLegacyText preserves the multi-service lines so the humanization
+        // engine doesn't replace them with a single-field template (e.g.
+        // CLEANING_ASK_ADDRESS) that would hide the listed services.
+        return result(reply,language,next,'cleaning_multi_service_started',{intent:intentForStep(next.step),payload:{legacyText:reply,preferLegacyText:true,serviceIds:selected.map((service)=>service.id),pendingField:next.step}});
       }
+    }
+
+    // Multi-service clarification turn: user has answered some/all of the
+    // pending scope questions (Standard vs Deep, bedroom count, sofa seater
+    // count, etc.). Assign each parsed answer to its service, recompute the
+    // combined estimate, and either ask the next missing scope or proceed to
+    // date/time/address collection.
+    if (previous.step === 'multi_service_clarify' && context.intelligence?.selected?.intent === 'cleaning.multi_service_clarify') {
+      const semantic=context.intelligence?.entities||{};
+      const allServices=await cleaning.listServices();
+      const pending=Array.isArray(previous.pendingClarifications)?previous.pendingClarifications:[];
+      // Resolve as many pending clarifications as possible from this turn.
+      const cleaningType=resolveCleaningTypeFromSemantic(semantic);
+      const bedrooms=semantic.bedrooms??null;
+      const units=semantic.units??null;
+      const cleanerCount=semantic.cleanerCount??null;
+      const durationHours=semantic.durationHours??null;
+      const serviceVariant=semantic.serviceVariant??null;
+      // Build a fresh working state from `previous` — never reassign `resolved`
+      // (const cannot be reassigned) — instead use a `let` accumulator.
+      let resolved={...previous};
+      const stillPending=[];
+      for(const entry of pending){
+        const service=allServices.find((s)=>s.id===entry.serviceId);
+        if(!service){continue;}
+        // Assign the parsed semantic to this service's pending slot.
+        if(entry.missing==='cleaningType'&&cleaningType){
+          resolved=applyServiceScope(resolved,service,cleaningType,semantic);
+        } else if(entry.missing==='bedrooms'&&bedrooms!=null){
+          resolved=applyServiceScope(resolved,service,null,{...semantic,bedrooms});
+        } else if(entry.missing==='cleanerCount'&&cleanerCount!=null){
+          resolved=applyServiceScope(resolved,service,null,{...semantic,cleanerCount});
+        } else if(entry.missing==='durationHours'&&durationHours!=null){
+          resolved=applyServiceScope(resolved,service,null,{...semantic,durationHours});
+        } else if(entry.missing==='units'&&units!=null){
+          resolved=applyServiceScope(resolved,service,null,{...semantic,units});
+        } else if(entry.missing==='serviceVariant'&&serviceVariant){
+          resolved=applyServiceScope(resolved,service,null,{...semantic,serviceVariant});
+        } else {
+          stillPending.push(entry);
+        }
+      }
+      if(stillPending.length){
+        const clarificationLines=stillPending.map((entry)=>{
+          const service=allServices.find((s)=>s.id===entry.serviceId);
+          return `• ${service?.name||'service'}: ${clarificationQuestion(entry.missing,language)}`;
+        }).join('\n');
+        const reply=localized(language,
+          `Thanks. Still need a few details to finish the estimate:\n${clarificationLines}`,
+          `Shukriya. Estimate mukammal karne ke liye kuch details aur chahiye:\n${clarificationLines}`,
+          `شکریہ۔ تخمینہ مکمل کرنے کے لیے مزید کچھ تفصیلات درکار ہیں:\n${clarificationLines}`);
+        const next={...resolved,step:'multi_service_clarify',pendingClarifications:stillPending};
+        return result(reply,language,next,'cleaning_multi_service_clarify_continue',{intent:'CLEANING_MULTI_SERVICE_CLARIFY',payload:{legacyText:reply,preferLegacyText:true,pendingField:'multi_service_clarify'}});
+      }
+      // Re-check each service's scope after applying the latest answers.
+      // A property service that just had cleaningType=standard resolved now
+      // needs cleanerCount + durationHours before it can be priced. A
+      // property service that just had cleaningType=deep resolved now needs
+      // bedrooms. If any service still needs scope, ask the next question
+      // instead of jumping to pricing.
+      // Resolve the primary service first (may switch to Deep variant).
+      let primaryService=allServices.find((s)=>s.id===resolved.serviceId)||allServices.find((s)=>s.id===pending[0]?.serviceId);
+      const finalCleaningType=resolveCleaningTypeFromSemantic({...resolved,...semantic});
+      if(finalCleaningType==='deep'&&primaryService){
+        const deepMap={'CLN008':'CLN010','CLN009':'CLN011','CLN001':'CLN002'};
+        const deepId=deepMap[primaryService.id];
+        if(deepId){
+          const deepService=allServices.find((s)=>s.id===deepId);
+          if(deepService)primaryService=deepService;
+        }
+      }
+      const pendingAfterResolution=resolved.additionalServices
+        ? resolved.additionalServices.map((item)=>{
+            const service=allServices.find((s)=>s.id===item.serviceId);
+            if(!service)return null;
+            // Build the per-service semantic from its stored scope + global
+            // state fields (for the primary service). For additional
+            // services, the item.scope contains the per-service answers
+            // (cleaningType, bedrooms, units, etc.) collected during the
+            // multi_service_clarify flow. For the primary service, the
+            // top-level resolved state carries those fields directly.
+            const isPrimaryItem=service.id===resolved.serviceId||service.id===(primaryService?.id);
+            const itemSemantic=isPrimaryItem
+              ? {...resolved,...(item.scope||{})}
+              : {...resolved,...(item.scope||{})};
+            const missing=requiresScopeClarification(service,itemSemantic);
+            return missing?{serviceId:service.id,serviceName:service.name,missing}:null;
+          }).filter(Boolean)
+        : [];
+      // Also re-check the primary service itself (using its resolved scope).
+      if(primaryService){
+        // The primary service's resolved scope lives at the top level of
+        // `resolved` (selectedCleaningType, bedrooms, cleanerCount,
+        // durationHours, units, serviceVariant). requiresScopeClarification
+        // reads those fields directly from the semantic.
+        const primarySemantic={...resolved,...(semantic||{})};
+        const primaryMissing=requiresScopeClarification(primaryService,primarySemantic);
+        if(primaryMissing){
+          pendingAfterResolution.unshift({serviceId:primaryService.id,serviceName:primaryService.name,missing:primaryMissing});
+        }
+      }
+      if(pendingAfterResolution.length){
+        // Deduplicate by serviceId + missing
+        const seen=new Set();
+        const deduped=[];
+        for(const entry of pendingAfterResolution){
+          const key=`${entry.serviceId}:${entry.missing}`;
+          if(!seen.has(key)){seen.add(key);deduped.push(entry);}
+        }
+        const clarificationLines=deduped.map((entry)=>{
+          const service=allServices.find((s)=>s.id===entry.serviceId);
+          return `• ${service?.name||'service'}: ${clarificationQuestion(entry.missing,language)}`;
+        }).join('\n');
+        const reply=localized(language,
+          `Thanks. Still need a few details to finish the estimate:\n${clarificationLines}`,
+          `Shukriya. Estimate mukammal karne ke liye kuch details aur chahiye:\n${clarificationLines}`,
+          `شکریہ۔ تخمینہ مکمل کرنے کے لیے مزید کچھ تفصیلات درکار ہیں:\n${clarificationLines}`);
+        const next={...resolved,step:'multi_service_clarify',pendingClarifications:deduped};
+        return result(reply,language,next,'cleaning_multi_service_clarify_continue',{intent:'CLEANING_MULTI_SERVICE_CLARIFY',payload:{legacyText:reply,preferLegacyText:true,pendingField:'multi_service_clarify'}});
+      }
+      // All scopes resolved → price every service and proceed.
+      const base=initialRequestState(context,engagement,semantic,{serviceId:primaryService?.id,serviceName:primaryService?.name,scopeText:resolved.scopeText||context.message.text});
+      // Build the primary service quote
+      let primaryQuote=null;
+      try{primaryQuote=quoteConfiguredService(context,primaryService||{},resolved);}catch{primaryQuote=null;}
+      const primaryTotal=primaryQuote?.ok?primaryQuote.total:null;
+      const primaryCurrency=primaryQuote?.ok?primaryQuote.currency:(primaryService?.currency||'AED');
+      // Build the additional service quotes (each with its own scope)
+      const additionalServicesResolved=resolved.additionalServices||[];
+      const pricedAdditionals=additionalServicesResolved.map((item)=>{
+        const service=allServices.find((s)=>s.id===item.serviceId);
+        if(!service)return item;
+        // Use this item's stored scope (cleaningType/bedrooms/units/etc.) to
+        // price it independently — NOT the global semantic that may have been
+        // set for a different service.
+        const itemSemantic={...resolved,...(item.scope||{}),serviceName:service.name,requestedOperationalServiceId:service.id,text:service.name};
+        let quote=null;
+        try{quote=quoteConfiguredService(context,service,itemSemantic);}catch{quote=null;}
+        const total=quote?.ok?quote.total:item.total;
+        const currency=quote?.ok?quote.currency:item.currency;
+        return {...item,total,currency,quotedService:quote?.ok?quote:item.quotedService,pricingStatus:quote?.ok?'quoted':item.pricingStatus};
+      });
+      const next={...base,...resolved,additionalServices:pricedAdditionals,total:primaryTotal,currency:primaryCurrency,quotedService:primaryQuote?.ok?primaryQuote:null,step:null};
+      delete next.pendingClarifications;
+      next.step=nextMissingStep(next);
+      const lines=[`${primaryService?.name||'Service'}${primaryTotal!=null?` — ${currencyAmount(primaryTotal,primaryCurrency)}`:''}`,...pricedAdditionals.map((item)=>`• ${item.serviceName}${item.total!=null?` — ${currencyAmount(item.total,item.currency||primaryCurrency)}`:' — custom quotation required'}`)];
+      const totals=combinedServiceTotal(allServices,next);
+      const totalLine=totals.total!=null?`\n\nConfigured estimate total: ${currencyAmount(totals.total,totals.currency||primaryCurrency)}${totals.hasCustomQuote?' plus custom-quoted service(s)':''}`:'';
+      const reply=localized(language,
+        `Here’s your configured estimate:\n${lines.join('\n')}${totalLine}\n\n${capturedScheduleLine(next)}${promptFor(next.step,language,next.serviceName)}`,
+        `Yeh raha aapka configured estimate:\n${lines.join('\n')}${totalLine}\n\n${capturedScheduleLine(next)}${promptFor(next.step,language,next.serviceName)}`,
+        `یہ رہا آپ کا تشخیصی تخمینہ:\n${lines.join('\n')}${totalLine}\n\n${capturedScheduleLine(next)}${promptFor(next.step,language,next.serviceName)}`);
+      return result(reply,language,next,'cleaning_multi_service_estimated',{intent:intentForStep(next.step),payload:{legacyText:reply,preferLegacyText:true,pendingField:next.step}});
     }
 
     if (context.intelligence?.selected?.intent === "cleaning.custom_quote_request") {
@@ -792,7 +1054,7 @@ class CleaningCapability extends BaseCapability {
         }));
         const next={...base,additionalServices,quotedServices:null,pendingPriceClarification:null,priceEnquiry:null};
         next.step=nextMissingStep(next);
-        const reply=`Great — I’ve selected ${quotedServices.map(quote=>quote.serviceName).join(' and ')} for a combined estimate of ${currencyAmount(quotedServices.reduce((sum,quote)=>sum+Number(quote.total||0),0),quotedServices[0].currency)}. ${next.step==='confirm'?'Please check the details and confirm.':promptFor(next.step,language)}`;
+        const reply=`Great — I’ve selected ${quotedServices.map(quote=>quote.serviceName).join(' and ')} for a combined estimate of ${currencyAmount(quotedServices.reduce((sum,quote)=>sum+Number(quote.total||0),0),quotedServices[0].currency)}. ${next.step==='confirm'?'Please check the details and confirm.':promptFor(next.step,language,next.serviceName)}`;
         return result(reply,language,next,'cleaning_quoted_services_selected',{intent:intentForStep(next.step),payload:{legacyText:reply,serviceIds:quotedServices.map(quote=>quote.operationalServiceId),pendingField:next.step}});
       }
     }
@@ -814,7 +1076,7 @@ class CleaningCapability extends BaseCapability {
         const item={...priceAdditionalService(context,service,requirements),total:q.total,currency:q.currency,formula:q.formula,quotedService:q,pricingStatus:'quoted'};
         const additionalServices=current.some(entry=>entry.serviceId===item.serviceId)?current:[...current,item];
         const next={...previous,additionalServices};
-        const reply=`Added ${q.serviceName} at ${currencyAmount(q.total,q.currency)}. ${previous.step==='confirm'?'Please check the updated request and confirm.':promptFor(previous.step,language)}`;
+        const reply=`Added ${q.serviceName} at ${currencyAmount(q.total,q.currency)}. ${previous.step==='confirm'?'Please check the updated request and confirm.':promptFor(previous.step,language,previous.serviceName)}`;
         return result(reply,language,next,'cleaning_quoted_service_added',{intent:'CLEANING_ADDITIONAL_SERVICES_ADDED',payload:{legacyText:reply,item,pendingField:previous.step}});
       }
       const continuation=bookingContinuation(previous);
@@ -822,20 +1084,33 @@ class CleaningCapability extends BaseCapability {
       const next=initialRequestState(context,engagement,semantic,{serviceId:q.operationalServiceId,serviceName:q.serviceName,quotedService:q,total:q.total,currency:q.currency,...serviceRequirementState(service||{})});
       next.priceEnquiry=null;next.quotedServices=null;next.pendingPriceClarification=null;
       next.step=nextMissingStep(next);
-      const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language);
+      const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language,next.serviceName);
       const reply=`Great — ${q.serviceName} is selected at ${currencyAmount(q.total,q.currency)}. ${prompt}`;
       return result(reply,language,next,"cleaning_quoted_service_selected",{intent:intentForStep(next.step),payload:{legacyText:reply,...q,pendingField:next.step}});
     }
 
     if (!previous.step && context.intelligence?.selected?.intent === "cleaning.structured_service_request") {
       const semantic=context.intelligence?.entities||{};
+      // Surface impossible clock tokens (e.g. "25:90") BEFORE we even attempt
+      // to price or schedule the request. The previous behavior silently
+      // skipped them and proceeded with just the date, which made it look as
+      // if the user had never supplied a time. We now reject explicitly and
+      // ask for a valid time without losing the captured service, date or
+      // scope. See Nova_Complete_Stress_Test_Kit_v9.4.1.txt TEST C06.
+      if(semantic.invalidTime||semantic.invalidClockText){
+        const reply=localized(language,
+          `I noticed “${semantic.invalidClockText||'that time'}” in your message, but that clock time isn’t valid. Please send a real time like “10 AM” or “14:00”.`,
+          `“${semantic.invalidClockText||'wo waqt'}” sahi clock time nahi hai. Aap “10 AM” ya “14:00” jaisa valid time bhej dein.`,
+          `“${semantic.invalidClockText||'وہ وقت'}” درست گھڑی کا وقت نہیں ہے۔ براہ کرم “10 AM” یا “14:00” جیسا درست وقت بھیجیں۔`);
+        return result(reply,language,{...previous,invalidTime:semantic.invalidClockText||true,step:null},"cleaning_invalid_clock_surface",{intent:"CLEANING_ASK_TIME",payload:{legacyText:reply,pendingField:"time",invalidClockReason:semantic.invalidClockReason||'invalid_clock'}});
+      }
       const q=context.services.pricing.quote({...semantic,requestedOperationalServiceId:semantic.serviceId||null,text:context.message.text});
       if(q.reason==='operational_service_conflict' && semantic.serviceId){
         const actual=(await cleaning.listServices()).find(x=>x.id===semantic.serviceId);
         const customQuoteFirst=actual?.priceType==='custom_quote'&&(semantic.cleaningType||(!semantic.date&&!semantic.dateText&&!semantic.weekday&&!semantic.startTime&&semantic.propertyType));
         if(actual&&!customQuoteFirst){
           const next=initialRequestState(context,engagement,semantic,{serviceId:actual.id,serviceName:actual.name,scopeText:context.message.text,...bookingRequirementState(actual)});
-          const prompt=promptFor(next.step,language);
+          const prompt=promptFor(next.step,language,next.serviceName);
           const reply=localized(language,
             `${actual.name} selected. ${formatPrice(actual)} is the configured service price. I won’t apply a pricing table linked to a different service. ${capturedScheduleLine(next)}${prompt}`,
             `${actual.name} select ho gayi hai. Configured price ${formatPrice(actual)} hai. Main kisi doosri service ki pricing table apply nahi karunga. ${capturedScheduleLine(next)}${prompt}`,
@@ -846,7 +1121,7 @@ class CleaningCapability extends BaseCapability {
       if(q.ok && q.operationalServiceId){
         const actual=(await cleaning.listServices()).find(service=>service.id===q.operationalServiceId);
         const next=initialRequestState(context,engagement,semantic,{serviceId:q.operationalServiceId,serviceName:q.serviceName,quotedService:q,...bookingRequirementState(actual||{})});
-        const prompt=promptFor(next.step,language);
+        const prompt=promptFor(next.step,language,next.serviceName);
         const reply=localized(language,
           `Yes — I can prepare that ${q.serviceName} request. The configured estimate is ${currencyAmount(q.total,q.currency)}. ${capturedScheduleLine(next)}${prompt}`,
           `Ji bilkul — ${q.serviceName} request tayar ho sakti hai. Configured estimate ${currencyAmount(q.total,q.currency)} hai. ${capturedScheduleLine(next)}${prompt}`,
@@ -874,7 +1149,7 @@ class CleaningCapability extends BaseCapability {
             : actual.priceType==='scope_based'
               ? `${formatPrice(actual)}. The exact amount will be calculated from the property or item size.`
               : `${formatPrice(actual)} is the configured rate.`;
-          const reply=`${actual.name} selected. ${priceNote} ${capturedScheduleLine(next)}${promptFor(next.step,language)}`;
+          const reply=`${actual.name} selected. ${priceNote} ${capturedScheduleLine(next)}${promptFor(next.step,language,next.serviceName)}`;
           return result(reply,language,next,'cleaning_structured_custom_priced_service_started',{intent:intentForStep(next.step),payload:{legacyText:reply,preferLegacyText:true,serviceId:actual.id,pendingField:next.step,requirements:requestFields(semantic)}});
         }
       }
@@ -1002,7 +1277,7 @@ class CleaningCapability extends BaseCapability {
       const history=semantic.returningCustomerClaim?' Your previous-customer status and any eligible offer will be checked only against this tenant’s CRM history; no discount has been assumed in this total.':'';
       const returning=await savedCustomerTransition(cleaning,context,next,language);
       if(returning)next=returning.state;
-      const prompt=returning?returning.reply:promptFor(next.step,language);
+      const prompt=returning?returning.reply:promptFor(next.step,language,next.serviceName);
       const addOnBoundary=unpricedAddOnBoundary(context,semantic);
       const policyNotes=await resolvePolicyNotes(context,semantic.policyFacets,{total,currency});
       const fullReply=`${quote}${requirement}${availability}${history}${addOnBoundary?`\n\n${addOnBoundary}`:''}${policyNotes.length?`\n\n${policyNotes.join('\n')}`:''}${checked.error?`\n\n${checked.error}`:''}${prompt?`\n\n${prompt}`:''}`;
@@ -1041,20 +1316,20 @@ class CleaningCapability extends BaseCapability {
       if(previous.step==='propertyType'){
         const raw=normalize(context.message.text);
         const propertyType=semantic.propertyType||(/\b(villa|vila|house|ghar|home)\b/.test(raw)?'villa':/\b(apartment|flat|studio)\b/.test(raw)?'apartment':null);
-        if(!propertyType)return result(promptFor('propertyType',language),language,previous,'cleaning_invalid_property_type',{intent:'CLEANING_ASK_PROPERTY_TYPE',payload:{pendingField:'propertyType'}});
+        if(!propertyType)return result(promptFor('propertyType',language,previous.serviceName),language,previous,'cleaning_invalid_property_type',{intent:'CLEANING_ASK_PROPERTY_TYPE',payload:{pendingField:'propertyType'}});
         next.propertyType=propertyType;
         if(/\bstudio\b/.test(raw))next.bedrooms=0;
       }else if(previous.step==='bedrooms'){
         const bedrooms=semantic.bedrooms??numberFromText(context.message.text);
-        if(!Number.isInteger(Number(bedrooms))||Number(bedrooms)<0||Number(bedrooms)>20)return result(promptFor('bedrooms',language),language,previous,'cleaning_invalid_bedrooms',{intent:'CLEANING_ASK_BEDROOMS',payload:{pendingField:'bedrooms'}});
+        if(!Number.isInteger(Number(bedrooms))||Number(bedrooms)<0||Number(bedrooms)>20)return result(promptFor('bedrooms',language,previous.serviceName),language,previous,'cleaning_invalid_bedrooms',{intent:'CLEANING_ASK_BEDROOMS',payload:{pendingField:'bedrooms'}});
         next.bedrooms=Number(bedrooms);
       }else if(previous.step==='units'){
         const units=semantic.units??numberFromText(context.message.text);
-        if(!Number.isFinite(Number(units))||Number(units)<1||Number(units)>100)return result(promptFor('units',language),language,previous,'cleaning_invalid_units',{intent:'CLEANING_ASK_UNITS',payload:{pendingField:'units'}});
+        if(!Number.isFinite(Number(units))||Number(units)<1||Number(units)>100)return result(promptFor('units',language,previous.serviceName),language,previous,'cleaning_invalid_units',{intent:'CLEANING_ASK_UNITS',payload:{pendingField:'units'}});
         next.units=Number(units);
       }else{
         const variant=semantic.serviceVariant||extractServiceVariant(context.message.text);
-        if(!variant)return result(promptFor('serviceVariant',language),language,previous,'cleaning_invalid_service_variant',{intent:'CLEANING_ASK_SERVICE_VARIANT',payload:{pendingField:'serviceVariant'}});
+        if(!variant)return result(promptFor('serviceVariant',language,previous.serviceName),language,previous,'cleaning_invalid_service_variant',{intent:'CLEANING_ASK_SERVICE_VARIANT',payload:{pendingField:'serviceVariant'}});
         next.serviceVariant=variant;
       }
       next.step=nextMissingStep(next);
@@ -1066,7 +1341,7 @@ class CleaningCapability extends BaseCapability {
         const reply=`Got it.${quoteLine}\n\n${returning.reply}`;
         return result(reply,language,returning.state,'cleaning_saved_customer_review',{intent:intentForStep(returning.state.step),payload:{legacyText:reply,preferLegacyText:true,pendingField:returning.state.step,quote:q?.ok?q:null,savedDetailsUsed:true}});
       }
-      const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language);
+      const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language,next.serviceName);
       return result(`Got it.${quoteLine} ${prompt}`,language,next,`cleaning_${previous.step}_saved`,{intent:intentForStep(next.step),payload:{legacyText:`Got it.${quoteLine} ${prompt}`,preferLegacyText:Boolean(q?.ok),pendingField:next.step,quote:q?.ok?q:null}});
     }
 
@@ -1080,7 +1355,7 @@ class CleaningCapability extends BaseCapability {
       if(!parsed.valid) return result(validationMessage("date",language,parsed.message),language,previous,"cleaning_invalid_date",{intent:"CLEANING_ASK_DATE",payload:{pendingField:"date"}});
       const day=weekdayForDate(parsed.value),operating=context.services.availability?.operatingDay?.(day);
       if(operating?.status==='closed'){
-        const reply=`We’re closed on ${title(day)}. Please choose an open business day. ${promptFor('date',language)}`;
+        const reply=`We’re closed on ${title(day)}. Please choose an open business day. ${promptFor('date',language,previous.serviceName)}`;
         return result(reply,language,previous,'cleaning_closed_date',{intent:'CLEANING_ASK_DATE',payload:{legacyText:reply,pendingField:'date',day}});
       }
       const suppliedTime=semantic.startTime||semantic.time||(
@@ -1098,13 +1373,13 @@ class CleaningCapability extends BaseCapability {
         const parsedTime=engagement.parseField('time',suppliedTime);
         if(!parsedTime.valid)return result(validationMessage('time',language,parsedTime.message),language,{...next,step:'time'},'cleaning_invalid_time',{intent:'CLEANING_ASK_TIME',payload:{pendingField:'time'}});
         const allowed=context.services.availability?.validateTime?.(day,parsedTime.value,{endTime:semantic.endTime||null,durationMinutes:Number(previous.durationHours||0)*60});
-        if(allowed?.valid===false){const reply=`${allowed.message} ${promptFor('time',language)}`;return result(reply,language,{...next,step:'time'},'cleaning_time_outside_hours',{intent:'CLEANING_ASK_TIME',payload:{legacyText:reply,preferLegacyText:true,pendingField:'time',hours:allowed.hours}});}
+        if(allowed?.valid===false){const reply=`${allowed.message} ${promptFor('time',language,previous.serviceName)}`;return result(reply,language,{...next,step:'time'},'cleaning_time_outside_hours',{intent:'CLEANING_ASK_TIME',payload:{legacyText:reply,preferLegacyText:true,pendingField:'time',hours:allowed.hours}});}
         next.preferredTime=parsedTime.value;next.startTime=parsedTime.value;
       }
       next.step=nextMissingStep(next);
       const returning=await savedCustomerTransition(cleaning,context,next,language);
       if(returning)return result(returning.reply,language,returning.state,'cleaning_saved_customer_review',{intent:intentForStep(returning.state.step),payload:{legacyText:returning.reply,preferLegacyText:true,pendingField:returning.state.step,savedDetailsUsed:true}});
-      const prompt=next.step==='address'?await savedAddressPrompt(cleaning,context,language):next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language);
+      const prompt=next.step==='address'?await savedAddressPrompt(cleaning,context,language):next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language,next.serviceName);
       return result(prompt,language,next,`cleaning_ask_${next.step}`,{intent:intentForStep(next.step),payload:{legacyText:prompt,preferLegacyText:next.step==='address',pendingField:next.step}});
     }
     if (previous.step === "time") {
@@ -1120,7 +1395,7 @@ class CleaningCapability extends BaseCapability {
             `ٹھیک ہے — ${next.preferredDate} کو ٹیم کا کوئی بھی دستیاب وقت نوٹ کر لیا ہے۔ ٹیم درست وقت کی تصدیق کرے گی۔\n\n${returning.reply}`);
           return result(reply,language,returning.state,'cleaning_saved_customer_review',{intent:intentForStep(returning.state.step),payload:{legacyText:reply,pendingField:returning.state.step,timeFlexible:true,savedDetailsUsed:true}});
         }
-        const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language);
+        const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language,next.serviceName);
         const reply=localized(language,
           `Got it — I’ve recorded any available team time on ${next.preferredDate}. This does not confirm a slot; the team will assign and confirm an available start time. ${prompt}`,
           `Theek hai — ${next.preferredDate} ko team ka koi bhi available time note kar liya hai. Abhi exact slot confirm nahi hua; team available start time check karke confirm karegi. ${prompt}`,
@@ -1131,7 +1406,7 @@ class CleaningCapability extends BaseCapability {
       if(!parsed.valid) return result(validationMessage("time",language,parsed.message),language,previous,"cleaning_invalid_time",{intent:"CLEANING_ASK_TIME",payload:{pendingField:"time"}});
       const day=weekdayForDate(previous.preferredDate);
       const allowed=context.services.availability?.validateTime?.(day,parsed.value,{durationMinutes:Number(previous.durationHours||0)*60,endTime:previous.endTime||null});
-      if(allowed?.valid===false){const reply=`${allowed.message} ${promptFor('time',language)}`;return result(reply,language,previous,'cleaning_time_outside_hours',{intent:'CLEANING_ASK_TIME',payload:{legacyText:reply,preferLegacyText:true,pendingField:'time',hours:allowed.hours}});}
+      if(allowed?.valid===false){const reply=`${allowed.message} ${promptFor('time',language,previous.serviceName)}`;return result(reply,language,previous,'cleaning_time_outside_hours',{intent:'CLEANING_ASK_TIME',payload:{legacyText:reply,preferLegacyText:true,pendingField:'time',hours:allowed.hours}});}
       const next={...previous,preferredTime:parsed.value,startTime:parsed.value,timeFlexible:false,timePreference:'exact',scheduleError:null,step:'address'};
       const returning=await savedCustomerTransition(cleaning,context,next,language);
       if(returning)return result(returning.reply,language,returning.state,'cleaning_saved_customer_review',{intent:intentForStep(returning.state.step),payload:{legacyText:returning.reply,preferLegacyText:true,pendingField:returning.state.step,savedDetailsUsed:true}});
@@ -1154,13 +1429,13 @@ class CleaningCapability extends BaseCapability {
         const reply=savedDetailsReview(service,next,language);
         return result(reply,language,next,next.step==='confirm'?'cleaning_saved_details_review':'cleaning_saved_details_partial',{intent:intentForStep(next.step),payload:{legacyText:reply,preferLegacyText:true,pendingField:next.step,savedDetailsUsed:true}});
       }
-      return result(promptFor("name",language),language,{...next,step:"name"},"cleaning_ask_name",{intent:"CLEANING_ASK_NAME",payload:{pendingField:"name"}});
+      return result(promptFor("name",language,previous.serviceName),language,{...next,step:"name"},"cleaning_ask_name",{intent:"CLEANING_ASK_NAME",payload:{pendingField:"name"}});
     }
     if (previous.step === "name") {
       if(engagement.referencesStoredField?.('name',context.message.text)){
         const stored=previous.name||previous.resumeSnapshot?.name||context.customer?.name||null;
-        if(stored)return result(promptFor("phone",language),language,{...previous,name:stored,step:"phone"},"cleaning_stored_name_reused",{intent:"CLEANING_ASK_PHONE",payload:{pendingField:"phone",name:stored}});
-        const reply=`I don’t have a saved name for this tenant yet. ${promptFor('name',language)}`;
+        if(stored)return result(promptFor("phone",language,previous.serviceName),language,{...previous,name:stored,step:"phone"},"cleaning_stored_name_reused",{intent:"CLEANING_ASK_PHONE",payload:{pendingField:"phone",name:stored}});
+        const reply=`I don’t have a saved name for this tenant yet. ${promptFor('name',language,previous.serviceName)}`;
         return result(reply,language,previous,"cleaning_stored_name_missing",{intent:"CLEANING_ASK_NAME",payload:{pendingField:"name"}});
       }
       if(engagement.isFieldRefusal?.(context.message.text)){
@@ -1172,7 +1447,7 @@ class CleaningCapability extends BaseCapability {
       const sharedEmail=context.intelligence?.messageFrame?.entities?.email||context.intelligence?.entities?.email||null;
       const email=validatedSemanticField(engagement,'email',sharedEmail)||previous.email||null;
       await context.services.crm?.updateCustomer?.({name:parsed.value,...(email?{email}:{}),preferredLanguage:language});
-      const reply=`${email?`Thanks — I’ve saved your name as ${parsed.value} and your email as an optional contact. `:''}${promptFor("phone",language)}`;
+      const reply=`${email?`Thanks — I’ve saved your name as ${parsed.value} and your email as an optional contact. `:''}${promptFor("phone",language,previous.serviceName)}`;
       return result(reply,language,{...previous,name:parsed.value,email,step:"phone"},"cleaning_ask_phone",{intent:"CLEANING_ASK_PHONE",payload:{legacyText:reply,preferLegacyText:true,pendingField:"phone",email}});
     }
     if (previous.step === "phone") {
@@ -1183,7 +1458,7 @@ class CleaningCapability extends BaseCapability {
           const service=(await cleaning.listServices()).find((x)=>x.id===next.serviceId);
           return result(summary(service,next,language),language,next,"cleaning_stored_phone_reused",{intent:"CLEANING_READY_TO_CONFIRM",payload:{pendingField:'confirm',phone:stored}});
         }
-        const reply=`I don’t have a saved contact number for this tenant yet. ${promptFor('phone',language)}`;
+        const reply=`I don’t have a saved contact number for this tenant yet. ${promptFor('phone',language,previous.serviceName)}`;
         return result(reply,language,previous,"cleaning_stored_phone_missing",{intent:"CLEANING_ASK_PHONE",payload:{pendingField:"phone"}});
       }
       if(engagement.isFieldRefusal?.(context.message.text)){
@@ -1307,7 +1582,7 @@ async function startConfiguredService(context,cleaning,engagement,language,servi
       : `${formatPrice(service)} is the configured service price.`;
   const returning=await savedCustomerTransition(cleaning,context,next,language);
   const finalState=returning?.state||next;
-  const nextPrompt=returning?`\n\n${returning.reply}`:finalState.step==='confirm'?'If everything looks correct, say confirm.':promptFor(finalState.step,language);
+  const nextPrompt=returning?`\n\n${returning.reply}`:finalState.step==='confirm'?'If everything looks correct, say confirm.':promptFor(finalState.step,language,finalState.serviceName);
   const openingReply=localized(language,
     `${service.name} selected. ${openingPrice} ${capturedScheduleLine(finalState)}${nextPrompt}`,
     `${service.name} select ho gayi hai. Configured price ${formatPrice(service)} hai. ${capturedScheduleLine(finalState)}${nextPrompt}`,
@@ -1326,6 +1601,17 @@ function result(reply, language, cleaningState, lastIntent, responseModel = null
   return createCapabilityResult({ handled: true, reply, confidence: 0.99, responseModel, statePatch: { language, activePlugin: "cleaning", lastIntent, capabilityState: { cleaning: cleaningState } }, events });
 }
 function localized(language,english,roman,urdu){ return language==="urdu"?urdu:language==="roman_urdu"?roman:english; }
+function capitalize(value){const s=String(value||'');return s.charAt(0).toUpperCase()+s.slice(1);}
+function describeScope(e={}){
+  const parts=[];
+  if(e.propertyType)parts.push(e.propertyType);
+  if(e.bedrooms!=null)parts.push(`${e.bedrooms}-bedroom`);
+  if(e.units!=null)parts.push(`${e.units} ${e.units===1?'item':'items'}`);
+  if(e.serviceVariant)parts.push(e.serviceVariant);
+  if(e.cleanerCount!=null)parts.push(`${e.cleanerCount} cleaner${e.cleanerCount===1?'':'s'}`);
+  if(e.durationHours!=null)parts.push(`${e.durationHours} hour${e.durationHours===1?'':'s'}`);
+  return parts.length?parts.join(', '):'your scope';
+}
 function customerFieldLabel(field){return ({name:'customer name',phone:'contact phone number',email:'email address',address:'service address'})[field]||field;}
 async function savedCustomerDetails(cleaning,context){
   const customer=context.customer||{};
@@ -1341,7 +1627,7 @@ async function savedCustomerDetails(cleaning,context){
 }
 async function savedAddressPrompt(cleaning,context,language){
   const saved=await savedCustomerDetails(cleaning,context);
-  if(!saved.address)return promptFor('address',language);
+  if(!saved.address)return promptFor('address',language,null);
   return localized(language,
     `Your previous service address is: ${saved.address}\n\nSay “use my previous address” to reuse it, or send the new full service address.`,
     `Aapka pichla service address hai: ${saved.address}\n\nDobara use karna ho to “previous address use karo” kahein, warna naya complete address bhej dein.`,
@@ -1372,7 +1658,7 @@ function savedDetailsReview(service,state,language){
       'Say “keep all details the same” or “confirm” to continue. To update anything, say “change the name, phone, email, or address to …”.',
       'Sab details same rakhne ke liye “keep all details the same” ya “confirm” kahein. Update ke liye name, phone, email, ya address batayein.',
       'تمام تفصیلات وہی رکھنے کے لیے ”keep all details the same“ یا ”confirm“ کہیں۔ تبدیلی کے لیے نام، فون، ای میل یا ایڈریس بتائیں۔')
-    : promptFor(state.step,language);
+    : promptFor(state.step,language,state.serviceName);
   const intro=localized(language,'I found your saved customer details and will reuse them for this request unless you update them:','Aapki saved customer details mil gayi hain; agar aap update na karein to isi request mein reuse hongi:','آپ کی محفوظ کسٹمر تفصیلات مل گئی ہیں؛ تبدیلی نہ کرنے کی صورت میں یہی استعمال ہوں گی:');
   const review=service?summary(service,state,language).replace(/\n\n(?:If everything looks correct, please confirm\.|Agar sab theek hai to confirm kar dein\.)$/,''):'';
   return `${intro}\n\n${review}\n\n${next}`.trim();
@@ -1565,10 +1851,17 @@ function addHours(time,hours){
   const minutes=(Number(m[1])*60+Number(m[2])+Math.round(Number(hours)*60))%(24*60);
   return `${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
 }
-function promptFor(field,language){
-  const en={cleaningType:'Would you like Standard Cleaning or Deep Cleaning?',cleanerCount:'How many cleaners do you need?',date:'What date would you prefer? Use DD/MM/YYYY, or say “tomorrow”.',time:'What time would you prefer? For example, 9:00 AM or 14:30, or say “any available time”.',address:'Please share the full service address, including the building/house and area.',name:'May I have your full name?',phone:'What is the best contact phone number to reach you on? You may also include an email address as an optional contact.',duration:'How many hours should each visit be?',propertyType:'Is the property an apartment or a villa/house?',bedrooms:'How many bedrooms does the property have? Say 0 for a studio.',units:'What is the furniture or carpet size/quantity (for example, 3-seater or 6 metres)?',serviceVariant:'What size is it (for example, single/queen/king or small/medium/large)?',recurring_days:'Which day or days do you prefer for the recurring visits?',recurring_service:'Which cleaning service should repeat?'};
-  const ru={cleaningType:'Standard Cleaning chahiye ya Deep Cleaning?',cleanerCount:'Kitne cleaners chahiye?',date:'Kis date ko service chahiye? DD/MM/YYYY likhein, ya “tomorrow” keh dein.',time:'Kis time service chahiye? Misal: 9:00 AM, 14:30, ya “jo time available ho”.',address:'Service ka poora address bata dein.',name:'Aap ka poora naam bata dein.',phone:'Aap se rabta karne ke liye sahi contact number bata dein.',duration:'Har visit kitne ghantay ki honi chahiye?',propertyType:'Property apartment hai ya villa/house?',bedrooms:'Property mein kitne bedrooms hain? Studio ke liye 0 kahen.',units:'Furniture ya carpet ka size/quantity bata dein, misal 3-seater ya 6 metres.',serviceVariant:'Size bata dein, misal single/queen/king ya small/medium/large.'};
-  const ur={cleaningType:'Standard Cleaning چاہیے یا Deep Cleaning؟',cleanerCount:'کتنے کلینرز چاہیے؟',date:'سروس کس تاریخ کو چاہیے؟ DD/MM/YYYY لکھیں، یا “tomorrow” کہیں۔',time:'سروس کس وقت چاہیے؟ مثال: 9:00 AM یا 14:30۔',address:'سروس کا مکمل پتہ بتائیں۔',name:'اپنا پورا نام بتائیں۔',phone:'رابطے کے لیے درست فون نمبر بتائیں۔',duration:'ہر وزٹ کتنے گھنٹے کا ہونا چاہیے؟',propertyType:'پراپرٹی اپارٹمنٹ ہے یا ولا/گھر؟',bedrooms:'پراپرٹی میں کتنے بیڈ روم ہیں؟ اسٹوڈیو کے لیے 0 کہیں۔',units:'فرنیچر یا کارپٹ کا سائز/تعداد بتائیں۔',serviceVariant:'سائز بتائیں، مثلاً سنگل، کوئین، کنگ، چھوٹا، درمیانہ یا بڑا۔'};
+function promptFor(field,language,serviceName=null){
+  // Service-specific unit prompts: carpets use metres, sofas use seaters,
+  // chairs/tables use item counts. The generic "units" prompt mentions
+  // "3-seater or 6 metres" which is confusing for carpet-only contexts.
+  const isCarpet=/carpet/i.test(serviceName||'');
+  const isSofa=/sofa|couch/i.test(serviceName||'');
+  const isChair=/chair/i.test(serviceName||'');
+  const isTable=/table/i.test(serviceName||'');
+  const en={cleaningType:'Would you like Standard Cleaning or Deep Cleaning?',cleanerCount:'How many cleaners do you need?',date:'What date would you prefer? Use DD/MM/YYYY, or say “tomorrow”.',time:'What time would you prefer? For example, 9:00 AM or 14:30, or say “any available time”.',address:'Please share the full service address, including the building/house and area.',name:'May I have your full name?',phone:'What is the best contact phone number to reach you on? You may also include an email address as an optional contact.',duration:'How many hours should each visit be?',propertyType:'Is the property an apartment or a villa/house?',bedrooms:'How many bedrooms does the property have? Say 0 for a studio.',units:isCarpet?'What is the carpet size in metres? (for example, 5 metres, 6 metres, 10 metres — minimum 5m, maximum 16m)':isSofa?'What is the sofa size? (for example, 3-seater, 5-seater)':isChair?'How many chairs need cleaning?':isTable?'How many tables need cleaning?':'What is the furniture or carpet size/quantity (for example, 3-seater or 6 metres)?',serviceVariant:'What size is it (for example, single/queen/king or small/medium/large)?',recurring_days:'Which day or days do you prefer for the recurring visits?',recurring_service:'Which cleaning service should repeat?'};
+  const ru={cleaningType:'Standard Cleaning chahiye ya Deep Cleaning?',cleanerCount:'Kitne cleaners chahiye?',date:'Kis date ko service chahiye? DD/MM/YYYY likhein, ya “tomorrow” keh dein.',time:'Kis time service chahiye? Misal: 9:00 AM, 14:30, ya “jo time available ho”.',address:'Service ka poora address bata dein.',name:'Aap ka poora naam bata dein.',phone:'Aap se rabta karne ke liye sahi contact number bata dein.',duration:'Har visit kitne ghantay ki honi chahiye?',propertyType:'Property apartment hai ya villa/house?',bedrooms:'Property mein kitne bedrooms hain? Studio ke liye 0 kahen.',units:isCarpet?'Carpet ka size metres mein bata dein? (misal 5 metres, 6 metres, 10 metres — minimum 5m, maximum 16m)':isSofa?'Sofa ka size bata dein? (misal 3-seater, 5-seater)':isChair?'Kitne chairs clean karne hain?':isTable?'Kitne tables clean karne hain?':'Furniture ya carpet ka size/quantity bata dein, misal 3-seater ya 6 metres.',serviceVariant:'Size bata dein, misal single/queen/king ya small/medium/large.'};
+  const ur={cleaningType:'Standard Cleaning چاہیے یا Deep Cleaning؟',cleanerCount:'کتنے کلینرز چاہیے؟',date:'سروس کس تاریخ کو چاہیے؟ DD/MM/YYYY لکھیں، یا “tomorrow” کہیں۔',time:'سروس کس وقت چاہیے؟ مثال: 9:00 AM یا 14:30۔',address:'سروس کا مکمل پتہ بتائیں۔',name:'اپنا پورا نام بتائیں۔',phone:'رابطے کے لیے درست فون نمبر بتائیں۔',duration:'ہر وزٹ کتنے گھنٹے کا ہونا چاہیے؟',propertyType:'پراپرٹی اپارٹمنٹ ہے یا ولا/گھر؟',bedrooms:'پراپرٹی میں کتنے بیڈ روم ہیں؟ اسٹوڈیو کے لیے 0 کہیں۔',units:isCarpet?'کارپٹ کا سائز میٹرز میں بتائیں؟ (مثال 5 metres, 6 metres, 10 metres — کم از کم 5m، زیادہ سے زیادہ 16m)':isSofa?'صوفے کا سائز بتائیں؟ (مثال 3-seater, 5-seater)':isChair?'کتنے کرسیاں صاف کرنی ہیں؟':isTable?'کتنے ٹیبل صاف کرنے ہیں؟':'فرنیچر یا کارپٹ کا سائز/تعداد بتائیں۔',serviceVariant:'سائز بتائیں، مثلاً سنگل، کوئین، کنگ، چھوٹا، درمیانہ یا بڑا۔'};
   return (language==='urdu'?ur:language==='roman_urdu'?ru:en)[field]||'';
 }
 function validationMessage(field,language,fallback){
@@ -1681,7 +1974,7 @@ function bookingRequirementState(service={}){
   if(['CLN001','CLN008','CLN009','CLN-HOURLY'].includes(service.id)||service.priceType==='hourly'){
     return {...base,requiredPricingFields:['cleanerCount','durationHours'],pricingFirst:true};
   }
-  if(['CLN010','CLN011'].includes(service.id))return {...base,requiredPricingFields:['bedrooms'],pricingFirst:true};
+  if(['CLN010','CLN011','CLN006'].includes(service.id))return {...base,requiredPricingFields:['bedrooms'],pricingFirst:true};
   return base;
 }
 function extractServiceVariant(value){
@@ -1778,6 +2071,119 @@ function priceAdditionalService(context,service,semantic={}){
     priceIsStartingFrom:service.priceType==='starting_from'
   };
 }
+
+// ===== Multi-service scope clarification helpers =====
+
+/**
+ * Returns the name of the missing scope field that must be collected BEFORE
+ * this service can be priced accurately, or null if the service's scope is
+ * fully determined by the supplied semantic.
+ *
+ * Property services (Apartment, Villa, Home Cleaning) need a cleaning-type
+ * decision (Standard vs Deep) before pricing. Standard property cleaning then
+ * needs cleanerCount + durationHours (hourly). Deep property cleaning needs
+ * bedrooms (matrix/linear). Furniture services (Sofa, Carpet, Mattress,
+ * Curtain, Chair, Table) need units (seater count, square meters, etc.) or
+ * a service variant (king/queen/single for mattress).
+ */
+function requiresScopeClarification(service,semantic={}){
+  if(!service)return null;
+  const id=service.id;
+  const name=String(service.name||'').toLowerCase();
+  const isPropertyCleaning=/\b(?:apartment|villa|home|house)\s+cleaning\b/i.test(service.name)&&!/^deep\b/i.test(service.name);
+  const isDeepPropertyCleaning=/^deep\s+(?:apartment|villa|home)\s+cleaning\b/i.test(service.name);
+  const isStandardPropertyCleaning=['CLN001','CLN008','CLN009','CLN-HOURLY'].includes(id)||service.priceType==='hourly';
+  const isDeepProperty=['CLN010','CLN011','CLN002','CLN006'].includes(id);
+  const isFurniture=/\b(?:sofa|couch|carpet|rug|mattress|curtain|chair|table)\b/i.test(name);
+  // Property services that haven't yet decided Standard vs Deep need cleaningType.
+  if(isPropertyCleaning&&!semantic.cleaningType&&!semantic.selectedCleaningType){
+    return 'cleaningType';
+  }
+  // Standard property cleaning (hourly) needs cleanerCount + durationHours.
+  // cleanerCount is the more fundamental field, so ask for it first.
+  if(isStandardPropertyCleaning&&(semantic.cleaningType==='standard'||semantic.selectedCleaningType==='standard')&&!Number(semantic.cleanerCount)){
+    return 'cleanerCount';
+  }
+  if(isStandardPropertyCleaning&&(semantic.cleaningType==='standard'||semantic.selectedCleaningType==='standard')&&Number(semantic.cleanerCount)&&!Number(semantic.durationHours)){
+    return 'durationHours';
+  }
+  // Deep property cleaning needs bedrooms. This check is intentionally
+  // scoped to PROPERTY services only — a furniture service like Sofa
+  // Cleaning must NOT inherit the global selectedCleaningType='deep' and
+  // start asking for bedrooms. Furniture services use units/serviceVariant.
+  if(!isFurniture&&(isDeepProperty||isDeepPropertyCleaning||(semantic.cleaningType==='deep'||semantic.selectedCleaningType==='deep'))&&(semantic.bedrooms==null||semantic.bedrooms==='')){
+    return 'bedrooms';
+  }
+  // Furniture services need units (seater count, square meters) — or a
+  // service variant for mattress/curtain.
+  if(isFurniture&&!Number(semantic.units)&&!semantic.serviceVariant){
+    return 'units';
+  }
+  return null;
+}
+
+function clarificationQuestion(missing,language){
+  const questions={
+    cleaningType:{english:'Standard or Deep cleaning?',roman_urdu:'Standard ya Deep cleaning?',urdu:'اسٹنڈرڈ یا گہری صفائی چاہیے؟'},
+    bedrooms:{english:'How many bedrooms? (say 0 for studio)',roman_urdu:'Kitne bedroom hain? (studio ke liye 0)',urdu:'کتنے بیڈ روم ہیں؟ (اسٹوڈیو کے لیے 0)'},
+    cleanerCount:{english:'How many cleaners do you need?',roman_urdu:'Kitne cleaners chahiye?',urdu:'کتنے کلینرز چاہیے؟'},
+    durationHours:{english:'How many hours should each visit be?',roman_urdu:'Har visit kitne ghantay ki ho?',urdu:'ہر وزٹ کتنے گھنٹے کی ہو؟'},
+    units:{english:'What is the size/quantity? (e.g., 3-seater, 5-seater, 6 metres)',roman_urdu:'Size/quantity kya hai? (misal 3-seater, 5-seater, 6 metres)',urdu:'سائز/تعداد کیا ہے؟ (مثال 3-seater, 5-seater, 6 metres)'},
+    serviceVariant:{english:'What size? (e.g., single/queen/king or small/medium/large)',roman_urdu:'Konsa size? (misal single/queen/king ya small/medium/large)',urdu:'کون سا سائز؟ (مثال single/queen/king یا small/medium/large)'}
+  };
+  const entry=questions[missing]||{english:'the missing scope detail',roman_urdu:'missing scope detail',urdu:'تفصیل درکار ہے'};
+  return entry[language]||entry.english;
+}
+
+function resolveCleaningTypeFromSemantic(semantic){
+  if(semantic.selectedCleaningType)return semantic.selectedCleaningType;
+  if(semantic.cleaningType)return semantic.cleaningType;
+  const text=normalizeText(`${semantic.text||''} ${semantic.scopeText||''}`);
+  if(/\bdeep\b|گہری/.test(text))return 'deep';
+  if(/\b(?:standard|stndrad|standrd|general|regular|routine|hourly)\b/.test(text))return 'standard';
+  return null;
+}
+
+// Apply a single resolved scope answer (cleaningType / bedrooms / units /
+// cleanerCount / durationHours / serviceVariant) to the correct service in
+// the state. Property-type services use the top-level state fields;
+// additional services have their own per-item scope stored under
+// additionalServices[i].scope so each service can be priced independently.
+function applyServiceScope(state,service,cleaningType,semantic){
+  // When the user's "deep cleaning" answer has already swapped the primary
+  // service to the Deep variant (CLN010/CLN011/CLN002), the pending
+  // clarification's serviceId points to the DEEP service. The state's
+  // serviceId may still be the generic one (CLN008/CLN009/CLN001), so we
+  // treat BOTH the state's primary AND the deep variant as "primary" for
+  // scope-application purposes. Without this, bedrooms=3 ends up stored
+  // only on the deep service's pending entry but never on the top-level
+  // state, and the re-check keeps asking for bedrooms forever.
+  const primaryServiceId=state.serviceId;
+  const deepVariantMap={'CLN008':'CLN010','CLN009':'CLN011','CLN001':'CLN002'};
+  const deepVariantId=deepVariantMap[primaryServiceId];
+  const isPrimary=service.id===primaryServiceId||service.id===deepVariantId;
+  const additionalServices=(state.additionalServices||[]).map((item)=>{
+    if(item.serviceId!==service.id)return item;
+    const scope={...(item.scope||{}),...(cleaningType?{cleaningType}:{})};
+    if(semantic.bedrooms!=null)scope.bedrooms=semantic.bedrooms;
+    if(semantic.cleanerCount!=null)scope.cleanerCount=semantic.cleanerCount;
+    if(semantic.durationHours!=null)scope.durationHours=semantic.durationHours;
+    if(semantic.units!=null)scope.units=semantic.units;
+    if(semantic.serviceVariant)scope.serviceVariant=semantic.serviceVariant;
+    return {...item,scope};
+  });
+  const next={...state,additionalServices};
+  if(isPrimary){
+    if(cleaningType)next.selectedCleaningType=cleaningType;
+    if(semantic.bedrooms!=null)next.bedrooms=semantic.bedrooms;
+    if(semantic.cleanerCount!=null)next.cleanerCount=semantic.cleanerCount;
+    if(semantic.durationHours!=null)next.durationHours=semantic.durationHours;
+    if(semantic.units!=null)next.units=semantic.units;
+    if(semantic.serviceVariant)next.serviceVariant=semantic.serviceVariant;
+  }
+  return next;
+}
+
 function combinedServiceTotal(services,state={}){
   const primary=services.find((service)=>service.id===state.serviceId);
   let primaryTotal=state.total??state.quotedService?.total;

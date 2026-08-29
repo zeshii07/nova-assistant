@@ -1,5 +1,5 @@
 class NluContextBuilder {
-  constructor({ maxItems = 80, defaultTimezone = 'UTC', clock = () => new Date() } = {}) { Object.assign(this, {maxItems, defaultTimezone, clock}); }
+  constructor({ maxItems = 80, defaultTimezone = 'UTC', clock = () => new Date(), maxRecentTurns = 6, maxTurnChars = 320 } = {}) { Object.assign(this, {maxItems, defaultTimezone, clock, maxRecentTurns, maxTurnChars}); }
 
   async build({ tenant, state, services = {}, pending = null }) {
     const vocabulary = [];
@@ -50,6 +50,12 @@ class NluContextBuilder {
         pending_field:pending.pendingField || null,
         collected:safeCollected(activeState)
       }) : null,
+      // Conversation memory window — the last N customer turns and the
+      // capability/intent that handled each. PII (name/phone/email/address)
+      // is deliberately excluded so the provider can resolve pronouns like
+      // "book it again" or "the same time as last week" without seeing
+      // customer contact data. See docs/V11_CONVERSATION_MEMORY_WINDOW.md.
+      recent_turns:Object.freeze(safeRecentTurns(state?.context?.recentTurns || [], this.maxRecentTurns, this.maxTurnChars)),
       vocabulary:Object.freeze(unique),
       allowed_service_ids:Object.freeze(unique.filter((x) => x.kind === 'service').map((x) => x.id)),
       allowed_product_ids:Object.freeze(unique.filter((x) => x.kind === 'product').map((x) => x.id))
@@ -64,6 +70,21 @@ function safeCollected(state) {
   for (const key of allow) if (scalar(fields[key] ?? state[key])) out[key] = fields[key] ?? state[key];
   if (Array.isArray(state.items)) out.itemIds = state.items.map((x) => x?.id).filter(Boolean).slice(0, 12);
   return Object.freeze(out);
+}
+function safeRecentTurns(turns, maxTurns, maxChars) {
+  if (!Array.isArray(turns)) return [];
+  const safeIntent = (value) => typeof value === 'string' && /^[\w.-]{1,80}$/.test(value) ? value : null;
+  return turns
+    .slice(-maxTurns)
+    .map((turn) => ({
+      // Customer-facing message text only — truncated for token budget.
+      // The provider uses this to resolve references such as "it", "the same
+      // one", "wohi", "وہی", "doosra wala".
+      text: clean(turn.text, maxChars),
+      capability_id: safeIntent(turn.capabilityId),
+      intent: safeIntent(turn.intent)
+    }))
+    .filter((turn) => turn.text);
 }
 function scalar(value) { return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'; }
 function clean(value, max) { const out = String(value || '').trim(); return out ? out.slice(0, max) : null; }
