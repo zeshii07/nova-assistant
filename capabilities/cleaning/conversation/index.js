@@ -184,6 +184,22 @@ class CleaningConversationAdapter {
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'information',value:'cleaning_duration',score:1}]};
     }
 
+    // "What is included in deep cleaning?" or "what does deep cleaning include?"
+    // — answer the scope-of-work question without starting/altering a booking.
+    if(/\b(?:what is|what's|what does|what do|what will|what's included|what is included|included in|does it include|what do you do in|what does .* include)\b[\s\S]{0,50}\b(?:deep|standard)\s*(?:clean(?:ing)?)?\b/i.test(message.text)
+      ||/\b(?:what is|what's) included\b[\s\S]{0,30}\b(?:cleaning|service)\b/i.test(message.text)){
+      entities={preserveWorkflow:true};
+      candidates.push({intent:'cleaning.scope_info',confidence:1,priority:219,entities,reason:'cleaning_scope_information_question'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'information',value:'cleaning_scope',score:1}]};
+    }
+    // "How many hours will it take for deep cleaning?" — explain Deep is
+    // scope-based, not hourly. Don't ask for a property type; just explain.
+    if(/\b(?:how (?:many|much) (?:hours?|time)|how long)\b[\s\S]{0,40}\b(?:deep|cleaning|service)\b/i.test(message.text)){
+      entities={preserveWorkflow:true};
+      candidates.push({intent:'cleaning.duration_info',confidence:1,priority:219,entities,reason:'cleaning_duration_information_question'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'information',value:'cleaning_duration',score:1}]};
+    }
+
     // The active field owns a clear answer.  This route is intentionally more
     // specific than generic workflow input so catalog/availability adapters or
     // remote NLU cannot reinterpret "OK 10 AM" as another command.
@@ -334,7 +350,7 @@ class CleaningConversationAdapter {
     const dominantCompositeService=/\b(post renovation|post construction|move in|move out)\b/.test(normalizedText);
     const conjoinedDistinctServices=!dominantCompositeService&&/\band\b/.test(normalizedText)&&new Set(serviceHeads).size>1;
     const additiveServiceLanguage=explicitAdditiveServiceLanguage||conjoinedDistinctServices;
-    if(step&&additiveServiceLanguage&&!pricingRequested){
+    if(step&&step!=='multi_service_clarify'&&additiveServiceLanguage&&!pricingRequested){
       const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
       const found=scoped?.findServices?await scoped.findServices(primaryText,{minScore:60}):[];
       const serviceItems=found.map(({service,score})=>({serviceId:service.id,serviceName:service.name,score}));
@@ -480,7 +496,11 @@ class CleaningConversationAdapter {
     // changes the selected service instead of being sent to the date validator.
     // (The multi_service_clarify branch is handled further down, before the
     // generic workflow_input fallthrough.)
-    if(step && step!=='multi_service_clarify' && /\b(deep\s*(?:home\s*)?(?:clean(?:ing)?|clening|cleening|clning)|standard\s*(?:home\s*)?(?:clean(?:ing)?|clening|cleening|clning)|sofa\s*(?:clean(?:ing)?|clening)|carpet\s*(?:clean(?:ing)?|clening)|office\s*(?:clean(?:ing)?|clening)|move[ -]?(?:in|out)\s*(?:clean(?:ing)?|clening)|hourly\s*cleaner)\b/.test(normalizedText)){
+    // EXCEPTION: "do you provide/offer X" is a SERVICE SUPPORT question —
+    // it should NOT trigger a service change. Let it fall through to the
+    // availability adapter or the generic workflow_input handler.
+    const isServiceSupportQuestion=/\b(?:do you|can you|are you able to|will you)\b[\s\S]{0,20}\b(?:provide|offer|have|do|give)\b/i.test(message.text);
+    if(step && step!=='multi_service_clarify' && !isServiceSupportQuestion && /\b(deep\s*(?:home\s*)?(?:clean(?:ing)?|clening|cleening|clning)|standard\s*(?:home\s*)?(?:clean(?:ing)?|clening|cleening|clning)|sofa\s*(?:clean(?:ing)?|clening)|carpet\s*(?:clean(?:ing)?|clening)|office\s*(?:clean(?:ing)?|clening)|move[ -]?(?:in|out)\s*(?:clean(?:ing)?|clening)|hourly\s*cleaner)\b/.test(normalizedText)){
       const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
       const targetText=cleaningServiceSubjectText(primaryText);
       const changed=scoped?await scoped.findService(targetText):null;
@@ -830,7 +850,11 @@ class CleaningConversationAdapter {
       // ("what are charges for...") — when there's no explicit booking action
       // and no date constraint, route to quote-only so Nova shows the price
       // and asks whether to book. Do NOT auto-start a booking.
-      if(!structuredRequest && !explicitBookingAction && step!=='multi_service_clarify' && !step && !hasDateConstraint){
+      // EXCEPTION: "do you provide/offer X" is a SERVICE SUPPORT question
+      // that belongs to the availability adapter (which lists matching
+      // services). Do NOT hijack it with a single-service quote.
+      const isServiceSupportQuestion=/\b(?:do you|can you|are you able to|will you)\b[\s\S]{0,20}\b(?:provide|offer|have|do|give)\b/i.test(message.text);
+      if(!structuredRequest && !explicitBookingAction && step!=='multi_service_clarify' && !step && !hasDateConstraint && !isServiceSupportQuestion){
         entities={...timeEntities,serviceId:found.service.id,serviceName:found.service.name,pricingRequested:true,quoteOnly:true,text:normalizedText};
         candidates.push({intent:'cleaning.standalone_quote',confidence:1,priority:175,entities,reason:'bare_service_mention_or_price_question'});
         matches.push({type:'pricing',value:'explicit_service_quote',canonical:found.service.id,score:1});

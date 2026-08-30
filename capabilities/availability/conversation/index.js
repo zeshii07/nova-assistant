@@ -60,8 +60,8 @@ class AvailabilityConversationAdapter{
   // question is the primary intent. The day constraint should NOT cause the
   // genericDayService block to fire first and answer only the hours question
   // while ignoring the "do you provide" question entirely.
-  const hasExplicitSupportQuestion=/\b(can you|are you able to|do you provide|do you offer)\b/.test(text)
-    && /\b(clean|cleaning|service|deep|sofa|carpet|mattress|furniture)\b/.test(text);
+  const hasExplicitSupportQuestion=/\b(?:do you|can you|are you able to|will you)\b[\s\S]{0,20}\b(?:provide|offer|do|have|give)\b/i.test(text)
+    && /\b(clean|cleaning|service|deep|sofa|carpet|mattress|furniture|standard)\b/i.test(text);
 
   if(arrivalQuestion)return out('availability.arrival_question',{...constraints,text},1,'service_arrival_question');
   if(openQuestion&&constraints.weekend&&!constraints.day)return out('availability.weekend_hours',{...constraints,text},1,'weekend_hours_question');
@@ -75,11 +75,11 @@ class AvailabilityConversationAdapter{
   if(availabilityQuestion && !hasExplicitSupportQuestion)return out('availability.slot_question',{...constraints,text},.99999,'service_slot_question');
 
   const listQuestion=/\b(what|which|list|show)\b.*\bservices?\b|\bservices?\b.*\b(do you offer|do you provide|available)\b/.test(text);
-  const explicitSupport=/\b(can you|are you able to|do you provide|do you offer)\b/.test(text);
+  const explicitSupport=/\b(can you|are you able to|do you provide|do you offer|do you do|do you have|will you provide|will you offer|will you)\b/i.test(text);
   const contextualCanI=/\b(can i get|can i have|can i book|cn i get|cn i have|cn i book)\b/.test(text)
     && (/\b(cleaned|studio|apartment|flat|villa)\b/.test(text)||/\b(?:can|cn) i book\b/.test(text));
   const serviceQuestion=!pricingQuestion&&!listQuestion&&(explicitSupport||contextualCanI)
-    &&/\b(clean|cleaned|cleaning|service|session|consultation|lesson|appointment|repair|treatment|massage|haircut|grooming|visit|meeting|booking)\b/.test(text);
+    &&/\b(clean|cleaned|cleaning|service|services|session|consultation|lesson|appointment|repair|treatment|massage|haircut|grooming|visit|meeting|booking)\b/.test(text);
 
   if(serviceQuestion&&services?.availabilityService){
     const a=services.availabilityService.scope({tenant}),supports=a.serviceSupports(text),support=a.serviceSupport(text);

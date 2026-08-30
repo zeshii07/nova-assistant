@@ -44,17 +44,44 @@ class CleaningCapability extends BaseCapability {
 
     if(context.intelligence?.selected?.intent==='cleaning.duration_info'){
       const service=(await cleaning.listServices()).find(entry=>entry.id===previous.serviceId);
+      const isDeep=service&&/\bdeep\b/i.test(service.name);
       const configuredDuration=Number(previous.durationHours||0);
       const reply=configuredDuration
         ? localized(language,
           `This request is currently set for ${configuredDuration} hour${configuredDuration===1?'':'s'}. Your booking details are still safe — ${promptFor(previous.step,language,previous.serviceName)}`,
           `Is request ke liye ${configuredDuration} ghantay note hain. Aapki booking details safe hain — ${promptFor(previous.step,language,previous.serviceName)}`,
           `اس درخواست کے لیے ${configuredDuration} گھنٹے درج ہیں۔ آپ کی بکنگ کی تفصیلات محفوظ ہیں۔ ${promptFor(previous.step,language,previous.serviceName)}`)
-        : localized(language,
-          `${service?.name||'This cleaning service'} has no fixed duration in the approved service data; how long it takes depends on the scope and the team will confirm it. Your request is still paused safely — ${promptFor(previous.step,language,previous.serviceName)}`,
-          `${service?.name||'Is cleaning service'} ka fixed duration configured nahi hai; time scope par depend karta hai aur team confirm karegi. Aapki request safe paused hai — ${promptFor(previous.step,language,previous.serviceName)}`,
-          `${service?.name||'اس صفائی کی سروس'} کا مقررہ دورانیہ درج نہیں؛ وقت کام کی نوعیت پر منحصر ہے اور ٹیم تصدیق کرے گی۔ آپ کی درخواست محفوظ ہے۔ ${promptFor(previous.step,language,previous.serviceName)}`);
+        : isDeep
+          ? localized(language,
+            `Deep cleaning is priced by property size and bedroom count, not by the hour. The team will confirm how long it takes based on the scope. Your request is still paused safely — ${promptFor(previous.step,language,previous.serviceName)}`,
+            `Deep cleaning ki pricing property size aur bedrooms par based hai, hours par nahi. Team scope check karke time confirm karegi. Aapki request safe paused hai — ${promptFor(previous.step,language,previous.serviceName)}`,
+            `گہری صفائی کی قیمت پراپرٹی کے سائز اور بیڈ رومز پر مبنی ہے، گھنٹوں پر نہیں۔ ٹیم اسکوپ دیکھ کر وقت کی تصدیق کرے گی۔ آپ کی درخواست محفوظ ہے۔ ${promptFor(previous.step,language,previous.serviceName)}`)
+          : localized(language,
+            `${service?.name||'This cleaning service'} has no fixed duration in the approved service data; how long it takes depends on the scope and the team will confirm it. Your request is still paused safely — ${promptFor(previous.step,language,previous.serviceName)}`,
+            `${service?.name||'Is cleaning service'} ka fixed duration configured nahi hai; time scope par depend karta hai aur team confirm karegi. Aapki request safe paused hai — ${promptFor(previous.step,language,previous.serviceName)}`,
+            `${service?.name||'اس صفائی کی سروس'} کا مقررہ دورانیہ درج نہیں؛ وقت کام کی نوعیت پر منحصر ہے اور ٹیم تصدیق کرے گی۔ آپ کی درخواست محفوظ ہے۔ ${promptFor(previous.step,language,previous.serviceName)}`);
       return result(reply,language,previous,'cleaning_duration_info',{intent:'CLEANING_DURATION_INFO',payload:{legacyText:reply,durationHours:configuredDuration||null,pendingField:previous.step}});
+    }
+
+    if(context.intelligence?.selected?.intent==='cleaning.scope_info'){
+      const e=context.intelligence?.entities||{};
+      const messageText=context.message?.text||'';
+      const isDeep=/\bdeep\b/i.test(messageText)||previous.serviceId&&/deep/i.test(previous.serviceName||'');
+      const propertyType=previous.propertyType||e.propertyType||null;
+      const bedrooms=previous.bedrooms||e.bedrooms||null;
+      const scopeDesc=propertyType&&bedrooms!=null?`${bedrooms}-bedroom ${propertyType}`:propertyType?`a ${propertyType}`:'your property';
+      if(isDeep){
+        const reply=localized(language,
+          `Deep cleaning for ${scopeDesc} includes deep cleaning of all bedrooms, one kitchen deep cleaning, and one washroom/bathroom deep cleaning. It does NOT include deep cleaning of furniture (sofa, carpet, mattress, curtains) — that is a separate Furniture Cleaning service. However, a light vacuuming will be done of all furniture present in the rooms.${previous.step?`\n\nYour request is still paused safely — ${promptFor(previous.step,language,previous.serviceName)}`:''}`,
+          `${scopeDesc} ki deep cleaning mein tamam bedrooms ki gahri safai, ek kitchen ki deep cleaning, aur ek washroom/bathroom ki deep cleaning shamil hai. Is mein furniture (sofa, carpet, mattress, curtains) ki deep cleaning shamil NAHI — woh ek alag Furniture Cleaning service hai. Lekin kamron mein maujood tamam furniture ki halki vacuum cleaning ki jayegi.${previous.step?`\n\nAapki request safe paused hai — ${promptFor(previous.step,language,previous.serviceName)}`:''}`,
+          `${scopeDesc} کی گہری صفائی میں تمام بیڈ رومز کی گہری صفائی، ایک کچن کی گہری صفائی، اور ایک واش روم/باتھ روم کی گہری صفائی شامل ہے۔ اس میں فرنیچر (صوفہ، کارپٹ، میٹریس، پردے) کی گہری صفائی شامل نہیں — یہ ایک الگ فرنیچر کلیننگ سروس ہے۔ تاہم، کمرے میں موجود تمام فرنیچر کی ہلکی ویکیوم صفائی کی جائے گی۔${previous.step?`\n\nآپ کی درخواست محفوظ ہے — ${promptFor(previous.step,language,previous.serviceName)}`:''}`);
+        return result(reply,language,previous,'cleaning_scope_info',{intent:'CLEANING_SCOPE_INFO',payload:{legacyText:reply,pendingField:previous.step}});
+      }
+      const reply=localized(language,
+        `Standard cleaning is an hourly service. The team cleans based on the agreed hours and number of cleaners. It includes general surface cleaning, dusting, mopping, and bathroom/kitchen surface cleaning. Deep cleaning of specific areas (kitchen, bathroom, furniture) is available as separate services.${previous.step?`\n\nYour request is still paused safely — ${promptFor(previous.step,language,previous.serviceName)}`:''}`,
+        `Standard cleaning ek hourly service hai. Team agreed hours aur cleaners ki tadad par clean karti hai. Is mein general surface cleaning, dusting, mopping, aur bathroom/kitchen surface cleaning shamil hai. Khaas ilaqon (kitchen, bathroom, furniture) ki deep cleaning alag services ke taur par available hai.${previous.step?`\n\nAapki request safe paused hai — ${promptFor(previous.step,language,previous.serviceName)}`:''}`,
+        `اسٹنڈرڈ صفائی ایک گھنٹے کی سروس ہے۔ ٹیم متفقہ گھنٹوں اور کلینرز کی تعداد پر صفائی کرتی ہے۔ اس میں عمومی سطح کی صفائی، دھول صاف کرنا، ماپنگ، اور باتھ روم/کچن کی سطح کی صفائی شامل ہے۔ مخصوص علاقوں (کچن، باتھ روم، فرنیچر) کی گہری صفائی الگ سروسز کے طور پر دستیاب ہے۔${previous.step?`\n\nآپ کی درخواست محفوظ ہے — ${promptFor(previous.step,language,previous.serviceName)}`:''}`);
+      return result(reply,language,previous,'cleaning_scope_info',{intent:'CLEANING_SCOPE_INFO',payload:{legacyText:reply,pendingField:previous.step}});
     }
 
     if(context.intelligence?.selected?.intent==='cleaning.saved_field_reference'){

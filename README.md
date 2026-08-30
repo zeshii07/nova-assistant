@@ -5,27 +5,21 @@ booking, cleaning, catalog, commerce, CRM, and tenant-knowledge capabilities.
 Its deterministic workflow core keeps customer data and transactions scoped to
 the active tenant while optional language models help interpret ambiguity.
 
-## Current release: v11.7 Availability Priority & Bare Service Quote
+## Current release: v11.8 Service Support Question Routing Fix
 
-Nova v11.7 fixes conversation gaps where the availability adapter was
-stealing turns from the cleaning adapter:
+Nova v11.8 fixes three critical routing issues where "do you provide X"
+questions were being hijacked by the cleaning adapter:
 
-- **Availability priority fix** — "i was looking for deep cleaning service
-  for my villa on monday do you provide deep cleaning service" now routes
-  to the cleaning capability (asks for bedrooms, captures the date)
-  instead of the availability adapter (which was only answering the hours
-  question and ignoring the "do you provide" part).
-- **Bare service mention → quote** — "villa deep cleaning" (no pricing
-  keyword, no booking action) now shows the price and asks whether to
-  book, instead of auto-starting a booking workflow. When a date is
-  supplied ("on monday"), the booking workflow fires correctly.
-- **Bedroom typo tolerance** — "3 bdroom" (missing 'e') now recognized.
-- **Quote follow-up context** — "3 bedroom" after a pricing question
-  correctly completes the quote (AED 440 for Deep Villa) instead of
-  losing context to the assistant fallback.
+- **"do you provide furniture cleaning service"** → now lists ALL 8 furniture
+  services (Sofa, Carpet, Mattress, Chair, Curtain, etc.) instead of quoting
+  "Furniture Cleaning" as a single service.
+- **"do you provide deep cleaning services"** (mid-workflow) → now lists all 5
+  Deep services instead of auto-changing the service to Deep Home Cleaning.
+- **"i was looking for someone to clean my office chairs"** (while step=date)
+  → now correctly detects the topic change and starts a new Office Chair
+  Cleaning quote instead of treating it as a date input.
 
-See `docs/V117_AVAILABILITY_PRIORITY_AND_BARE_SERVICE_QUOTE.md` for
-details, and `docs/V110_*.md` through `docs/V116_*.md` for earlier patches.
+See `docs/V118_SERVICE_SUPPORT_QUESTION_ROUTING_FIX.md` for details.
 
 ## Previous release: v10.2.0 Multilingual Acquisition and Lead Intelligence
 
