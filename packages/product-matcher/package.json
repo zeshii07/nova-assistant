@@ -1,0 +1,7 @@
+{
+  "name": "nova-product-matcher",
+  "version": "1.0.0",
+  "description": "Embedding-based product matcher for Nova — TF-IDF sentence embeddings + cosine similarity",
+  "main": "src/index.js",
+  "type": "commonjs"
+}

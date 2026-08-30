@@ -1,0 +1,7 @@
+{
+  "name": "nova-entity-extraction",
+  "version": "1.0.0",
+  "description": "Unified entity extraction layer for Nova",
+  "main": "src/index.js",
+  "type": "commonjs"
+}

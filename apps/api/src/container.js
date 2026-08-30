@@ -31,6 +31,11 @@ const { CapabilityRegistry } = require("../../../packages/capability-engine/src/
 const { CapabilityLoader } = require("../../../packages/capability-engine/src/capabilityLoader");
 const { CapabilityRouter } = require("../../../packages/capability-engine/src/capabilityRouter");
 const { ExecutionEngine } = require("../../../packages/execution-engine/src/executionEngine");
+// v16.0: ML intent classifier + hybrid router
+const { MlIntentClassifier } = require("../../../packages/ml-intent-classifier/src/mlIntentClassifier");
+const { HybridRouter } = require("../../../packages/ml-intent-classifier/src/hybridRouter");
+// v17.0: Embedding-based product matcher
+const { ProductEmbeddingMatcher } = require("../../../packages/product-matcher/src/productEmbeddingMatcher");
 const { InMemoryMemoryRepository } = require("../../../packages/memory-engine/src/inMemoryMemoryRepository");
 const { MemoryPermissionService } = require("../../../packages/memory-engine/src/memoryPermissionService");
 const { MemoryService } = require("../../../packages/memory-engine/src/memoryService");
@@ -206,6 +211,52 @@ async function buildContainer() {
   const loader = new CapabilityLoader({ capabilitiesDir: path.resolve(__dirname, "../../../capabilities"), logger });
   for (const descriptor of loader.discover()) await registry.register(loader.instantiate(descriptor, { assistantService, commerceService, offeringService, bookingService }));
   const capabilityRouter = new CapabilityRouter({ registry, permissionService, logger });
+  // === v16.0: ML Intent Classifier + Hybrid Router ===
+  // The ML classifier is a TF-IDF + logistic regression ensemble that runs
+  // alongside the regex capability router. It provides a SECOND OPINION on
+  // intent — never overrides regex when regex is confident, but breaks ties
+  // and surfaces ambiguity when regex is uncertain.
+  const mlIntentClassifier = new MlIntentClassifier({ logger });
+  const hybridRouter = new HybridRouter({ mlClassifier: mlIntentClassifier, logger });
+  capabilityRouter.mlClassifier = mlIntentClassifier;
+  capabilityRouter.hybridRouter = hybridRouter;
+
+  // === v17.0: Embedding-Based Product Matcher ===
+  // Indexes each tenant's product/service catalog as TF-IDF embeddings and
+  // matches user queries via cosine similarity + token overlap. Augments
+  // (does not replace) the existing regex-based findService/findProducts.
+  const productEmbeddingMatcher = new ProductEmbeddingMatcher({ logger });
+  // Pre-index all known tenants at startup so the first request has zero
+  // indexing latency. Scan the tenants directory directly because the
+  // FileTenantRepository doesn't expose a list() method.
+  try {
+    const fs = require('fs');
+    const tenantFolderEntries = fs.readdirSync(config.tenantsDir, { withFileTypes: true })
+      .filter(entry => entry.isDirectory())
+      .map(entry => entry.name);
+    for (const tenantId of tenantFolderEntries) {
+      try {
+        const tenant = tenantRepository.getById(tenantId);
+        if (!tenant) continue;
+        // Index cleaning services if tenant has cleaning capability.
+        // Use the repository directly to bypass capability-permission
+        // checks (this is read-only indexing, not a customer request).
+        if (tenant.capabilities && tenant.capabilities.includes('cleaning') && cleaningServiceRepository) {
+          const services = cleaningServiceRepository.loadServices ? cleaningServiceRepository.loadServices(tenantId) : await cleaningServiceRepository.listServices?.(tenantId);
+          if (services && services.length) productEmbeddingMatcher.indexTenant(tenantId + ':cleaning', services);
+        }
+        // Index catalog products if tenant has catalog capability
+        if (tenant.capabilities && tenant.capabilities.includes('catalog') && catalogRepository) {
+          const products = await catalogRepository.listProducts(tenantId);
+          if (products && products.length) productEmbeddingMatcher.indexTenant(tenantId + ':catalog', products);
+        }
+      } catch (err) {
+        logger.warn('product_matcher.tenant_index_failed', { tenantId, error: err.message });
+      }
+    }
+  } catch (err) {
+    logger.warn('product_matcher.startup_index_failed', { error: err.message });
+  }
   const conversationAdapterRegistry = new ConversationAdapterRegistry()
     .register(new AvailabilityConversationAdapter())
     .register(new PricingConversationAdapter())
@@ -265,7 +316,7 @@ async function buildContainer() {
   const conversationIntelligenceEngine = new ConversationIntelligenceEngine({ adapterRegistry: conversationAdapterRegistry, llmInterpreter:null, nluInterpreter:remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, logger, socialIntelligenceEngine, domainResolver });
   const replayRepository = new InMemoryReplayRepository();
   const replayService = new ReplayService({ repository: replayRepository });
-  const executionEngine = new ExecutionEngine({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId: config.defaultTenantId, services: { knowledgeService, llmRouter, memoryService, crmService, leadService, customerDataBridge, catalogService, commerceService, inventoryService, cleaningService, offeringService, bookingService, calendarService, offeringOrderService, engagementService, pricingService, handoffService, availabilityService, promptEngine }, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService });
+  const executionEngine = new ExecutionEngine({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId: config.defaultTenantId, services: { knowledgeService, llmRouter, memoryService, crmService, leadService, customerDataBridge, catalogService, commerceService, inventoryService, cleaningService, offeringService, bookingService, calendarService, offeringOrderService, engagementService, pricingService, handoffService, availabilityService, promptEngine, productMatcher: productEmbeddingMatcher }, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService });
   const channelRegistry = new ChannelRegistry().register(new HttpChatAdapter());
   const whatsappConfigRepository = new WhatsAppTenantConfigRepository({ tenantsDir: config.tenantsDir });
   const whatsappCloudClient = new WhatsAppCloudClient({ logger });
@@ -277,6 +328,6 @@ async function buildContainer() {
     executionEngine,
     logger
   });
-  return { config, logger, storage, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, leadRepository, leadService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService };
+  return { config, logger, storage, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, leadRepository, leadService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService, mlIntentClassifier, hybridRouter, productEmbeddingMatcher };
 }
 module.exports = { buildContainer };

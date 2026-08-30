@@ -1,0 +1,7 @@
+{
+  "name": "nova-state-machine",
+  "version": "1.0.0",
+  "description": "Typed state machine with schema validation for Nova",
+  "main": "src/index.js",
+  "type": "commonjs"
+}

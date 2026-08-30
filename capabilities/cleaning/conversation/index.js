@@ -855,8 +855,12 @@ class CleaningConversationAdapter {
       // EXCEPTION: "do you provide/offer X" is a SERVICE SUPPORT question
       // that belongs to the availability adapter (which lists matching
       // services). Do NOT hijack it with a single-service quote.
-      const isServiceSupportQuestion=/\b(?:do you|can you|are you able to|will you)\b[\s\S]{0,20}\b(?:provide|offer|have|do|give)\b/i.test(message.text);
-      if(!structuredRequest && !explicitBookingAction && step!=='multi_service_clarify' && !step && !hasDateConstraint && !isServiceSupportQuestion){
+      const isServiceSupportQuestion=/\b(?:do you|can you|are you able to|will you)\b[\s\S]{0,20}\b(?:provide|offer|have|do|give|clean|wash)\b/i.test(message.text);
+      // Business identity questions (name, hours, contact, location, payment,
+      // return policy, delivery, FAQ) belong to the assistant, not cleaning.
+      const isBusinessIdentityQuestion=/\b(?:business name|company name|your name|what are you|who are you|opening hours|business hours|working hours|phone number|contact number|email address|where are you|where.*located|your address|payment method|return policy|refund policy|delivery|takeaway)\b/i.test(message.text)
+        || /\b(?:اوقات|فون|ای میل|پتہ|ادائیگی|واپسی|ڈیلیوری)\b/.test(message.text);
+      if(!structuredRequest && !explicitBookingAction && step!=='multi_service_clarify' && !step && !hasDateConstraint && !isServiceSupportQuestion && !isBusinessIdentityQuestion){
         entities={...timeEntities,serviceId:found.service.id,serviceName:found.service.name,pricingRequested:true,quoteOnly:true,text:normalizedText};
         candidates.push({intent:'cleaning.standalone_quote',confidence:1,priority:175,entities,reason:'bare_service_mention_or_price_question'});
         matches.push({type:'pricing',value:'explicit_service_quote',canonical:found.service.id,score:1});

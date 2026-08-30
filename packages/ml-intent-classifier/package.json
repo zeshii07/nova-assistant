@@ -1,0 +1,7 @@
+{
+  "name": "nova-ml-intent-classifier",
+  "version": "1.0.0",
+  "description": "ML intent classifier for Nova — TF-IDF + logistic regression ensemble with multilingual support",
+  "main": "src/index.js",
+  "type": "commonjs"
+}

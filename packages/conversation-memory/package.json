@@ -1,0 +1,7 @@
+{
+  "name": "nova-conversation-memory",
+  "version": "1.0.0",
+  "description": "Conversation memory engine for Nova deterministic core",
+  "main": "src/index.js",
+  "type": "commonjs"
+}

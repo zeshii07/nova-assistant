@@ -2031,14 +2031,24 @@ function serviceReply(service, language, nextPrompt = null) {
   return `${service.name} is available.\n${service.description}\nPrice: ${formatPrice(service)}\n\n${nextPrompt||'What date would you prefer? For example, 24/02/2026, or say “tomorrow”.'}`;
 }
 function summary(service, state, language) {
-  const priceLine=state.quotedService ? `Quoted price: ${currencyAmount(state.quotedService.total,state.quotedService.currency)}` : service?.priceType==="hourly"
-    ? (state.durationHours?`${state.cleanerCount||1} cleaner${(state.cleanerCount||1)===1?'':'s'} × ${state.durationHours} hours × ${currencyAmount(state.hourlyRate||service.price||0,state.currency||service.currency||'AED')} = ${currencyAmount(state.total||((state.cleanerCount||1)*state.durationHours*(state.hourlyRate||service.price||0)),state.currency||service.currency||'AED')}`:formatPrice(service))
-    : formatPrice(service || { price: 0 });
+  // === v17.0 Defensive guard against silent service swap ===
+  // If `service` is undefined OR doesn't match state.serviceId, fall back to
+  // the state's own serviceName/configuredServiceName. This prevents the
+  // summary from silently displaying a DIFFERENT service (e.g., the
+  // customer's previous laundry order) when the service lookup fails.
+  const serviceMatchesState = service && service.id === state.serviceId;
+  const displayName = serviceMatchesState
+    ? service.name
+    : (state.configuredServiceName || state.serviceName || service?.name || "Cleaning service");
+  const safeService = serviceMatchesState ? service : { ...(service || {}), id: state.serviceId, name: displayName };
+  const priceLine=state.quotedService ? `Quoted price: ${currencyAmount(state.quotedService.total,state.quotedService.currency)}` : safeService?.priceType==="hourly"
+    ? (state.durationHours?`${state.cleanerCount||1} cleaner${(state.cleanerCount||1)===1?'':'s'} × ${state.durationHours} hours × ${currencyAmount(state.hourlyRate||safeService.price||0,state.currency||safeService.currency||'AED')} = ${currencyAmount(state.total||((state.cleanerCount||1)*state.durationHours*(state.hourlyRate||safeService.price||0)),state.currency||safeService.currency||'AED')}`:formatPrice(safeService))
+    : formatPrice(safeService || { price: 0 });
   const recurrenceLine=state.recurrence?`\nRecurrence: ${recurrenceLabel(state.recurrence)}${state.recurringDays?.length?` (${state.recurringDays.join(', ')})`:''}`:'';
   const requirements=cleaningRequirementLabels(state);
   const hasRequirements=['balconies','interiorWindows','washrooms','halls','insideRefrigerator','insideOven','fragranceFree','petPresent','businessProvidesSupplies','businessProvidesEquipment'].some(key=>state[key]!==undefined&&state[key]!==null&&state[key]!==false);
   const additional=(state.additionalServices||[]).length?`\nAdditional services:\n${state.additionalServices.map((item)=>`• ${item.serviceName}${item.total!=null?` — ${currencyAmount(item.total,item.currency)}`:' — custom quotation required'}`).join('\n')}`:'';
-  const base = `${service?.name || "Cleaning service"}\n${priceLine}${additional}${state.durationHours?`\nRequested duration: ${state.durationHours} hour${state.durationHours===1?'':'s'}`:''}${hasRequirements?`\nRequirements: ${requirements.join(', ')}`:''}${recurrenceLine}\nDate: ${state.preferredDate}\nTime: ${displayTime(state)}\nAddress: ${state.address}${state.name?`\nName: ${state.name}`:''}${state.phone?`\nPhone: ${state.phone}`:''}${state.email?`\nEmail (optional): ${state.email}`:''}`;
+  const base = `${displayName}\n${priceLine}${additional}${state.durationHours?`\nRequested duration: ${state.durationHours} hour${state.durationHours===1?'':'s'}`:''}${hasRequirements?`\nRequirements: ${requirements.join(', ')}`:''}${recurrenceLine}\nDate: ${state.preferredDate}\nTime: ${displayTime(state)}\nAddress: ${state.address}${state.name?`\nName: ${state.name}`:''}${state.phone?`\nPhone: ${state.phone}`:''}${state.email?`\nEmail (optional): ${state.email}`:''}`;
   return language === "roman_urdu" ? `Cleaning request summary:\n\n${base}\n\nAgar sab theek hai to confirm kar dein.` : `Cleaning request summary:\n\n${base}\n\nIf everything looks correct, please confirm.`;
 }
 function confirmReply(requests, language, state={}) {

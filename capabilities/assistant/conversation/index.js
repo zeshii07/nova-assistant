@@ -65,8 +65,8 @@ class AssistantConversationAdapter {
     if (domainQuery && !tenantSupportsDomain(tenant, domainQuery)) {
       candidates.push({
         intent: "assistant.domain_mismatch",
-        confidence: 1,
-        priority: 140,
+        confidence: 0.6,
+        priority: 60,
         entities: {
           requestedDomain: domainQuery,
           currentDomain: tenant.domain || null,
@@ -90,8 +90,8 @@ class AssistantConversationAdapter {
     ) {
       candidates.push({
         intent: "assistant.provider_summary",
-        confidence: 1,
-        priority: 130,
+        confidence: 0.6,
+        priority: 60,
         entities: { requestedDomain: "healthcare" },
         reason: "healthcare_provider_summary",
       });
@@ -109,8 +109,8 @@ class AssistantConversationAdapter {
       const entities = { facets: ["service_area"], requestedArea };
       candidates.push({
         intent: "assistant.knowledge_question",
-        confidence: 1,
-        priority: 155,
+        confidence: 0.6,
+        priority: 55,
         entities,
         reason: "tenant_service_area_question",
       });
@@ -140,8 +140,8 @@ class AssistantConversationAdapter {
     if (facets.length >= 2 && !operationalCompound) {
       candidates.push({
         intent: "assistant.multi_info_question",
-        confidence: 1,
-        priority: 120,
+        confidence: 0.5,
+        priority: 50,
         entities: { facets },
         reason: "multi_business_information_question",
       });
@@ -167,8 +167,8 @@ class AssistantConversationAdapter {
     if (informational) {
       candidates.push({
         intent: "assistant.knowledge_question",
-        confidence: 0.9,
-        priority: 100,
+        confidence: 0.5,
+        priority: 50,
         entities: {
           knowledgeConfidence: retrieval?.confidence || 0,
           knowledgeAnswerable: Boolean(retrieval?.answerable),
@@ -184,12 +184,25 @@ class AssistantConversationAdapter {
         message.text,
       );
     const socialOnly = new Set(["greet", "thanks", "small_talk", "goodbye"]);
-    const confidence =
-      mixedTask && socialOnly.has(r.intent) ? 0.35 : r.confidence;
+    // Business identity questions (name, hours, contact, location, payment,
+    // returns, delivery, FAQ) are legitimate assistant intents that should
+    // win over domain capabilities. Give them confidence 0.95 priority 120
+    // so they beat cleaning/catalog (confidence ~0.98 priority 85) but not
+    // safety guardrails (priority 220+).
+    const businessIdentityIntents = new Set([
+      "assistant_identity","ask_hours","ask_business_info","ask_about",
+      "ask_payment","ask_contact","ask_location","ask_takeaway",
+      "ask_delivery","ask_returns","ask_faq"
+    ]);
+    const adjustedConfidence = businessIdentityIntents.has(`assistant.${r.intent}`)
+      ? Math.max(r.confidence, 0.95)
+      : (mixedTask && socialOnly.has(r.intent) ? 0.35 : r.confidence);
+    const adjustedPriority = businessIdentityIntents.has(`assistant.${r.intent}`) ? 120 : this.priority;
     if (r.intent !== "other")
       candidates.push({
         intent: `assistant.${r.intent}`,
-        confidence,
+        confidence: adjustedConfidence,
+        priority: adjustedPriority,
         entities: {},
         reason: mixedTask ? "assistant_social_prefix" : "assistant_rule",
       });
