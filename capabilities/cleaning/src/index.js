@@ -1160,12 +1160,27 @@ class CleaningCapability extends BaseCapability {
       // request workflow from continuing.
       if(semantic.serviceId||semantic.propertyType){
         const services=await cleaning.listServices();
-        const fallbackId=semantic.propertyType==='villa'?'CLN009':semantic.propertyType==='apartment'?'CLN008':null;
-        const actual=services.find((service)=>service.id===(semantic.serviceId||fallbackId));
+        // v18.0 fix: respect semantic.serviceId (e.g. CLN011 Deep Villa) when set.
+        // The previous fallback always picked CLN009 (Standard Villa) for villa
+        // properties, silently swapping Deep → Standard when the structured quote
+        // path didn't fire. Now: if semantic.serviceId is set, use it; otherwise
+        // fall back to property-based default (CLN009 villa / CLN008 apartment).
+        const fallbackId=semantic.serviceId || (semantic.propertyType==='villa'?'CLN009':semantic.propertyType==='apartment'?'CLN008':null);
+        const actual=services.find((service)=>service.id===fallbackId);
         if(actual){
           const hasSchedule=Boolean(semantic.date||semantic.dateText||semantic.weekday||semantic.startTime||semantic.time);
-          const scopeReviewService=Boolean(semantic.cleaningType)||['CLN010','CLN011','CLN012'].includes(actual.id);
-          if(['custom_quote','scope_based'].includes(actual.priceType)&&!hasSchedule&&scopeReviewService){
+          // v18.0: Treat Deep services (CLN010, CLN011) and other scope_based
+          // services as requiring scope (bedrooms) BEFORE date. The previous
+          // logic only triggered scope_review when there was no schedule; we now
+          // also collect the missing scope fields (bedrooms for Deep) and ask
+          // for them before prompting for date.
+          const isDeepScopeService=['CLN010','CLN011','CLN012','CLN006'].includes(actual.id)||actual.priceType==='scope_based';
+          const scopeReviewService=Boolean(semantic.cleaningType)||isDeepScopeService;
+          if(['custom_quote','scope_based'].includes(actual.priceType)&&!hasSchedule&&scopeReviewService && actual.priceType==='custom_quote'){
+            // Only the truly custom_quote services (CLN012 post-renovation, CLN013 commercial,
+            // CLN015/16/17/18/19 specialised, CLN024/25/26/27 AC/maintenance) require
+            // a manual scope review. Deep services (CLN010/CLN011) use scope_based
+            // pricing with a configured matrix and should ask for bedrooms.
             const pending=makeCustomQuotePending({...semantic,serviceId:actual.id,serviceName:actual.name},context.message.text,'scope_review_required');
             const reply=`${actual.name} requires a custom quotation after the team reviews the scope; I will not invent a fixed price. If you want, say “arrange a custom quotation”.`;
             return result(reply,language,{...previous,step:null,customQuotePending:pending},'cleaning_structured_service_unpriced',{intent:'CLEANING_CUSTOM_QUOTE_REQUIRED',payload:{legacyText:reply,serviceId:actual.id,serviceName:actual.name,reason:'scope_review_required'}});

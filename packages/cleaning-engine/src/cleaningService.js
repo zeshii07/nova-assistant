@@ -163,7 +163,9 @@ function normalize(value) {
     // Treat common English inflections as one service identity. This lets a
     // tenant configure "deep cleaning" once while customers naturally say
     // "deep clean" or "deep cleaned" without falling back to routine service.
-    .replace(/\b(?:clean(?:ing|ed|s)?|clening|cleening|clning|clen)\b/g, "clean")
+    // v18.0: Added "deeep", "deepp", "depe" extra-letter typo tolerance.
+    .replace(/\b(?:deeep|deepp|depe)\b/g, "deep")
+    .replace(/\b(?:clean(?:ing|ed|s)?|clening|cleening|clening|clenening|cleening|clning|clen)\b/g, "clean")
     .replace(/\bsof\b/g,"sofa")
     .replace(/\s+/g, " ")
     .trim();
