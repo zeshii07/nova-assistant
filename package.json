@@ -1,6 +1,6 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "12.4.0",
+  "version": "12.5.0",
   "private": true,
   "description": "Nova v12.4 Service Support Typo v12.3 Retail Tenant 200-Query Stress Test Saved Details Confirmation",
   "main": "apps/api/src/server.js",
