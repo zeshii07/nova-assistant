@@ -13,7 +13,9 @@ class CleaningConversationAdapter {
     const step=state.capabilityState?.cleaning?.step; const candidates=[]; let entities={}; const matches=[];
     const previous=state.capabilityState?.cleaning||{};
     const timeEntities={...extractTimeEntities(primaryText,temporal),...extractCleaningContext(message.text)};
-    let pricingRequested=/\b(charg(?:e|es|ing)|price|prices|pricing|cost|costs|rate|rates|quote|quotation|estimate|how much|kitna|kitni|kitne|kitny|kitnay|charges kya|charges kia)\b|(?:قیمت|چارجز|کتنے|قیمتیں)/.test(normalizedText);
+    let pricingRequested=/\b(charg(?:e|es|ing)|price|prices|pricing|cost|costs|rate|rates|quote|quotation|estimate|how much|kitna|kitni|kitne|kitny|kitnay|charges kya|charges kia)\b|(?:قیمت|چارجز|کتنے|قیمتیں)/.test(normalizedText)
+      || /\b(?:kitna|kitni|kitne|kitny|kitnay)\b/i.test(message.text)
+      || /(?:قیمت|چارجز|کتنے|قیمتیں|دینا ہوگا|کرنا ہوگا|ہوگا|ہوگی)/.test(message.text);
     const explicitBookingAction=/\b(book|schedule|reserve|arrange|place (?:a )?request|start (?:a )?(?:booking|request)|confirm (?:the )?(?:booking|service))\b/.test(normalizedText);
     const explicitTransactionLanguage=/\b(i want|i need|book|schedule|arrange|add|change|switch|replace|start (?:a )?(?:booking|request))\b/.test(normalizedText);
     const priceFollowUp=Boolean(previous.priceEnquiry?.serviceId)&&!explicitBookingAction&&!explicitTransactionLanguage&&(
@@ -702,7 +704,7 @@ class CleaningConversationAdapter {
           return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'pricing',value:'multi_variant_quote',score:1}]};
         }
         entities={...timeEntities,text:normalizedText,pricingRequested:true};
-        candidates.push({intent:discountRequested?'cleaning.discount_request':'cleaning.structured_quote_request',confidence:.99995,entities,reason:discountRequested?'cleaning_discount_request':'cleaning_structured_quote'});
+        candidates.push({intent:discountRequested?'cleaning.discount_request':'cleaning.structured_quote_request',confidence:1,priority:160,entities,reason:discountRequested?'cleaning_discount_request':'cleaning_structured_quote'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'pricing',value:'structured_service_quote',score:1}]};
       }
       // A named service remains the pricing subject even when it has no
@@ -716,7 +718,7 @@ class CleaningConversationAdapter {
           scopeText:message.text,
           pricingRequested:true
         };
-        candidates.push({intent:'cleaning.standalone_service_quote',confidence:1,priority:150,entities,reason:'explicit_cleaning_service_price_question'});
+        candidates.push({intent:'cleaning.standalone_service_quote',confidence:1,priority:160,entities,reason:'explicit_cleaning_service_price_question'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'pricing',value:'explicit_service_quote',canonical:explicitService.service.id,score:1}]};
       }
     }
@@ -808,7 +810,7 @@ class CleaningConversationAdapter {
     }
     if (cleaningDomain && timeEntities.durationHours && (pricingRequested || genericCleaner) && step!=='multi_service_clarify') {
       entities={...timeEntities,policyFacets, pricingRequested:true, pricingModel:'hourly_cleaner'};
-      candidates.push({intent:'cleaning.pricing_request',confidence:.9993,entities,reason:'cleaning_duration_pricing'});
+      candidates.push({intent:'cleaning.pricing_request',confidence:1,priority:160,entities,reason:'cleaning_duration_pricing'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'semantic_role',value:'duration',score:.9993},{type:'domain',value:'cleaning',score:.99}]};
     }
     if (/\b(what|which|show|list|tell me|do you have|do you offer|provide)\b[\s\S]{0,35}\b(cleaning )?services\b|\b(what cleaning services|cleaning services do you|services do you offer|kia cleaning services|kya cleaning services)\b|\b(?:ap|aap)\s+log\b[\s\S]{0,25}\b(?:kis kis|kon kon|kya kya|kia kia)\b[\s\S]{0,30}\b(?:cleaning|clening|safai)\b/.test(normalizedText)

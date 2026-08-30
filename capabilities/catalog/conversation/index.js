@@ -19,7 +19,7 @@ const CATEGORY_ALIASES = {
   'mobile-accessories':['mobile accessories','phone accessories','mobile accessory'],
   travel:['travel','travel accessories']
 };
-const REQUEST_CUES = ['do you have','do you sell','can i get','can i have','could i get','i want','i need','show me','looking for','searching for','shopping for','trying to find','interested in','help me find','buy','purchase','order','mujhe','mujhy','mujhay','chahiye','chahiyy','chahy','lyni','leni','lyna','lena','ap k pass','aap ke paas','dikhao','ہے','چاہیے'];
+const REQUEST_CUES = ['do you have','do you sell','can i get','can i have','could i get','i want','i need','show me','looking for','searching for','shopping for','trying to find','interested in','help me find','buy','purchase','order','mujhe','mujhy','mujhay','chahiye','chahiyy','chahy','lyni','leni','lyna','lena','ap k pass','aap ke paas','dikhao','ہے','چاہیے','قیمت','ریٹ','مل','دستانی','دستیاب','بتائیں','کرنا','ہوگا','ہوگی','ہوں گے','بنے گا','بتا'];
 const PRODUCT_FAMILIES = { shirts:aliasesFor('catalog.shirts'), jeans:aliasesFor('catalog.jeans') };
 const BROWSE_COLORS = { black:'Black', white:'White', blue:'Blue', navy:'Navy', grey:'Grey', gray:'Grey', brown:'Brown', silver:'Silver', gold:'Gold', olive:'Olive', maroon:'Maroon', red:'Red' };
 const BROWSE_SIZES = { small:'S', s:'S', medium:'M', m:'M', large:'L', l:'L', xl:'XL', xxl:'XXL' };

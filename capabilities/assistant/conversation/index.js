@@ -167,8 +167,8 @@ class AssistantConversationAdapter {
     if (informational) {
       candidates.push({
         intent: "assistant.knowledge_question",
-        confidence: 1,
-        priority: 150,
+        confidence: 0.9,
+        priority: 100,
         entities: {
           knowledgeConfidence: retrieval?.confidence || 0,
           knowledgeAnswerable: Boolean(retrieval?.answerable),
@@ -317,9 +317,43 @@ function looksInformational(text, detectedIntent = "other") {
     return false;
   if (/^\s*what\b.*\bdo you (?:have|sell|teach|serve|offer|provide)\b/.test(n))
     return false;
-  // "do you do/offer/provide X cleaning" is a service support question for
+  // "do you do/offer/provide/clean X cleaning" is a service support question for
   // the availability adapter, not a knowledge question.
-  if (/\b(?:do you|can you|will you|are you)\b[\s\S]{0,20}\b(?:do|provide|offer|have|give)\b[\s\S]{0,40}\b(?:clean|cleaning|service)\b/i.test(n))
+  if (/\b(?:do you|can you|will you|are you)\b[\s\S]{0,20}\b(?:do|provide|offer|have|give|clean|wash)\b[\s\S]{0,40}\b(?:clean|cleaning|clening|cleening|clning|service|curtains?|sofas?|carpets?|mattress(?:es)?|chairs?|laundry)\b/i.test(n))
+    return false;
+  // Queries about booking modifications, rescheduling, and multi-service bundles
+  // belong to cleaning, not knowledge.
+  if (/(?:shift|reschedule|change|move)[\s\S]{0,30}(?:booking|appointment|time|date|slot|day)/i.test(n))
+    return false;
+  if (/can i (?:request|book|get)[\s\S]{0,30}(?:\d+\s*cleaners?|\d+\s*maids?)/i.test(n))
+    return false;
+  if (/(?:laundry|order)\s*(?:status|id|ready|delivery|check)/i.test(n))
+    return false;
+  if (/(?:صوفہ|دھووانا|دھونا).*(?:booking|seater|emergency|shaam|آج|شام)/i.test(n))
+    return false;
+  if (/(?:move out|move in|deep cleaning|balcony|invoice)/i.test(n) && /(?:chahiye|چاہیے|total|بھیجو|bhejo)/i.test(n))
+    return false;
+  if (/(?:استری|ironing|دھونا|کپڑوں)/i.test(n) && /(?:قیمت|kitna|کیتنا|کرنا|ہوگا)/i.test(n))
+    return false;
+  if (/(?:\d+\s*(?:hours?|ghante|cleaners?|chairs?|bedroom)|washroom|kitchen|office chair|bundle)/i.test(n))
+    return false;
+  // Urdu product pricing queries should go to catalog/commerce, not knowledge
+  if (/(?:قیمت|ریٹ|بل|کتنا|کرنا|ہوگا|ہوگی|بتائیں|دستانی|دستیاب)/.test(n) && /(?:prodana|product|shirt|shoes|watch|بڈز|چشمے|نوٹ|واش|لوشن|کیٹل|بکن)/i.test(n))
+    return false;
+  if (/(?:kettle|frying pan|face wash|body lotion|notebook|sunglasses|headphones|earbuds)/i.test(n))
+    return false;
+  if (/(?:refund|cancel|return|exchange|warranty|delivery|shipping).*(?:policy|how|when|kitne|kab|din|days?)/i.test(n))
+    return false;
+  if (/(?:repair|fix|broken|screen)/i.test(n) && /(?:phone|iphone|laptop|screen|repair)/i.test(n))
+    return false;
+  if (/(?:microwave|refrigerator|fridge|washing machine|واشنگ|فرج|دوا|medicine|cryptocurrency|stock shares|flight|hotel|groceries)/i.test(n))
+    return false;
+  // Reschedule / booking modification queries belong to cleaning, not knowledge
+  if (/(?:shift|reschedule|change|move|shift)[\s\S]{0,30}(?:booking|appointment|time|date|slot|day)/i.test(n))
+    return false;
+  if (/can i (?:request|book|get)[\s\S]{0,30}(?:\d+\s*cleaners?|\d+\s*maids?)/i.test(n))
+    return false;
+  if (/launch? status|order id|ready for delivery/i.test(n))
     return false;
   // "what type/kind of cleaning do you do" is an operational service-list
   // question for the cleaning capability, not a knowledge/policy question.

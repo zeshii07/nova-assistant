@@ -75,7 +75,7 @@ class AvailabilityConversationAdapter{
   if(availabilityQuestion && !hasExplicitSupportQuestion)return out('availability.slot_question',{...constraints,text},.99999,'service_slot_question');
 
   const listQuestion=/\b(what|which|list|show)\b.*\bservices?\b|\bservices?\b.*\b(do you offer|do you provide|available)\b/.test(text);
-  const explicitSupport=/\b(can you|are you able to|do you provide|do you offer|do you do|do you have|will you provide|will you offer|will you)\b/i.test(text);
+  const explicitSupport=/\b(can you|are you able to|do you provide|do you offer|do you do|do you have|do you clean|do you wash|will you provide|will you offer|will you)\b/i.test(text);
   const contextualCanI=/\b(can i get|can i have|can i book|cn i get|cn i have|cn i book)\b/.test(text)
     && (/\b(cleaned|studio|apartment|flat|villa)\b/.test(text)||/\b(?:can|cn) i book\b/.test(text));
   const serviceQuestion=!pricingQuestion&&!listQuestion&&(explicitSupport||contextualCanI)

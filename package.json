@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "12.0.0",
+  "version": "12.4.0",
   "private": true,
-  "description": "Nova v12.0 Service Availability & Deep Cleaning Scope",
+  "description": "Nova v12.4 Service Support Typo v12.3 Retail Tenant 200-Query Stress Test Saved Details Confirmation",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {

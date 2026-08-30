@@ -130,6 +130,9 @@ class UniversalEngagementEngine {
 
   referencesStoredDetails(raw){
     const text=normalizeText(raw).replace(/previuos|privious|pervious/g,'previous');
+    // Short acceptance phrases like "ok use", "use", "ok", "yes use", "ok done"
+    // should also be accepted when saved details have been offered.
+    if(/^(?:ok\s+)?(?:use|ok|yes|done|confirm|confirmed|theek hai|thik hai|haan|han)(?:\s+(?:use|ok|yes|done|all|sab|sari))?\s*$/i.test(text))return true;
     return /^(?:yes\s+)?use(?:\s+my|\s+the)?\s+(?:(?:previous|old|saved|existing|current|configured)(?:\s+(?:contact|customer|delivery|profile))?\s+)?(?:details|information|info|name and details)$|^(?:yes\s+)?(?:use|keep)\s+(?:all\s+)?(?:the\s+)?(?:other\s+)?(?:provided\s+)?details(?:\s+(?:the\s+)?same)?$|^(?:yes\s+)?(?:keep|use)\s+(?:everything|all information|all info)\s+(?:the\s+)?same$|^(?:yes\s+)?use\s+(?:my\s+)?configured\s+name\s+and\s+details$|^(?:sab|sari|saari)\s+(?:details|information|info|maloomat)\s+(?:same\s+)?(?:rakho|rakhna|rakh dein|use karo|use kar dein)$|^(?:meri|meray|mere)\s+(?:purani|pehli|saved)\s+(?:details|maloomat|information)\s+(?:use|rakh|laga)\s*(?:karo|kar dein)?$|^(?:purani|pehli)\s+(?:details|maloomat)\s+(?:theek|same|use)|^(?:میری|میرے)\s+(?:پرانی|محفوظ)\s+(?:تفصیلات|معلومات)\s+(?:استعمال|رکھ)/i.test(text);
   }
 

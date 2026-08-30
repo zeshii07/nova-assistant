@@ -55,7 +55,7 @@ class CommerceCapability extends BaseCapability {
     }
     if (intent === "commerce.review.change") return this.reviewChange(context,commerce,language,state);
     if (intent === "commerce.checkout_continue") {
-      if(state.savedDetailsOffered&&isWorkflowAcceptance(context.message.text))return this.confirmSavedDetails(context,commerce,catalog,language,state);
+      if(state.savedDetailsOffered && (isWorkflowAcceptance(context.message.text) || context.services.engagement.referencesStoredDetails?.(context.message.text))) return this.confirmSavedDetails(context,commerce,catalog,language,state);
       const field=state.pendingField||"name";
       const msg=language==="roman_urdu"
         ? `Cart ready hai 👍 Order complete karne ke liye abhi ${checkoutFieldLabel(field,language)} chahiye. ${ask(field,language)}`
