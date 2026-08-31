@@ -542,12 +542,38 @@ class CleaningCapability extends BaseCapability {
       for(const item of semantic.serviceItems||[]){
         const service=allServices.find(entry=>entry.id===item.serviceId);
         if(!service||quotedServices.some(quote=>quote.operationalServiceId===service.id))continue;
-        const quote=quoteConfiguredService(context,service,semantic);
-        if(quote.ok)quotedServices.push(quote);
+        // v20.0: Pass per-item quantity and variant to the quote engine.
+        // The previous code used the top-level semantic for ALL items, which
+        // meant all items got the same units/variant (the primary item's).
+        // Now we merge per-item fields into a per-item semantic.
+        // IMPORTANT: For sofa/carpet, the "variant" (e.g., "3-seater") encodes
+        // the SIZE, and "quantity" encodes HOW MANY. The quote engine's `units`
+        // field is used for sizing, so we extract the size from the variant.
+        const variantSize = item.variant && /\d+/.test(item.variant) ? Number(item.variant.match(/\d+/)[0]) : null;
+        const itemSemantic={
+          ...semantic,
+          units: variantSize || semantic.units,
+          serviceVariant:item.variant || semantic.serviceVariant,
+        };
+        const quote=quoteConfiguredService(context,service,itemSemantic);
+        if(quote.ok){
+          // v20.0: If the item has quantity > 1, multiply the quote total
+          // (e.g., 2 sofas × AED 110 = AED 220)
+          if(item.quantity && item.quantity > 1 && quote.total){
+            quote.total = quote.total * item.quantity;
+            quote.subtotal = quote.subtotal * item.quantity;
+            quote.baseSubtotal = quote.baseSubtotal * item.quantity;
+            quote.quantity = item.quantity;
+          }
+          quotedServices.push(quote);
+        }
         else missing.push({serviceId:service.id,serviceName:service.name,missing:quote.missing||[],reason:quote.reason});
       }
       if(quotedServices.length){
-        const lines=quotedServices.map(quote=>`• ${quoteLine(quote,semantic)}`);
+        const lines=quotedServices.map(quote=>{
+          const qtyNote = quote.quantity && quote.quantity > 1 ? ` × ${quote.quantity}` : '';
+          return `• ${quoteLine(quote,semantic)}${qtyNote}`;
+        });
         const currencies=[...new Set(quotedServices.map(quote=>quote.currency))];
         const total=currencies.length===1?quotedServices.reduce((sum,quote)=>sum+Number(quote.total||0),0):null;
         const scopeReview=missing.filter(item=>!(item.missing||[]).length);

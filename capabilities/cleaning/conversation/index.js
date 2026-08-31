@@ -39,7 +39,7 @@ class CleaningConversationAdapter {
     // When the customer explicitly accepts the last quote, route that exact
     // priced scope back into the deterministic booking workflow. Prefer the
     // latest interrupt quote over an older quote attached to the draft.
-    const quoteAcceptance=/\b(?:add this service|book this|book it|book (?:these|both) services|book this (?:quote|quotation)|make (?:a )?booking for this (?:quote|quotation|service)|confirm this service|confirm (?:my|the) booking for this service|i want this service|go ahead|proceed)\b/.test(normalizedText);
+    const quoteAcceptance=/\b(?:add this service|book this|book it|book (?:these|both|the) services?|book this (?:quote|quotation|service)|make (?:a )?booking for this (?:quote|quotation|service)|confirm this service|confirm (?:my|the) booking for this service|i want this service|go ahead|proceed|ok book|yes book|book now)\b/i.test(normalizedText);
     const latestQuotedService=previous.priceEnquiry?.quote||previous.quotedService||null;
     if(quoteAcceptance&&Array.isArray(previous.quotedServices)&&previous.quotedServices.length>1){
       entities={quotedServices:previous.quotedServices,quotedServiceRequirements:previous.quotedServiceRequirements||{},preserveWorkflow:Boolean(step)};
@@ -561,6 +561,46 @@ class CleaningConversationAdapter {
         candidates.push({intent:'cleaning.multi_service_request',confidence:1,priority:132,entities,reason:'explicit_multi_service_cleaning_request'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:entities.serviceItems.map((item)=>({type:'service',value:item.serviceName,canonical:item.serviceId,score:item.score/100}))};
       }
+      // v20.0: Multi-item furniture detection.
+      // Handles compound furniture requests like "2 sofa 3 seater and 1 king
+      // mattress" that the generic multi-service detector misses (because
+      // segment-based findService matches the umbrella "Furniture Cleaning"
+      // service instead of the specific "Sofa Cleaning" service).
+      // This detector parses quantities (2 sofas) and variants (3-seater, king)
+      // per item, and routes to a multi_service_quote_request with per-item
+      // quantities + variants.
+      const hasFurnitureVocabulary=/\b(?:sofa|couch|carpet|rug|mattress|chair|table|curtain|drape)\b/i.test(normalizedText);
+      if(hasFurnitureVocabulary && (pricingRequested||structuredRequest||quote)){
+        const furnitureItems=await detectMultiItemFurniture(primaryText,scopedService);
+        if(furnitureItems.length>=2){
+          // Build serviceItems with per-item quantity and variant
+          const serviceItems=furnitureItems.map(item=>({
+            serviceId:item.serviceId,
+            serviceName:item.serviceName,
+            score:100,
+            quantity:item.quantity,
+            variant:item.variant,
+          }));
+          // Also populate top-level units/serviceVariant from the FIRST item
+          // so the quote engine can price it. The remaining items are priced
+          // as additional services.
+          const primary=serviceItems[0];
+          const primaryUnits=primary.quantity>1?primary.quantity:(primary.variant&&/\d+/.test(primary.variant)?Number(primary.variant.match(/\d+/)[0]):1);
+          entities={
+            ...timeEntities,
+            serviceId:primary.serviceId,
+            serviceName:primary.serviceName,
+            units:primaryUnits,
+            serviceVariant:primary.variant,
+            serviceItems,
+            text:normalizedText,
+            pricingRequested:true,
+            multiItemFurniture:true,
+          };
+          candidates.push({intent:'cleaning.multi_service_quote_request',confidence:1,priority:200,entities,reason:'multi_item_furniture_quote'});
+          return {priority:this.priority,candidates,entities,vocabularyMatches:serviceItems.map(item=>({type:'service',value:item.serviceName,canonical:item.serviceId,score:1,quantity:item.quantity,variant:item.variant}))};
+        }
+      }
       let explicitService=scopedService?await scopedService.findService(cleaningServiceSubjectText(primaryText)):null;
       if((!explicitService?.service||(explicitService.score||0)<60)&&previous.priceEnquiry?.serviceId){
         const servicesList=await scopedService?.listServices?.();
@@ -576,6 +616,38 @@ class CleaningConversationAdapter {
       const propertyCleaningTypeSpecified=Boolean(resolveCleaningType(normalizedText));
       const namesOnlyPropertyCleaning=!/\b(?:office|sofa|couch|carpet|rug|mattress|chair|curtain|laundry|ac|duct|pest|disinfection|kitchen|bathroom|window|balcony|floor|move[ -]?(?:in|out)|post[ -]?(?:renovation|construction))\b/.test(normalizedText);
       const discussedSpecificService=Boolean(state.capabilityState?.availability?.lastDiscussedServiceId);
+      // v20.0: Multi-item furniture detection (runs BEFORE the standalone quote
+      // path so compound furniture requests get a multi-service quote instead
+      // of being reduced to a single service).
+      // Handles: "2 sofa 3 seater and 1 king mattress", "2 sofas and 1 carpet", etc.
+      const hasFurnitureVocab=/\b(?:sofa|couch|carpet|rug|mattress|chair|table|curtain|drape)\b/i.test(normalizedText);
+      if(hasFurnitureVocab && (pricingRequested||structuredRequest||quote) && !explicitBookingAction){
+        const furnitureItems=await detectMultiItemFurniture(primaryText,scopedService);
+        if(furnitureItems.length>=2){
+          const serviceItems=furnitureItems.map(item=>({
+            serviceId:item.serviceId,
+            serviceName:item.serviceName,
+            score:100,
+            quantity:item.quantity,
+            variant:item.variant,
+          }));
+          const primary=serviceItems[0];
+          const primaryUnits=primary.quantity>1?primary.quantity:(primary.variant&&/\d+/.test(primary.variant)?Number(primary.variant.match(/\d+/)[0]):1);
+          entities={
+            ...timeEntities,
+            serviceId:primary.serviceId,
+            serviceName:primary.serviceName,
+            units:primaryUnits,
+            serviceVariant:primary.variant,
+            serviceItems,
+            text:normalizedText,
+            pricingRequested:true,
+            multiItemFurniture:true,
+          };
+          candidates.push({intent:'cleaning.multi_service_quote_request',confidence:1,priority:200,entities,reason:'multi_item_furniture_quote'});
+          return {priority:this.priority,candidates,entities,vocabularyMatches:serviceItems.map(item=>({type:'service',value:item.serviceName,canonical:item.serviceId,score:1,quantity:item.quantity,variant:item.variant}))};
+        }
+      }
       // Pricing question: "what are you charging for deep cleaning a 3 bedroom
       // apartment" — the user is asking for the CHARGE, not starting a booking.
       // Route to quote-only so Nova shows the estimate and asks whether to
@@ -643,6 +715,44 @@ class CleaningConversationAdapter {
       let m=normalizedText.match(/\b(\d+)\s*(?:bedrooms?|bed|bhk|bdrooms?|bd|bdrm)\b/);if(m)timeEntities.bedrooms=Number(m[1]);
       if(/\b(villa|vila)\b/.test(normalizedText))timeEntities.propertyType='villa';else if(/\b(apartment|flat)\b/.test(normalizedText))timeEntities.propertyType='apartment';
       const scopedService=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
+
+      // v20.0: Multi-item furniture detection for pricing queries.
+      // Handles "2 sofa 3 seater and 1 king mattress" → multi_service_quote_request
+      // with per-item quantity and variant. Runs BEFORE the segment-based
+      // detection because segment-based findService matches the umbrella
+      // "Furniture Cleaning" service instead of specific "Sofa Cleaning".
+      const hasFurnVocab=/\b(?:sofa|couch|carpet|rug|mattress|chair|table|curtain|drape)\b/i.test(normalizedText);
+      if(hasFurnVocab){
+        const furnitureItems=await detectMultiItemFurniture(primaryText,scopedService);
+        if(furnitureItems.length>=2){
+          const serviceItems=furnitureItems.map(item=>({
+            serviceId:item.serviceId,
+            serviceName:item.serviceName,
+            score:100,
+            quantity:item.quantity,
+            variant:item.variant,
+          }));
+          const primary=serviceItems[0];
+          // v20.0: For the top-level entities, extract the SIZE from the
+          // primary item's variant (e.g., "3-seater" → units=3), NOT the
+          // quantity. The quantity is used by the quote handler to multiply
+          // the per-item price.
+          const primaryVariantSize = primary.variant && /\d+/.test(primary.variant) ? Number(primary.variant.match(/\d+/)[0]) : null;
+          entities={
+            ...timeEntities,
+            serviceId:primary.serviceId,
+            serviceName:primary.serviceName,
+            units: primaryVariantSize || timeEntities.units || 1,
+            serviceVariant:primary.variant,
+            serviceItems,
+            text:normalizedText,
+            pricingRequested:true,
+            multiItemFurniture:true,
+          };
+          candidates.push({intent:'cleaning.multi_service_quote_request',confidence:1,priority:200,entities,reason:'multi_item_furniture_quote'});
+          return {priority:this.priority,candidates,entities,vocabularyMatches:serviceItems.map(item=>({type:'service',value:item.serviceName,canonical:item.serviceId,score:1,quantity:item.quantity,variant:item.variant}))};
+        }
+      }
 
       // Price each explicitly mentioned service independently. A compound
       // question must never be reduced to the single highest-scoring match.
@@ -968,6 +1078,89 @@ async function detectMultiServiceMatches(text, scopedService) {
     matches.push(found);
   }
   return matches;
+}
+
+/**
+ * v20.0: Detect multiple furniture items in a single message.
+ *
+ * Handles compound furniture requests like:
+ *   - "2 sofa 3 seater and 1 king size mattress"
+ *   - "3 seater sofa and a queen mattress"
+ *   - "2 sofas and 1 carpet"
+ *   - "cleaning of my 2 sofas and one mattress"
+ *
+ * Returns an array of furniture items, each with:
+ *   { service, serviceName, quantity, variant }
+ *
+ * The variant field captures "3-seater", "king", "queen", "single", "5 metre", etc.
+ * The quantity field captures the NUMBER of items (2 sofas, 1 mattress).
+ *
+ * Returns an empty array if fewer than 2 distinct furniture types are found.
+ */
+async function detectMultiItemFurniture(text, scopedService) {
+  if (!scopedService?.findService) return [];
+  const n = normalizeText(text);
+  if (!n) return [];
+
+  // Define furniture item patterns: (regex, catalogServiceName)
+  // Each pattern captures the item head (sofa/mattress/carpet/etc.) and
+  // optionally a quantity and variant.
+  const FURNITURE_PATTERNS = [
+    // v20.0: Added typo tolerance for "setas"/"seta" (common misspelling of "seater")
+    { head: 'sofa', serviceId: 'CLN003', variantRe: /(\d+)\s*(?:seater|seat|seats|setas|seta|sitr|sitar)\b/i, variantLabel: (m) => `${m[1]}-seater` },
+    { head: 'couch', serviceId: 'CLN003', variantRe: /(\d+)\s*(?:seater|seat|seats|setas|seta)\b/i, variantLabel: (m) => `${m[1]}-seater` },
+    { head: 'carpet', serviceId: 'CLN004', variantRe: /(\d+)\s*(?:metre|meter|m2|sqm|mtrs?)\b/i, variantLabel: (m) => `${m[1]} metre` },
+    { head: 'rug', serviceId: 'CLN004', variantRe: /(\d+)\s*(?:metre|meter|m2|sqm|mtrs?)\b/i, variantLabel: (m) => `${m[1]} metre` },
+    { head: 'mattress', serviceId: 'CLN020', variantRe: /\b(crib|single|queen|king)\s*(?:size)?\b/i, variantLabel: (m) => m[1] },
+    { head: 'curtain', serviceId: 'CLN022', variantRe: /\b(small|medium|large|extra[ -]?large|xl)\b/i, variantLabel: (m) => m[1] },
+    { head: 'drape', serviceId: 'CLN022', variantRe: /\b(small|medium|large|extra[ -]?large|xl)\b/i, variantLabel: (m) => m[1] },
+    { head: 'chair', serviceId: 'CLN021', variantRe: null, variantLabel: null },
+    { head: 'table', serviceId: 'CLN033', variantRe: null, variantLabel: null },
+  ];
+
+  const items = [];
+  const seenServices = new Set();
+
+  for (const { head, serviceId, variantRe, variantLabel } of FURNITURE_PATTERNS) {
+    // Match the furniture head word with an optional preceding quantity.
+    // Use "head" with optional plural "s" — but "mattress" plural is "mattresses"
+    // so we handle both "mattress" and "mattresses" via `head(?:es|s)?`.
+    const pluralSuffix = head.endsWith('s') ? '(?:es)?' : '(?:es|s)?';
+    const headRe = new RegExp(
+      `(?:\\b(\\d+|one|two|three|four|five|six|seven|eight|nine|ten|ek|aik|do|teen|char|chaar|panch)\\s+)?(?:a|an|the)?\\s*${head}${pluralSuffix}\\b`,
+      'i'
+    );
+    const headMatch = n.match(headRe);
+    if (!headMatch) continue;
+    if (seenServices.has(serviceId)) continue;
+
+    // Parse quantity
+    let quantity = 1;
+    if (headMatch[1]) {
+      const wordMap = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, ek: 1, aik: 1, do: 2, teen: 3, char: 4, chaar: 4, panch: 5 };
+      const w = headMatch[1].toLowerCase();
+      if (/^\d+$/.test(w)) quantity = Number(w);
+      else if (wordMap[w]) quantity = wordMap[w];
+    }
+
+    // Parse variant
+    let variant = null;
+    if (variantRe) {
+      const vMatch = n.match(variantRe);
+      if (vMatch) variant = variantLabel(vMatch);
+    }
+
+    items.push({
+      serviceId,
+      serviceName: head.charAt(0).toUpperCase() + head.slice(1) + ' Cleaning',
+      quantity,
+      variant,
+      head,
+    });
+    seenServices.add(serviceId);
+  }
+
+  return items;
 }
 
 

@@ -144,9 +144,28 @@ const TOKEN_OVERLAP_THRESHOLD = 0.20;
 const MIN_THRESHOLD = 0.25;
 
 class ProductEmbeddingMatcher {
-  constructor({ logger = null } = {}) {
+  constructor({ logger = null, transformerService = null } = {}) {
     this.logger = logger;
     this.indexes = new Map(); // tenantId -> { products, df, embeddings, aliases }
+    // v19.0: Optional transformer embedding service for semantic matching.
+    // When provided, the matcher uses transformer embeddings for the cosine
+    // similarity channel; when not provided, it falls back to TF-IDF.
+    this.transformerService = transformerService;
+    this._transformerAvailable = null; // null = not checked yet
+  }
+
+  /**
+   * v19.0: Check if transformer embeddings are available.
+   * Cached after first check to avoid repeated model loading attempts.
+   */
+  async _isTransformerAvailable() {
+    if (this._transformerAvailable !== null) return this._transformerAvailable;
+    if (!this.transformerService) {
+      this._transformerAvailable = false;
+      return false;
+    }
+    this._transformerAvailable = await this.transformerService.isAvailable();
+    return this._transformerAvailable;
   }
 
   /**
@@ -241,6 +260,48 @@ class ProductEmbeddingMatcher {
       this.logger.info('product_matcher.indexed', summary);
     }
     return summary;
+  }
+
+  /**
+   * v19.0: Async match that uses transformer embeddings when available.
+   * Falls back to the synchronous TF-IDF match when transformers are not installed.
+   *
+   * @param {string} tenantId - Tenant ID
+   * @param {string} query - User's query text
+   * @param {object} options - { minScore, maxResults, excludeHidden }
+   * @returns {Promise<object>} - { used, matches, timingMs, engine }
+   */
+  async matchAsync(tenantId, query, options = {}) {
+    // Try transformer embeddings first (if available)
+    if (await this._isTransformerAvailable()) {
+      try {
+        // Index with transformers if not already indexed
+        if (!this.transformerService.isIndexed(tenantId)) {
+          const index = this.indexes.get(tenantId);
+          if (index) {
+            const items = index.embeddings.map(e => e.item);
+            await this.transformerService.indexTenant(tenantId, items);
+          }
+        }
+        const transformerResult = await this.transformerService.match(tenantId, query, options);
+        if (transformerResult.used && transformerResult.matches.length > 0) {
+          return {
+            ...transformerResult,
+            engine: 'transformer_embeddings',
+          };
+        }
+        // If transformer returned no matches, fall through to TF-IDF
+      } catch (error) {
+        if (this.logger) {
+          this.logger.warn('product_matcher.transformer_failed', { error: error.message, fallback: 'tfidf' });
+        }
+      }
+    }
+    // Fall back to synchronous TF-IDF match
+    return {
+      ...this.match(tenantId, query, options),
+      engine: 'tfidf_embeddings',
+    };
   }
 
   /**

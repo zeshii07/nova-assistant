@@ -36,6 +36,8 @@ const { MlIntentClassifier } = require("../../../packages/ml-intent-classifier/s
 const { HybridRouter } = require("../../../packages/ml-intent-classifier/src/hybridRouter");
 // v17.0: Embedding-based product matcher
 const { ProductEmbeddingMatcher } = require("../../../packages/product-matcher/src/productEmbeddingMatcher");
+// v19.0: Transformer-based sentence embeddings (optional upgrade)
+const { TransformerEmbeddingService } = require("../../../packages/transformer-embeddings/src/transformerEmbeddingService");
 const { InMemoryMemoryRepository } = require("../../../packages/memory-engine/src/inMemoryMemoryRepository");
 const { MemoryPermissionService } = require("../../../packages/memory-engine/src/memoryPermissionService");
 const { MemoryService } = require("../../../packages/memory-engine/src/memoryService");
@@ -225,7 +227,14 @@ async function buildContainer() {
   // Indexes each tenant's product/service catalog as TF-IDF embeddings and
   // matches user queries via cosine similarity + token overlap. Augments
   // (does not replace) the existing regex-based findService/findProducts.
-  const productEmbeddingMatcher = new ProductEmbeddingMatcher({ logger });
+  //
+  // === v19.0: Transformer Embeddings (optional upgrade) ===
+  // The TransformerEmbeddingService uses @xenova/transformers all-MiniLM-L6-v2
+  // (384-dim, 22MB) for semantic matching. When available, the product matcher
+  // uses transformer embeddings for the cosine channel; when not available
+  // (e.g., @xenova/transformers not installed), it falls back to TF-IDF.
+  const transformerEmbeddingService = new TransformerEmbeddingService({ logger });
+  const productEmbeddingMatcher = new ProductEmbeddingMatcher({ logger, transformerService: transformerEmbeddingService });
   // Pre-index all known tenants at startup so the first request has zero
   // indexing latency. Scan the tenants directory directly because the
   // FileTenantRepository doesn't expose a list() method.
@@ -328,6 +337,6 @@ async function buildContainer() {
     executionEngine,
     logger
   });
-  return { config, logger, storage, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, leadRepository, leadService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService, mlIntentClassifier, hybridRouter, productEmbeddingMatcher };
+  return { config, logger, storage, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, leadRepository, leadService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService, mlIntentClassifier, hybridRouter, productEmbeddingMatcher, transformerEmbeddingService };
 }
 module.exports = { buildContainer };
