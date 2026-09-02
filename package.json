@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "20.0.0",
+  "version": "21.0.0",
   "private": true,
-  "description": "Nova v20.0 \u2014 Multilingual Transformer Embeddings + Multi-Item Furniture Detection + ML Classifier v2.0",
+  "description": "Nova v21.0 \u2014 Online Learning & Feedback Loop",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {
@@ -65,7 +65,9 @@
     "model:semantic:trace": "node scripts/trace-semantic-router.js",
     "benchmark:v18.0": "node --require ./tests/test-env.js --test tests/sprint90.v180-workflow-order-and-typo-fixes.integration.test.js",
     "benchmark:v19.0": "node --require ./tests/test-env.js --test tests/sprint91.v191-ml-classifier-refactor.integration.test.js tests/sprint92.v192-transformer-embeddings.integration.test.js",
-    "benchmark:v20.0": "node --require ./tests/test-env.js --test tests/sprint93.v200-multilingual-embeddings.integration.test.js tests/sprint94.v200-multi-item-detection.integration.test.js"
+    "benchmark:v20.0": "node --require ./tests/test-env.js --test tests/sprint93.v200-multilingual-embeddings.integration.test.js tests/sprint94.v200-multi-item-detection.integration.test.js",
+    "benchmark:v20.1": "node --require ./tests/test-env.js --test tests/sprint90.v180-workflow-order-and-typo-fixes.integration.test.js tests/sprint94.v200-multi-item-detection.integration.test.js",
+    "benchmark:v21.0": "node --require ./tests/test-env.js --test tests/sprint95.v210-feedback-collector.integration.test.js tests/sprint96.v210-online-learner.integration.test.js"
   },
   "dependencies": {
     "pg": "^8.16.3",

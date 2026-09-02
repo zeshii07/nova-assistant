@@ -583,13 +583,35 @@ class CleaningCapability extends BaseCapability {
         if(missingFields.length)missingParts.push(`To price ${missing.filter(item=>(item.missing||[]).length).map(item=>item.serviceName).join(' and ')}, please tell me ${humanPricingFields(missingFields)}.`);
         const missingLine=missingParts.length?`\n\n${missingParts.join(' ')}`:'';
         const reply=`Here are the prices:\n${lines.join('\n')}${total!=null?`\nTotal: ${currencyAmount(total,currencies[0])}`:''}${missingLine}${!missing.length?'\n\nWould you like me to book these services?':''}`;
-        const next={...previous,step:null,quotedServices,quotedServiceRequirements:requestFields(semantic),priceEnquiry:{serviceId:quotedServices.at(-1).operationalServiceId,serviceName:quotedServices.at(-1).serviceName,...requestFields(semantic),quote:quotedServices.at(-1),quoteBundle:quotedServices},pendingPriceClarification:null};
+        // v20.1: If there are missing items, save pendingPriceClarification so
+        // the conversation adapter can re-enter the multi-item quote flow when
+        // the user provides the missing info (e.g., "mattress is king size").
+        const pendingItems=missing.map(item=>{
+          const si=(semantic.serviceItems||[]).find(s=>s.serviceId===item.serviceId);
+          return {serviceId:item.serviceId,serviceName:item.serviceName,missing:item.missing||[],quantity:si?.quantity||1};
+        });
+        const pendingClarification=missing.length?{items:pendingItems,knownQuotes:quotedServices,requirements:requestFields(semantic)}:null;
+        const next={...previous,step:null,quotedServices,quotedServiceRequirements:requestFields(semantic),priceEnquiry:{serviceId:quotedServices.at(-1).operationalServiceId,serviceName:quotedServices.at(-1).serviceName,...requestFields(semantic),quote:quotedServices.at(-1),quoteBundle:quotedServices},pendingPriceClarification:pendingClarification};
         delete next.quotedService;
         return result(reply,language,next,'cleaning_multi_service_quote',{intent:'CLEANING_MULTI_SERVICE_QUOTE_GENERATED',payload:{legacyText:reply,quotes:quotedServices,total,currency:currencies.length===1?currencies[0]:null,missing,noBookingCreated:true}});
       }
       const fields=[...new Set(missing.flatMap(item=>item.missing))];
       const reply=fields.length?`To calculate those prices, please tell me ${humanPricingFields(fields)}.`:'Those services need a scope review before an exact price can be given.';
-      return result(reply,language,{...previous,step:null,pendingPriceClarification:null},'cleaning_multi_service_quote_missing',{intent:'CLEANING_MULTI_SERVICE_QUOTE_NEEDS_DETAILS',payload:{legacyText:reply,missing,noBookingCreated:true}});
+      // v20.1: Save pendingPriceClarification with the missing items + quantities
+      // + known quotes so the conversation adapter can re-enter the multi-item
+      // quote flow when the user provides the missing info (e.g., "mattress is king size").
+      const pendingItems=missing.map(item=>{
+        const si=(semantic.serviceItems||[]).find(s=>s.serviceId===item.serviceId);
+        return {
+          serviceId:item.serviceId,
+          serviceName:item.serviceName,
+          missing:item.missing,
+          quantity:si?.quantity||1,
+        };
+      });
+      const knownQuotes=quotedServices.length?quotedServices:[];
+      const knownRequirements=requestFields(semantic);
+      return result(reply,language,{...previous,step:null,pendingPriceClarification:{items:pendingItems,knownQuotes,requirements:knownRequirements}},'cleaning_multi_service_quote_missing',{intent:'CLEANING_MULTI_SERVICE_QUOTE_NEEDS_DETAILS',payload:{legacyText:reply,missing,noBookingCreated:true}});
     }
 
     if (context.intelligence?.selected?.intent === 'cleaning.multi_variant_quote_request') {
@@ -2127,6 +2149,16 @@ async function findEditableRequest(cleaning,preferredId){
   return [...modifiable].sort((a,b)=>String(b.updatedAt||b.createdAt||'').localeCompare(String(a.updatedAt||a.createdAt||'')))[0]||null;
 }
 function additionalServiceLabel(item={}){
+  // v20.2 fix: For furniture services (sofa, carpet, mattress, curtain, chair,
+  // table), use the serviceName directly — do NOT construct a property-type
+  // label like "3-bedroom apartment cleaning" from inherited bedrooms/propertyType.
+  // The previous logic spread the primary service's requirements (bedrooms,
+  // propertyType) into ALL additional services via quote_bundle_accept, which
+  // caused Sofa Cleaning to be displayed as "3-bedroom apartment cleaning".
+  const furnitureServiceIds=['CLN003','CLN004','CLN020','CLN021','CLN022','CLN032','CLN033'];
+  if(item.serviceId && furnitureServiceIds.includes(item.serviceId)){
+    return item.serviceName || 'Additional cleaning service';
+  }
   const property=[item.propertyCount>1?`${item.propertyCount} ×`:null,item.bedrooms?`${item.bedrooms}-bedroom`:null,item.propertyType].filter(Boolean).join(' ');
   return property?`${property} cleaning`:(item.serviceName||'Additional cleaning service');
 }

@@ -39,7 +39,7 @@ class CleaningConversationAdapter {
     // When the customer explicitly accepts the last quote, route that exact
     // priced scope back into the deterministic booking workflow. Prefer the
     // latest interrupt quote over an older quote attached to the draft.
-    const quoteAcceptance=/\b(?:add this service|book this|book it|book (?:these|both|the) services?|book this (?:quote|quotation|service)|make (?:a )?booking for this (?:quote|quotation|service)|confirm this service|confirm (?:my|the) booking for this service|i want this service|go ahead|proceed|ok book|yes book|book now)\b/i.test(normalizedText);
+    const quoteAcceptance=/\b(?:add this service|book this|book it|book (?:these|both|the) services?|book this (?:quote|quotation|service)|make (?:a )?booking for this (?:quote|quotation|service)|confirm this service|confirm (?:my|the) booking for this service|i want this service|go ahead|proceed|ok book|yes book|book now|stat booking|start booking|yes stat booking|yes start booking)\b/i.test(normalizedText);
     const latestQuotedService=previous.priceEnquiry?.quote||previous.quotedService||null;
     if(quoteAcceptance&&Array.isArray(previous.quotedServices)&&previous.quotedServices.length>1){
       entities={quotedServices:previous.quotedServices,quotedServiceRequirements:previous.quotedServiceRequirements||{},preserveWorkflow:Boolean(step)};
@@ -80,6 +80,38 @@ class CleaningConversationAdapter {
     // short phrase such as "deep cleaning". Resume the pricing comparison,
     // not a booking workflow.
     const pendingPriceClarification=previous.pendingPriceClarification;
+    // v20.1: If we're in a pending multi-item price clarification and the user
+    // provides the missing variant (e.g., "mattress is king size"), re-enter
+    // the multi-service quote flow with the completed items.
+    if(pendingPriceClarification?.items?.length){
+      // v20.1: Inline variant extraction (extractServiceVariant is in the
+      // capability, not the conversation adapter, so we inline it here).
+      const inlineVariant=/\bextra[ -]?large\b|\bxl\b/i.test(normalizedText)?'extra-large':
+        ['king','queen','crib','single','medium','large','small'].find(v=>new RegExp(`\\b${v}\\b`,'i').test(normalizedText))||null;
+      const providedVariant=timeEntities.serviceVariant || inlineVariant;
+      const providedUnits=timeEntities.units || scalarPendingNumber(normalizedText);
+      if(providedVariant || providedUnits){
+        const allItems=[
+          ...(pendingPriceClarification.knownQuotes||[]).map(q=>({
+            serviceId:q.operationalServiceId,
+            serviceName:q.serviceName,
+            score:100,
+            quantity:q.quantity||1,
+            variant:q.serviceVariant||null,
+          })),
+          ...pendingPriceClarification.items.map(item=>({
+            serviceId:item.serviceId,
+            serviceName:item.serviceName,
+            score:100,
+            quantity:item.quantity,
+            variant:providedVariant || (item.missing?.includes('units')?providedUnits:null),
+          })),
+        ];
+        entities={...pendingPriceClarification.requirements,...timeEntities,serviceItems:allItems,pricingRequested:true,multiItemFurniture:true};
+        candidates.push({intent:'cleaning.multi_service_quote_request',confidence:1,priority:200,entities,reason:'multi_item_price_clarification_completed'});
+        return {priority:this.priority,candidates,entities,vocabularyMatches:allItems.map(item=>({type:'service',value:item.serviceName,canonical:item.serviceId,score:1,quantity:item.quantity,variant:item.variant}))};
+      }
+    }
     if(pendingPriceClarification?.selectedCleaningType==='standard'&&timeEntities.durationHours&&timeEntities.cleanerCount){
       const propertyServiceId=pendingPriceClarification.propertyType==='villa'?'CLN009':'CLN008';
       entities={...pendingPriceClarification.scope,...timeEntities,propertyServiceId,otherServiceItems:pendingPriceClarification.otherServiceItems||[],pricingRequested:true};
@@ -210,6 +242,83 @@ class CleaningConversationAdapter {
       entities={pendingField:'time',...timeEntities,preserveWorkflow:true};
       candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:205,entities,reason:'active_cleaning_time_value'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'time',score:1}]};
+    }
+
+    // v20.1 fix: When the workflow is actively asking for a scalar value
+    // (bedrooms, cleanerCount, durationHours, units, serviceVariant) and the
+    // user's message contains that value, route directly to workflow_input
+    // BEFORE any pricing question blocks. Without this, "i have 3 bedrooms"
+    // (when step='bedrooms') gets hijacked by the standalone_quote /
+    // active_quote_question pricing paths and loses the Deep Cleaning selection.
+    if(step==='bedrooms' && (timeEntities.bedrooms != null || scalarPendingNumber(normalizedText) != null)){
+      entities={pendingField:'bedrooms',...timeEntities,preserveWorkflow:true};
+      if(!entities.bedrooms && scalarPendingNumber(normalizedText)!=null) entities.bedrooms=scalarPendingNumber(normalizedText);
+      candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:212,entities,reason:'active_cleaning_bedrooms_value'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'bedrooms',score:1}]};
+    }
+    if(step==='cleanerCount' && (timeEntities.cleanerCount != null || scalarPendingNumber(normalizedText) != null)){
+      entities={pendingField:'cleanerCount',...timeEntities,preserveWorkflow:true};
+      if(!entities.cleanerCount && scalarPendingNumber(normalizedText)!=null) entities.cleanerCount=scalarPendingNumber(normalizedText);
+      candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:212,entities,reason:'active_cleaning_cleaner_count_value'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'cleanerCount',score:1}]};
+    }
+    if(step==='duration' && (timeEntities.durationHours != null || scalarPendingNumber(normalizedText) != null)){
+      entities={pendingField:'duration',...timeEntities,preserveWorkflow:true};
+      if(!entities.durationHours && scalarPendingNumber(normalizedText)!=null) entities.durationHours=scalarPendingNumber(normalizedText);
+      candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:212,entities,reason:'active_cleaning_duration_value'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'duration',score:1}]};
+    }
+    if(step==='units' && (timeEntities.units != null || scalarPendingNumber(normalizedText) != null)){
+      entities={pendingField:'units',...timeEntities,preserveWorkflow:true};
+      if(!entities.units && scalarPendingNumber(normalizedText)!=null) entities.units=scalarPendingNumber(normalizedText);
+      candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:212,entities,reason:'active_cleaning_units_value'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'units',score:1}]};
+    }
+    if(step==='serviceVariant' && timeEntities.serviceVariant != null){
+      entities={pendingField:'serviceVariant',...timeEntities,preserveWorkflow:true};
+      candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:212,entities,reason:'active_cleaning_service_variant_value'});
+      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'serviceVariant',score:1}]};
+    }
+
+    // v20.1: Multi-item furniture detection when step==='serviceChoice'.
+    // When the system asked "Which type of furniture?" and the user responds
+    // with multiple items (e.g., "2 sofa 3 seater and 1 king mattress"),
+    // detect all items and route to multi_service_quote_request or
+    // multi_service_request instead of letting the capability pick a single service.
+    if(step==='serviceChoice'){
+      const hasFurnVocab=/\b(?:sofa|couch|carpet|rug|mattress|chair|table|curtain|drape)\b/i.test(normalizedText);
+      if(hasFurnVocab){
+        const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
+        const furnitureItems=await detectMultiItemFurniture(primaryText,scoped);
+        if(furnitureItems.length>=2){
+          const serviceItems=furnitureItems.map(item=>({
+            serviceId:item.serviceId,
+            serviceName:item.serviceName,
+            score:100,
+            quantity:item.quantity,
+            variant:item.variant,
+          }));
+          const primary=serviceItems[0];
+          const primaryVariantSize = primary.variant && /\d+/.test(primary.variant) ? Number(primary.variant.match(/\d+/)[0]) : null;
+          entities={
+            ...timeEntities,
+            serviceId:primary.serviceId,
+            serviceName:primary.serviceName,
+            units: primaryVariantSize || timeEntities.units || 1,
+            serviceVariant:primary.variant,
+            serviceItems,
+            text:normalizedText,
+            pricingRequested:pricingRequested||structuredRequest,
+            multiItemFurniture:true,
+          };
+          // v20.1: When answering serviceChoice, always show a quote (pricing)
+          // because the user is telling us WHAT to clean, not booking yet.
+          // The quote will include "Would you like me to book these services?"
+          const intent='cleaning.multi_service_quote_request';
+          candidates.push({intent,confidence:1,priority:200,entities,reason:'multi_item_furniture_service_choice'});
+          return {priority:this.priority,candidates,entities,vocabularyMatches:serviceItems.map(item=>({type:'service',value:item.serviceName,canonical:item.serviceId,score:1,quantity:item.quantity,variant:item.variant}))};
+        }
+      }
     }
     const expectedScalarPresent=(step==='cleanerCount'&&Boolean(timeEntities.cleanerCount||scalarPendingNumber(normalizedText)))
       ||(step==='duration'&&Boolean(timeEntities.durationHours||scalarPendingNumber(normalizedText)))
@@ -459,7 +568,13 @@ class CleaningConversationAdapter {
     // Price/quote questions about the currently selected service outrank a pending
     // date/time/name slot. Scope terms such as floor/shops/rooms make this a
     // quotation question, not a date value.
-    if(step && pricingRequested){
+    // v20.1 fix: Do NOT treat the message as a pricing question when it is
+    // actually answering the pending step (e.g., step='bedrooms' and the user
+    // says "i have 3 bedrooms"). The expectedScalarPresent check (computed
+    // above at line ~214) detects this case. Without this guard, the
+    // active_quote_question path hijacks the workflow input and re-quotes
+    // based on a stale priceEnquiry, losing the Deep Cleaning selection.
+    if(step && pricingRequested && !expectedScalarPresent){
       const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
       const explicit=await scoped?.findService?.(cleaningServiceSubjectText(primaryText));
       let explicitService=explicit?.service&&(explicit.score||0)>=60?explicit.service:null;
@@ -1106,11 +1221,13 @@ async function detectMultiItemFurniture(text, scopedService) {
   // Each pattern captures the item head (sofa/mattress/carpet/etc.) and
   // optionally a quantity and variant.
   const FURNITURE_PATTERNS = [
-    // v20.0: Added typo tolerance for "setas"/"seta" (common misspelling of "seater")
-    { head: 'sofa', serviceId: 'CLN003', variantRe: /(\d+)\s*(?:seater|seat|seats|setas|seta|sitr|sitar)\b/i, variantLabel: (m) => `${m[1]}-seater` },
-    { head: 'couch', serviceId: 'CLN003', variantRe: /(\d+)\s*(?:seater|seat|seats|setas|seta)\b/i, variantLabel: (m) => `${m[1]}-seater` },
-    { head: 'carpet', serviceId: 'CLN004', variantRe: /(\d+)\s*(?:metre|meter|m2|sqm|mtrs?)\b/i, variantLabel: (m) => `${m[1]} metre` },
-    { head: 'rug', serviceId: 'CLN004', variantRe: /(\d+)\s*(?:metre|meter|m2|sqm|mtrs?)\b/i, variantLabel: (m) => `${m[1]} metre` },
+    // v20.2: Added "seates?" typo tolerance (missing final "r" of "seater").
+    // Also added "seate" for singular typo. Now matches: seater, seaters,
+    // seats, seat, setas, seta, seates, seate, sitr, sitar.
+    { head: 'sofa', serviceId: 'CLN003', variantRe: /(\d+)\s*(?:seaters?|seats?|setas?|seates?|sitr|sitar)\b/i, variantLabel: (m) => `${m[1]}-seater` },
+    { head: 'couch', serviceId: 'CLN003', variantRe: /(\d+)\s*(?:seaters?|seats?|setas?|seates?)\b/i, variantLabel: (m) => `${m[1]}-seater` },
+    { head: 'carpet', serviceId: 'CLN004', variantRe: /(\d+)\s*(?:metres?|meters?|m2|sqm|mtrs?)\b/i, variantLabel: (m) => `${m[1]} metre` },
+    { head: 'rug', serviceId: 'CLN004', variantRe: /(\d+)\s*(?:metres?|meters?|m2|sqm|mtrs?)\b/i, variantLabel: (m) => `${m[1]} metre` },
     { head: 'mattress', serviceId: 'CLN020', variantRe: /\b(crib|single|queen|king)\s*(?:size)?\b/i, variantLabel: (m) => m[1] },
     { head: 'curtain', serviceId: 'CLN022', variantRe: /\b(small|medium|large|extra[ -]?large|xl)\b/i, variantLabel: (m) => m[1] },
     { head: 'drape', serviceId: 'CLN022', variantRe: /\b(small|medium|large|extra[ -]?large|xl)\b/i, variantLabel: (m) => m[1] },
@@ -1123,8 +1240,6 @@ async function detectMultiItemFurniture(text, scopedService) {
 
   for (const { head, serviceId, variantRe, variantLabel } of FURNITURE_PATTERNS) {
     // Match the furniture head word with an optional preceding quantity.
-    // Use "head" with optional plural "s" — but "mattress" plural is "mattresses"
-    // so we handle both "mattress" and "mattresses" via `head(?:es|s)?`.
     const pluralSuffix = head.endsWith('s') ? '(?:es)?' : '(?:es|s)?';
     const headRe = new RegExp(
       `(?:\\b(\\d+|one|two|three|four|five|six|seven|eight|nine|ten|ek|aik|do|teen|char|chaar|panch)\\s+)?(?:a|an|the)?\\s*${head}${pluralSuffix}\\b`,
@@ -1134,20 +1249,36 @@ async function detectMultiItemFurniture(text, scopedService) {
     if (!headMatch) continue;
     if (seenServices.has(serviceId)) continue;
 
-    // Parse quantity
+    // Parse variant first (before quantity, because the quantity may be
+    // BEFORE the variant, e.g., "2 3-seater sofa" where 2=quantity, 3-seater=variant)
+    let variant = null;
+    let variantMatch = null;
+    if (variantRe) {
+      variantMatch = n.match(variantRe);
+      if (variantMatch) variant = variantLabel(variantMatch);
+    }
+
+    // v20.1: Parse quantity. If the head regex captured a quantity (immediately
+    // before the head word), use it. Otherwise, look for a quantity BEFORE the
+    // variant pattern (e.g., "2 3-seater sofa" → quantity=2, variant=3-seater).
     let quantity = 1;
     if (headMatch[1]) {
       const wordMap = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, ek: 1, aik: 1, do: 2, teen: 3, char: 4, chaar: 4, panch: 5 };
       const w = headMatch[1].toLowerCase();
       if (/^\d+$/.test(w)) quantity = Number(w);
       else if (wordMap[w]) quantity = wordMap[w];
-    }
-
-    // Parse variant
-    let variant = null;
-    if (variantRe) {
-      const vMatch = n.match(variantRe);
-      if (vMatch) variant = variantLabel(vMatch);
+    } else if (variantMatch) {
+      // Look for a number BEFORE the variant match in the text.
+      // e.g., "2 3 seater sofa" → variantMatch.index points to "3 seater"
+      // We look for a number in the 20 chars before the variant.
+      const beforeVariant = n.substring(Math.max(0, variantMatch.index - 20), variantMatch.index);
+      const qtyBefore = beforeVariant.match(/(\d+|one|two|three|four|five|six|seven|eight|nine|ten|ek|aik|do|teen|char|chaar|panch)\s*$/i);
+      if (qtyBefore) {
+        const wordMap = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, ek: 1, aik: 1, do: 2, teen: 3, char: 4, chaar: 4, panch: 5 };
+        const w = qtyBefore[1].toLowerCase();
+        if (/^\d+$/.test(w)) quantity = Number(w);
+        else if (wordMap[w]) quantity = wordMap[w];
+      }
     }
 
     items.push({

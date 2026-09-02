@@ -1,0 +1,7 @@
+{
+  "name": "nova-feedback-collector",
+  "version": "1.0.0",
+  "description": "Observes conversation outcomes to generate ML training examples (positive = quote accepted/booking completed, negative = cancelled/corrected)",
+  "main": "src/index.js",
+  "type": "commonjs"
+}
