@@ -1,0 +1,550 @@
+{
+  "schemaVersion": "1.0",
+  "tenantId": "cleaning-demo",
+  "holds": {
+    "HLD-MT6S8JBA-54234322": {
+      "id": "HLD-MT6S8JBA-54234322",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN010"
+      ],
+      "subject": "Deep Cleaning",
+      "localDate": "25/08/2026",
+      "localTime": "14:00",
+      "endLocalTime": "19:00",
+      "startAt": "2026-08-25T10:00:00.000Z",
+      "endAt": "2026-08-25T15:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "idempotencyKey": "74f4f19dae43e1cab106e03024af5d3af961ea3b94bc98f0099d8e8dc9ffa59c",
+      "createdAt": "2026-08-24T05:15:22.439Z",
+      "expiresAt": "2026-08-24T05:25:22.439Z",
+      "confirmedAt": "2026-08-24T05:15:22.446Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MT6S8JBI-68DBAF06"
+    },
+    "HLD-MT6T3SOE-9905748D": {
+      "id": "HLD-MT6T3SOE-9905748D",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN-HOURLY"
+      ],
+      "subject": "Hourly Cleaner Hire",
+      "localDate": "25/08/2026",
+      "localTime": "11:00",
+      "endLocalTime": "13:00",
+      "startAt": "2026-08-25T07:00:00.000Z",
+      "endAt": "2026-08-25T09:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "idempotencyKey": "ed50b2d77305b0facac9c6b529917d1f2b0ba6c704b1a18e886ac9c40703aebf",
+      "createdAt": "2026-08-24T05:39:40.910Z",
+      "expiresAt": "2026-08-24T05:49:40.910Z",
+      "confirmedAt": "2026-08-24T05:39:42.573Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MT6T3TYL-4EB022EC"
+    },
+    "HLD-MT70PY0V-BE57E098": {
+      "id": "HLD-MT70PY0V-BE57E098",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN010"
+      ],
+      "subject": "Deep Cleaning",
+      "localDate": "28/08/2026",
+      "localTime": "11:00",
+      "endLocalTime": "16:00",
+      "startAt": "2026-08-28T07:00:00.000Z",
+      "endAt": "2026-08-28T12:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "idempotencyKey": "b85cd6a1eede3ef249cea9666ba67ad5436d2b6ee174cf73520e7f9f831d8f07",
+      "createdAt": "2026-08-24T09:12:51.583Z",
+      "expiresAt": "2026-08-24T09:22:51.583Z",
+      "confirmedAt": "2026-08-24T09:12:51.591Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MT70PY13-4635E60E"
+    },
+    "HLD-MT70UZ1N-059652DB": {
+      "id": "HLD-MT70UZ1N-059652DB",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN023"
+      ],
+      "subject": "Furniture Cleaning Package",
+      "localDate": "31/08/2026",
+      "localTime": "14:00",
+      "endLocalTime": "17:00",
+      "startAt": "2026-08-31T10:00:00.000Z",
+      "endAt": "2026-08-31T13:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "idempotencyKey": "6d929c228725e884f53e7ce3a4c6cced60f2dd76dd82368ef4af4bd83aa73907",
+      "createdAt": "2026-08-24T09:16:46.187Z",
+      "expiresAt": "2026-08-24T09:26:46.187Z",
+      "confirmedAt": "2026-08-24T09:16:46.195Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MT70UZ1U-0ED59849"
+    },
+    "HLD-MTFGA8AC-653919A5": {
+      "id": "HLD-MTFGA8AC-653919A5",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "status": "expired",
+      "provider": "local",
+      "serviceIds": [
+        "CLN-HOURLY"
+      ],
+      "subject": "Hourly Cleaner Hire",
+      "localDate": "31/08/2026",
+      "localTime": "11:00",
+      "endLocalTime": "15:00",
+      "startAt": "2026-08-31T07:00:00.000Z",
+      "endAt": "2026-08-31T11:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 2,
+      "idempotencyKey": "9cb50fa55daf3454988bb784318e165820466a128f95e51189738bbb2c3d9a7b",
+      "createdAt": "2026-08-30T06:50:41.652Z",
+      "expiresAt": "2026-08-30T07:00:41.652Z",
+      "confirmedAt": null,
+      "releasedAt": "2026-09-01T03:11:45.030Z",
+      "releaseReason": "expired"
+    },
+    "HLD-MTI3CDCB-41EB9A4B": {
+      "id": "HLD-MTI3CDCB-41EB9A4B",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN002",
+        "CLN003"
+      ],
+      "subject": "Deep Cleaning",
+      "localDate": "05/09/2026",
+      "localTime": "13:00",
+      "endLocalTime": "18:00",
+      "startAt": "2026-09-05T09:00:00.000Z",
+      "endAt": "2026-09-05T14:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "idempotencyKey": "af14c67c1355744820108916668a64323c03efccdf982b120206762942d59e9d",
+      "createdAt": "2026-09-01T03:11:45.035Z",
+      "expiresAt": "2026-09-01T03:21:45.035Z",
+      "confirmedAt": "2026-09-01T03:11:45.201Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MTI3CDGU-205871CB"
+    }
+  },
+  "events": {
+    "EVT-MT6S8JBI-68DBAF06": {
+      "id": "EVT-MT6S8JBI-68DBAF06",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-MT6S8JBE-0-3IRUQ",
+      "subject": "Deep Apartment Cleaning",
+      "serviceIds": [
+        "CLN010"
+      ],
+      "localDate": "25/08/2026",
+      "localTime": "14:00",
+      "endLocalTime": "19:00",
+      "startAt": "2026-08-25T10:00:00.000Z",
+      "endAt": "2026-08-25T15:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "metadata": {
+        "requestIds": [
+          "CLN-MT6S8JBE-0-3IRUQ"
+        ]
+      },
+      "revision": 1,
+      "createdAt": "2026-08-24T05:15:22.446Z",
+      "updatedAt": "2026-08-24T05:15:22.446Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-08-24T05:15:22.446Z"
+        }
+      ]
+    },
+    "EVT-MT6T3TYL-4EB022EC": {
+      "id": "EVT-MT6T3TYL-4EB022EC",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-MT6T3SOM-0-3T1BA",
+      "subject": "Hourly Cleaner Hire",
+      "serviceIds": [
+        "CLN-HOURLY"
+      ],
+      "localDate": "28/08/2026",
+      "localTime": "11:00",
+      "endLocalTime": "13:00",
+      "startAt": "2026-08-28T07:00:00.000Z",
+      "endAt": "2026-08-28T09:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "metadata": {
+        "requestIds": [
+          "CLN-MT6T3SOM-0-3T1BA"
+        ]
+      },
+      "revision": 2,
+      "createdAt": "2026-08-24T05:39:42.573Z",
+      "updatedAt": "2026-08-24T05:41:52.274Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-08-24T05:39:42.573Z"
+        },
+        {
+          "action": "rescheduled",
+          "at": "2026-08-24T05:41:52.274Z",
+          "before": {
+            "localDate": "25/08/2026",
+            "localTime": "11:00",
+            "endLocalTime": "13:00",
+            "startAt": "2026-08-25T07:00:00.000Z",
+            "endAt": "2026-08-25T09:00:00.000Z",
+            "timezone": "Asia/Dubai",
+            "poolId": "cleaning-teams",
+            "capacityRequired": 1
+          },
+          "after": {
+            "localDate": "28/08/2026",
+            "localTime": "11:00",
+            "endLocalTime": "13:00",
+            "startAt": "2026-08-28T07:00:00.000Z",
+            "endAt": "2026-08-28T09:00:00.000Z",
+            "timezone": "Asia/Dubai",
+            "poolId": "cleaning-teams",
+            "capacityRequired": 1
+          },
+          "reason": "customer_requested"
+        }
+      ]
+    },
+    "EVT-MT70PY13-4635E60E": {
+      "id": "EVT-MT70PY13-4635E60E",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-02MZCSPS",
+      "subject": "Deep Apartment Cleaning",
+      "serviceIds": [
+        "CLN010"
+      ],
+      "localDate": "28/08/2026",
+      "localTime": "11:00",
+      "endLocalTime": "16:00",
+      "startAt": "2026-08-28T07:00:00.000Z",
+      "endAt": "2026-08-28T12:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "metadata": {
+        "requestIds": [
+          "CLN-02MZCSPS"
+        ]
+      },
+      "revision": 1,
+      "createdAt": "2026-08-24T09:12:51.591Z",
+      "updatedAt": "2026-08-24T09:12:51.591Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-08-24T09:12:51.591Z"
+        }
+      ]
+    },
+    "EVT-MT70UZ1U-0ED59849": {
+      "id": "EVT-MT70UZ1U-0ED59849",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-DN6CKIWF",
+      "subject": "Furniture Cleaning Package",
+      "serviceIds": [
+        "CLN023"
+      ],
+      "localDate": "31/08/2026",
+      "localTime": "14:00",
+      "endLocalTime": "17:00",
+      "startAt": "2026-08-31T10:00:00.000Z",
+      "endAt": "2026-08-31T13:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "metadata": {
+        "requestIds": [
+          "CLN-DN6CKIWF"
+        ]
+      },
+      "revision": 1,
+      "createdAt": "2026-08-24T09:16:46.195Z",
+      "updatedAt": "2026-08-24T09:16:46.195Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-08-24T09:16:46.195Z"
+        }
+      ]
+    },
+    "EVT-MTI3CDGU-205871CB": {
+      "id": "EVT-MTI3CDGU-205871CB",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-6FCVH72A",
+      "subject": "Deep Cleaning + Furniture Cleaning",
+      "serviceIds": [
+        "CLN002",
+        "CLN003"
+      ],
+      "localDate": "05/09/2026",
+      "localTime": "13:00",
+      "endLocalTime": "18:00",
+      "startAt": "2026-09-05T09:00:00.000Z",
+      "endAt": "2026-09-05T14:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "metadata": {
+        "requestIds": [
+          "CLN-6FCVH72A",
+          "CLN-7XY2J117"
+        ]
+      },
+      "revision": 1,
+      "createdAt": "2026-09-01T03:11:45.201Z",
+      "updatedAt": "2026-09-01T03:11:45.201Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-09-01T03:11:45.201Z"
+        }
+      ]
+    }
+  },
+  "idempotency": {
+    "hold:74f4f19dae43e1cab106e03024af5d3af961ea3b94bc98f0099d8e8dc9ffa59c": "HLD-MT6S8JBA-54234322",
+    "hold:ed50b2d77305b0facac9c6b529917d1f2b0ba6c704b1a18e886ac9c40703aebf": "HLD-MT6T3SOE-9905748D",
+    "hold:b85cd6a1eede3ef249cea9666ba67ad5436d2b6ee174cf73520e7f9f831d8f07": "HLD-MT70PY0V-BE57E098",
+    "hold:6d929c228725e884f53e7ce3a4c6cced60f2dd76dd82368ef4af4bd83aa73907": "HLD-MT70UZ1N-059652DB",
+    "hold:9cb50fa55daf3454988bb784318e165820466a128f95e51189738bbb2c3d9a7b": "HLD-MTFGA8AC-653919A5",
+    "hold:af14c67c1355744820108916668a64323c03efccdf982b120206762942d59e9d": "HLD-MTI3CDCB-41EB9A4B"
+  },
+  "audit": [
+    {
+      "id": "CAL-AUD-MT6S8JBB-1E46D8DC",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MT6S8JBA-54234322",
+        "customerId": "playground-user",
+        "localDate": "25/08/2026",
+        "localTime": "14:00"
+      },
+      "at": "2026-08-24T05:15:22.439Z"
+    },
+    {
+      "id": "CAL-AUD-MT6S8JBJ-4FD44B65",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MT6S8JBI-68DBAF06",
+        "holdId": "HLD-MT6S8JBA-54234322",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-MT6S8JBE-0-3IRUQ"
+      },
+      "at": "2026-08-24T05:15:22.447Z"
+    },
+    {
+      "id": "CAL-AUD-MT6T3SOF-385079DB",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MT6T3SOE-9905748D",
+        "customerId": "playground-user",
+        "localDate": "25/08/2026",
+        "localTime": "11:00"
+      },
+      "at": "2026-08-24T05:39:40.911Z"
+    },
+    {
+      "id": "CAL-AUD-MT6T3TYL-C9B39E97",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MT6T3TYL-4EB022EC",
+        "holdId": "HLD-MT6T3SOE-9905748D",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-MT6T3SOM-0-3T1BA"
+      },
+      "at": "2026-08-24T05:39:42.574Z"
+    },
+    {
+      "id": "CAL-AUD-MT6T6M1E-B883E2A1",
+      "tenantId": "cleaning-demo",
+      "action": "event.rescheduled",
+      "metadata": {
+        "eventId": "EVT-MT6T3TYL-4EB022EC",
+        "before": {
+          "localDate": "25/08/2026",
+          "localTime": "11:00",
+          "endLocalTime": "13:00",
+          "startAt": "2026-08-25T07:00:00.000Z",
+          "endAt": "2026-08-25T09:00:00.000Z",
+          "timezone": "Asia/Dubai",
+          "poolId": "cleaning-teams",
+          "capacityRequired": 1
+        },
+        "after": {
+          "localDate": "28/08/2026",
+          "localTime": "11:00",
+          "endLocalTime": "13:00",
+          "startAt": "2026-08-28T07:00:00.000Z",
+          "endAt": "2026-08-28T09:00:00.000Z",
+          "timezone": "Asia/Dubai",
+          "poolId": "cleaning-teams",
+          "capacityRequired": 1
+        },
+        "reason": "customer_requested"
+      },
+      "at": "2026-08-24T05:41:52.275Z"
+    },
+    {
+      "id": "CAL-AUD-MT70PY0V-15DBCC7B",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MT70PY0V-BE57E098",
+        "customerId": "playground-user",
+        "localDate": "28/08/2026",
+        "localTime": "11:00"
+      },
+      "at": "2026-08-24T09:12:51.583Z"
+    },
+    {
+      "id": "CAL-AUD-MT70PY14-4CE83D1B",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MT70PY13-4635E60E",
+        "holdId": "HLD-MT70PY0V-BE57E098",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-02MZCSPS"
+      },
+      "at": "2026-08-24T09:12:51.592Z"
+    },
+    {
+      "id": "CAL-AUD-MT70UZ1N-08943762",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MT70UZ1N-059652DB",
+        "customerId": "playground-user",
+        "localDate": "31/08/2026",
+        "localTime": "14:00"
+      },
+      "at": "2026-08-24T09:16:46.187Z"
+    },
+    {
+      "id": "CAL-AUD-MT70UZ1V-E23356DC",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MT70UZ1U-0ED59849",
+        "holdId": "HLD-MT70UZ1N-059652DB",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-DN6CKIWF"
+      },
+      "at": "2026-08-24T09:16:46.195Z"
+    },
+    {
+      "id": "CAL-AUD-MTFGA8AC-CC9C8927",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MTFGA8AC-653919A5",
+        "customerId": "playground-user",
+        "localDate": "31/08/2026",
+        "localTime": "11:00"
+      },
+      "at": "2026-08-30T06:50:41.652Z"
+    },
+    {
+      "id": "CAL-AUD-MTI3CDCC-2CFD2123",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MTI3CDCB-41EB9A4B",
+        "customerId": "playground-user",
+        "localDate": "05/09/2026",
+        "localTime": "13:00"
+      },
+      "at": "2026-09-01T03:11:45.036Z"
+    },
+    {
+      "id": "CAL-AUD-MTI3CDGX-70EDC72D",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MTI3CDGU-205871CB",
+        "holdId": "HLD-MTI3CDCB-41EB9A4B",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-6FCVH72A"
+      },
+      "at": "2026-09-01T03:11:45.202Z"
+    }
+  ],
+  "updatedAt": "2026-09-01T03:11:45.205Z"
+}

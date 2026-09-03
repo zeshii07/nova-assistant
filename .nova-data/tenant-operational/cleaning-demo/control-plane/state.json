@@ -1,0 +1,1714 @@
+{
+  "schemaVersion": "1.0",
+  "tenantId": "cleaning-demo",
+  "activeRevisions": {
+    "profile": 0,
+    "products": 0,
+    "services": 1,
+    "hours": 1,
+    "calendar": 1
+  },
+  "drafts": {
+    "DFT-MTDSBI93-87BE2FBF": {
+      "id": "DFT-MTDSBI93-87BE2FBF",
+      "tenantId": "cleaning-demo",
+      "resourceType": "hours",
+      "status": "published",
+      "baseRevision": 0,
+      "document": {
+        "text": "Monday to Saturday, 8 AM to 8 PM Gulf Standard Time"
+      },
+      "validation": {
+        "status": "valid",
+        "valid": true,
+        "errors": [],
+        "warnings": [],
+        "checksum": "6b1c56bf26ed3187f676d5c4857eae7f605f927b0f096fcec3d9a2cd7531a74c",
+        "validatedAt": "2026-08-29T02:52:15.453Z"
+      },
+      "createdBy": "local-developer",
+      "createdAt": "2026-08-29T02:52:04.263Z",
+      "updatedBy": "local-developer",
+      "updatedAt": "2026-08-29T02:52:26.067Z",
+      "publishedRevision": 1
+    },
+    "DFT-MTF94ZOF-066DBAF4": {
+      "id": "DFT-MTF94ZOF-066DBAF4",
+      "tenantId": "cleaning-demo",
+      "resourceType": "services",
+      "status": "published",
+      "baseRevision": 0,
+      "document": {
+        "kind": "cleaning",
+        "currency": "AED",
+        "items": [
+          {
+            "id": "CLN001",
+            "name": "Standard / General Cleaning",
+            "category": "Standard Cleaning",
+            "description": "Routine hourly cleaning for apartments, villas, houses, offices, shops, and commercial spaces.",
+            "aliases": [
+              "standard cleaning",
+              "general cleaning",
+              "standard home cleaning",
+              "home cleaning",
+              "house cleaning",
+              "residential cleaning",
+              "commercial cleaning",
+              "office cleaning",
+              "shop cleaning",
+              "building cleaning",
+              "apartment cleaning",
+              "villa cleaning",
+              "flat cleaning",
+              "studio cleaning",
+              "routine cleaning",
+              "regular cleaning",
+              "normal cleaning",
+              "maid service",
+              "housekeeping",
+              "cleaner hire",
+              "hourly cleaner",
+              "ghar ki safai",
+              "workplace cleaning"
+            ],
+            "tags": [
+              "standard",
+              "general",
+              "routine",
+              "hourly",
+              "residential",
+              "commercial"
+            ],
+            "active": true,
+            "pricingRuleIds": [
+              "hourly-cleaner"
+            ]
+          },
+          {
+            "id": "CLN002",
+            "name": "Deep Cleaning",
+            "category": "Deep Cleaning",
+            "description": "Top-to-bottom thorough deep cleaning for apartments, villas, offices, shops, or post-renovation properties.",
+            "aliases": [
+              "deep cleaning",
+              "deep clean",
+              "full deep cleaning",
+              "complete deep cleaning",
+              "deep home cleaning",
+              "deep residential cleaning",
+              "deep commercial cleaning",
+              "deep apartment cleaning",
+              "deep villa cleaning",
+              "deep office cleaning",
+              "deep shop cleaning",
+              "move in cleaning",
+              "move out cleaning",
+              "moving cleaning",
+              "vacant house cleaning",
+              "end of tenancy cleaning",
+              "post renovation cleaning",
+              "post construction cleaning",
+              "after renovation cleaning",
+              "gehri safai",
+              "pura ghar deep cleaning"
+            ],
+            "tags": [
+              "deep",
+              "thorough",
+              "residential",
+              "commercial",
+              "move-in-out",
+              "post-renovation"
+            ],
+            "active": true,
+            "pricingRuleIds": [
+              "deep-cleaning-matrix"
+            ]
+          },
+          {
+            "id": "CLN003",
+            "name": "Furniture Cleaning",
+            "category": "Furniture Cleaning",
+            "description": "Comprehensive cleaning for all upholstered and solid furniture including sofas, carpets, mattresses, curtains, chairs, and tables.",
+            "aliases": [
+              "furniture cleaning",
+              "furniture deep cleaning",
+              "upholstery cleaning",
+              "furniture package",
+              "sofa cleaning",
+              "carpet cleaning",
+              "mattress cleaning",
+              "curtain cleaning",
+              "chair cleaning",
+              "table cleaning"
+            ],
+            "tags": [
+              "furniture",
+              "upholstery",
+              "fabric",
+              "deep-clean"
+            ],
+            "active": true,
+            "pricingRuleIds": [
+              "furniture-sofa",
+              "furniture-carpet",
+              "furniture-mattress",
+              "furniture-curtain",
+              "furniture-dining-chair",
+              "furniture-office-chair",
+              "furniture-table"
+            ]
+          },
+          {
+            "id": "CLN004",
+            "name": "Deep Kitchen Cleaning",
+            "category": "Add-on Deep Cleaning",
+            "description": "Specialised deep cleaning for kitchens, cabinets, grease removal, and appliance exteriors.",
+            "aliases": [
+              "kitchen deep cleaning",
+              "kitchen cleaning",
+              "deep kitchen clean",
+              "kitchen grease cleaning"
+            ],
+            "tags": [
+              "add-on",
+              "kitchen",
+              "deep"
+            ],
+            "active": true,
+            "pricingRuleIds": [
+              "add-on-deep-cleaning"
+            ]
+          },
+          {
+            "id": "CLN005",
+            "name": "Deep Washroom & Bathroom Cleaning",
+            "category": "Add-on Deep Cleaning",
+            "description": "Detailed deep cleaning, descaling, and sanitisation for washrooms, bathrooms, tiles, and fixtures.",
+            "aliases": [
+              "washroom cleaning",
+              "bathroom cleaning",
+              "deep washroom cleaning",
+              "deep bathroom cleaning",
+              "toilet cleaning",
+              "washroom deep clean"
+            ],
+            "tags": [
+              "add-on",
+              "washroom",
+              "bathroom",
+              "deep"
+            ],
+            "active": true,
+            "pricingRuleIds": [
+              "add-on-deep-cleaning"
+            ]
+          },
+          {
+            "id": "CLN006",
+            "name": "Deep Balcony & Terrace Cleaning",
+            "category": "Add-on Deep Cleaning",
+            "description": "Pressure wash and deep cleaning for accessible balconies, terraces, floors, and railings.",
+            "aliases": [
+              "balcony cleaning",
+              "deep balcony cleaning",
+              "terrace cleaning",
+              "balcony wash"
+            ],
+            "tags": [
+              "add-on",
+              "balcony",
+              "terrace",
+              "deep"
+            ],
+            "active": true,
+            "pricingRuleIds": [
+              "add-on-deep-cleaning"
+            ]
+          },
+          {
+            "id": "CLN007",
+            "name": "Deep Floor & Window Cleaning",
+            "category": "Add-on Deep Cleaning",
+            "description": "Specialised deep floor scrubbing and interior glass/window cleaning.",
+            "aliases": [
+              "floor deep cleaning",
+              "floor wash",
+              "interior window cleaning",
+              "glass cleaning",
+              "window deep cleaning"
+            ],
+            "tags": [
+              "add-on",
+              "floor",
+              "window",
+              "deep"
+            ],
+            "active": true,
+            "pricingRuleIds": [
+              "add-on-deep-cleaning"
+            ]
+          },
+          {
+            "id": "CLN008",
+            "name": "Laundry Wash & Fold",
+            "category": "Standalone Small Services",
+            "description": "Bag-based wash-and-fold laundry service.",
+            "aliases": [
+              "wash and fold",
+              "laundry wash fold",
+              "wash & fold"
+            ],
+            "tags": [
+              "laundry",
+              "small-service",
+              "standalone"
+            ],
+            "active": true,
+            "pricingRuleIds": [
+              "laundry-wash-fold-small",
+              "laundry-wash-fold-big"
+            ]
+          },
+          {
+            "id": "CLN009",
+            "name": "Laundry Ironing",
+            "category": "Standalone Small Services",
+            "description": "Bag-based clothes ironing service.",
+            "aliases": [
+              "ironing",
+              "laundry iron",
+              "iron clothes",
+              "press clothes"
+            ],
+            "tags": [
+              "laundry",
+              "ironing",
+              "small-service",
+              "standalone"
+            ],
+            "active": true,
+            "pricingRuleIds": [
+              "laundry-iron-small",
+              "laundry-iron-big"
+            ]
+          },
+          {
+            "id": "CLN010",
+            "name": "Laundry Wash & Iron",
+            "category": "Standalone Small Services",
+            "description": "Complete bag-based wash and iron laundry service.",
+            "aliases": [
+              "wash and iron",
+              "wash & iron",
+              "laundry wash iron"
+            ],
+            "tags": [
+              "laundry",
+              "small-service",
+              "standalone"
+            ],
+            "active": true,
+            "pricingRuleIds": [
+              "laundry-wash-iron-small",
+              "laundry-wash-iron-big"
+            ]
+          },
+          {
+            "id": "CLN011",
+            "name": "Home-care & Textile Laundry",
+            "category": "Standalone Small Services",
+            "description": "Large bag laundry service for bedsheets, linens, towels, and home textiles.",
+            "aliases": [
+              "home care laundry",
+              "household textile laundry",
+              "linen laundry"
+            ],
+            "tags": [
+              "laundry",
+              "homecare",
+              "small-service",
+              "standalone"
+            ],
+            "active": true,
+            "pricingRuleIds": [
+              "laundry-home-care-big"
+            ]
+          },
+          {
+            "id": "CLN012",
+            "name": "AC & Maintenance Services",
+            "category": "Specialised Maintenance",
+            "description": "Air conditioning unit, duct cleaning, disinfection, and pest control treatments.",
+            "aliases": [
+              "ac cleaning",
+              "ac duct cleaning",
+              "disinfection",
+              "sanitisation",
+              "pest control"
+            ],
+            "tags": [
+              "maintenance",
+              "ac",
+              "disinfection",
+              "pest-control"
+            ],
+            "active": true,
+            "pricingRuleIds": [
+              "maintenance-custom"
+            ]
+          }
+        ],
+        "pricingRules": [
+          {
+            "id": "hourly-cleaner",
+            "name": "Standard / General Cleaning Rate",
+            "aliases": [
+              "standard cleaning",
+              "general cleaning",
+              "hourly cleaning",
+              "maid service",
+              "regular cleaning"
+            ],
+            "model": "hourly",
+            "rate": 40,
+            "currency": "AED",
+            "operationalServiceId": "CLN001"
+          },
+          {
+            "id": "deep-cleaning-matrix",
+            "name": "Deep Cleaning Pricing Matrix",
+            "aliases": [
+              "deep cleaning",
+              "deep home cleaning",
+              "deep apartment cleaning",
+              "deep villa cleaning",
+              "deep office cleaning",
+              "move in move out cleaning"
+            ],
+            "model": "matrix",
+            "keys": [
+              "propertyType",
+              "bedrooms"
+            ],
+            "currency": "AED",
+            "prices": {
+              "apartment|0": 200,
+              "apartment|1": 250,
+              "apartment|2": 300,
+              "apartment|3": 350,
+              "apartment|4": 400,
+              "apartment|5": 450,
+              "apartment|6": 500,
+              "apartment|7": 550,
+              "apartment|8": 600,
+              "villa|1": 300,
+              "villa|2": 370,
+              "villa|3": 440,
+              "villa|4": 510,
+              "villa|5": 580,
+              "villa|6": 650,
+              "villa|7": 720,
+              "villa|8": 790,
+              "villa|9": 860,
+              "villa|10": 930
+            },
+            "operationalServiceId": "CLN002"
+          },
+          {
+            "id": "add-on-deep-cleaning",
+            "name": "Add-on Deep Cleaning Rates",
+            "aliases": [
+              "kitchen deep cleaning",
+              "washroom deep cleaning",
+              "balcony deep cleaning",
+              "floor window deep cleaning"
+            ],
+            "model": "matrix",
+            "keys": [
+              "serviceType"
+            ],
+            "currency": "AED",
+            "prices": {
+              "kitchen": 150,
+              "washroom": 100,
+              "balcony": 80,
+              "floor_window": 120
+            },
+            "operationalServiceId": "CLN004"
+          },
+          {
+            "id": "furniture-sofa",
+            "name": "Sofa Cleaning",
+            "model": "linear",
+            "inputKey": "units",
+            "baseInput": 1,
+            "minimum": 1,
+            "basePrice": 50,
+            "stepPrice": 30,
+            "currency": "AED",
+            "operationalServiceId": "CLN003"
+          },
+          {
+            "id": "furniture-carpet",
+            "name": "Carpet Cleaning",
+            "model": "matrix",
+            "keys": [
+              "units"
+            ],
+            "currency": "AED",
+            "prices": {
+              "5": 140,
+              "6": 168,
+              "7": 196,
+              "8": 224,
+              "9": 252,
+              "10": 280,
+              "11": 308,
+              "12": 336,
+              "13": 364,
+              "14": 392,
+              "15": 420,
+              "16": 448
+            },
+            "operationalServiceId": "CLN003"
+          },
+          {
+            "id": "furniture-mattress",
+            "name": "Mattress Cleaning",
+            "model": "matrix",
+            "keys": [
+              "serviceVariant"
+            ],
+            "currency": "AED",
+            "prices": {
+              "crib": 90,
+              "single": 120,
+              "queen": 160,
+              "king": 200
+            },
+            "operationalServiceId": "CLN003"
+          },
+          {
+            "id": "furniture-curtain",
+            "name": "Curtain Cleaning",
+            "model": "matrix",
+            "keys": [
+              "serviceVariant"
+            ],
+            "currency": "AED",
+            "prices": {
+              "small": 95,
+              "medium": 130,
+              "large": 170,
+              "extra-large": 220
+            },
+            "operationalServiceId": "CLN003"
+          },
+          {
+            "id": "furniture-dining-chair",
+            "name": "Dining Chair Cleaning",
+            "model": "unit",
+            "rate": 31.5,
+            "unitLabel": "chairs",
+            "currency": "AED",
+            "operationalServiceId": "CLN003"
+          },
+          {
+            "id": "furniture-office-chair",
+            "name": "Office Chair Cleaning",
+            "model": "unit",
+            "rate": 35,
+            "unitLabel": "chairs",
+            "currency": "AED",
+            "operationalServiceId": "CLN003"
+          },
+          {
+            "id": "furniture-table",
+            "name": "Table Cleaning",
+            "model": "unit",
+            "rate": 45,
+            "unitLabel": "tables",
+            "currency": "AED",
+            "operationalServiceId": "CLN003"
+          },
+          {
+            "id": "laundry-wash-fold-small",
+            "name": "Laundry Wash & Fold Small Bag",
+            "model": "flat",
+            "price": 31.5,
+            "currency": "AED",
+            "operationalServiceId": "CLN008"
+          },
+          {
+            "id": "laundry-wash-fold-big",
+            "name": "Laundry Wash & Fold Big Bag",
+            "model": "flat",
+            "price": 49.5,
+            "currency": "AED",
+            "operationalServiceId": "CLN008"
+          },
+          {
+            "id": "laundry-iron-small",
+            "name": "Laundry Iron Small Bag",
+            "model": "flat",
+            "price": 40.5,
+            "currency": "AED",
+            "operationalServiceId": "CLN009"
+          },
+          {
+            "id": "laundry-iron-big",
+            "name": "Laundry Iron Big Bag",
+            "model": "flat",
+            "price": 67.5,
+            "currency": "AED",
+            "operationalServiceId": "CLN009"
+          },
+          {
+            "id": "laundry-wash-iron-small",
+            "name": "Laundry Wash & Iron Small Bag",
+            "model": "flat",
+            "price": 58.5,
+            "currency": "AED",
+            "operationalServiceId": "CLN010"
+          },
+          {
+            "id": "laundry-wash-iron-big",
+            "name": "Laundry Wash & Iron Big Bag",
+            "model": "flat",
+            "price": 108,
+            "currency": "AED",
+            "operationalServiceId": "CLN010"
+          },
+          {
+            "id": "laundry-home-care-big",
+            "name": "Laundry Home-care Big Bag",
+            "model": "flat",
+            "price": 67.5,
+            "currency": "AED",
+            "operationalServiceId": "CLN011"
+          },
+          {
+            "id": "maintenance-custom",
+            "name": "Specialised Maintenance Services",
+            "model": "custom_quote",
+            "currency": "AED",
+            "operationalServiceId": "CLN012"
+          }
+        ],
+        "addOns": [],
+        "discounts": []
+      },
+      "validation": {
+        "status": "valid",
+        "valid": true,
+        "errors": [],
+        "warnings": [],
+        "checksum": "8324fd12762f46cb96ca1c6e103df415d46fd108065d1234d81a9d870fd51979",
+        "validatedAt": "2026-08-30T03:31:22.380Z"
+      },
+      "createdBy": "local-developer",
+      "createdAt": "2026-08-30T03:30:39.903Z",
+      "updatedBy": "local-developer",
+      "updatedAt": "2026-08-30T03:31:25.748Z",
+      "publishedRevision": 1
+    },
+    "DFT-MTFDYZGC-651A08CF": {
+      "id": "DFT-MTFDYZGC-651A08CF",
+      "tenantId": "cleaning-demo",
+      "resourceType": "calendar",
+      "status": "draft",
+      "baseRevision": 0,
+      "document": {
+        "enabled": true,
+        "provider": "local",
+        "timezone": "Asia/Dubai",
+        "defaultDurationMinutes": 180,
+        "slotIntervalMinutes": 30,
+        "holdTtlSeconds": 600,
+        "minLeadMinutes": 0,
+        "maxAdvanceDays": 730,
+        "resourcePools": [
+          {
+            "id": "cleaning-teams",
+            "name": "Cleaning teams",
+            "capacity": 60,
+            "serviceIds": [],
+            "active": true
+          }
+        ],
+        "serviceRules": [
+          {
+            "serviceId": "CLN001",
+            "poolId": "cleaning-teams",
+            "durationMinutes": 180,
+            "capacityRequired": 1
+          },
+          {
+            "serviceId": "CLN002",
+            "poolId": "cleaning-teams",
+            "durationMinutes": 300,
+            "capacityRequired": 2
+          },
+          {
+            "serviceId": "CLN003",
+            "poolId": "cleaning-teams",
+            "durationMinutes": 90,
+            "capacityRequired": 1
+          },
+          {
+            "serviceId": "CLN010",
+            "poolId": "cleaning-teams",
+            "durationMinutes": 300,
+            "capacityRequired": 2
+          },
+          {
+            "serviceId": "CLN011",
+            "poolId": "cleaning-teams",
+            "durationMinutes": 360,
+            "capacityRequired": 2
+          }
+        ]
+      },
+      "validation": {
+        "status": "pending",
+        "valid": null,
+        "errors": [],
+        "warnings": [],
+        "checksum": null,
+        "validatedAt": null
+      },
+      "createdBy": "local-developer",
+      "createdAt": "2026-08-30T05:45:57.756Z",
+      "updatedBy": "local-developer",
+      "updatedAt": "2026-08-30T05:45:57.756Z",
+      "publishedRevision": null
+    },
+    "DFT-MTFDZ0H5-6CE6F93C": {
+      "id": "DFT-MTFDZ0H5-6CE6F93C",
+      "tenantId": "cleaning-demo",
+      "resourceType": "calendar",
+      "status": "published",
+      "baseRevision": 0,
+      "document": {
+        "enabled": true,
+        "provider": "local",
+        "timezone": "Asia/Dubai",
+        "defaultDurationMinutes": 180,
+        "slotIntervalMinutes": 30,
+        "holdTtlSeconds": 600,
+        "minLeadMinutes": 0,
+        "maxAdvanceDays": 730,
+        "resourcePools": [
+          {
+            "id": "cleaning-teams",
+            "name": "Cleaning teams",
+            "capacity": 60,
+            "serviceIds": [],
+            "active": true
+          }
+        ],
+        "serviceRules": [
+          {
+            "serviceId": "CLN001",
+            "poolId": "cleaning-teams",
+            "durationMinutes": 180,
+            "capacityRequired": 1
+          },
+          {
+            "serviceId": "CLN002",
+            "poolId": "cleaning-teams",
+            "durationMinutes": 300,
+            "capacityRequired": 2
+          },
+          {
+            "serviceId": "CLN003",
+            "poolId": "cleaning-teams",
+            "durationMinutes": 90,
+            "capacityRequired": 1
+          },
+          {
+            "serviceId": "CLN010",
+            "poolId": "cleaning-teams",
+            "durationMinutes": 300,
+            "capacityRequired": 2
+          },
+          {
+            "serviceId": "CLN011",
+            "poolId": "cleaning-teams",
+            "durationMinutes": 360,
+            "capacityRequired": 2
+          }
+        ]
+      },
+      "validation": {
+        "status": "valid",
+        "valid": true,
+        "errors": [],
+        "warnings": [],
+        "checksum": "fdf849e8f38520b993d95055ed83f5e7b5ead98a923aabd9d2dedc4e8d0c6053",
+        "validatedAt": "2026-08-30T05:46:12.900Z"
+      },
+      "createdBy": "local-developer",
+      "createdAt": "2026-08-30T05:45:59.081Z",
+      "updatedBy": "local-developer",
+      "updatedAt": "2026-08-30T05:46:15.256Z",
+      "publishedRevision": 1
+    }
+  },
+  "revisions": {
+    "profile": [],
+    "products": [],
+    "services": [
+      {
+        "revision": 1,
+        "tenantId": "cleaning-demo",
+        "resourceType": "services",
+        "document": {
+          "kind": "cleaning",
+          "currency": "AED",
+          "items": [
+            {
+              "id": "CLN001",
+              "name": "Standard / General Cleaning",
+              "category": "Standard Cleaning",
+              "description": "Routine hourly cleaning for apartments, villas, houses, offices, shops, and commercial spaces.",
+              "aliases": [
+                "standard cleaning",
+                "general cleaning",
+                "standard home cleaning",
+                "home cleaning",
+                "house cleaning",
+                "residential cleaning",
+                "commercial cleaning",
+                "office cleaning",
+                "shop cleaning",
+                "building cleaning",
+                "apartment cleaning",
+                "villa cleaning",
+                "flat cleaning",
+                "studio cleaning",
+                "routine cleaning",
+                "regular cleaning",
+                "normal cleaning",
+                "maid service",
+                "housekeeping",
+                "cleaner hire",
+                "hourly cleaner",
+                "ghar ki safai",
+                "workplace cleaning"
+              ],
+              "tags": [
+                "standard",
+                "general",
+                "routine",
+                "hourly",
+                "residential",
+                "commercial"
+              ],
+              "active": true,
+              "pricingRuleIds": [
+                "hourly-cleaner"
+              ]
+            },
+            {
+              "id": "CLN002",
+              "name": "Deep Cleaning",
+              "category": "Deep Cleaning",
+              "description": "Top-to-bottom thorough deep cleaning for apartments, villas, offices, shops, or post-renovation properties.",
+              "aliases": [
+                "deep cleaning",
+                "deep clean",
+                "full deep cleaning",
+                "complete deep cleaning",
+                "deep home cleaning",
+                "deep residential cleaning",
+                "deep commercial cleaning",
+                "deep apartment cleaning",
+                "deep villa cleaning",
+                "deep office cleaning",
+                "deep shop cleaning",
+                "move in cleaning",
+                "move out cleaning",
+                "moving cleaning",
+                "vacant house cleaning",
+                "end of tenancy cleaning",
+                "post renovation cleaning",
+                "post construction cleaning",
+                "after renovation cleaning",
+                "gehri safai",
+                "pura ghar deep cleaning"
+              ],
+              "tags": [
+                "deep",
+                "thorough",
+                "residential",
+                "commercial",
+                "move-in-out",
+                "post-renovation"
+              ],
+              "active": true,
+              "pricingRuleIds": [
+                "deep-cleaning-matrix"
+              ]
+            },
+            {
+              "id": "CLN003",
+              "name": "Furniture Cleaning",
+              "category": "Furniture Cleaning",
+              "description": "Comprehensive cleaning for all upholstered and solid furniture including sofas, carpets, mattresses, curtains, chairs, and tables.",
+              "aliases": [
+                "furniture cleaning",
+                "furniture deep cleaning",
+                "upholstery cleaning",
+                "furniture package",
+                "sofa cleaning",
+                "carpet cleaning",
+                "mattress cleaning",
+                "curtain cleaning",
+                "chair cleaning",
+                "table cleaning"
+              ],
+              "tags": [
+                "furniture",
+                "upholstery",
+                "fabric",
+                "deep-clean"
+              ],
+              "active": true,
+              "pricingRuleIds": [
+                "furniture-sofa",
+                "furniture-carpet",
+                "furniture-mattress",
+                "furniture-curtain",
+                "furniture-dining-chair",
+                "furniture-office-chair",
+                "furniture-table"
+              ]
+            },
+            {
+              "id": "CLN004",
+              "name": "Deep Kitchen Cleaning",
+              "category": "Add-on Deep Cleaning",
+              "description": "Specialised deep cleaning for kitchens, cabinets, grease removal, and appliance exteriors.",
+              "aliases": [
+                "kitchen deep cleaning",
+                "kitchen cleaning",
+                "deep kitchen clean",
+                "kitchen grease cleaning"
+              ],
+              "tags": [
+                "add-on",
+                "kitchen",
+                "deep"
+              ],
+              "active": true,
+              "pricingRuleIds": [
+                "add-on-deep-cleaning"
+              ]
+            },
+            {
+              "id": "CLN005",
+              "name": "Deep Washroom & Bathroom Cleaning",
+              "category": "Add-on Deep Cleaning",
+              "description": "Detailed deep cleaning, descaling, and sanitisation for washrooms, bathrooms, tiles, and fixtures.",
+              "aliases": [
+                "washroom cleaning",
+                "bathroom cleaning",
+                "deep washroom cleaning",
+                "deep bathroom cleaning",
+                "toilet cleaning",
+                "washroom deep clean"
+              ],
+              "tags": [
+                "add-on",
+                "washroom",
+                "bathroom",
+                "deep"
+              ],
+              "active": true,
+              "pricingRuleIds": [
+                "add-on-deep-cleaning"
+              ]
+            },
+            {
+              "id": "CLN006",
+              "name": "Deep Balcony & Terrace Cleaning",
+              "category": "Add-on Deep Cleaning",
+              "description": "Pressure wash and deep cleaning for accessible balconies, terraces, floors, and railings.",
+              "aliases": [
+                "balcony cleaning",
+                "deep balcony cleaning",
+                "terrace cleaning",
+                "balcony wash"
+              ],
+              "tags": [
+                "add-on",
+                "balcony",
+                "terrace",
+                "deep"
+              ],
+              "active": true,
+              "pricingRuleIds": [
+                "add-on-deep-cleaning"
+              ]
+            },
+            {
+              "id": "CLN007",
+              "name": "Deep Floor & Window Cleaning",
+              "category": "Add-on Deep Cleaning",
+              "description": "Specialised deep floor scrubbing and interior glass/window cleaning.",
+              "aliases": [
+                "floor deep cleaning",
+                "floor wash",
+                "interior window cleaning",
+                "glass cleaning",
+                "window deep cleaning"
+              ],
+              "tags": [
+                "add-on",
+                "floor",
+                "window",
+                "deep"
+              ],
+              "active": true,
+              "pricingRuleIds": [
+                "add-on-deep-cleaning"
+              ]
+            },
+            {
+              "id": "CLN008",
+              "name": "Laundry Wash & Fold",
+              "category": "Standalone Small Services",
+              "description": "Bag-based wash-and-fold laundry service.",
+              "aliases": [
+                "wash and fold",
+                "laundry wash fold",
+                "wash & fold"
+              ],
+              "tags": [
+                "laundry",
+                "small-service",
+                "standalone"
+              ],
+              "active": true,
+              "pricingRuleIds": [
+                "laundry-wash-fold-small",
+                "laundry-wash-fold-big"
+              ]
+            },
+            {
+              "id": "CLN009",
+              "name": "Laundry Ironing",
+              "category": "Standalone Small Services",
+              "description": "Bag-based clothes ironing service.",
+              "aliases": [
+                "ironing",
+                "laundry iron",
+                "iron clothes",
+                "press clothes"
+              ],
+              "tags": [
+                "laundry",
+                "ironing",
+                "small-service",
+                "standalone"
+              ],
+              "active": true,
+              "pricingRuleIds": [
+                "laundry-iron-small",
+                "laundry-iron-big"
+              ]
+            },
+            {
+              "id": "CLN010",
+              "name": "Laundry Wash & Iron",
+              "category": "Standalone Small Services",
+              "description": "Complete bag-based wash and iron laundry service.",
+              "aliases": [
+                "wash and iron",
+                "wash & iron",
+                "laundry wash iron"
+              ],
+              "tags": [
+                "laundry",
+                "small-service",
+                "standalone"
+              ],
+              "active": true,
+              "pricingRuleIds": [
+                "laundry-wash-iron-small",
+                "laundry-wash-iron-big"
+              ]
+            },
+            {
+              "id": "CLN011",
+              "name": "Home-care & Textile Laundry",
+              "category": "Standalone Small Services",
+              "description": "Large bag laundry service for bedsheets, linens, towels, and home textiles.",
+              "aliases": [
+                "home care laundry",
+                "household textile laundry",
+                "linen laundry"
+              ],
+              "tags": [
+                "laundry",
+                "homecare",
+                "small-service",
+                "standalone"
+              ],
+              "active": true,
+              "pricingRuleIds": [
+                "laundry-home-care-big"
+              ]
+            },
+            {
+              "id": "CLN012",
+              "name": "AC & Maintenance Services",
+              "category": "Specialised Maintenance",
+              "description": "Air conditioning unit, duct cleaning, disinfection, and pest control treatments.",
+              "aliases": [
+                "ac cleaning",
+                "ac duct cleaning",
+                "disinfection",
+                "sanitisation",
+                "pest control"
+              ],
+              "tags": [
+                "maintenance",
+                "ac",
+                "disinfection",
+                "pest-control"
+              ],
+              "active": true,
+              "pricingRuleIds": [
+                "maintenance-custom"
+              ]
+            }
+          ],
+          "pricingRules": [
+            {
+              "id": "hourly-cleaner",
+              "name": "Standard / General Cleaning Rate",
+              "aliases": [
+                "standard cleaning",
+                "general cleaning",
+                "hourly cleaning",
+                "maid service",
+                "regular cleaning"
+              ],
+              "model": "hourly",
+              "rate": 40,
+              "currency": "AED",
+              "operationalServiceId": "CLN001"
+            },
+            {
+              "id": "deep-cleaning-matrix",
+              "name": "Deep Cleaning Pricing Matrix",
+              "aliases": [
+                "deep cleaning",
+                "deep home cleaning",
+                "deep apartment cleaning",
+                "deep villa cleaning",
+                "deep office cleaning",
+                "move in move out cleaning"
+              ],
+              "model": "matrix",
+              "keys": [
+                "propertyType",
+                "bedrooms"
+              ],
+              "currency": "AED",
+              "prices": {
+                "apartment|0": 200,
+                "apartment|1": 250,
+                "apartment|2": 300,
+                "apartment|3": 350,
+                "apartment|4": 400,
+                "apartment|5": 450,
+                "apartment|6": 500,
+                "apartment|7": 550,
+                "apartment|8": 600,
+                "villa|1": 300,
+                "villa|2": 370,
+                "villa|3": 440,
+                "villa|4": 510,
+                "villa|5": 580,
+                "villa|6": 650,
+                "villa|7": 720,
+                "villa|8": 790,
+                "villa|9": 860,
+                "villa|10": 930
+              },
+              "operationalServiceId": "CLN002"
+            },
+            {
+              "id": "add-on-deep-cleaning",
+              "name": "Add-on Deep Cleaning Rates",
+              "aliases": [
+                "kitchen deep cleaning",
+                "washroom deep cleaning",
+                "balcony deep cleaning",
+                "floor window deep cleaning"
+              ],
+              "model": "matrix",
+              "keys": [
+                "serviceType"
+              ],
+              "currency": "AED",
+              "prices": {
+                "kitchen": 150,
+                "washroom": 100,
+                "balcony": 80,
+                "floor_window": 120
+              },
+              "operationalServiceId": "CLN004"
+            },
+            {
+              "id": "furniture-sofa",
+              "name": "Sofa Cleaning",
+              "model": "linear",
+              "inputKey": "units",
+              "baseInput": 1,
+              "minimum": 1,
+              "basePrice": 50,
+              "stepPrice": 30,
+              "currency": "AED",
+              "operationalServiceId": "CLN003"
+            },
+            {
+              "id": "furniture-carpet",
+              "name": "Carpet Cleaning",
+              "model": "matrix",
+              "keys": [
+                "units"
+              ],
+              "currency": "AED",
+              "prices": {
+                "5": 140,
+                "6": 168,
+                "7": 196,
+                "8": 224,
+                "9": 252,
+                "10": 280,
+                "11": 308,
+                "12": 336,
+                "13": 364,
+                "14": 392,
+                "15": 420,
+                "16": 448
+              },
+              "operationalServiceId": "CLN003"
+            },
+            {
+              "id": "furniture-mattress",
+              "name": "Mattress Cleaning",
+              "model": "matrix",
+              "keys": [
+                "serviceVariant"
+              ],
+              "currency": "AED",
+              "prices": {
+                "crib": 90,
+                "single": 120,
+                "queen": 160,
+                "king": 200
+              },
+              "operationalServiceId": "CLN003"
+            },
+            {
+              "id": "furniture-curtain",
+              "name": "Curtain Cleaning",
+              "model": "matrix",
+              "keys": [
+                "serviceVariant"
+              ],
+              "currency": "AED",
+              "prices": {
+                "small": 95,
+                "medium": 130,
+                "large": 170,
+                "extra-large": 220
+              },
+              "operationalServiceId": "CLN003"
+            },
+            {
+              "id": "furniture-dining-chair",
+              "name": "Dining Chair Cleaning",
+              "model": "unit",
+              "rate": 31.5,
+              "unitLabel": "chairs",
+              "currency": "AED",
+              "operationalServiceId": "CLN003"
+            },
+            {
+              "id": "furniture-office-chair",
+              "name": "Office Chair Cleaning",
+              "model": "unit",
+              "rate": 35,
+              "unitLabel": "chairs",
+              "currency": "AED",
+              "operationalServiceId": "CLN003"
+            },
+            {
+              "id": "furniture-table",
+              "name": "Table Cleaning",
+              "model": "unit",
+              "rate": 45,
+              "unitLabel": "tables",
+              "currency": "AED",
+              "operationalServiceId": "CLN003"
+            },
+            {
+              "id": "laundry-wash-fold-small",
+              "name": "Laundry Wash & Fold Small Bag",
+              "model": "flat",
+              "price": 31.5,
+              "currency": "AED",
+              "operationalServiceId": "CLN008"
+            },
+            {
+              "id": "laundry-wash-fold-big",
+              "name": "Laundry Wash & Fold Big Bag",
+              "model": "flat",
+              "price": 49.5,
+              "currency": "AED",
+              "operationalServiceId": "CLN008"
+            },
+            {
+              "id": "laundry-iron-small",
+              "name": "Laundry Iron Small Bag",
+              "model": "flat",
+              "price": 40.5,
+              "currency": "AED",
+              "operationalServiceId": "CLN009"
+            },
+            {
+              "id": "laundry-iron-big",
+              "name": "Laundry Iron Big Bag",
+              "model": "flat",
+              "price": 67.5,
+              "currency": "AED",
+              "operationalServiceId": "CLN009"
+            },
+            {
+              "id": "laundry-wash-iron-small",
+              "name": "Laundry Wash & Iron Small Bag",
+              "model": "flat",
+              "price": 58.5,
+              "currency": "AED",
+              "operationalServiceId": "CLN010"
+            },
+            {
+              "id": "laundry-wash-iron-big",
+              "name": "Laundry Wash & Iron Big Bag",
+              "model": "flat",
+              "price": 108,
+              "currency": "AED",
+              "operationalServiceId": "CLN010"
+            },
+            {
+              "id": "laundry-home-care-big",
+              "name": "Laundry Home-care Big Bag",
+              "model": "flat",
+              "price": 67.5,
+              "currency": "AED",
+              "operationalServiceId": "CLN011"
+            },
+            {
+              "id": "maintenance-custom",
+              "name": "Specialised Maintenance Services",
+              "model": "custom_quote",
+              "currency": "AED",
+              "operationalServiceId": "CLN012"
+            }
+          ],
+          "addOns": [],
+          "discounts": []
+        },
+        "checksum": "8324fd12762f46cb96ca1c6e103df415d46fd108065d1234d81a9d870fd51979",
+        "source": "draft",
+        "sourceDraftId": "DFT-MTF94ZOF-066DBAF4",
+        "publishedBy": "local-developer",
+        "publishedAt": "2026-08-30T03:31:25.748Z",
+        "rolledBackFromRevision": null
+      }
+    ],
+    "hours": [
+      {
+        "revision": 1,
+        "tenantId": "cleaning-demo",
+        "resourceType": "hours",
+        "document": {
+          "text": "Monday to Saturday, 8 AM to 8 PM Gulf Standard Time"
+        },
+        "checksum": "6b1c56bf26ed3187f676d5c4857eae7f605f927b0f096fcec3d9a2cd7531a74c",
+        "source": "draft",
+        "sourceDraftId": "DFT-MTDSBI93-87BE2FBF",
+        "publishedBy": "local-developer",
+        "publishedAt": "2026-08-29T02:52:26.067Z",
+        "rolledBackFromRevision": null
+      }
+    ],
+    "calendar": [
+      {
+        "revision": 1,
+        "tenantId": "cleaning-demo",
+        "resourceType": "calendar",
+        "document": {
+          "enabled": true,
+          "provider": "local",
+          "timezone": "Asia/Dubai",
+          "defaultDurationMinutes": 180,
+          "slotIntervalMinutes": 30,
+          "holdTtlSeconds": 600,
+          "minLeadMinutes": 0,
+          "maxAdvanceDays": 730,
+          "resourcePools": [
+            {
+              "id": "cleaning-teams",
+              "name": "Cleaning teams",
+              "capacity": 60,
+              "serviceIds": [],
+              "active": true
+            }
+          ],
+          "serviceRules": [
+            {
+              "serviceId": "CLN001",
+              "poolId": "cleaning-teams",
+              "durationMinutes": 180,
+              "capacityRequired": 1
+            },
+            {
+              "serviceId": "CLN002",
+              "poolId": "cleaning-teams",
+              "durationMinutes": 300,
+              "capacityRequired": 2
+            },
+            {
+              "serviceId": "CLN003",
+              "poolId": "cleaning-teams",
+              "durationMinutes": 90,
+              "capacityRequired": 1
+            },
+            {
+              "serviceId": "CLN010",
+              "poolId": "cleaning-teams",
+              "durationMinutes": 300,
+              "capacityRequired": 2
+            },
+            {
+              "serviceId": "CLN011",
+              "poolId": "cleaning-teams",
+              "durationMinutes": 360,
+              "capacityRequired": 2
+            }
+          ]
+        },
+        "checksum": "fdf849e8f38520b993d95055ed83f5e7b5ead98a923aabd9d2dedc4e8d0c6053",
+        "source": "draft",
+        "sourceDraftId": "DFT-MTFDZ0H5-6CE6F93C",
+        "publishedBy": "local-developer",
+        "publishedAt": "2026-08-30T05:46:15.256Z",
+        "rolledBackFromRevision": null
+      }
+    ]
+  },
+  "audit": [
+    {
+      "id": "AUD-MTDSBI94-548EBE86",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.created",
+      "resourceType": "hours",
+      "draftId": "DFT-MTDSBI93-87BE2FBF",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": 0,
+      "beforeChecksum": null,
+      "afterChecksum": "f7e429d2b79f9c970edd0cc6e6cdafb2ae910355f1721b2e4dde4bb0e2fd9446",
+      "metadata": {},
+      "timestamp": "2026-08-29T02:52:04.264Z"
+    },
+    {
+      "id": "AUD-MTDSBQVH-12018B09",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.updated",
+      "resourceType": "hours",
+      "draftId": "DFT-MTDSBI93-87BE2FBF",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": null,
+      "beforeChecksum": "f7e429d2b79f9c970edd0cc6e6cdafb2ae910355f1721b2e4dde4bb0e2fd9446",
+      "afterChecksum": "6b1c56bf26ed3187f676d5c4857eae7f605f927b0f096fcec3d9a2cd7531a74c",
+      "metadata": {},
+      "timestamp": "2026-08-29T02:52:15.437Z"
+    },
+    {
+      "id": "AUD-MTDSBQVX-96BA3750",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.validated",
+      "resourceType": "hours",
+      "draftId": "DFT-MTDSBI93-87BE2FBF",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": null,
+      "beforeChecksum": null,
+      "afterChecksum": "6b1c56bf26ed3187f676d5c4857eae7f605f927b0f096fcec3d9a2cd7531a74c",
+      "metadata": {
+        "valid": true,
+        "errorCount": 0,
+        "warningCount": 0
+      },
+      "timestamp": "2026-08-29T02:52:15.453Z"
+    },
+    {
+      "id": "AUD-MTDSBZ2R-5DCF9423",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "resource.published",
+      "resourceType": "hours",
+      "draftId": "DFT-MTDSBI93-87BE2FBF",
+      "requestId": null,
+      "fromRevision": 0,
+      "toRevision": 1,
+      "beforeChecksum": null,
+      "afterChecksum": "6b1c56bf26ed3187f676d5c4857eae7f605f927b0f096fcec3d9a2cd7531a74c",
+      "metadata": {},
+      "timestamp": "2026-08-29T02:52:26.067Z"
+    },
+    {
+      "id": "AUD-MTF94ZOK-40AF3160",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.created",
+      "resourceType": "services",
+      "draftId": "DFT-MTF94ZOF-066DBAF4",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": 0,
+      "beforeChecksum": null,
+      "afterChecksum": "bbb09a01521cf85e3541b4b18465f4bf31160f739f65166c4a41a188138bef61",
+      "metadata": {},
+      "timestamp": "2026-08-30T03:30:39.908Z"
+    },
+    {
+      "id": "AUD-MTF95UEQ-DBF29E46",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.updated",
+      "resourceType": "services",
+      "draftId": "DFT-MTF94ZOF-066DBAF4",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": null,
+      "beforeChecksum": "bbb09a01521cf85e3541b4b18465f4bf31160f739f65166c4a41a188138bef61",
+      "afterChecksum": "8324fd12762f46cb96ca1c6e103df415d46fd108065d1234d81a9d870fd51979",
+      "metadata": {},
+      "timestamp": "2026-08-30T03:31:19.730Z"
+    },
+    {
+      "id": "AUD-MTF95UFA-AE84CFA3",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.validated",
+      "resourceType": "services",
+      "draftId": "DFT-MTF94ZOF-066DBAF4",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": null,
+      "beforeChecksum": null,
+      "afterChecksum": "8324fd12762f46cb96ca1c6e103df415d46fd108065d1234d81a9d870fd51979",
+      "metadata": {
+        "valid": true,
+        "errorCount": 0,
+        "warningCount": 0
+      },
+      "timestamp": "2026-08-30T03:31:19.750Z"
+    },
+    {
+      "id": "AUD-MTF95WFP-67B8F218",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.updated",
+      "resourceType": "services",
+      "draftId": "DFT-MTF94ZOF-066DBAF4",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": null,
+      "beforeChecksum": "8324fd12762f46cb96ca1c6e103df415d46fd108065d1234d81a9d870fd51979",
+      "afterChecksum": "8324fd12762f46cb96ca1c6e103df415d46fd108065d1234d81a9d870fd51979",
+      "metadata": {},
+      "timestamp": "2026-08-30T03:31:22.357Z"
+    },
+    {
+      "id": "AUD-MTF95WGC-6BD92845",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.validated",
+      "resourceType": "services",
+      "draftId": "DFT-MTF94ZOF-066DBAF4",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": null,
+      "beforeChecksum": null,
+      "afterChecksum": "8324fd12762f46cb96ca1c6e103df415d46fd108065d1234d81a9d870fd51979",
+      "metadata": {
+        "valid": true,
+        "errorCount": 0,
+        "warningCount": 0
+      },
+      "timestamp": "2026-08-30T03:31:22.380Z"
+    },
+    {
+      "id": "AUD-MTF95Z1X-53E56CB1",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "resource.published",
+      "resourceType": "services",
+      "draftId": "DFT-MTF94ZOF-066DBAF4",
+      "requestId": null,
+      "fromRevision": 0,
+      "toRevision": 1,
+      "beforeChecksum": null,
+      "afterChecksum": "8324fd12762f46cb96ca1c6e103df415d46fd108065d1234d81a9d870fd51979",
+      "metadata": {},
+      "timestamp": "2026-08-30T03:31:25.749Z"
+    },
+    {
+      "id": "AUD-MTFDYZGD-DF0DC878",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.created",
+      "resourceType": "calendar",
+      "draftId": "DFT-MTFDYZGC-651A08CF",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": 0,
+      "beforeChecksum": null,
+      "afterChecksum": "fdf849e8f38520b993d95055ed83f5e7b5ead98a923aabd9d2dedc4e8d0c6053",
+      "metadata": {},
+      "timestamp": "2026-08-30T05:45:57.757Z"
+    },
+    {
+      "id": "AUD-MTFDZ0H5-0F0B70C4",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.created",
+      "resourceType": "calendar",
+      "draftId": "DFT-MTFDZ0H5-6CE6F93C",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": 0,
+      "beforeChecksum": null,
+      "afterChecksum": "fdf849e8f38520b993d95055ed83f5e7b5ead98a923aabd9d2dedc4e8d0c6053",
+      "metadata": {},
+      "timestamp": "2026-08-30T05:45:59.081Z"
+    },
+    {
+      "id": "AUD-MTFDZ9M2-CDB626F5",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.updated",
+      "resourceType": "calendar",
+      "draftId": "DFT-MTFDZ0H5-6CE6F93C",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": null,
+      "beforeChecksum": "fdf849e8f38520b993d95055ed83f5e7b5ead98a923aabd9d2dedc4e8d0c6053",
+      "afterChecksum": "fdf849e8f38520b993d95055ed83f5e7b5ead98a923aabd9d2dedc4e8d0c6053",
+      "metadata": {},
+      "timestamp": "2026-08-30T05:46:10.922Z"
+    },
+    {
+      "id": "AUD-MTFDZ9N1-282A7EBE",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.validated",
+      "resourceType": "calendar",
+      "draftId": "DFT-MTFDZ0H5-6CE6F93C",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": null,
+      "beforeChecksum": null,
+      "afterChecksum": "fdf849e8f38520b993d95055ed83f5e7b5ead98a923aabd9d2dedc4e8d0c6053",
+      "metadata": {
+        "valid": true,
+        "errorCount": 0,
+        "warningCount": 0
+      },
+      "timestamp": "2026-08-30T05:46:10.957Z"
+    },
+    {
+      "id": "AUD-MTFDZB4A-176469AC",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.updated",
+      "resourceType": "calendar",
+      "draftId": "DFT-MTFDZ0H5-6CE6F93C",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": null,
+      "beforeChecksum": "fdf849e8f38520b993d95055ed83f5e7b5ead98a923aabd9d2dedc4e8d0c6053",
+      "afterChecksum": "fdf849e8f38520b993d95055ed83f5e7b5ead98a923aabd9d2dedc4e8d0c6053",
+      "metadata": {},
+      "timestamp": "2026-08-30T05:46:12.874Z"
+    },
+    {
+      "id": "AUD-MTFDZB50-F8625402",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "draft.validated",
+      "resourceType": "calendar",
+      "draftId": "DFT-MTFDZ0H5-6CE6F93C",
+      "requestId": null,
+      "fromRevision": null,
+      "toRevision": null,
+      "beforeChecksum": null,
+      "afterChecksum": "fdf849e8f38520b993d95055ed83f5e7b5ead98a923aabd9d2dedc4e8d0c6053",
+      "metadata": {
+        "valid": true,
+        "errorCount": 0,
+        "warningCount": 0
+      },
+      "timestamp": "2026-08-30T05:46:12.900Z"
+    },
+    {
+      "id": "AUD-MTFDZCYG-F822DB42",
+      "tenantId": "cleaning-demo",
+      "actorId": "local-developer",
+      "actorRole": "owner",
+      "action": "resource.published",
+      "resourceType": "calendar",
+      "draftId": "DFT-MTFDZ0H5-6CE6F93C",
+      "requestId": null,
+      "fromRevision": 0,
+      "toRevision": 1,
+      "beforeChecksum": null,
+      "afterChecksum": "fdf849e8f38520b993d95055ed83f5e7b5ead98a923aabd9d2dedc4e8d0c6053",
+      "metadata": {},
+      "timestamp": "2026-08-30T05:46:15.256Z"
+    }
+  ],
+  "updatedAt": "2026-08-30T05:46:15.258Z"
+}

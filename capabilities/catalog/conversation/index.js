@@ -226,13 +226,27 @@ class CatalogConversationAdapter {
     } else if (category) {
       candidates.push({ intent:'catalog.category_browse', confidence:.9, entities:{ categoryId:category.id, categoryTerm:category.term }, reason:'category_without_request_cue' });
     } else if ((hasAny(normalizedText, REQUEST_CUES)||hasAcquisitionCue(normalizedText)) && /\b(do you sell|do you have|can i get|can i have|could i get|i want|i need|looking for|searching for|shopping for|trying to find|interested in|help me find|buy|purchase|mujhe|chahiye|ap k pass|aap ke paas)\b/.test(normalizedText)) {
+      // v22.1: If the search found alternatives (e.g., "watches" → Smart Watch
+      // as an alternative), surface them as product_interest instead of
+      // unavailable_request. This handles plural/category queries like
+      // "what watches do you have" when the catalog has "Smart Watch".
       const safeAlternatives=(result?.alternatives||[]).filter(product=>isRelevantAlternative(message.text,product));
-      entities = {
-        requestedText: cleanRequestedText(message.text),
-        recommendationIds:safeAlternatives.map(x=>x.id).slice(0,3)
-      };
-      candidates.push({ intent:'catalog.unavailable_request', confidence:1, priority:180, entities, reason:'explicit_unmatched_catalog_request' });
-      matches.push({ type:'request', value:'unmatched_catalog_item', score:.955 });
+      if (safeAlternatives.length > 0) {
+        // Show the first alternative as a product interest
+        const primary = safeAlternatives[0];
+        entities = { ...entities, productId:primary.id, productName:primary.name, ...(primary.attributes || {}) };
+        candidates.push({ intent:'catalog.product_interest', confidence:.92, entities, reason:'alternative_match_for_request' });
+        for (const alt of safeAlternatives.slice(0,3)) {
+          matches.push({ type:'product_term', value:alt.name, canonical:alt.id, score:.92 });
+        }
+      } else {
+        entities = {
+          requestedText: cleanRequestedText(message.text),
+          recommendationIds:[]
+        };
+        candidates.push({ intent:'catalog.unavailable_request', confidence:1, priority:180, entities, reason:'explicit_unmatched_catalog_request' });
+        matches.push({ type:'request', value:'unmatched_catalog_item', score:.955 });
+      }
     }
     return { priority:this.priority, candidates, entities, vocabularyMatches:matches };
   }
@@ -328,10 +342,21 @@ function cleanRequestedText(value){
     .replace(/[?.!,]/g,' ').replace(/\s+/g,' ').trim() || 'that item';
 }
 function isRelevantAlternative(requested,product={}){
-  const ignored=new Set(['i','am','is','are','a','an','the','for','my','your','do','you','have','want','need','one','it','this','looking','searching','get','can','with','of']);
+  const ignored=new Set(['i','am','is','are','a','an','the','for','my','your','do','you','have','want','need','one','it','this','looking','searching','get','can','with','of','what','kon','si','hain','ap','k','pass','mujhy','aik','yeh','btao','bta']);
   const tokens=normalizeText(cleanRequestedText(requested)).split(' ').filter(token=>token.length>2&&!ignored.has(token));
   const productText=normalizeText([product.name,product.description,...(product.aliases||[]),...(product.tags||[])].join(' '));
-  const singular=value=>value.endsWith('ies')?`${value.slice(0,-3)}y`:value.endsWith('s')&&!value.endsWith('ss')?value.slice(0,-1):value;
+  // v22.1: Fixed plural→singular conversion. Old: "watches"→"watche" (wrong).
+  // New: handles "ies"→"y", "ches"→"ch", "shes"→"sh", "ses"→"s", "s"→"".
+  const singular=value=>{
+    if(/ies$/i.test(value))return value.slice(0,-3)+'y';  // "categories"→"category"
+    if(/ches$/i.test(value))return value.slice(0,-2);       // "watches"→"watch"
+    if(/shes$/i.test(value))return value.slice(0,-2);      // "wishes"→"wish"
+    if(/ses$/i.test(value))return value.slice(0,-2);        // "houses"→"house"
+    if(/xes$/i.test(value))return value.slice(0,-2);       // "boxes"→"box"
+    if(/zes$/i.test(value))return value.slice(0,-2);       // "buzzes"→"buzz"
+    if(/s$/i.test(value)&&!/ss$/i.test(value))return value.slice(0,-1); // "shirts"→"shirt"
+    return value;
+  };
   return tokens.some(token=>productText.split(' ').some(candidate=>singular(candidate)===singular(token)));
 }
 function isExactRequestedProductPhrase(value,product){

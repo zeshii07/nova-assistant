@@ -1,0 +1,4082 @@
+{
+  "customers": {
+    "cleaning-demo:playground-user": {
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "name": "James Watson",
+      "phone": "03077374765",
+      "email": "zeeshan@gmil.com",
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Villa 34, JVC Phase 2, Dubai"
+        },
+        "primaryAddress": "Villa 34, JVC Phase 2, Dubai"
+      },
+      "createdAt": "2026-08-24T05:09:42.411Z",
+      "updatedAt": "2026-08-24T05:09:42.411Z"
+    },
+    "default:playground-user": {
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "name": "Aryan Ahmad",
+      "phone": "0301926756543",
+      "email": "zeeshan@gmail.com",
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastDelivery": {
+          "city": "lhore",
+          "address": "near ali town westwood colony lhore",
+          "landmark": null,
+          "paymentMethod": "Cash on Delivery"
+        },
+        "lastOrderId": "ORD-MTGS16QC-DF3F48"
+      },
+      "createdAt": "2026-08-24T05:21:17.435Z",
+      "updatedAt": "2026-08-24T05:21:17.435Z"
+    },
+    "default:debug-tv": {
+      "tenantId": "default",
+      "customerId": "debug-tv",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:49:16.113Z",
+      "updatedAt": "2026-08-24T08:49:16.113Z"
+    },
+    "default:debug-sem": {
+      "tenantId": "default",
+      "customerId": "debug-sem",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:49:31.195Z",
+      "updatedAt": "2026-08-24T08:49:31.195Z"
+    },
+    "default:sem-1": {
+      "tenantId": "default",
+      "customerId": "sem-1",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:50:22.230Z",
+      "updatedAt": "2026-08-24T08:50:22.230Z"
+    },
+    "default:sem-2": {
+      "tenantId": "default",
+      "customerId": "sem-2",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:50:22.891Z",
+      "updatedAt": "2026-08-24T08:50:22.891Z"
+    },
+    "cleaning-demo:sem-3": {
+      "tenantId": "cleaning-demo",
+      "customerId": "sem-3",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:50:24.821Z",
+      "updatedAt": "2026-08-24T08:50:24.821Z"
+    },
+    "default:sem-4": {
+      "tenantId": "default",
+      "customerId": "sem-4",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:50:26.119Z",
+      "updatedAt": "2026-08-24T08:50:26.119Z"
+    },
+    "default:sem-5": {
+      "tenantId": "default",
+      "customerId": "sem-5",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:50:27.054Z",
+      "updatedAt": "2026-08-24T08:50:27.054Z"
+    },
+    "default:sem-6": {
+      "tenantId": "default",
+      "customerId": "sem-6",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:50:31.160Z",
+      "updatedAt": "2026-08-24T08:50:31.160Z"
+    },
+    "default:sem-7": {
+      "tenantId": "default",
+      "customerId": "sem-7",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:50:33.757Z",
+      "updatedAt": "2026-08-24T08:50:33.757Z"
+    },
+    "default:tv-1": {
+      "tenantId": "default",
+      "customerId": "tv-1",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:51:17.156Z",
+      "updatedAt": "2026-08-24T08:51:17.156Z"
+    },
+    "default:tv-2": {
+      "tenantId": "default",
+      "customerId": "tv-2",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:51:18.693Z",
+      "updatedAt": "2026-08-24T08:51:18.693Z"
+    },
+    "default:tv-3": {
+      "tenantId": "default",
+      "customerId": "tv-3",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:51:19.844Z",
+      "updatedAt": "2026-08-24T08:51:19.844Z"
+    },
+    "default:tv-4": {
+      "tenantId": "default",
+      "customerId": "tv-4",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:51:21.447Z",
+      "updatedAt": "2026-08-24T08:51:21.447Z"
+    },
+    "default:ux-retail": {
+      "tenantId": "default",
+      "customerId": "ux-retail",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "ux",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:57:34.349Z",
+      "updatedAt": "2026-08-24T08:57:34.349Z"
+    },
+    "default:ux-checkout": {
+      "tenantId": "default",
+      "customerId": "ux-checkout",
+      "name": "Zeeshan",
+      "phone": "03019299608",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "ux",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:57:35.889Z",
+      "updatedAt": "2026-08-24T08:57:35.889Z"
+    },
+    "healthcare-demo:ux-booking": {
+      "tenantId": "healthcare-demo",
+      "customerId": "ux-booking",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "ux",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:57:42.338Z",
+      "updatedAt": "2026-08-24T08:57:42.338Z"
+    },
+    "education-demo:ux-edu": {
+      "tenantId": "education-demo",
+      "customerId": "ux-edu",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "ux",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:57:44.034Z",
+      "updatedAt": "2026-08-24T08:57:44.034Z"
+    },
+    "healthcare-demo:ux-hints": {
+      "tenantId": "healthcare-demo",
+      "customerId": "ux-hints",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "ux",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:57:45.328Z",
+      "updatedAt": "2026-08-24T08:57:45.328Z"
+    },
+    "cleaning-demo:ux-clean": {
+      "tenantId": "cleaning-demo",
+      "customerId": "ux-clean",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "ux",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:57:45.894Z",
+      "updatedAt": "2026-08-24T08:57:45.894Z"
+    },
+    "education-demo:ux-offering": {
+      "tenantId": "education-demo",
+      "customerId": "ux-offering",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "ux",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:57:47.414Z",
+      "updatedAt": "2026-08-24T08:57:47.414Z"
+    },
+    "education-demo:ux-grades": {
+      "tenantId": "education-demo",
+      "customerId": "ux-grades",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "ux",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:57:48.168Z",
+      "updatedAt": "2026-08-24T08:57:48.168Z"
+    },
+    "default:ux-greet-r": {
+      "tenantId": "default",
+      "customerId": "ux-greet-r",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "ux",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:57:48.758Z",
+      "updatedAt": "2026-08-24T08:57:48.758Z"
+    },
+    "salon-demo:ux-greet-s": {
+      "tenantId": "salon-demo",
+      "customerId": "ux-greet-s",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "ux",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:57:49.499Z",
+      "updatedAt": "2026-08-24T08:57:49.499Z"
+    },
+    "healthcare-demo:ux-greet-h": {
+      "tenantId": "healthcare-demo",
+      "customerId": "ux-greet-h",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "ux",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T08:57:49.962Z",
+      "updatedAt": "2026-08-24T08:57:49.962Z"
+    },
+    "cleaning-demo:web-2555960f-183b-4aa5-8249-1801d803f113": {
+      "tenantId": "cleaning-demo",
+      "customerId": "web-2555960f-183b-4aa5-8249-1801d803f113",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "http",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T10:23:16.890Z",
+      "updatedAt": "2026-08-24T10:23:16.890Z"
+    },
+    "cleaning-demo:web-4d4800d4-faa4-4a3a-9e81-16669d1c74c4": {
+      "tenantId": "cleaning-demo",
+      "customerId": "web-4d4800d4-faa4-4a3a-9e81-16669d1c74c4",
+      "name": "Malik Ahmad",
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "http",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T10:24:40.693Z",
+      "updatedAt": "2026-08-24T10:24:40.693Z"
+    },
+    "restaurant-demo:playground-user": {
+      "tenantId": "restaurant-demo",
+      "customerId": "playground-user",
+      "name": "Umar Gujjar",
+      "phone": "03012343567",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-24T13:36:08.116Z",
+      "updatedAt": "2026-08-24T13:36:08.116Z"
+    },
+    "cleaning-demo:user1": {
+      "tenantId": "cleaning-demo",
+      "customerId": "user1",
+      "name": "Mer Naam Mohsin Hai",
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "faiz pur basti saho house number 23"
+        }
+      },
+      "createdAt": "2026-08-24T13:42:03.516Z",
+      "updatedAt": "2026-08-24T13:42:03.516Z"
+    },
+    "cleaning-demo:playground-user1": {
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user1",
+      "name": "Mkhdoom Al Amir",
+      "phone": "0306754234",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "jvc near bin zahid park al barsha dubai"
+        }
+      },
+      "createdAt": "2026-08-25T03:15:42.752Z",
+      "updatedAt": "2026-08-25T03:15:42.752Z"
+    },
+    "cleaning-demo:kit-clean-a01": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-a01",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:28:24.442Z",
+      "updatedAt": "2026-08-25T05:28:24.442Z"
+    },
+    "cleaning-demo:kit-clean-a07": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-a07",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:28:27.432Z",
+      "updatedAt": "2026-08-25T05:28:27.432Z"
+    },
+    "cleaning-demo:kit-clean-b02": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-b02",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:28:30.862Z",
+      "updatedAt": "2026-08-25T05:28:30.862Z"
+    },
+    "cleaning-demo:kit-clean-b06": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-b06",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:28:31.775Z",
+      "updatedAt": "2026-08-25T05:28:31.775Z"
+    },
+    "cleaning-demo:kit-clean-b09": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-b09",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:28:32.834Z",
+      "updatedAt": "2026-08-25T05:28:32.834Z"
+    },
+    "cleaning-demo:kit-clean-c04": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-c04",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:28:34.050Z",
+      "updatedAt": "2026-08-25T05:28:34.050Z"
+    },
+    "cleaning-demo:kit-clean-e01": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-e01",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:28:35.115Z",
+      "updatedAt": "2026-08-25T05:28:35.115Z"
+    },
+    "cleaning-demo:kit-clean-e06": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-e06",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:28:36.031Z",
+      "updatedAt": "2026-08-25T05:28:36.031Z"
+    },
+    "cleaning-demo:kit-clean-i01": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-i01",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:28:36.944Z",
+      "updatedAt": "2026-08-25T05:28:36.944Z"
+    },
+    "cleaning-demo:kit-clean-m01": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-m01",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:28:37.861Z",
+      "updatedAt": "2026-08-25T05:28:37.861Z"
+    },
+    "cleaning-demo:kit-clean-m04": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-m04",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:28:41.573Z",
+      "updatedAt": "2026-08-25T05:28:41.573Z"
+    },
+    "cleaning-demo:kit-clean-m06": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-m06",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:28:44.360Z",
+      "updatedAt": "2026-08-25T05:28:44.360Z"
+    },
+    "cleaning-demo:kit-clean-m10": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-m10",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:28:45.539Z",
+      "updatedAt": "2026-08-25T05:28:45.539Z"
+    },
+    "default:kit-retail-a09": {
+      "tenantId": "default",
+      "customerId": "kit-retail-a09",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:29:11.658Z",
+      "updatedAt": "2026-08-25T05:29:11.658Z"
+    },
+    "default:kit-retail-f02": {
+      "tenantId": "default",
+      "customerId": "kit-retail-f02",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:29:12.721Z",
+      "updatedAt": "2026-08-25T05:29:12.721Z"
+    },
+    "default:kit-retail-f03": {
+      "tenantId": "default",
+      "customerId": "kit-retail-f03",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:29:13.660Z",
+      "updatedAt": "2026-08-25T05:29:13.660Z"
+    },
+    "default:kit-retail-f07": {
+      "tenantId": "default",
+      "customerId": "kit-retail-f07",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:29:15.669Z",
+      "updatedAt": "2026-08-25T05:29:15.669Z"
+    },
+    "default:kit-retail-f08": {
+      "tenantId": "default",
+      "customerId": "kit-retail-f08",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:29:16.969Z",
+      "updatedAt": "2026-08-25T05:29:16.969Z"
+    },
+    "default:kit-retail-g08": {
+      "tenantId": "default",
+      "customerId": "kit-retail-g08",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:29:17.719Z",
+      "updatedAt": "2026-08-25T05:29:17.719Z"
+    },
+    "default:kit-retail-h01": {
+      "tenantId": "default",
+      "customerId": "kit-retail-h01",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:29:18.353Z",
+      "updatedAt": "2026-08-25T05:29:18.353Z"
+    },
+    "default:kit-retail-m02": {
+      "tenantId": "default",
+      "customerId": "kit-retail-m02",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:29:18.951Z",
+      "updatedAt": "2026-08-25T05:29:18.951Z"
+    },
+    "default:kit-retail-m07": {
+      "tenantId": "default",
+      "customerId": "kit-retail-m07",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:29:20.235Z",
+      "updatedAt": "2026-08-25T05:29:20.235Z"
+    },
+    "default:kit-retail-m08": {
+      "tenantId": "default",
+      "customerId": "kit-retail-m08",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:29:22.370Z",
+      "updatedAt": "2026-08-25T05:29:22.370Z"
+    },
+    "default:kit-retail-l02": {
+      "tenantId": "default",
+      "customerId": "kit-retail-l02",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:29:23.131Z",
+      "updatedAt": "2026-08-25T05:29:23.131Z"
+    },
+    "default:kit-retail-l03": {
+      "tenantId": "default",
+      "customerId": "kit-retail-l03",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-25T05:29:23.893Z",
+      "updatedAt": "2026-08-25T05:29:23.893Z"
+    },
+    "cleaning-demo:playground-user23": {
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user23",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-29T03:09:52.497Z",
+      "updatedAt": "2026-08-29T03:09:52.497Z"
+    },
+    "cleaning-demo:playground-user234": {
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user234",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-29T04:12:20.386Z",
+      "updatedAt": "2026-08-29T04:12:20.386Z"
+    },
+    "default:playground-user1": {
+      "tenantId": "default",
+      "customerId": "playground-user1",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "playground",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-08-29T08:33:40.997Z",
+      "updatedAt": "2026-08-29T08:33:40.997Z"
+    }
+  },
+  "activities": {
+    "cleaning-demo:playground-user": [
+      {
+        "id": "act_1787548524180_uu9lph",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-MT6S8JBE-0-3IRUQ",
+          "requestIds": [
+            "CLN-MT6S8JBE-0-3IRUQ"
+          ],
+          "serviceId": "CLN010",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T05:15:24.180Z"
+      },
+      {
+        "id": "act_1787548565219_irzl5k",
+        "type": "crm.profile_viewed",
+        "data": {
+          "text": "show my profile"
+        },
+        "capabilityId": "crm",
+        "createdAt": "2026-08-24T05:16:05.219Z"
+      },
+      {
+        "id": "act_1787549982582_i739wl",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-MT6T3SOM-0-3T1BA",
+          "requestIds": [
+            "CLN-MT6T3SOM-0-3T1BA"
+          ],
+          "serviceId": "CLN-HOURLY",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T05:39:42.582Z"
+      },
+      {
+        "id": "act_1787550016943_bpm2qh",
+        "type": "cleaning.request_updated",
+        "data": {
+          "requestId": "CLN-MT6T3SOM-0-3T1BA",
+          "revision": 1,
+          "preferredDate": "25/08/2026",
+          "preferredTime": "11 am"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T05:40:16.943Z"
+      },
+      {
+        "id": "act_1787550045754_389rfr",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T05:40:45.754Z"
+      },
+      {
+        "id": "act_1787550112280_j8ismk",
+        "type": "cleaning.request_updated",
+        "data": {
+          "requestId": "CLN-MT6T3SOM-0-3T1BA",
+          "revision": 2,
+          "preferredDate": "28/08/2026",
+          "preferredTime": "11 am"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T05:41:52.280Z"
+      },
+      {
+        "id": "act_1787558260446_3kkgcd",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T07:57:40.446Z"
+      },
+      {
+        "id": "act_1787558428458_phvw2j",
+        "type": "crm.name_updated",
+        "data": {
+          "text": "Actually use Zeeshan Ahmad as my name and change my phone to 03019299608."
+        },
+        "capabilityId": "crm",
+        "createdAt": "2026-08-24T08:00:28.458Z"
+      },
+      {
+        "id": "act_1787558463510_obl0vn",
+        "type": "crm.profile_viewed",
+        "data": {
+          "text": "show my profile now"
+        },
+        "capabilityId": "crm",
+        "createdAt": "2026-08-24T08:01:03.510Z"
+      },
+      {
+        "id": "act_1787558562125_71mbyk",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T08:02:42.125Z"
+      },
+      {
+        "id": "act_1787559440701_wcqv0p",
+        "type": "crm.address_updated",
+        "data": {
+          "text": "Change my booked cleaning address to Villa 34, JVC Phase 2, Dubai."
+        },
+        "capabilityId": "crm",
+        "createdAt": "2026-08-24T08:17:20.701Z"
+      },
+      {
+        "id": "act_1787559537510_6us1ox",
+        "type": "crm.profile_viewed",
+        "data": {
+          "text": "ok show my profile now"
+        },
+        "capabilityId": "crm",
+        "createdAt": "2026-08-24T08:18:57.510Z"
+      },
+      {
+        "id": "act_1787562521463_ti4ks1",
+        "type": "crm.name_updated",
+        "data": {
+          "text": "hello my name is james odin"
+        },
+        "capabilityId": "crm",
+        "createdAt": "2026-08-24T09:08:41.463Z"
+      },
+      {
+        "id": "act_1787562771596_ad2qre",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-02MZCSPS",
+          "requestIds": [
+            "CLN-02MZCSPS"
+          ],
+          "serviceId": "CLN010",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T09:12:51.596Z"
+      },
+      {
+        "id": "act_1787562899908_c39u1f",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T09:14:59.908Z"
+      },
+      {
+        "id": "act_1787562904976_huesui",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN023"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T09:15:04.976Z"
+      },
+      {
+        "id": "act_1787563006201_cdhma9",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-DN6CKIWF",
+          "requestIds": [
+            "CLN-DN6CKIWF"
+          ],
+          "serviceId": "CLN023",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T09:16:46.201Z"
+      },
+      {
+        "id": "act_1787563219703_qoc372",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN017"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T09:20:19.703Z"
+      },
+      {
+        "id": "act_1787567139316_vcnk3l",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T10:25:39.316Z"
+      },
+      {
+        "id": "act_1787571485957_zrf153",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T11:38:05.957Z"
+      },
+      {
+        "id": "act_1787571964565_cat0g2",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-BPOAWAMJ",
+          "requestIds": [
+            "CLN-BPOAWAMJ"
+          ],
+          "serviceId": "CLN008",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T11:46:04.565Z"
+      },
+      {
+        "id": "act_1787574372541_r8vqkg",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T12:26:12.541Z"
+      },
+      {
+        "id": "act_1787574397889_30whck",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T12:26:37.889Z"
+      },
+      {
+        "id": "act_1787574541370_qpwe82",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T12:29:01.370Z"
+      },
+      {
+        "id": "act_1787574576863_vnmtlz",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T12:29:36.863Z"
+      },
+      {
+        "id": "act_1787574614271_jf36pb",
+        "type": "cleaning.services_viewed",
+        "data": {
+          "count": 34,
+          "durationHours": null
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T12:30:14.271Z"
+      },
+      {
+        "id": "act_1787578078433_lgqiv6",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-D4031B2Q",
+          "requestIds": [
+            "CLN-D4031B2Q"
+          ],
+          "serviceId": "CLN011",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T13:27:58.434Z"
+      },
+      {
+        "id": "act_1787578883778_lohobh",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-A9R73IOX",
+          "requestIds": [
+            "CLN-A9R73IOX"
+          ],
+          "serviceId": "CLN010",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T13:41:23.778Z"
+      },
+      {
+        "id": "act_1787971512209_d0ds4p",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T02:45:12.209Z"
+      },
+      {
+        "id": "act_1787971804112_vgw6hz",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-1LBB60FE",
+          "requestIds": [
+            "CLN-1LBB60FE"
+          ],
+          "serviceId": "CLN010",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-29T02:50:04.112Z"
+      },
+      {
+        "id": "act_1787971963627_g5v87r",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_hours",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T02:52:43.627Z"
+      },
+      {
+        "id": "act_1787979792148_da05ai",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T05:03:12.148Z"
+      },
+      {
+        "id": "act_1787979913153_f02min",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T05:05:13.153Z"
+      },
+      {
+        "id": "act_1787979938331_eaef4v",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T05:05:38.331Z"
+      },
+      {
+        "id": "act_1788000742086_x8k54l",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T10:52:22.086Z"
+      },
+      {
+        "id": "act_1788004237757_a68eeq",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T11:50:37.757Z"
+      },
+      {
+        "id": "act_1788004451007_bqxul9",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T11:54:11.007Z"
+      },
+      {
+        "id": "act_1788004540900_tc8uq0",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T11:55:40.900Z"
+      },
+      {
+        "id": "act_1788005726675_7ygrp5",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T12:15:26.675Z"
+      },
+      {
+        "id": "act_1788005784752_s0tqj1",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-29T12:16:24.752Z"
+      },
+      {
+        "id": "act_1788006685848_xvtdkz",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T12:31:25.848Z"
+      },
+      {
+        "id": "act_1788006830984_ln14is",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T12:33:50.984Z"
+      },
+      {
+        "id": "act_1788006851262_90p9pd",
+        "type": "cleaning.services_viewed",
+        "data": {
+          "count": 34
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-29T12:34:11.262Z"
+      },
+      {
+        "id": "act_1788007827828_0e0u0o",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T12:50:27.828Z"
+      },
+      {
+        "id": "act_1788007874169_dh0t4z",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T12:51:14.169Z"
+      },
+      {
+        "id": "act_1788007932312_ti7mu9",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T12:52:12.312Z"
+      },
+      {
+        "id": "act_1788007960398_tcp37l",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T12:52:40.398Z"
+      },
+      {
+        "id": "act_1788007982744_gtmnc6",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-29T12:53:02.744Z"
+      },
+      {
+        "id": "act_1788008690804_f3cld5",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T13:04:50.804Z"
+      },
+      {
+        "id": "act_1788059126686_4or9nq",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T03:05:26.686Z"
+      },
+      {
+        "id": "act_1788059145925_nw5rqr",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T03:05:45.925Z"
+      },
+      {
+        "id": "act_1788059262243_4wegso",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T03:07:42.243Z"
+      },
+      {
+        "id": "act_1788059322006_09tjna",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T03:08:42.006Z"
+      },
+      {
+        "id": "act_1788059343863_jhi6gb",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T03:09:03.863Z"
+      },
+      {
+        "id": "act_1788059361235_luklr7",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T03:09:21.235Z"
+      },
+      {
+        "id": "act_1788059385921_5a2rjy",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-30T03:09:45.921Z"
+      },
+      {
+        "id": "act_1788059782413_x35oru",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T03:16:22.413Z"
+      },
+      {
+        "id": "act_1788059806925_4z8wkf",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T03:16:46.925Z"
+      },
+      {
+        "id": "act_1788059989641_tql5ov",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T03:19:49.641Z"
+      },
+      {
+        "id": "act_1788060773405_zjwnfu",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T03:32:53.405Z"
+      },
+      {
+        "id": "act_1788060913219_f8v064",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T03:35:13.219Z"
+      },
+      {
+        "id": "act_1788060940931_xfnd01",
+        "type": "cleaning.services_viewed",
+        "data": {
+          "count": 12
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-30T03:35:40.931Z"
+      },
+      {
+        "id": "act_1788064139233_zg1ou0",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T04:28:59.233Z"
+      },
+      {
+        "id": "act_1788064163951_bnx88e",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T04:29:23.951Z"
+      },
+      {
+        "id": "act_1788064210230_oz9zxy",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T04:30:10.230Z"
+      },
+      {
+        "id": "act_1788064243345_1afau8",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T04:30:43.345Z"
+      },
+      {
+        "id": "act_1788064308012_8lqmvp",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T04:31:48.012Z"
+      },
+      {
+        "id": "act_1788066846891_45u25w",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T05:14:06.891Z"
+      },
+      {
+        "id": "act_1788066881757_f98r3c",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T05:14:41.757Z"
+      },
+      {
+        "id": "act_1788067035070_5aa86u",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-9TU5C7IX",
+          "requestIds": [
+            "CLN-9TU5C7IX"
+          ],
+          "serviceId": "CLN008",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-30T05:17:15.070Z"
+      },
+      {
+        "id": "act_1788067166763_69kfc7",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-30T05:19:26.763Z"
+      },
+      {
+        "id": "act_1788067214868_3tg3qc",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-30T05:20:14.868Z"
+      },
+      {
+        "id": "act_1788067303255_mqpb4d",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T05:21:43.255Z"
+      },
+      {
+        "id": "act_1788067346211_krnia2",
+        "type": "cleaning.services_viewed",
+        "data": {
+          "count": 12
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-30T05:22:26.211Z"
+      },
+      {
+        "id": "act_1788068303594_ut06lm",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T05:38:23.594Z"
+      },
+      {
+        "id": "act_1788068377284_stl8od",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-30T05:39:37.284Z"
+      },
+      {
+        "id": "act_1788068407464_y1baog",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T05:40:07.464Z"
+      },
+      {
+        "id": "act_1788073717340_st66ej",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_about",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T07:08:37.340Z"
+      },
+      {
+        "id": "act_1788079071837_iy4f8z",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T08:37:51.837Z"
+      },
+      {
+        "id": "act_1788081972267_nk7z44",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-30T09:26:12.267Z"
+      },
+      {
+        "id": "act_1788082321819_fwmefm",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T09:32:01.819Z"
+      },
+      {
+        "id": "act_1788082355252_xub3pn",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T09:32:35.252Z"
+      },
+      {
+        "id": "act_1788089629763_0jke44",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T11:33:49.763Z"
+      },
+      {
+        "id": "act_1788092626370_ik192v",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T12:23:46.370Z"
+      },
+      {
+        "id": "act_1788092639953_qj1coo",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-30T12:23:59.953Z"
+      },
+      {
+        "id": "act_1788092771557_uud0b2",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-30T12:26:11.557Z"
+      },
+      {
+        "id": "act_1788092967218_kbf67v",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T12:29:27.218Z"
+      },
+      {
+        "id": "act_1788092989883_it6jzw",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T12:29:49.883Z"
+      },
+      {
+        "id": "act_1788093006188_x3h0b2",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-30T12:30:06.188Z"
+      },
+      {
+        "id": "act_1788093087188_ggb5fl",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T12:31:27.188Z"
+      },
+      {
+        "id": "act_1788095190268_cfi573",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T13:06:30.268Z"
+      },
+      {
+        "id": "act_1788095338468_y7wi70",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-30T13:08:58.468Z"
+      },
+      {
+        "id": "act_1788150442461_peyt3s",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-31T04:27:22.461Z"
+      },
+      {
+        "id": "act_1788150612219_dinre4",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN001"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-31T04:30:12.219Z"
+      },
+      {
+        "id": "act_1788150673628_udvtg3",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-31T04:31:13.628Z"
+      },
+      {
+        "id": "act_1788150928261_dadew7",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-31T04:35:28.261Z"
+      },
+      {
+        "id": "act_1788151529977_0vlhzb",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-31T04:45:29.977Z"
+      },
+      {
+        "id": "act_1788151896857_bogs3k",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-31T04:51:36.857Z"
+      },
+      {
+        "id": "act_1788232305244_rtr4up",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-6FCVH72A",
+          "requestIds": [
+            "CLN-6FCVH72A",
+            "CLN-7XY2J117"
+          ],
+          "serviceId": "CLN002",
+          "count": 2
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-01T03:11:45.244Z"
+      },
+      {
+        "id": "act_1788237227044_qps7qz",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-01T04:33:47.044Z"
+      }
+    ],
+    "default:playground-user": [
+      {
+        "id": "act_1787548877612_ayireh",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P007",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T05:21:17.612Z"
+      },
+      {
+        "id": "act_1787548894648_m3odo6",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P007",
+          "attributes": {
+            "color": "Grey",
+            "size": "S"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T05:21:34.648Z"
+      },
+      {
+        "id": "act_1787548906775_k20chm",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P007",
+          "attributes": {
+            "color": "Grey",
+            "size": "S",
+            "quantity": 5
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T05:21:46.775Z"
+      },
+      {
+        "id": "act_1787548936264_4ujn30",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P007",
+          "attributes": {
+            "color": "Grey",
+            "size": "S",
+            "quantity": 2
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T05:22:16.264Z"
+      },
+      {
+        "id": "act_1787548989271_0gkqu8",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P007",
+          "attributes": {
+            "color": "Black",
+            "size": "L",
+            "quantity": 3
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T05:23:09.271Z"
+      },
+      {
+        "id": "act_1787548996706_o7fpp1",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P007",
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-24T05:23:16.706Z"
+      },
+      {
+        "id": "act_1787549282267_1ev9ns",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P002",
+          "attributes": {
+            "color": "Blue",
+            "size": "36",
+            "quantity": null
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T05:28:02.267Z"
+      },
+      {
+        "id": "act_1787549287152_7y1hu4",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P002",
+          "attributes": {
+            "color": "Blue",
+            "size": "36",
+            "quantity": 1
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T05:28:07.152Z"
+      },
+      {
+        "id": "act_1787549294383_vb4lml",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P002",
+          "cartItems": 3
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-24T05:28:14.383Z"
+      },
+      {
+        "id": "act_1787549869080_aiygdf",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T05:37:49.080Z"
+      },
+      {
+        "id": "act_1787559065084_fx0fqp",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T08:11:05.084Z"
+      },
+      {
+        "id": "act_1787559098803_yfyuzf",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T08:11:38.803Z"
+      },
+      {
+        "id": "act_1787562838108_q23n5v",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T09:13:58.108Z"
+      },
+      {
+        "id": "act_1787562870206_5hkvll",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T09:14:30.206Z"
+      },
+      {
+        "id": "act_1787563469281_po6j9h",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T09:24:29.281Z"
+      },
+      {
+        "id": "act_1787563572476_74vmow",
+        "type": "catalog.category_viewed",
+        "data": {
+          "categoryId": "kitchen",
+          "count": 2
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T09:26:12.476Z"
+      },
+      {
+        "id": "act_1787563595537_bwavd9",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P022",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T09:26:35.537Z"
+      },
+      {
+        "id": "act_1787563619381_4qm648",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P022",
+          "attributes": {
+            "quantity": 24
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T09:26:59.381Z"
+      },
+      {
+        "id": "act_1787563639151_3ihd38",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P022",
+          "attributes": {
+            "quantity": 24,
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T09:27:19.151Z"
+      },
+      {
+        "id": "act_1787563653067_uvyfet",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P022",
+          "attributes": {
+            "quantity": 2,
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T09:27:33.067Z"
+      },
+      {
+        "id": "act_1787563665254_i8pxgd",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P022",
+          "attributes": {
+            "quantity": 2,
+            "color": "Black",
+            "size": "24cm"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T09:27:45.254Z"
+      },
+      {
+        "id": "act_1787563764806_wc3fxm",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P014",
+          "attributes": {
+            "color": "Black",
+            "size": "1L",
+            "quantity": null
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T09:29:24.806Z"
+      },
+      {
+        "id": "act_1787563776875_b0g2wg",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P014",
+          "attributes": {
+            "color": "Black",
+            "size": "1L",
+            "quantity": 2
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T09:29:36.875Z"
+      },
+      {
+        "id": "act_1787563788265_ex1di4",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P014",
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-24T09:29:48.265Z"
+      },
+      {
+        "id": "act_1787563877894_dybaez",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": null,
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-24T09:31:17.894Z"
+      },
+      {
+        "id": "act_1787563915599_boq391",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P019",
+          "attributes": {
+            "color": null,
+            "size": "150ml",
+            "quantity": 1
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T09:31:55.599Z"
+      },
+      {
+        "id": "act_1787563923386_z9mq7v",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P019",
+          "cartItems": 3
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-24T09:32:03.386Z"
+      },
+      {
+        "id": "act_1787566475900_7uuc6k",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T10:14:35.900Z"
+      },
+      {
+        "id": "act_1787567348131_2nagdq",
+        "type": "catalog.category_viewed",
+        "data": {
+          "categoryId": "kitchen",
+          "count": 2
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T10:29:08.131Z"
+      },
+      {
+        "id": "act_1787567366190_qvwfex",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P021",
+          "attributes": {
+            "size": "1.7L"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T10:29:26.190Z"
+      },
+      {
+        "id": "act_1787567401543_7xparc",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P021",
+          "attributes": {
+            "size": "1.7L",
+            "color": "Black",
+            "quantity": 1
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T10:30:01.543Z"
+      },
+      {
+        "id": "act_1787567415103_vgia2h",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P021",
+          "cartItems": 4
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-24T10:30:15.103Z"
+      },
+      {
+        "id": "act_1787567665817_3cqzt5",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P022",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T10:34:25.817Z"
+      },
+      {
+        "id": "act_1787567690643_isg0k9",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P022",
+          "attributes": {
+            "color": "Black",
+            "size": "24cm",
+            "quantity": 3
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T10:34:50.643Z"
+      },
+      {
+        "id": "act_1787567696178_e1wpn8",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P022",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-24T10:34:56.178Z"
+      },
+      {
+        "id": "act_1787567835190_dcayed",
+        "type": "catalog.category_viewed",
+        "data": {
+          "categoryId": "footwear",
+          "count": 2
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T10:37:15.190Z"
+      },
+      {
+        "id": "act_1787567844281_x3l02q",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P011",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T10:37:24.281Z"
+      },
+      {
+        "id": "act_1787567878458_h4f3k2",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P011",
+          "attributes": {
+            "color": "Black",
+            "size": "43",
+            "quantity": 1
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T10:37:58.458Z"
+      },
+      {
+        "id": "act_1787567888094_1pz0p2",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P011",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-24T10:38:08.094Z"
+      },
+      {
+        "id": "act_1787578215570_ueow73",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T13:30:15.570Z"
+      },
+      {
+        "id": "act_1787578261630_eo6l9c",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P021",
+          "attributes": {
+            "size": "1.7L"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T13:31:01.630Z"
+      },
+      {
+        "id": "act_1787578275369_9gn3zd",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P021",
+          "attributes": {
+            "size": "1.7L",
+            "color": "Black",
+            "quantity": 4
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T13:31:15.369Z"
+      },
+      {
+        "id": "act_1787578288714_mnh20v",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P021",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-24T13:31:28.714Z"
+      },
+      {
+        "id": "act_1787578352299_bdtxig",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MT79ZW62-A93E90",
+          "total": 18400
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-24T13:32:32.299Z"
+      },
+      {
+        "id": "act_1787625209299_ytyo8z",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-25T02:33:29.299Z"
+      },
+      {
+        "id": "act_1787625254599_u84xkj",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-25T02:34:14.599Z"
+      },
+      {
+        "id": "act_1787625283577_2zw0v1",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "Black",
+            "size": "M",
+            "quantity": 3
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-25T02:34:43.577Z"
+      },
+      {
+        "id": "act_1787625325389_uk7ckd",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P008",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-25T02:35:25.389Z"
+      },
+      {
+        "id": "act_1787626970078_r0h1h6",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-25T03:02:50.078Z"
+      },
+      {
+        "id": "act_1787627021149_1r2pzz",
+        "type": "crm.name_updated",
+        "data": {
+          "text": "hello mera naam aryan ahmad hai"
+        },
+        "capabilityId": "crm",
+        "createdAt": "2026-08-25T03:03:41.149Z"
+      },
+      {
+        "id": "act_1787627107920_rsxmee",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-25T03:05:07.920Z"
+      },
+      {
+        "id": "act_1787627142396_akbe2m",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "Black",
+            "size": "S",
+            "quantity": 2
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-25T03:05:42.396Z"
+      },
+      {
+        "id": "act_1787627151937_e15g4u",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P008",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-25T03:05:51.937Z"
+      },
+      {
+        "id": "act_1787631662879_wefycz",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-25T04:21:02.879Z"
+      },
+      {
+        "id": "act_1787638984575_zge4tg",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-25T06:23:04.575Z"
+      },
+      {
+        "id": "act_1787639034831_n7www2",
+        "type": "crm.name_updated",
+        "data": {
+          "text": "mera name aryan ahmd hai"
+        },
+        "capabilityId": "crm",
+        "createdAt": "2026-08-25T06:23:54.831Z"
+      },
+      {
+        "id": "act_1787639114031_1h3r7x",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P001",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-25T06:25:14.031Z"
+      },
+      {
+        "id": "act_1787639126835_2yiinc",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-25T06:25:26.835Z"
+      },
+      {
+        "id": "act_1787639191231_nccox5",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "Black",
+            "size": "S",
+            "quantity": 5
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-25T06:26:31.231Z"
+      },
+      {
+        "id": "act_1787639204794_zl8t75",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P008",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-25T06:26:44.794Z"
+      },
+      {
+        "id": "act_1787639220275_qb3the",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MT8A8I7D-58C791",
+          "total": 11000
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-25T06:27:00.275Z"
+      },
+      {
+        "id": "act_1787971314486_3rmfkn",
+        "type": "crm.name_updated",
+        "data": {
+          "text": "hello mera name aryan ahmad hai"
+        },
+        "capabilityId": "crm",
+        "createdAt": "2026-08-29T02:41:54.486Z"
+      },
+      {
+        "id": "act_1787971352692_0yjubo",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-29T02:42:32.692Z"
+      },
+      {
+        "id": "act_1787971385544_zl6znn",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "Black",
+            "size": "M",
+            "quantity": 2
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-29T02:43:05.544Z"
+      },
+      {
+        "id": "act_1787971393555_6vvpcm",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P008",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-29T02:43:13.555Z"
+      },
+      {
+        "id": "act_1787971444105_zon8rs",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MTDS17R4-0AD2B2",
+          "total": 4400
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-29T02:44:04.105Z"
+      },
+      {
+        "id": "act_1788005030372_wgjx7i",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T12:03:50.372Z"
+      },
+      {
+        "id": "act_1788006806937_khom3n",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T12:33:26.937Z"
+      },
+      {
+        "id": "act_1788007775520_13x7h7",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T12:49:35.520Z"
+      },
+      {
+        "id": "act_1788059043103_y67ay2",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T03:04:03.103Z"
+      },
+      {
+        "id": "act_1788059298871_1ladm0",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T03:08:18.871Z"
+      },
+      {
+        "id": "act_1788064389527_lryhis",
+        "type": "catalog.category_viewed",
+        "data": {
+          "categoryId": "footwear",
+          "count": 2
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-30T04:33:09.527Z"
+      },
+      {
+        "id": "act_1788064678796_g88y5t",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P011",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-30T04:37:58.796Z"
+      },
+      {
+        "id": "act_1788064720839_86t2si",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P011",
+          "attributes": {
+            "color": "Black",
+            "size": "40",
+            "quantity": 3
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-30T04:38:40.839Z"
+      },
+      {
+        "id": "act_1788064844058_zvozo7",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P011",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-30T04:40:44.058Z"
+      },
+      {
+        "id": "act_1788081644140_7mcoy6",
+        "type": "catalog.category_viewed",
+        "data": {
+          "categoryId": "footwear",
+          "count": 0
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-30T09:20:44.140Z"
+      },
+      {
+        "id": "act_1788081749738_p3xsjc",
+        "type": "catalog.category_viewed",
+        "data": {
+          "categoryId": "footwear",
+          "count": 2
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-30T09:22:29.738Z"
+      },
+      {
+        "id": "act_1788081774989_ikcw9r",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P011",
+          "attributes": {
+            "color": "White"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-30T09:22:54.990Z"
+      },
+      {
+        "id": "act_1788089612426_lg540t",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T11:33:32.426Z"
+      },
+      {
+        "id": "act_1788092601639_q2n9q4",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T12:23:21.639Z"
+      },
+      {
+        "id": "act_1788095397940_aob2j6",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-30T13:09:57.941Z"
+      },
+      {
+        "id": "act_1788151619703_pgytek",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-31T04:46:59.703Z"
+      },
+      {
+        "id": "act_1788151873278_oliah1",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-31T04:51:13.278Z"
+      },
+      {
+        "id": "act_1788152070489_60s79e",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "White",
+            "size": "S"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-31T04:54:30.489Z"
+      },
+      {
+        "id": "act_1788152091763_9v3j1v",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "White",
+            "size": "S",
+            "quantity": 5
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-31T04:54:51.763Z"
+      },
+      {
+        "id": "act_1788152138455_65t94x",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P011",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-31T04:55:38.455Z"
+      },
+      {
+        "id": "act_1788152171976_nl81xj",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P011",
+          "attributes": {
+            "color": "Grey",
+            "size": "40",
+            "quantity": 3
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-31T04:56:11.976Z"
+      },
+      {
+        "id": "act_1788152198374_7nov8u",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P011",
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-31T04:56:38.374Z"
+      },
+      {
+        "id": "act_1788152841310_b19me6",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MTGS16QC-DF3F48",
+          "total": 30500
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-31T05:07:21.310Z"
+      },
+      {
+        "id": "act_1788164665439_g89r30",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P015",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-31T08:24:25.439Z"
+      },
+      {
+        "id": "act_1788164813874_82vfa0",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": null,
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-31T08:26:53.874Z"
+      },
+      {
+        "id": "act_1788164882480_a3d712",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P015",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-31T08:28:02.480Z"
+      },
+      {
+        "id": "act_1788164894428_r7jawv",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P015",
+          "attributes": {
+            "color": "Black",
+            "quantity": 3
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-31T08:28:14.428Z"
+      },
+      {
+        "id": "act_1788164924606_qrvcji",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P015",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-31T08:28:44.606Z"
+      },
+      {
+        "id": "act_1788164932530_nuqr6s",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P015",
+          "attributes": {
+            "color": "Black",
+            "quantity": 4
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-31T08:28:52.530Z"
+      },
+      {
+        "id": "act_1788165069586_s7adhw",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P015",
+          "cartItems": 3
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-31T08:31:09.586Z"
+      },
+      {
+        "id": "act_1788231116817_2lb9zs",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P015",
+          "attributes": {
+            "color": "Black",
+            "quantity": 5
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-01T02:51:56.817Z"
+      },
+      {
+        "id": "act_1788231129095_x1p0il",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P015",
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-01T02:52:09.095Z"
+      },
+      {
+        "id": "act_1788231279764_4sbolv",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P002",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-01T02:54:39.764Z"
+      },
+      {
+        "id": "act_1788257013165_6xt6y6",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P019",
+          "attributes": {
+            "size": "150ml"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-01T10:03:33.165Z"
+      },
+      {
+        "id": "act_1788257037541_hnz6md",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P019",
+          "attributes": {
+            "size": "150ml",
+            "quantity": 1
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-01T10:03:57.541Z"
+      },
+      {
+        "id": "act_1788258326537_amj9hh",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P023",
+          "attributes": {
+            "size": "6mm"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-01T10:25:26.537Z"
+      },
+      {
+        "id": "act_1788258426011_38l9h6",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P023",
+          "attributes": {
+            "size": "6mm",
+            "quantity": 3,
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-01T10:27:06.011Z"
+      },
+      {
+        "id": "act_1788258823589_vf4vgt",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "Black",
+            "size": "L",
+            "quantity": 2
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-01T10:33:43.589Z"
+      },
+      {
+        "id": "act_1788262263570_9tezu5",
+        "type": "assistant.message",
+        "data": {
+          "intent": "nlu_information_question",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-01T11:31:03.570Z"
+      },
+      {
+        "id": "act_1788409081014_tdum4a",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "Blue",
+            "quantity": 2
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-03T04:18:01.014Z"
+      },
+      {
+        "id": "act_1788409093891_1zrhkp",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "Blue",
+            "quantity": 2,
+            "size": "S"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-03T04:18:13.891Z"
+      }
+    ],
+    "default:debug-tv": [
+      {
+        "id": "act_1787561356751_sx4hfw",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P012",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:49:16.751Z"
+      }
+    ],
+    "default:debug-sem": [
+      {
+        "id": "act_1787561371884_43cj7t",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:49:31.884Z"
+      },
+      {
+        "id": "act_1787561372149_1ljlrl",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "White"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:49:32.149Z"
+      },
+      {
+        "id": "act_1787561374034_aqtl4j",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "White",
+            "size": "S"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:49:34.034Z"
+      },
+      {
+        "id": "act_1787561374336_9aro7w",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "White",
+            "size": "S",
+            "quantity": 3
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:49:34.336Z"
+      }
+    ],
+    "default:sem-1": [
+      {
+        "id": "act_1787561422840_h6wz10",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "test"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T08:50:22.840Z"
+      }
+    ],
+    "default:sem-2": [
+      {
+        "id": "act_1787561424751_rfd5gu",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "test"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T08:50:24.751Z"
+      }
+    ],
+    "cleaning-demo:sem-3": [
+      {
+        "id": "act_1787561426077_ihybxq",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "test"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T08:50:26.077Z"
+      }
+    ],
+    "default:sem-5": [
+      {
+        "id": "act_1787561428237_pjqx9a",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:50:28.237Z"
+      },
+      {
+        "id": "act_1787561428819_ze6x6l",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "White"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:50:28.819Z"
+      },
+      {
+        "id": "act_1787561429450_87l996",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "White",
+            "size": "S"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:50:29.450Z"
+      },
+      {
+        "id": "act_1787561429974_s00yhm",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "White",
+            "size": "S",
+            "quantity": 3
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:50:29.974Z"
+      },
+      {
+        "id": "act_1787561431122_h4y3n5",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P008",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-24T08:50:31.122Z"
+      }
+    ],
+    "default:sem-6": [
+      {
+        "id": "act_1787561431582_xlwfuy",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:50:31.582Z"
+      },
+      {
+        "id": "act_1787561432044_7m503n",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "White"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:50:32.044Z"
+      },
+      {
+        "id": "act_1787561432432_ttov4t",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "White",
+            "size": "S"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:50:32.432Z"
+      },
+      {
+        "id": "act_1787561432823_b5e5p3",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "White",
+            "size": "S",
+            "quantity": 1
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:50:32.823Z"
+      }
+    ],
+    "default:tv-1": [
+      {
+        "id": "act_1787561477747_c813p9",
+        "type": "catalog.category_viewed",
+        "data": {
+          "categoryId": "footwear",
+          "count": 2
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:51:17.747Z"
+      },
+      {
+        "id": "act_1787561478100_uhajkx",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P012",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:51:18.100Z"
+      },
+      {
+        "id": "act_1787561478392_0hoaod",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P012",
+          "attributes": {
+            "color": "Black",
+            "size": "41"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:51:18.392Z"
+      }
+    ],
+    "default:tv-2": [
+      {
+        "id": "act_1787561478963_u9n8ps",
+        "type": "catalog.category_viewed",
+        "data": {
+          "categoryId": "footwear",
+          "count": 2
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:51:18.963Z"
+      },
+      {
+        "id": "act_1787561479314_wlu2v9",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P012",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:51:19.314Z"
+      },
+      {
+        "id": "act_1787561479581_110cx5",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P012",
+          "attributes": {
+            "color": "Black",
+            "size": "41"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:51:19.581Z"
+      }
+    ],
+    "default:tv-3": [
+      {
+        "id": "act_1787561480106_t2z91k",
+        "type": "catalog.category_viewed",
+        "data": {
+          "categoryId": "footwear",
+          "count": 2
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:51:20.106Z"
+      },
+      {
+        "id": "act_1787561480614_7j7iqb",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P012",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:51:20.614Z"
+      },
+      {
+        "id": "act_1787561480862_l7grob",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P012",
+          "attributes": {
+            "color": "Black",
+            "size": "41"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:51:20.862Z"
+      }
+    ],
+    "default:tv-4": [
+      {
+        "id": "act_1787561481639_bjudyf",
+        "type": "catalog.category_viewed",
+        "data": {
+          "categoryId": "footwear",
+          "count": 2
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:51:21.639Z"
+      },
+      {
+        "id": "act_1787561481914_49nfex",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P012",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:51:21.914Z"
+      },
+      {
+        "id": "act_1787561482223_uahpv6",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P012",
+          "attributes": {
+            "color": "Black",
+            "size": "41"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:51:22.223Z"
+      }
+    ],
+    "default:ux-checkout": [
+      {
+        "id": "act_1787561856713_yg7f43",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P012",
+          "attributes": {
+            "color": "Black",
+            "size": "42",
+            "quantity": 2
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-24T08:57:36.713Z"
+      },
+      {
+        "id": "act_1787561857580_wvse0c",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P012",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-08-24T08:57:37.581Z"
+      },
+      {
+        "id": "act_1787561862232_5muwfn",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "channel": "ux"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T08:57:42.232Z"
+      }
+    ],
+    "cleaning-demo:ux-clean": [
+      {
+        "id": "act_1787561866828_ooluyc",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN001"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T08:57:46.828Z"
+      }
+    ],
+    "default:ux-greet-r": [
+      {
+        "id": "act_1787561869440_8iu3ov",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "ux"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T08:57:49.440Z"
+      }
+    ],
+    "salon-demo:ux-greet-s": [
+      {
+        "id": "act_1787561869850_a5dicu",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "ux"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T08:57:49.850Z"
+      }
+    ],
+    "healthcare-demo:ux-greet-h": [
+      {
+        "id": "act_1787561870271_7cxe7x",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "ux"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T08:57:50.271Z"
+      }
+    ],
+    "cleaning-demo:user1": [
+      {
+        "id": "act_1787578923745_bkkam5",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T13:42:03.745Z"
+      },
+      {
+        "id": "act_1787578941623_dne491",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T13:42:21.623Z"
+      },
+      {
+        "id": "act_1787578957921_ou9all",
+        "type": "assistant.message",
+        "data": {
+          "intent": "domain_mismatch",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T13:42:37.921Z"
+      },
+      {
+        "id": "act_1787579006900_fhbdb2",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-24T13:43:26.900Z"
+      },
+      {
+        "id": "act_1787579242262_drunkm",
+        "type": "assistant.message",
+        "data": {
+          "intent": "domain_mismatch",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T13:47:22.262Z"
+      },
+      {
+        "id": "act_1787579349320_jsky3m",
+        "type": "assistant.message",
+        "data": {
+          "intent": "domain_mismatch",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-24T13:49:09.320Z"
+      }
+    ],
+    "cleaning-demo:playground-user1": [
+      {
+        "id": "act_1787627742983_yn1pn6",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-25T03:15:42.983Z"
+      },
+      {
+        "id": "act_1787992511496_ndht3f",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T08:35:11.496Z"
+      },
+      {
+        "id": "act_1787992529574_ynsd6e",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T08:35:29.574Z"
+      },
+      {
+        "id": "act_1787992575313_9llok7",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T08:36:15.313Z"
+      },
+      {
+        "id": "act_1787992602250_uxfnf7",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T08:36:42.250Z"
+      },
+      {
+        "id": "act_1787992709826_lmjl22",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T08:38:29.826Z"
+      },
+      {
+        "id": "act_1787996288369_rsjk6l",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_about",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T09:38:08.369Z"
+      },
+      {
+        "id": "act_1787996442018_wyty8z",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T09:40:42.018Z"
+      },
+      {
+        "id": "act_1788000518368_k1xxug",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T10:48:38.368Z"
+      },
+      {
+        "id": "act_1788000670504_foehp1",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T10:51:10.504Z"
+      }
+    ],
+    "cleaning-demo:kit-clean-a01": [
+      {
+        "id": "act_1787635706761_90xpf7",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-25T05:28:26.761Z"
+      }
+    ],
+    "cleaning-demo:kit-clean-a07": [
+      {
+        "id": "act_1787635709973_qdmagg",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-25T05:28:29.973Z"
+      }
+    ],
+    "cleaning-demo:kit-clean-i01": [
+      {
+        "id": "act_1787635717294_u78lps",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-25T05:28:37.294Z"
+      }
+    ],
+    "cleaning-demo:kit-clean-m06": [
+      {
+        "id": "act_1787635724692_v5u9b3",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN028"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-08-25T05:28:44.692Z"
+      }
+    ],
+    "cleaning-demo:kit-clean-m10": [
+      {
+        "id": "act_1787635726680_8ztjzc",
+        "type": "crm.field_edit_rejected",
+        "data": {
+          "text": "Hi, before doing anything tell me your phone and Saturday hours; then check whether 2 cleaners can do standard cleaning for my 3-bedroom apartment on 30/09/2026 from 10 AM to 1 PM with two balconies and five interior windows, bring fragrance-free supplies if available, total the price, do not confirm, and if that time is unavailable try 2 PM but do not change the number of cleaners."
+        },
+        "capabilityId": "crm",
+        "createdAt": "2026-08-25T05:28:46.680Z"
+      }
+    ],
+    "default:kit-retail-a09": [
+      {
+        "id": "act_1787635752167_ld28aw",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-25T05:29:12.167Z"
+      }
+    ],
+    "default:kit-retail-g08": [
+      {
+        "id": "act_1787635757910_5q0bx2",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-08-25T05:29:17.910Z"
+      }
+    ],
+    "default:kit-retail-l02": [
+      {
+        "id": "act_1787635763334_tktxva",
+        "type": "assistant.message",
+        "data": {
+          "intent": "data_access_denied",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-25T05:29:23.334Z"
+      }
+    ],
+    "default:kit-retail-l03": [
+      {
+        "id": "act_1787635764109_13pfiz",
+        "type": "assistant.message",
+        "data": {
+          "intent": "data_access_denied",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-25T05:29:24.109Z"
+      }
+    ],
+    "restaurant-demo:playground-user": [
+      {
+        "id": "act_1787972421711_b26ho5",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T03:00:21.711Z"
+      }
+    ],
+    "cleaning-demo:playground-user234": [
+      {
+        "id": "act_1787976742749_x5obvy",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T04:12:22.749Z"
+      }
+    ],
+    "default:playground-user1": [
+      {
+        "id": "act_1787992426947_j8yby5",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T08:33:46.947Z"
+      },
+      {
+        "id": "act_1787995135182_vnke8g",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-08-29T09:18:55.182Z"
+      },
+      {
+        "id": "act_1788319987130_7ksv8q",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-02T03:33:07.130Z"
+      },
+      {
+        "id": "act_1788320097274_9dkaui",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-02T03:34:57.274Z"
+      },
+      {
+        "id": "act_1788320516912_dvkz5h",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-02T03:41:56.912Z"
+      },
+      {
+        "id": "act_1788321138495_4y97gj",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-02T03:52:18.495Z"
+      },
+      {
+        "id": "act_1788323794988_c84fov",
+        "type": "catalog.category_viewed",
+        "data": {
+          "categoryId": "kitchen",
+          "count": 2
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-02T04:36:34.988Z"
+      },
+      {
+        "id": "act_1788323855654_3nanrg",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-02T04:37:35.654Z"
+      },
+      {
+        "id": "act_1788323932677_49wfhk",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black",
+            "quantity": 3
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-02T04:38:52.677Z"
+      },
+      {
+        "id": "act_1788323960675_cl678c",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black",
+            "quantity": 10
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-02T04:39:20.675Z"
+      },
+      {
+        "id": "act_1788324268512_ezxp8i",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P001",
+          "attributes": {
+            "color": "Navy",
+            "quantity": 10,
+            "size": "S"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-02T04:44:28.512Z"
+      },
+      {
+        "id": "act_1788324302883_vqyzib",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P001",
+          "attributes": {
+            "color": "Navy",
+            "quantity": 1,
+            "size": "S"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-02T04:45:02.883Z"
+      },
+      {
+        "id": "act_1788324312329_lt3z4w",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P001",
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-02T04:45:12.329Z"
+      }
+    ]
+  }
+}

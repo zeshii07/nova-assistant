@@ -353,18 +353,10 @@ class ExecutionEngine {
       await this.services.leadService.observe({tenantId:tenant.id,conversationId,customerId:message.customerId,channel:message.channel,message,customer:latestCustomer,capabilityId,intelligence,result,state});
     }
 
-    // v21.0: Feedback collection — observes the conversation outcome to
-    // generate labeled training examples for the ML intent classifier.
-    // Passive, failure-isolated, never blocks the reply.
+    // v21.0: Feedback collection — passive, failure-isolated
     if(this.feedbackCollector){
-      try{
-        this.feedbackCollector.observe({
-          tenantId:tenant.id, conversationId, customerId:message.customerId,
-          message, intelligence, result, stateBefore, stateAfter:state, capabilityId
-        });
-      }catch(error){
-        logger.warn('feedback_collector.observe_failed',{error:error.message});
-      }
+      try{ this.feedbackCollector.observe({ tenantId:tenant.id, conversationId, customerId:message.customerId, message, intelligence, result, stateBefore, stateAfter:state, capabilityId }); }
+      catch(error){ logger.warn('feedback_collector.observe_failed',{error:error.message}); }
     }
 
     await this.eventBus.publish("message.processed.v1", { tenantId:tenant.id, conversationId, capabilityId }, { source:"execution-engine" });

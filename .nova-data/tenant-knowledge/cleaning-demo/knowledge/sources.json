@@ -1,0 +1,28 @@
+[
+  {
+    "id": "SRC-BUSINESS",
+    "kind": "business_profile",
+    "title": "Business profile",
+    "file": "knowledge/business.json",
+    "status": "active",
+    "priority": 100,
+    "revision": 1,
+    "tags": [],
+    "metadata": {},
+    "createdAt": "2026-08-29T02:51:43.485Z",
+    "updatedAt": "2026-08-29T02:51:43.485Z"
+  },
+  {
+    "id": "SRC-FAQS",
+    "kind": "faq_collection",
+    "title": "FAQs",
+    "file": "knowledge/faqs.json",
+    "status": "active",
+    "priority": 80,
+    "revision": 1,
+    "tags": [],
+    "metadata": {},
+    "createdAt": "2026-08-29T02:51:43.489Z",
+    "updatedAt": "2026-08-29T02:51:43.489Z"
+  }
+]

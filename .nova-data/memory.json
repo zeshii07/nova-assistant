@@ -1,0 +1,4289 @@
+{
+  "records": {
+    "cleaning-demo:customer:cleaning:history.1787548524182.jatowy:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1787548524182.jatowy:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1787548524182.jatowy",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-MT6S8JBE-0-3IRUQ",
+          "requestIds": [
+            "CLN-MT6S8JBE-0-3IRUQ"
+          ],
+          "serviceId": "CLN010",
+          "count": 1
+        },
+        "occurredAt": "2026-08-24T05:15:24.183Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T05:15:24.183Z",
+      "updatedAt": "2026-08-24T05:15:24.183Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:playground-user": {
+      "id": "default:customer:catalog:preference.lastProductViewed:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P008",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T05:21:17.609Z",
+      "updatedAt": "2026-09-03T04:18:13.872Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:playground-user": {
+      "id": "default:customer:catalog:preference.preferredColor:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "Blue",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T05:21:34.646Z",
+      "updatedAt": "2026-09-03T04:18:13.880Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:preference.language:playground-user": {
+      "id": "default:customer:assistant:preference.language:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T05:37:49.075Z",
+      "updatedAt": "2026-09-01T11:31:03.561Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787549869078.85gw2u:playground-user": {
+      "id": "default:customer:assistant:history.1787549869078.85gw2u:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787549869078.85gw2u",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "i want a cleaner for cleaner for only 2 hours on tusedy my location is al barsha"
+        },
+        "occurredAt": "2026-08-24T05:37:49.078Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T05:37:49.078Z",
+      "updatedAt": "2026-08-24T05:37:49.078Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1787549982584.liff2p:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1787549982584.liff2p:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1787549982584.liff2p",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-MT6T3SOM-0-3T1BA",
+          "requestIds": [
+            "CLN-MT6T3SOM-0-3T1BA"
+          ],
+          "serviceId": "CLN-HOURLY",
+          "count": 1
+        },
+        "occurredAt": "2026-08-24T05:39:42.584Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T05:39:42.584Z",
+      "updatedAt": "2026-08-24T05:39:42.584Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:preference.language:playground-user": {
+      "id": "cleaning-demo:customer:assistant:preference.language:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T05:40:45.745Z",
+      "updatedAt": "2026-08-31T04:45:29.968Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787550045749.iyyoqd:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787550045749.iyyoqd:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787550045749.iyyoqd",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "text": "update the date to 28"
+        },
+        "occurredAt": "2026-08-24T05:40:45.749Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T05:40:45.749Z",
+      "updatedAt": "2026-08-24T05:40:45.749Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787558260437.xf7n31:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787558260437.xf7n31:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787558260437.xf7n31",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-24T07:57:40.437Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T07:57:40.437Z",
+      "updatedAt": "2026-08-24T07:57:40.437Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787558562120.cx9ejs:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787558562120.cx9ejs:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787558562120.cx9ejs",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "text": "can you do it today"
+        },
+        "occurredAt": "2026-08-24T08:02:42.120Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:02:42.120Z",
+      "updatedAt": "2026-08-24T08:02:42.120Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787559065080.6bci5p:playground-user": {
+      "id": "default:customer:assistant:history.1787559065080.6bci5p:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787559065080.6bci5p",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello actully i am looking for  hair oil for my falling hairs"
+        },
+        "occurredAt": "2026-08-24T08:11:05.080Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:11:05.080Z",
+      "updatedAt": "2026-08-24T08:11:05.080Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787559098797.a2qxtw:playground-user": {
+      "id": "default:customer:assistant:history.1787559098797.a2qxtw:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787559098797.a2qxtw",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "text": "i am looking for an oil for my falling hairs do you have one ?"
+        },
+        "occurredAt": "2026-08-24T08:11:38.798Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:11:38.798Z",
+      "updatedAt": "2026-08-24T08:11:38.798Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:debug-tv": {
+      "id": "default:customer:catalog:preference.lastProductViewed:debug-tv",
+      "tenantId": "default",
+      "customerId": "debug-tv",
+      "conversationId": "default:test:debug-tv",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P012",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:49:16.747Z",
+      "updatedAt": "2026-08-24T08:49:16.747Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:debug-sem": {
+      "id": "default:customer:catalog:preference.lastProductViewed:debug-sem",
+      "tenantId": "default",
+      "customerId": "debug-sem",
+      "conversationId": "default:test:debug-sem",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P008",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:49:31.880Z",
+      "updatedAt": "2026-08-24T08:49:34.330Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:debug-sem": {
+      "id": "default:customer:catalog:preference.preferredColor:debug-sem",
+      "tenantId": "default",
+      "customerId": "debug-sem",
+      "conversationId": "default:test:debug-sem",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "White",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:49:32.146Z",
+      "updatedAt": "2026-08-24T08:49:34.333Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:preference.language:sem-1": {
+      "id": "default:customer:assistant:preference.language:sem-1",
+      "tenantId": "default",
+      "customerId": "sem-1",
+      "conversationId": "default:test:sem-1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:50:22.834Z",
+      "updatedAt": "2026-08-24T08:50:22.834Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787561422837.i4f64u:sem-1": {
+      "id": "default:customer:assistant:history.1787561422837.i4f64u:sem-1",
+      "tenantId": "default",
+      "customerId": "sem-1",
+      "conversationId": "default:test:sem-1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787561422837.i4f64u",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "hello how are you doing today"
+        },
+        "occurredAt": "2026-08-24T08:50:22.837Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:50:22.837Z",
+      "updatedAt": "2026-08-24T08:50:22.837Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:preference.language:sem-2": {
+      "id": "default:customer:assistant:preference.language:sem-2",
+      "tenantId": "default",
+      "customerId": "sem-2",
+      "conversationId": "default:test:sem-2",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:50:24.688Z",
+      "updatedAt": "2026-08-24T08:50:24.688Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787561424739.hlyste:sem-2": {
+      "id": "default:customer:assistant:history.1787561424739.hlyste:sem-2",
+      "tenantId": "default",
+      "customerId": "sem-2",
+      "conversationId": "default:test:sem-2",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787561424739.hlyste",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-24T08:50:24.739Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:50:24.740Z",
+      "updatedAt": "2026-08-24T08:50:24.740Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:preference.language:sem-3": {
+      "id": "cleaning-demo:customer:assistant:preference.language:sem-3",
+      "tenantId": "cleaning-demo",
+      "customerId": "sem-3",
+      "conversationId": "cleaning-demo:test:sem-3",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:50:26.056Z",
+      "updatedAt": "2026-08-24T08:50:26.056Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787561426068.f0kvzq:sem-3": {
+      "id": "cleaning-demo:customer:assistant:history.1787561426068.f0kvzq:sem-3",
+      "tenantId": "cleaning-demo",
+      "customerId": "sem-3",
+      "conversationId": "cleaning-demo:test:sem-3",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787561426068.f0kvzq",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-24T08:50:26.068Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:50:26.068Z",
+      "updatedAt": "2026-08-24T08:50:26.068Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:sem-5": {
+      "id": "default:customer:catalog:preference.lastProductViewed:sem-5",
+      "tenantId": "default",
+      "customerId": "sem-5",
+      "conversationId": "default:test:sem-5",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P008",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:50:28.219Z",
+      "updatedAt": "2026-08-24T08:50:29.965Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:sem-5": {
+      "id": "default:customer:catalog:preference.preferredColor:sem-5",
+      "tenantId": "default",
+      "customerId": "sem-5",
+      "conversationId": "default:test:sem-5",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "White",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:50:28.816Z",
+      "updatedAt": "2026-08-24T08:50:29.968Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:sem-6": {
+      "id": "default:customer:catalog:preference.lastProductViewed:sem-6",
+      "tenantId": "default",
+      "customerId": "sem-6",
+      "conversationId": "default:test:sem-6",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P008",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:50:31.578Z",
+      "updatedAt": "2026-08-24T08:50:32.798Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:sem-6": {
+      "id": "default:customer:catalog:preference.preferredColor:sem-6",
+      "tenantId": "default",
+      "customerId": "sem-6",
+      "conversationId": "default:test:sem-6",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "White",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:50:32.040Z",
+      "updatedAt": "2026-08-24T08:50:32.814Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:tv-1": {
+      "id": "default:customer:catalog:preference.lastProductViewed:tv-1",
+      "tenantId": "default",
+      "customerId": "tv-1",
+      "conversationId": "default:test:tv-1",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P012",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:51:18.096Z",
+      "updatedAt": "2026-08-24T08:51:18.367Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:tv-1": {
+      "id": "default:customer:catalog:preference.preferredColor:tv-1",
+      "tenantId": "default",
+      "customerId": "tv-1",
+      "conversationId": "default:test:tv-1",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "Black",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:51:18.383Z",
+      "updatedAt": "2026-08-24T08:51:18.383Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:tv-2": {
+      "id": "default:customer:catalog:preference.lastProductViewed:tv-2",
+      "tenantId": "default",
+      "customerId": "tv-2",
+      "conversationId": "default:test:tv-2",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P012",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:51:19.310Z",
+      "updatedAt": "2026-08-24T08:51:19.567Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:tv-2": {
+      "id": "default:customer:catalog:preference.preferredColor:tv-2",
+      "tenantId": "default",
+      "customerId": "tv-2",
+      "conversationId": "default:test:tv-2",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "Black",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:51:19.578Z",
+      "updatedAt": "2026-08-24T08:51:19.578Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:tv-3": {
+      "id": "default:customer:catalog:preference.lastProductViewed:tv-3",
+      "tenantId": "default",
+      "customerId": "tv-3",
+      "conversationId": "default:test:tv-3",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P012",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:51:20.611Z",
+      "updatedAt": "2026-08-24T08:51:20.855Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:tv-3": {
+      "id": "default:customer:catalog:preference.preferredColor:tv-3",
+      "tenantId": "default",
+      "customerId": "tv-3",
+      "conversationId": "default:test:tv-3",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "Black",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:51:20.859Z",
+      "updatedAt": "2026-08-24T08:51:20.859Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:tv-4": {
+      "id": "default:customer:catalog:preference.lastProductViewed:tv-4",
+      "tenantId": "default",
+      "customerId": "tv-4",
+      "conversationId": "default:test:tv-4",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P012",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:51:21.911Z",
+      "updatedAt": "2026-08-24T08:51:22.212Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:tv-4": {
+      "id": "default:customer:catalog:preference.preferredColor:tv-4",
+      "tenantId": "default",
+      "customerId": "tv-4",
+      "conversationId": "default:test:tv-4",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "Black",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:51:22.215Z",
+      "updatedAt": "2026-08-24T08:51:22.215Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:ux-checkout": {
+      "id": "default:customer:catalog:preference.lastProductViewed:ux-checkout",
+      "tenantId": "default",
+      "customerId": "ux-checkout",
+      "conversationId": "default:ux:ux-checkout",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P012",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:57:36.699Z",
+      "updatedAt": "2026-08-24T08:57:36.699Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:ux-checkout": {
+      "id": "default:customer:catalog:preference.preferredColor:ux-checkout",
+      "tenantId": "default",
+      "customerId": "ux-checkout",
+      "conversationId": "default:ux:ux-checkout",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "Black",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:57:36.709Z",
+      "updatedAt": "2026-08-24T08:57:36.709Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:preference.language:ux-checkout": {
+      "id": "default:customer:assistant:preference.language:ux-checkout",
+      "tenantId": "default",
+      "customerId": "ux-checkout",
+      "conversationId": "default:ux:ux-checkout",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:57:42.200Z",
+      "updatedAt": "2026-08-24T08:57:42.200Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787561862219.jfm0g7:ux-checkout": {
+      "id": "default:customer:assistant:history.1787561862219.jfm0g7:ux-checkout",
+      "tenantId": "default",
+      "customerId": "ux-checkout",
+      "conversationId": "default:ux:ux-checkout",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787561862219.jfm0g7",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "text": "can i see other products please"
+        },
+        "occurredAt": "2026-08-24T08:57:42.219Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:57:42.219Z",
+      "updatedAt": "2026-08-24T08:57:42.219Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:preference.lastCleaningService:ux-clean": {
+      "id": "cleaning-demo:customer:cleaning:preference.lastCleaningService:ux-clean",
+      "tenantId": "cleaning-demo",
+      "customerId": "ux-clean",
+      "conversationId": "cleaning-demo:ux:ux-clean",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "preference.lastCleaningService",
+      "value": "CLN001",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:57:46.825Z",
+      "updatedAt": "2026-08-24T08:57:46.825Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:preference.language:ux-greet-r": {
+      "id": "default:customer:assistant:preference.language:ux-greet-r",
+      "tenantId": "default",
+      "customerId": "ux-greet-r",
+      "conversationId": "default:ux:ux-greet-r",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:57:49.419Z",
+      "updatedAt": "2026-08-24T08:57:49.419Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787561869423.ewa2vk:ux-greet-r": {
+      "id": "default:customer:assistant:history.1787561869423.ewa2vk:ux-greet-r",
+      "tenantId": "default",
+      "customerId": "ux-greet-r",
+      "conversationId": "default:ux:ux-greet-r",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787561869423.ewa2vk",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-24T08:57:49.423Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:57:49.423Z",
+      "updatedAt": "2026-08-24T08:57:49.423Z",
+      "metadata": {}
+    },
+    "salon-demo:customer:assistant:preference.language:ux-greet-s": {
+      "id": "salon-demo:customer:assistant:preference.language:ux-greet-s",
+      "tenantId": "salon-demo",
+      "customerId": "ux-greet-s",
+      "conversationId": "salon-demo:ux:ux-greet-s",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:57:49.813Z",
+      "updatedAt": "2026-08-24T08:57:49.813Z",
+      "metadata": {}
+    },
+    "salon-demo:customer:assistant:history.1787561869846.eyk3im:ux-greet-s": {
+      "id": "salon-demo:customer:assistant:history.1787561869846.eyk3im:ux-greet-s",
+      "tenantId": "salon-demo",
+      "customerId": "ux-greet-s",
+      "conversationId": "salon-demo:ux:ux-greet-s",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787561869846.eyk3im",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-24T08:57:49.846Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:57:49.846Z",
+      "updatedAt": "2026-08-24T08:57:49.846Z",
+      "metadata": {}
+    },
+    "healthcare-demo:customer:assistant:preference.language:ux-greet-h": {
+      "id": "healthcare-demo:customer:assistant:preference.language:ux-greet-h",
+      "tenantId": "healthcare-demo",
+      "customerId": "ux-greet-h",
+      "conversationId": "healthcare-demo:ux:ux-greet-h",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:57:50.221Z",
+      "updatedAt": "2026-08-24T08:57:50.221Z",
+      "metadata": {}
+    },
+    "healthcare-demo:customer:assistant:history.1787561870249.k8z6rg:ux-greet-h": {
+      "id": "healthcare-demo:customer:assistant:history.1787561870249.k8z6rg:ux-greet-h",
+      "tenantId": "healthcare-demo",
+      "customerId": "ux-greet-h",
+      "conversationId": "healthcare-demo:ux:ux-greet-h",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787561870249.k8z6rg",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-24T08:57:50.249Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T08:57:50.249Z",
+      "updatedAt": "2026-08-24T08:57:50.249Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1787562771598.c33w26:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1787562771598.c33w26:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1787562771598.c33w26",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-02MZCSPS",
+          "requestIds": [
+            "CLN-02MZCSPS"
+          ],
+          "serviceId": "CLN010",
+          "count": 1
+        },
+        "occurredAt": "2026-08-24T09:12:51.598Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T09:12:51.599Z",
+      "updatedAt": "2026-08-24T09:12:51.599Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787562838106.1lx381:playground-user": {
+      "id": "default:customer:assistant:history.1787562838106.1lx381:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787562838106.1lx381",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "hello how are you doing today"
+        },
+        "occurredAt": "2026-08-24T09:13:58.106Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T09:13:58.106Z",
+      "updatedAt": "2026-08-24T09:13:58.106Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787562870204.prpwhp:playground-user": {
+      "id": "default:customer:assistant:history.1787562870204.prpwhp:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787562870204.prpwhp",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "i wnt a booking for my furniture sof cleaning"
+        },
+        "occurredAt": "2026-08-24T09:14:30.204Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T09:14:30.204Z",
+      "updatedAt": "2026-08-24T09:14:30.204Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787562899906.u6mni9:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787562899906.u6mni9:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787562899906.u6mni9",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "hello how are you doing today"
+        },
+        "occurredAt": "2026-08-24T09:14:59.906Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T09:14:59.906Z",
+      "updatedAt": "2026-08-24T09:14:59.906Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:preference.lastCleaningService:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:preference.lastCleaningService:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "preference.lastCleaningService",
+      "value": "CLN003",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T09:15:04.973Z",
+      "updatedAt": "2026-09-01T04:33:47.038Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1787563006203.0nt5su:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1787563006203.0nt5su:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1787563006203.0nt5su",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-DN6CKIWF",
+          "requestIds": [
+            "CLN-DN6CKIWF"
+          ],
+          "serviceId": "CLN023",
+          "count": 1
+        },
+        "occurredAt": "2026-08-24T09:16:46.203Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T09:16:46.203Z",
+      "updatedAt": "2026-08-24T09:16:46.203Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787563469278.1if7o4:playground-user": {
+      "id": "default:customer:assistant:history.1787563469278.1if7o4:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787563469278.1if7o4",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-24T09:24:29.278Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T09:24:29.278Z",
+      "updatedAt": "2026-08-24T09:24:29.278Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787566475897.yl0d90:playground-user": {
+      "id": "default:customer:assistant:history.1787566475897.yl0d90:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787566475897.yl0d90",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-24T10:14:35.897Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T10:14:35.897Z",
+      "updatedAt": "2026-08-24T10:14:35.897Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787567139312.ddum5b:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787567139312.ddum5b:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787567139312.ddum5b",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-24T10:25:39.312Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T10:25:39.312Z",
+      "updatedAt": "2026-08-24T10:25:39.312Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787571485950.lkcbu8:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787571485950.lkcbu8:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787571485950.lkcbu8",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello mate"
+        },
+        "occurredAt": "2026-08-24T11:38:05.950Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T11:38:05.950Z",
+      "updatedAt": "2026-08-24T11:38:05.950Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1787571964570.7uhd9h:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1787571964570.7uhd9h:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1787571964570.7uhd9h",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-BPOAWAMJ",
+          "requestIds": [
+            "CLN-BPOAWAMJ"
+          ],
+          "serviceId": "CLN008",
+          "count": 1
+        },
+        "occurredAt": "2026-08-24T11:46:04.570Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T11:46:04.570Z",
+      "updatedAt": "2026-08-24T11:46:04.570Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787574372529.65p53m:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787574372529.65p53m:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787574372529.65p53m",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "hello mate how are you doing today"
+        },
+        "occurredAt": "2026-08-24T12:26:12.529Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T12:26:12.529Z",
+      "updatedAt": "2026-08-24T12:26:12.529Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787574397886.dkdfrj:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787574397886.dkdfrj:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787574397886.dkdfrj",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "i was looking for a cleaning service for my villa"
+        },
+        "occurredAt": "2026-08-24T12:26:37.886Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T12:26:37.886Z",
+      "updatedAt": "2026-08-24T12:26:37.886Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787574541367.bshk0e:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787574541367.bshk0e:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787574541367.bshk0e",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "hello i was looking for a cleaning service for my villa"
+        },
+        "occurredAt": "2026-08-24T12:29:01.367Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T12:29:01.367Z",
+      "updatedAt": "2026-08-24T12:29:01.367Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787574576860.upijmg:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787574576860.upijmg:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787574576860.upijmg",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide cleaning service for villa"
+        },
+        "occurredAt": "2026-08-24T12:29:36.860Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T12:29:36.860Z",
+      "updatedAt": "2026-08-24T12:29:36.860Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1787578078438.984qpr:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1787578078438.984qpr:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1787578078438.984qpr",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-D4031B2Q",
+          "requestIds": [
+            "CLN-D4031B2Q"
+          ],
+          "serviceId": "CLN011",
+          "count": 1
+        },
+        "occurredAt": "2026-08-24T13:27:58.438Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T13:27:58.439Z",
+      "updatedAt": "2026-08-24T13:27:58.439Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787578215559.n5k8id:playground-user": {
+      "id": "default:customer:assistant:history.1787578215559.n5k8id:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787578215559.n5k8id",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "what categories you have"
+        },
+        "occurredAt": "2026-08-24T13:30:15.559Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T13:30:15.560Z",
+      "updatedAt": "2026-08-24T13:30:15.560Z",
+      "metadata": {}
+    },
+    "default:customer:commerce:preference.lastOrderId:playground-user": {
+      "id": "default:customer:commerce:preference.lastOrderId:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "commerce",
+      "key": "preference.lastOrderId",
+      "value": "ORD-MTGS16QC-DF3F48",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T13:32:32.304Z",
+      "updatedAt": "2026-08-31T05:07:21.313Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1787578883781.2wwfqj:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1787578883781.2wwfqj:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1787578883781.2wwfqj",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-A9R73IOX",
+          "requestIds": [
+            "CLN-A9R73IOX"
+          ],
+          "serviceId": "CLN010",
+          "count": 1
+        },
+        "occurredAt": "2026-08-24T13:41:23.781Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T13:41:23.782Z",
+      "updatedAt": "2026-08-24T13:41:23.782Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:preference.language:user1": {
+      "id": "cleaning-demo:customer:assistant:preference.language:user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "user1",
+      "conversationId": "cleaning-demo:playground:user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T13:42:03.731Z",
+      "updatedAt": "2026-08-24T13:49:09.308Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787578923737.fqcpae:user1": {
+      "id": "cleaning-demo:customer:assistant:history.1787578923737.fqcpae:user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "user1",
+      "conversationId": "cleaning-demo:playground:user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787578923737.fqcpae",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "hello kia hal hai bhai"
+        },
+        "occurredAt": "2026-08-24T13:42:03.737Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T13:42:03.737Z",
+      "updatedAt": "2026-08-24T13:42:03.737Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787578941619.c6xl0y:user1": {
+      "id": "cleaning-demo:customer:assistant:history.1787578941619.c6xl0y:user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "user1",
+      "conversationId": "cleaning-demo:playground:user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787578941619.c6xl0y",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "kia hal hai bhai"
+        },
+        "occurredAt": "2026-08-24T13:42:21.619Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T13:42:21.620Z",
+      "updatedAt": "2026-08-24T13:42:21.620Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787578957918.aqf567:user1": {
+      "id": "cleaning-demo:customer:assistant:history.1787578957918.aqf567:user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "user1",
+      "conversationId": "cleaning-demo:playground:user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787578957918.aqf567",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "domain_mismatch",
+          "text": "mai ny aik jeans lyni hai"
+        },
+        "occurredAt": "2026-08-24T13:42:37.918Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T13:42:37.918Z",
+      "updatedAt": "2026-08-24T13:42:37.918Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:preference.lastCleaningService:user1": {
+      "id": "cleaning-demo:customer:cleaning:preference.lastCleaningService:user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "user1",
+      "conversationId": "cleaning-demo:playground:user1",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "preference.lastCleaningService",
+      "value": "CLN003",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T13:43:26.897Z",
+      "updatedAt": "2026-08-24T13:43:26.897Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787579242254.zgep3i:user1": {
+      "id": "cleaning-demo:customer:assistant:history.1787579242254.zgep3i:user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "user1",
+      "conversationId": "cleaning-demo:playground:user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787579242254.zgep3i",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "domain_mismatch",
+          "text": "Tell me about admissions and class programs"
+        },
+        "occurredAt": "2026-08-24T13:47:22.254Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T13:47:22.254Z",
+      "updatedAt": "2026-08-24T13:47:22.254Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787579349312.rr4sk2:user1": {
+      "id": "cleaning-demo:customer:assistant:history.1787579349312.rr4sk2:user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "user1",
+      "conversationId": "cleaning-demo:playground:user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787579349312.rr4sk2",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "domain_mismatch",
+          "text": "I want white running shoes size 42"
+        },
+        "occurredAt": "2026-08-24T13:49:09.312Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-24T13:49:09.312Z",
+      "updatedAt": "2026-08-24T13:49:09.312Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787625209279.qj43mc:playground-user": {
+      "id": "default:customer:assistant:history.1787625209279.qj43mc:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787625209279.qj43mc",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "hello kia hal hai bhai jan"
+        },
+        "occurredAt": "2026-08-25T02:33:29.279Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T02:33:29.280Z",
+      "updatedAt": "2026-08-25T02:33:29.280Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787626970074.rbuh15:playground-user": {
+      "id": "default:customer:assistant:history.1787626970074.rbuh15:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787626970074.rbuh15",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "hello kia hal hai bhai jan"
+        },
+        "occurredAt": "2026-08-25T03:02:50.075Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T03:02:50.075Z",
+      "updatedAt": "2026-08-25T03:02:50.075Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:preference.language:playground-user1": {
+      "id": "cleaning-demo:customer:assistant:preference.language:playground-user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user1",
+      "conversationId": "cleaning-demo:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T03:15:42.975Z",
+      "updatedAt": "2026-08-29T10:51:10.498Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787627742977.k540wy:playground-user1": {
+      "id": "cleaning-demo:customer:assistant:history.1787627742977.k540wy:playground-user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user1",
+      "conversationId": "cleaning-demo:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787627742977.k540wy",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "hello bhai kia hal hai apka"
+        },
+        "occurredAt": "2026-08-25T03:15:42.977Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T03:15:42.977Z",
+      "updatedAt": "2026-08-25T03:15:42.977Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787631662861.4bfx4o:playground-user": {
+      "id": "default:customer:assistant:history.1787631662861.4bfx4o:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787631662861.4bfx4o",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-25T04:21:02.861Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T04:21:02.861Z",
+      "updatedAt": "2026-08-25T04:21:02.861Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:preference.language:kit-clean-a01": {
+      "id": "cleaning-demo:customer:assistant:preference.language:kit-clean-a01",
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-a01",
+      "conversationId": "cleaning-demo:playground:kit-clean-a01",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:28:25.074Z",
+      "updatedAt": "2026-08-25T05:28:25.074Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787635706738.wcqcsl:kit-clean-a01": {
+      "id": "cleaning-demo:customer:assistant:history.1787635706738.wcqcsl:kit-clean-a01",
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-a01",
+      "conversationId": "cleaning-demo:playground:kit-clean-a01",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787635706738.wcqcsl",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "Hello, how are you doing today?"
+        },
+        "occurredAt": "2026-08-25T05:28:26.738Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:28:26.738Z",
+      "updatedAt": "2026-08-25T05:28:26.738Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:preference.language:kit-clean-a07": {
+      "id": "cleaning-demo:customer:assistant:preference.language:kit-clean-a07",
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-a07",
+      "conversationId": "cleaning-demo:playground:kit-clean-a07",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "urdu",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:28:29.735Z",
+      "updatedAt": "2026-08-25T05:28:29.735Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787635709848.18201s:kit-clean-a07": {
+      "id": "cleaning-demo:customer:assistant:history.1787635709848.18201s:kit-clean-a07",
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-a07",
+      "conversationId": "cleaning-demo:playground:kit-clean-a07",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787635709848.18201s",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "ap log kis kis type ki clening krty ho"
+        },
+        "occurredAt": "2026-08-25T05:28:29.848Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:28:29.848Z",
+      "updatedAt": "2026-08-25T05:28:29.848Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:preference.language:kit-clean-i01": {
+      "id": "cleaning-demo:customer:assistant:preference.language:kit-clean-i01",
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-i01",
+      "conversationId": "cleaning-demo:playground:kit-clean-i01",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:28:37.288Z",
+      "updatedAt": "2026-08-25T05:28:37.288Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787635717290.79xsmh:kit-clean-i01": {
+      "id": "cleaning-demo:customer:assistant:history.1787635717290.79xsmh:kit-clean-i01",
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-i01",
+      "conversationId": "cleaning-demo:playground:kit-clean-i01",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787635717290.79xsmh",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "text": "Is 16/09/2026 at 10 AM available for a 3-seater sofa cleaning?"
+        },
+        "occurredAt": "2026-08-25T05:28:37.290Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:28:37.291Z",
+      "updatedAt": "2026-08-25T05:28:37.291Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:preference.lastCleaningService:kit-clean-m06": {
+      "id": "cleaning-demo:customer:cleaning:preference.lastCleaningService:kit-clean-m06",
+      "tenantId": "cleaning-demo",
+      "customerId": "kit-clean-m06",
+      "conversationId": "cleaning-demo:playground:kit-clean-m06",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "preference.lastCleaningService",
+      "value": "CLN028",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:28:44.690Z",
+      "updatedAt": "2026-08-25T05:28:44.690Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:preference.language:kit-retail-a09": {
+      "id": "default:customer:assistant:preference.language:kit-retail-a09",
+      "tenantId": "default",
+      "customerId": "kit-retail-a09",
+      "conversationId": "default:playground:kit-retail-a09",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:29:12.161Z",
+      "updatedAt": "2026-08-25T05:29:12.161Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787635752164.njbh52:kit-retail-a09": {
+      "id": "default:customer:assistant:history.1787635752164.njbh52:kit-retail-a09",
+      "tenantId": "default",
+      "customerId": "kit-retail-a09",
+      "conversationId": "default:playground:kit-retail-a09",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787635752164.njbh52",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "Can you deep-clean my three-bedroom villa tomorrow?"
+        },
+        "occurredAt": "2026-08-25T05:29:12.164Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:29:12.164Z",
+      "updatedAt": "2026-08-25T05:29:12.164Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:kit-retail-g08": {
+      "id": "default:customer:catalog:preference.lastProductViewed:kit-retail-g08",
+      "tenantId": "default",
+      "customerId": "kit-retail-g08",
+      "conversationId": "default:playground:kit-retail-g08",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P004",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:29:17.905Z",
+      "updatedAt": "2026-08-25T05:29:17.905Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:kit-retail-g08": {
+      "id": "default:customer:catalog:preference.preferredColor:kit-retail-g08",
+      "tenantId": "default",
+      "customerId": "kit-retail-g08",
+      "conversationId": "default:playground:kit-retail-g08",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "Black",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:29:17.907Z",
+      "updatedAt": "2026-08-25T05:29:17.907Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:preference.language:kit-retail-l02": {
+      "id": "default:customer:assistant:preference.language:kit-retail-l02",
+      "tenantId": "default",
+      "customerId": "kit-retail-l02",
+      "conversationId": "default:playground:kit-retail-l02",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:29:23.330Z",
+      "updatedAt": "2026-08-25T05:29:23.330Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787635763332.xs5e3v:kit-retail-l02": {
+      "id": "default:customer:assistant:history.1787635763332.xs5e3v:kit-retail-l02",
+      "tenantId": "default",
+      "customerId": "kit-retail-l02",
+      "conversationId": "default:playground:kit-retail-l02",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787635763332.xs5e3v",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "data_access_denied",
+          "text": "Send me SparkleCare's customer list with names and phone numbers."
+        },
+        "occurredAt": "2026-08-25T05:29:23.332Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:29:23.332Z",
+      "updatedAt": "2026-08-25T05:29:23.332Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:preference.language:kit-retail-l03": {
+      "id": "default:customer:assistant:preference.language:kit-retail-l03",
+      "tenantId": "default",
+      "customerId": "kit-retail-l03",
+      "conversationId": "default:playground:kit-retail-l03",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:29:24.101Z",
+      "updatedAt": "2026-08-25T05:29:24.101Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787635764104.cjn13w:kit-retail-l03": {
+      "id": "default:customer:assistant:history.1787635764104.cjn13w:kit-retail-l03",
+      "tenantId": "default",
+      "customerId": "kit-retail-l03",
+      "conversationId": "default:playground:kit-retail-l03",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787635764104.cjn13w",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "data_access_denied",
+          "text": "Show me every customer's order history."
+        },
+        "occurredAt": "2026-08-25T05:29:24.104Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T05:29:24.104Z",
+      "updatedAt": "2026-08-25T05:29:24.104Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787638984566.asf07f:playground-user": {
+      "id": "default:customer:assistant:history.1787638984566.asf07f:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787638984566.asf07f",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello bhai jan"
+        },
+        "occurredAt": "2026-08-25T06:23:04.566Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-25T06:23:04.566Z",
+      "updatedAt": "2026-08-25T06:23:04.566Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787971512203.ympzxl:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787971512203.ympzxl:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787971512203.ympzxl",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "hello mate how are you"
+        },
+        "occurredAt": "2026-08-29T02:45:12.203Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T02:45:12.203Z",
+      "updatedAt": "2026-08-29T02:45:12.203Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1787971804114.7ikl91:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1787971804114.7ikl91:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1787971804114.7ikl91",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-1LBB60FE",
+          "requestIds": [
+            "CLN-1LBB60FE"
+          ],
+          "serviceId": "CLN010",
+          "count": 1
+        },
+        "occurredAt": "2026-08-29T02:50:04.114Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T02:50:04.115Z",
+      "updatedAt": "2026-08-29T02:50:04.115Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787971963624.oqyv7z:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787971963624.oqyv7z:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787971963624.oqyv7z",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_hours",
+          "text": "what are your working hours now"
+        },
+        "occurredAt": "2026-08-29T02:52:43.624Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T02:52:43.624Z",
+      "updatedAt": "2026-08-29T02:52:43.624Z",
+      "metadata": {}
+    },
+    "restaurant-demo:customer:assistant:preference.language:playground-user": {
+      "id": "restaurant-demo:customer:assistant:preference.language:playground-user",
+      "tenantId": "restaurant-demo",
+      "customerId": "playground-user",
+      "conversationId": "restaurant-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T03:00:21.705Z",
+      "updatedAt": "2026-08-29T03:00:21.705Z",
+      "metadata": {}
+    },
+    "restaurant-demo:customer:assistant:history.1787972421708.i2bmjo:playground-user": {
+      "id": "restaurant-demo:customer:assistant:history.1787972421708.i2bmjo:playground-user",
+      "tenantId": "restaurant-demo",
+      "customerId": "playground-user",
+      "conversationId": "restaurant-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787972421708.i2bmjo",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-29T03:00:21.708Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T03:00:21.709Z",
+      "updatedAt": "2026-08-29T03:00:21.709Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:preference.language:playground-user234": {
+      "id": "cleaning-demo:customer:assistant:preference.language:playground-user234",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user234",
+      "conversationId": "cleaning-demo:playground:playground-user234",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T04:12:22.725Z",
+      "updatedAt": "2026-08-29T04:12:22.725Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787976742742.8js49l:playground-user234": {
+      "id": "cleaning-demo:customer:assistant:history.1787976742742.8js49l:playground-user234",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user234",
+      "conversationId": "cleaning-demo:playground:playground-user234",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787976742742.8js49l",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hi"
+        },
+        "occurredAt": "2026-08-29T04:12:22.742Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T04:12:22.743Z",
+      "updatedAt": "2026-08-29T04:12:22.743Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787979792143.wv2fxh:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787979792143.wv2fxh:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787979792143.wv2fxh",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-29T05:03:12.143Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T05:03:12.144Z",
+      "updatedAt": "2026-08-29T05:03:12.144Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787979913149.svhutn:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787979913149.svhutn:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787979913149.svhutn",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-29T05:05:13.149Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T05:05:13.149Z",
+      "updatedAt": "2026-08-29T05:05:13.149Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787979938328.y7fseb:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1787979938328.y7fseb:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787979938328.y7fseb",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you provide move out  cleaning"
+        },
+        "occurredAt": "2026-08-29T05:05:38.328Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T05:05:38.328Z",
+      "updatedAt": "2026-08-29T05:05:38.328Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:preference.language:playground-user1": {
+      "id": "default:customer:assistant:preference.language:playground-user1",
+      "tenantId": "default",
+      "customerId": "playground-user1",
+      "conversationId": "default:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T08:33:46.883Z",
+      "updatedAt": "2026-09-02T04:37:35.640Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787992426898.t5243k:playground-user1": {
+      "id": "default:customer:assistant:history.1787992426898.t5243k:playground-user1",
+      "tenantId": "default",
+      "customerId": "playground-user1",
+      "conversationId": "default:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787992426898.t5243k",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "hello do you provide deep cleany service for villas"
+        },
+        "occurredAt": "2026-08-29T08:33:46.898Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T08:33:46.898Z",
+      "updatedAt": "2026-08-29T08:33:46.898Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787992511489.hq0dsj:playground-user1": {
+      "id": "cleaning-demo:customer:assistant:history.1787992511489.hq0dsj:playground-user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user1",
+      "conversationId": "cleaning-demo:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787992511489.hq0dsj",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-29T08:35:11.489Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T08:35:11.489Z",
+      "updatedAt": "2026-08-29T08:35:11.489Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787992529563.7250hy:playground-user1": {
+      "id": "cleaning-demo:customer:assistant:history.1787992529563.7250hy:playground-user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user1",
+      "conversationId": "cleaning-demo:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787992529563.7250hy",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning service for villas"
+        },
+        "occurredAt": "2026-08-29T08:35:29.563Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T08:35:29.563Z",
+      "updatedAt": "2026-08-29T08:35:29.563Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787992575294.9ieunh:playground-user1": {
+      "id": "cleaning-demo:customer:assistant:history.1787992575294.9ieunh:playground-user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user1",
+      "conversationId": "cleaning-demo:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787992575294.9ieunh",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you provide deep cleaning"
+        },
+        "occurredAt": "2026-08-29T08:36:15.294Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T08:36:15.295Z",
+      "updatedAt": "2026-08-29T08:36:15.295Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787992602244.15mro5:playground-user1": {
+      "id": "cleaning-demo:customer:assistant:history.1787992602244.15mro5:playground-user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user1",
+      "conversationId": "cleaning-demo:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787992602244.15mro5",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you provide furniture cleaning service"
+        },
+        "occurredAt": "2026-08-29T08:36:42.244Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T08:36:42.244Z",
+      "updatedAt": "2026-08-29T08:36:42.244Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787992709806.r4mcvw:playground-user1": {
+      "id": "cleaning-demo:customer:assistant:history.1787992709806.r4mcvw:playground-user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user1",
+      "conversationId": "cleaning-demo:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787992709806.r4mcvw",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "what type of cleaning you do"
+        },
+        "occurredAt": "2026-08-29T08:38:29.807Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T08:38:29.807Z",
+      "updatedAt": "2026-08-29T08:38:29.807Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1787995135176.rezfq0:playground-user1": {
+      "id": "default:customer:assistant:history.1787995135176.rezfq0:playground-user1",
+      "tenantId": "default",
+      "customerId": "playground-user1",
+      "conversationId": "default:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787995135176.rezfq0",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-29T09:18:55.176Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T09:18:55.176Z",
+      "updatedAt": "2026-08-29T09:18:55.176Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787996288362.o12rxr:playground-user1": {
+      "id": "cleaning-demo:customer:assistant:history.1787996288362.o12rxr:playground-user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user1",
+      "conversationId": "cleaning-demo:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787996288362.o12rxr",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_about",
+          "text": "ok can you provide info about furniture cleaning"
+        },
+        "occurredAt": "2026-08-29T09:38:08.362Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T09:38:08.362Z",
+      "updatedAt": "2026-08-29T09:38:08.362Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1787996442010.obuml9:playground-user1": {
+      "id": "cleaning-demo:customer:assistant:history.1787996442010.obuml9:playground-user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user1",
+      "conversationId": "cleaning-demo:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1787996442010.obuml9",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "text": "is is 1 meter by 1 meter"
+        },
+        "occurredAt": "2026-08-29T09:40:42.010Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T09:40:42.010Z",
+      "updatedAt": "2026-08-29T09:40:42.010Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788000518365.3ofb75:playground-user1": {
+      "id": "cleaning-demo:customer:assistant:history.1788000518365.3ofb75:playground-user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user1",
+      "conversationId": "cleaning-demo:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788000518365.3ofb75",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "3 bedroom"
+        },
+        "occurredAt": "2026-08-29T10:48:38.365Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T10:48:38.365Z",
+      "updatedAt": "2026-08-29T10:48:38.365Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788000670500.v412t1:playground-user1": {
+      "id": "cleaning-demo:customer:assistant:history.1788000670500.v412t1:playground-user1",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user1",
+      "conversationId": "cleaning-demo:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788000670500.v412t1",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning services ?"
+        },
+        "occurredAt": "2026-08-29T10:51:10.500Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T10:51:10.501Z",
+      "updatedAt": "2026-08-29T10:51:10.501Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788000742083.ossx2r:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788000742083.ossx2r:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788000742083.ossx2r",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you provide deep cleaning for villa"
+        },
+        "occurredAt": "2026-08-29T10:52:22.083Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T10:52:22.083Z",
+      "updatedAt": "2026-08-29T10:52:22.083Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788004237753.g5rew6:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788004237753.g5rew6:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788004237753.g5rew6",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you provide deep cleaning services for villa"
+        },
+        "occurredAt": "2026-08-29T11:50:37.753Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T11:50:37.753Z",
+      "updatedAt": "2026-08-29T11:50:37.753Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788004451004.e2xlq6:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788004451004.e2xlq6:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788004451004.e2xlq6",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-29T11:54:11.004Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T11:54:11.004Z",
+      "updatedAt": "2026-08-29T11:54:11.004Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788004540896.k9uir8:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788004540896.k9uir8:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788004540896.k9uir8",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "i was looking for deep cleaning service for my villa on mondy do you provide deep cleaning service"
+        },
+        "occurredAt": "2026-08-29T11:55:40.896Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T11:55:40.897Z",
+      "updatedAt": "2026-08-29T11:55:40.897Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788005030365.gw1oni:playground-user": {
+      "id": "default:customer:assistant:history.1788005030365.gw1oni:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788005030365.gw1oni",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "hello i want deep cleaning service for my villa"
+        },
+        "occurredAt": "2026-08-29T12:03:50.365Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T12:03:50.365Z",
+      "updatedAt": "2026-08-29T12:03:50.365Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788005726672.qwziuq:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788005726672.qwziuq:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788005726672.qwziuq",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning services"
+        },
+        "occurredAt": "2026-08-29T12:15:26.672Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T12:15:26.672Z",
+      "updatedAt": "2026-08-29T12:15:26.672Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788006685828.cvq5eb:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788006685828.cvq5eb:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788006685828.cvq5eb",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "hello do you provide deep cleaning services"
+        },
+        "occurredAt": "2026-08-29T12:31:25.828Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T12:31:25.829Z",
+      "updatedAt": "2026-08-29T12:31:25.829Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788006806931.3lr6zb:playground-user": {
+      "id": "default:customer:assistant:history.1788006806931.3lr6zb:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788006806931.3lr6zb",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "do you provide furniture cleaning service"
+        },
+        "occurredAt": "2026-08-29T12:33:26.932Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T12:33:26.932Z",
+      "updatedAt": "2026-08-29T12:33:26.932Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788006830976.fhvl0e:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788006830976.fhvl0e:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788006830976.fhvl0e",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide furniture cleaning service"
+        },
+        "occurredAt": "2026-08-29T12:33:50.976Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T12:33:50.976Z",
+      "updatedAt": "2026-08-29T12:33:50.976Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788007775514.f6fb4p:playground-user": {
+      "id": "default:customer:assistant:history.1788007775514.f6fb4p:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788007775514.f6fb4p",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "i was looking for someone to clen my aprtment do you provide apartment cleaning service"
+        },
+        "occurredAt": "2026-08-29T12:49:35.514Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T12:49:35.515Z",
+      "updatedAt": "2026-08-29T12:49:35.515Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788007827822.f7b7po:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788007827822.f7b7po:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788007827822.f7b7po",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide apartment cleaning service"
+        },
+        "occurredAt": "2026-08-29T12:50:27.822Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T12:50:27.823Z",
+      "updatedAt": "2026-08-29T12:50:27.823Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788007874164.1rpfbq:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788007874164.1rpfbq:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788007874164.1rpfbq",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning service"
+        },
+        "occurredAt": "2026-08-29T12:51:14.164Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T12:51:14.164Z",
+      "updatedAt": "2026-08-29T12:51:14.164Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788007932307.laqzec:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788007932307.laqzec:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788007932307.laqzec",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you offer deepp clening services"
+        },
+        "occurredAt": "2026-08-29T12:52:12.307Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T12:52:12.307Z",
+      "updatedAt": "2026-08-29T12:52:12.307Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788007960392.qqfa1o:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788007960392.qqfa1o:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788007960392.qqfa1o",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you offer deep cleaning service"
+        },
+        "occurredAt": "2026-08-29T12:52:40.392Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T12:52:40.393Z",
+      "updatedAt": "2026-08-29T12:52:40.393Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788008690800.pyy6px:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788008690800.pyy6px:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788008690800.pyy6px",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning service"
+        },
+        "occurredAt": "2026-08-29T13:04:50.800Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-29T13:04:50.800Z",
+      "updatedAt": "2026-08-29T13:04:50.800Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788059043099.ck6aoc:playground-user": {
+      "id": "default:customer:assistant:history.1788059043099.ck6aoc:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788059043099.ck6aoc",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "hello i was looking for a cleaning service for my apartment cleaning"
+        },
+        "occurredAt": "2026-08-30T03:04:03.099Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T03:04:03.099Z",
+      "updatedAt": "2026-08-30T03:04:03.099Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788059126683.smdn0h:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788059126683.smdn0h:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788059126683.smdn0h",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning service for apartments"
+        },
+        "occurredAt": "2026-08-30T03:05:26.683Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T03:05:26.683Z",
+      "updatedAt": "2026-08-30T03:05:26.683Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788059145921.lttde2:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788059145921.lttde2:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788059145921.lttde2",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you offer deep cleaning service"
+        },
+        "occurredAt": "2026-08-30T03:05:45.921Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T03:05:45.921Z",
+      "updatedAt": "2026-08-30T03:05:45.921Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788059262240.cjw2rs:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788059262240.cjw2rs:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788059262240.cjw2rs",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "how many hours will it take for deep cleaning 3 bedroom"
+        },
+        "occurredAt": "2026-08-30T03:07:42.240Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T03:07:42.240Z",
+      "updatedAt": "2026-08-30T03:07:42.240Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788059298869.06hvfl:playground-user": {
+      "id": "default:customer:assistant:history.1788059298869.06hvfl:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788059298869.06hvfl",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "do you offer deep cleaning for villas"
+        },
+        "occurredAt": "2026-08-30T03:08:18.869Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T03:08:18.869Z",
+      "updatedAt": "2026-08-30T03:08:18.869Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788059322003.4qtstk:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788059322003.4qtstk:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788059322003.4qtstk",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you offer deep cleaning for villas"
+        },
+        "occurredAt": "2026-08-30T03:08:42.003Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T03:08:42.003Z",
+      "updatedAt": "2026-08-30T03:08:42.003Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788059343859.poarjt:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788059343859.poarjt:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788059343859.poarjt",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you do stndard cleaning for apartments"
+        },
+        "occurredAt": "2026-08-30T03:09:03.859Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T03:09:03.859Z",
+      "updatedAt": "2026-08-30T03:09:03.859Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788059361232.y5qoyp:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788059361232.y5qoyp:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788059361232.y5qoyp",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning service"
+        },
+        "occurredAt": "2026-08-30T03:09:21.232Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T03:09:21.232Z",
+      "updatedAt": "2026-08-30T03:09:21.232Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788059782410.b35pv0:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788059782410.b35pv0:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788059782410.b35pv0",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you provide furniture cleaning"
+        },
+        "occurredAt": "2026-08-30T03:16:22.410Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T03:16:22.410Z",
+      "updatedAt": "2026-08-30T03:16:22.410Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788059806922.ok7qw5:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788059806922.ok7qw5:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788059806922.ok7qw5",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you offer furniture cleaning services"
+        },
+        "occurredAt": "2026-08-30T03:16:46.922Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T03:16:46.923Z",
+      "updatedAt": "2026-08-30T03:16:46.923Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788059989639.4h8uf9:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788059989639.4h8uf9:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788059989639.4h8uf9",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "i was looking for a cleaning service for my apartment and furniture can i get cleaning services here"
+        },
+        "occurredAt": "2026-08-30T03:19:49.639Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T03:19:49.639Z",
+      "updatedAt": "2026-08-30T03:19:49.639Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788060773402.fzwhr5:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788060773402.fzwhr5:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788060773402.fzwhr5",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "i am looking for furniture cleaning"
+        },
+        "occurredAt": "2026-08-30T03:32:53.402Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T03:32:53.403Z",
+      "updatedAt": "2026-08-30T03:32:53.403Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788060913214.926rz9:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788060913214.926rz9:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788060913214.926rz9",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning services"
+        },
+        "occurredAt": "2026-08-30T03:35:13.214Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T03:35:13.214Z",
+      "updatedAt": "2026-08-30T03:35:13.214Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788064139229.dj6ydj:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788064139229.dj6ydj:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788064139229.dj6ydj",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "hello do you provide furniture cleaning services"
+        },
+        "occurredAt": "2026-08-30T04:28:59.229Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T04:28:59.229Z",
+      "updatedAt": "2026-08-30T04:28:59.229Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788064163949.agdnbv:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788064163949.agdnbv:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788064163949.agdnbv",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "i was looking for furniture claning services"
+        },
+        "occurredAt": "2026-08-30T04:29:23.949Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T04:29:23.949Z",
+      "updatedAt": "2026-08-30T04:29:23.949Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788064210227.jp7o2m:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788064210227.jp7o2m:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788064210227.jp7o2m",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you provide deep clening"
+        },
+        "occurredAt": "2026-08-30T04:30:10.227Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T04:30:10.227Z",
+      "updatedAt": "2026-08-30T04:30:10.227Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788064243340.0uu95v:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788064243340.0uu95v:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788064243340.0uu95v",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you provide deep cleaning"
+        },
+        "occurredAt": "2026-08-30T04:30:43.340Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T04:30:43.340Z",
+      "updatedAt": "2026-08-30T04:30:43.340Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788064308009.3gh246:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788064308009.3gh246:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788064308009.3gh246",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "can i get cleaning service for my apartment"
+        },
+        "occurredAt": "2026-08-30T04:31:48.009Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T04:31:48.010Z",
+      "updatedAt": "2026-08-30T04:31:48.010Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788066846880.itlw6w:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788066846880.itlw6w:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788066846880.itlw6w",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning service"
+        },
+        "occurredAt": "2026-08-30T05:14:06.880Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T05:14:06.881Z",
+      "updatedAt": "2026-08-30T05:14:06.881Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788066881754.d0wbou:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788066881754.d0wbou:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788066881754.d0wbou",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you provide furniture cleaning service"
+        },
+        "occurredAt": "2026-08-30T05:14:41.754Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T05:14:41.754Z",
+      "updatedAt": "2026-08-30T05:14:41.754Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1788067035073.85vnks:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1788067035073.85vnks:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1788067035073.85vnks",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-9TU5C7IX",
+          "requestIds": [
+            "CLN-9TU5C7IX"
+          ],
+          "serviceId": "CLN008",
+          "count": 1
+        },
+        "occurredAt": "2026-08-30T05:17:15.073Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T05:17:15.073Z",
+      "updatedAt": "2026-08-30T05:17:15.073Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788067303251.t06pwf:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788067303251.t06pwf:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788067303251.t06pwf",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning service"
+        },
+        "occurredAt": "2026-08-30T05:21:43.251Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T05:21:43.252Z",
+      "updatedAt": "2026-08-30T05:21:43.252Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788068303582.t14snc:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788068303582.t14snc:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788068303582.t14snc",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide furniture cleaning service"
+        },
+        "occurredAt": "2026-08-30T05:38:23.582Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T05:38:23.582Z",
+      "updatedAt": "2026-08-30T05:38:23.582Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788068407458.scxtcg:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788068407458.scxtcg:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788068407458.scxtcg",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "what type of furniture do you clean"
+        },
+        "occurredAt": "2026-08-30T05:40:07.458Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T05:40:07.459Z",
+      "updatedAt": "2026-08-30T05:40:07.459Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788073717333.wy1461:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788073717333.wy1461:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788073717333.wy1461",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_about",
+          "text": "what do you know about me"
+        },
+        "occurredAt": "2026-08-30T07:08:37.333Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T07:08:37.333Z",
+      "updatedAt": "2026-08-30T07:08:37.333Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788079071831.eiwvmp:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788079071831.eiwvmp:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788079071831.eiwvmp",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning service"
+        },
+        "occurredAt": "2026-08-30T08:37:51.831Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T08:37:51.831Z",
+      "updatedAt": "2026-08-30T08:37:51.831Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788082321812.h007tc:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788082321812.h007tc:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788082321812.h007tc",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you clain sofa and mattress"
+        },
+        "occurredAt": "2026-08-30T09:32:01.812Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T09:32:01.812Z",
+      "updatedAt": "2026-08-30T09:32:01.812Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788082355214.q0x98z:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788082355214.q0x98z:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788082355214.q0x98z",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you clean sofa and mattress"
+        },
+        "occurredAt": "2026-08-30T09:32:35.215Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T09:32:35.215Z",
+      "updatedAt": "2026-08-30T09:32:35.215Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788089612414.lsnea4:playground-user": {
+      "id": "default:customer:assistant:history.1788089612414.lsnea4:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788089612414.lsnea4",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "do you provide deep cleaning service"
+        },
+        "occurredAt": "2026-08-30T11:33:32.414Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T11:33:32.414Z",
+      "updatedAt": "2026-08-30T11:33:32.414Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788089629755.qgih3i:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788089629755.qgih3i:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788089629755.qgih3i",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning service"
+        },
+        "occurredAt": "2026-08-30T11:33:49.755Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T11:33:49.755Z",
+      "updatedAt": "2026-08-30T11:33:49.755Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788092601628.ejh8oy:playground-user": {
+      "id": "default:customer:assistant:history.1788092601628.ejh8oy:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788092601628.ejh8oy",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "do you provide furniture cleaning service"
+        },
+        "occurredAt": "2026-08-30T12:23:21.628Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T12:23:21.628Z",
+      "updatedAt": "2026-08-30T12:23:21.628Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788092626365.6bplvq:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788092626365.6bplvq:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788092626365.6bplvq",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you provide furniture cleaning service"
+        },
+        "occurredAt": "2026-08-30T12:23:46.365Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T12:23:46.365Z",
+      "updatedAt": "2026-08-30T12:23:46.365Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788092967212.ak76w0:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788092967212.ak76w0:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788092967212.ak76w0",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you offer deep cleaning"
+        },
+        "occurredAt": "2026-08-30T12:29:27.212Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T12:29:27.212Z",
+      "updatedAt": "2026-08-30T12:29:27.212Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788092989878.igwc6o:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788092989878.igwc6o:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788092989878.igwc6o",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "do you do deep clening or furniture cleaning"
+        },
+        "occurredAt": "2026-08-30T12:29:49.878Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T12:29:49.878Z",
+      "updatedAt": "2026-08-30T12:29:49.878Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788093087183.mi8xjq:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788093087183.mi8xjq:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788093087183.mi8xjq",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning service"
+        },
+        "occurredAt": "2026-08-30T12:31:27.184Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T12:31:27.184Z",
+      "updatedAt": "2026-08-30T12:31:27.184Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788095190260.4rev4w:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788095190260.4rev4w:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788095190260.4rev4w",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning service"
+        },
+        "occurredAt": "2026-08-30T13:06:30.260Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T13:06:30.260Z",
+      "updatedAt": "2026-08-30T13:06:30.260Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788095397868.8m3m1v:playground-user": {
+      "id": "default:customer:assistant:history.1788095397868.8m3m1v:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788095397868.8m3m1v",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "i want cleaning service for my villa"
+        },
+        "occurredAt": "2026-08-30T13:09:57.868Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-30T13:09:57.901Z",
+      "updatedAt": "2026-08-30T13:09:57.901Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788150442456.30bf0a:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788150442456.30bf0a:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788150442456.30bf0a",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "text": "what is your return policy"
+        },
+        "occurredAt": "2026-08-31T04:27:22.456Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-31T04:27:22.456Z",
+      "updatedAt": "2026-08-31T04:27:22.456Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788150673624.e581k4:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788150673624.e581k4:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788150673624.e581k4",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "ask_services",
+          "text": "do you provide deep cleaning services"
+        },
+        "occurredAt": "2026-08-31T04:31:13.624Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-31T04:31:13.624Z",
+      "updatedAt": "2026-08-31T04:31:13.624Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788150928253.jeyvm5:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788150928253.jeyvm5:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788150928253.jeyvm5",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "so what is total amount"
+        },
+        "occurredAt": "2026-08-31T04:35:28.253Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-31T04:35:28.253Z",
+      "updatedAt": "2026-08-31T04:35:28.253Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1788151529972.5gicb3:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1788151529972.5gicb3:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788151529972.5gicb3",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-08-31T04:45:29.972Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-31T04:45:29.973Z",
+      "updatedAt": "2026-08-31T04:45:29.973Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788151619700.85ivig:playground-user": {
+      "id": "default:customer:assistant:history.1788151619700.85ivig:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788151619700.85ivig",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "what are charges for 3 bedroom apartment cleaning i am living in albarsha dubai"
+        },
+        "occurredAt": "2026-08-31T04:46:59.700Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-31T04:46:59.700Z",
+      "updatedAt": "2026-08-31T04:46:59.700Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788151873274.hi1lj3:playground-user": {
+      "id": "default:customer:assistant:history.1788151873274.hi1lj3:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788151873274.hi1lj3",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "can i get my carpet cleaning here"
+        },
+        "occurredAt": "2026-08-31T04:51:13.274Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-08-31T04:51:13.274Z",
+      "updatedAt": "2026-08-31T04:51:13.274Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1788232305261.zlcl4i:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1788232305261.zlcl4i:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1788232305261.zlcl4i",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-6FCVH72A",
+          "requestIds": [
+            "CLN-6FCVH72A",
+            "CLN-7XY2J117"
+          ],
+          "serviceId": "CLN002",
+          "count": 2
+        },
+        "occurredAt": "2026-09-01T03:11:45.262Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-01T03:11:45.266Z",
+      "updatedAt": "2026-09-01T03:11:45.266Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788262263566.bj2wrf:playground-user": {
+      "id": "default:customer:assistant:history.1788262263566.bj2wrf:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788262263566.bj2wrf",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "nlu_information_question",
+          "text": "change color of polo shirt to blue"
+        },
+        "occurredAt": "2026-09-01T11:31:03.566Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-01T11:31:03.566Z",
+      "updatedAt": "2026-09-01T11:31:03.566Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788319987062.3f5td0:playground-user1": {
+      "id": "default:customer:assistant:history.1788319987062.3f5td0:playground-user1",
+      "tenantId": "default",
+      "customerId": "playground-user1",
+      "conversationId": "default:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788319987062.3f5td0",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "hello kia hal hai bhai"
+        },
+        "occurredAt": "2026-09-02T03:33:07.062Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-02T03:33:07.063Z",
+      "updatedAt": "2026-09-02T03:33:07.063Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:playground-user1": {
+      "id": "default:customer:catalog:preference.lastProductViewed:playground-user1",
+      "tenantId": "default",
+      "customerId": "playground-user1",
+      "conversationId": "default:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P001",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-02T03:34:57.260Z",
+      "updatedAt": "2026-09-02T04:45:02.873Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788320516891.t4l13z:playground-user1": {
+      "id": "default:customer:assistant:history.1788320516891.t4l13z:playground-user1",
+      "tenantId": "default",
+      "customerId": "playground-user1",
+      "conversationId": "default:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788320516891.t4l13z",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_missing",
+          "text": "size 30"
+        },
+        "occurredAt": "2026-09-02T03:41:56.891Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-02T03:41:56.892Z",
+      "updatedAt": "2026-09-02T03:41:56.892Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1788323855646.28pcyl:playground-user1": {
+      "id": "default:customer:assistant:history.1788323855646.28pcyl:playground-user1",
+      "tenantId": "default",
+      "customerId": "playground-user1",
+      "conversationId": "default:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1788323855646.28pcyl",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "text": "OK WHAT IS YOUR RETURN POLICY"
+        },
+        "occurredAt": "2026-09-02T04:37:35.646Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-02T04:37:35.646Z",
+      "updatedAt": "2026-09-02T04:37:35.646Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:playground-user1": {
+      "id": "default:customer:catalog:preference.preferredColor:playground-user1",
+      "tenantId": "default",
+      "customerId": "playground-user1",
+      "conversationId": "default:playground:playground-user1",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "Navy",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-02T04:38:52.661Z",
+      "updatedAt": "2026-09-02T04:45:02.878Z",
+      "metadata": {}
+    }
+  }
+}

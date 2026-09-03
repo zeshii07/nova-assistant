@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "21.0.0",
+  "version": "22.1.0",
   "private": true,
-  "description": "Nova v21.0 \u2014 Online Learning & Feedback Loop",
+  "description": "Nova v22.1 \u2014 Catalog Alternative Match Fix + Plural Singular Fix + Price Type Clarification Re-ask",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {
@@ -67,7 +67,7 @@
     "benchmark:v19.0": "node --require ./tests/test-env.js --test tests/sprint91.v191-ml-classifier-refactor.integration.test.js tests/sprint92.v192-transformer-embeddings.integration.test.js",
     "benchmark:v20.0": "node --require ./tests/test-env.js --test tests/sprint93.v200-multilingual-embeddings.integration.test.js tests/sprint94.v200-multi-item-detection.integration.test.js",
     "benchmark:v20.1": "node --require ./tests/test-env.js --test tests/sprint90.v180-workflow-order-and-typo-fixes.integration.test.js tests/sprint94.v200-multi-item-detection.integration.test.js",
-    "benchmark:v21.0": "node --require ./tests/test-env.js --test tests/sprint95.v210-feedback-collector.integration.test.js tests/sprint96.v210-online-learner.integration.test.js"
+    "benchmark:v22.0": "node --require ./tests/test-env.js --test tests/sprint97.v220-persistence.integration.test.js"
   },
   "dependencies": {
     "pg": "^8.16.3",

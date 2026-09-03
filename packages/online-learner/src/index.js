@@ -1,3 +1,2 @@
 const { OnlineLearner, MIN_EXAMPLES_TO_RETRAIN, MAX_EXAMPLES_PER_INTENT, MIN_POSITIVE_RATIO } = require('./onlineLearner');
-
 module.exports = { OnlineLearner, MIN_EXAMPLES_TO_RETRAIN, MAX_EXAMPLES_PER_INTENT, MIN_POSITIVE_RATIO };

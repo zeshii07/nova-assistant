@@ -26,7 +26,36 @@ async function startServer() {
 
       if (req.method === "GET" && url.pathname === "/health") {
         const health = await Promise.all(container.registry.list().map((item) => item.health()));
-        return sendJson(res, 200, { ok: true, service: "nova-api", version: packageJson.version, capabilities: health, channels: ["http", "whatsapp"] });
+        const checks = { service: "nova-api", version: packageJson.version, capabilities: health, channels: ["http", "whatsapp"] };
+        // v22.0: Storage health checks
+        checks.storage = { mode: container.config.storageMode };
+        if (container.storage?.db) {
+          try {
+            await container.storage.db.query('SELECT 1 as ok');
+            checks.storage.postgres = { ok: true, poolMax: container.config.dbPoolMax };
+          } catch (error) {
+            checks.storage.postgres = { ok: false, error: error.message };
+          }
+        }
+        if (container.storage?.redis) {
+          try {
+            // RedisStateRepository doesn't expose a ping, so we test via a get
+            await container.storage.redis.get('__health_check__');
+            checks.storage.redis = { ok: true, ttlSeconds: container.config.stateTtlSeconds };
+          } catch (error) {
+            checks.storage.redis = { ok: false, error: error.message };
+          }
+        }
+        // v21.0: Feedback collector status
+        if (container.feedbackCollector) {
+          checks.feedback = { storageDir: container.feedbackCollector.storageDir };
+        }
+        // v16-v20: ML status
+        if (container.mlIntentClassifier) {
+          checks.ml = { version: container.mlIntentClassifier.model?.version || 'unknown', trained: container.mlIntentClassifier.trained };
+        }
+        const allOk = (!checks.storage.postgres || checks.storage.postgres.ok) && (!checks.storage.redis || checks.storage.redis.ok);
+        return sendJson(res, allOk ? 200 : 503, { ok: allOk, ...checks });
       }
 
       if (whatsappMatch && req.method === "GET") {

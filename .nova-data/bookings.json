@@ -1,0 +1,51 @@
+{
+  "records": {
+    "BKG_9Q9L1K16": {
+      "id": "BKG_9Q9L1K16",
+      "tenantId": "restaurant-demo",
+      "customerId": "playground-user",
+      "conversationId": "restaurant-demo:playground:playground-user",
+      "status": "requested",
+      "slots": {
+        "subject": "Table Reservation",
+        "items": [
+          {
+            "id": "default:table-reservation",
+            "name": "Table Reservation",
+            "type": "default_subject",
+            "quantity": 1,
+            "price": null,
+            "metadata": {}
+          }
+        ],
+        "date": "28/08/2026",
+        "partySize": 20,
+        "name": "Umar Gujjar",
+        "phone": "03012343567",
+        "time": "11 pm",
+        "metadata": {
+          "priceRequested": false,
+          "durationRequested": false,
+          "availabilityRequested": false,
+          "closestTimeRequested": false,
+          "calendarStatus": "invalid_time"
+        }
+      },
+      "idempotencyKey": "booking:28f62c288767bc89bfe986e7ac6fbe99",
+      "revision": 1,
+      "calendarEventId": null,
+      "calendarProvider": null,
+      "timeline": [
+        {
+          "action": "created",
+          "at": "2026-08-24T13:38:01.324Z"
+        }
+      ],
+      "createdAt": "2026-08-24T13:38:01.324Z",
+      "updatedAt": "2026-08-24T13:38:01.324Z"
+    }
+  },
+  "keys": {
+    "restaurant-demo:booking:28f62c288767bc89bfe986e7ac6fbe99": "BKG_9Q9L1K16"
+  }
+}

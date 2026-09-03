@@ -29,5 +29,64 @@
     "confidence": 0.9,
     "responseIntent": null,
     "timestamp": "2026-09-01T11:31:03.599Z"
+  },
+  {
+    "id": "default:default:playground:playground-user1:1788323960751:jolc41",
+    "tenantId": "default",
+    "conversationId": "default:playground:playground-user1",
+    "customerId": "playground-user1",
+    "messageText": "i want black 3 pieces",
+    "selectedIntent": "catalog.attribute_update",
+    "selectedCapabilityId": "catalog",
+    "mlPrediction": {
+      "intentId": "cart.update",
+      "confidence": 0.4178
+    },
+    "outcome": "negative",
+    "confidence": 0.9,
+    "responseIntent": "CATALOG_PRODUCT_VIEWED",
+    "timestamp": "2026-09-02T04:39:20.751Z"
+  },
+  {
+    "id": "default:default:playground:playground-user1:1788324019717:f9hlwg",
+    "tenantId": "default",
+    "conversationId": "default:playground:playground-user1",
+    "customerId": "playground-user1",
+    "messageText": "change quntity to 10",
+    "selectedIntent": "catalog.attribute_update",
+    "selectedCapabilityId": "catalog",
+    "mlPrediction": null,
+    "outcome": "negative",
+    "confidence": 0.9,
+    "responseIntent": "CONVERSATION_CLARIFICATION_REQUIRED",
+    "timestamp": "2026-09-02T04:40:19.717Z"
+  },
+  {
+    "id": "default:default:playground:playground-user:1788410847031:fe40ss",
+    "tenantId": "default",
+    "conversationId": "default:playground:playground-user",
+    "customerId": "playground-user",
+    "messageText": "small",
+    "selectedIntent": "catalog.attribute_update",
+    "selectedCapabilityId": "catalog",
+    "mlPrediction": null,
+    "outcome": "negative",
+    "confidence": 0.9,
+    "responseIntent": "CONVERSATION_CLARIFICATION_REQUIRED",
+    "timestamp": "2026-09-03T04:47:27.031Z"
+  },
+  {
+    "id": "default:default:playground:playground-user:1788410866175:n545m1",
+    "tenantId": "default",
+    "conversationId": "default:playground:playground-user",
+    "customerId": "playground-user",
+    "messageText": "change size to large and quantity 10",
+    "selectedIntent": null,
+    "selectedCapabilityId": "system",
+    "mlPrediction": null,
+    "outcome": "negative",
+    "confidence": 0.9,
+    "responseIntent": "CONVERSATION_CLARIFICATION_REQUIRED",
+    "timestamp": "2026-09-03T04:47:46.175Z"
   }
 ]

@@ -1,7 +1,7 @@
 {
   "name": "nova-online-learner",
   "version": "1.0.0",
-  "description": "Retrains the ML intent classifier using collected feedback examples (positive = correct routing, negative = incorrect routing)",
+  "description": "Retrains the ML intent classifier using collected feedback examples",
   "main": "src/index.js",
   "type": "commonjs"
 }

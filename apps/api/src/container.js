@@ -329,20 +329,9 @@ async function buildContainer() {
   const replayRepository = new InMemoryReplayRepository();
   const replayService = new ReplayService({ repository: replayRepository });
 
-  // === v21.0: Online Learning & Feedback Loop ===
-  // The feedback collector observes conversation outcomes (booking confirmed
-  // = positive example, cancelled/corrected = negative example) and stores
-  // them per tenant. The online learner periodically retrains the ML
-  // classifier using the collected examples.
-  const feedbackCollector = new FeedbackCollector({
-    logger,
-    storageDir: path.resolve(__dirname, "../../../.nova-feedback"),
-  });
-  const onlineLearner = new OnlineLearner({
-    feedbackCollector,
-    mlIntentClassifier,
-    logger,
-  });
+  // v21.0: Online Learning & Feedback Loop
+  const feedbackCollector = new FeedbackCollector({ logger, storageDir: path.resolve(__dirname, "../../../.nova-feedback") });
+  const onlineLearner = new OnlineLearner({ feedbackCollector, mlIntentClassifier, logger });
 
   const executionEngine = new ExecutionEngine({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId: config.defaultTenantId, services: { knowledgeService, llmRouter, memoryService, crmService, leadService, customerDataBridge, catalogService, commerceService, inventoryService, cleaningService, offeringService, bookingService, calendarService, offeringOrderService, engagementService, pricingService, handoffService, availabilityService, promptEngine, productMatcher: productEmbeddingMatcher }, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService, feedbackCollector });
   const channelRegistry = new ChannelRegistry().register(new HttpChatAdapter());

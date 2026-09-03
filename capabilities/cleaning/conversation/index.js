@@ -75,6 +75,18 @@ class CleaningConversationAdapter {
       candidates.push({intent:'cleaning.booking_type_clarification',confidence:1,priority:198,entities,reason:'property_cleaning_booking_type_still_missing'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_type_required',score:1}]};
     }
+    // v22.1: If pendingPriceClarification exists (user was asked Standard vs Deep
+    // for a pricing question) and the user provides a non-cleaning-type answer
+    // (like "4" or a random number), re-ask the Standard vs Deep question
+    // instead of letting the answer fall through to another capability.
+    if(previous.pendingPriceClarification?.propertyType && !resolvedCleaningType && !interruption && !pricingRequested){
+      const isShortAnswer=/^\d+$|^(?:one|two|three|four|five|six|seven|eight|nine|ten|yes|no|ok|okay|sure)\b/i.test(normalizedText.trim());
+      if(isShortAnswer || (normalizedText.split(' ').length<=3 && !cleaningDomain)){
+        entities={...previous.pendingPriceClarification.scope,...timeEntities,pendingCleaningType:true,propertyType:previous.pendingPriceClarification.propertyType,bedrooms:previous.pendingPriceClarification.bedrooms};
+        candidates.push({intent:'cleaning.price_type_clarification',confidence:1,priority:195,entities,reason:'price_type_clarification_re_ask'});
+        return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_type_required',score:1}]};
+      }
+    }
 
     // A customer can answer a quote-only cleaning-type clarification with a
     // short phrase such as "deep cleaning". Resume the pricing comparison,
