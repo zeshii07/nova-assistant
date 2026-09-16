@@ -45,7 +45,7 @@
       "sensitivity": "standard",
       "expiresAt": null,
       "createdAt": "2026-08-24T05:21:17.609Z",
-      "updatedAt": "2026-09-03T04:18:13.872Z",
+      "updatedAt": "2026-09-16T07:40:42.964Z",
       "metadata": {}
     },
     "default:customer:catalog:preference.preferredColor:playground-user": {
@@ -56,14 +56,14 @@
       "scope": "customer",
       "namespace": "catalog",
       "key": "preference.preferredColor",
-      "value": "Blue",
+      "value": "Black",
       "tags": [
         "preference"
       ],
       "sensitivity": "standard",
       "expiresAt": null,
       "createdAt": "2026-08-24T05:21:34.646Z",
-      "updatedAt": "2026-09-03T04:18:13.880Z",
+      "updatedAt": "2026-09-16T07:40:42.968Z",
       "metadata": {}
     },
     "default:customer:assistant:preference.language:playground-user": {
@@ -81,7 +81,7 @@
       "sensitivity": "standard",
       "expiresAt": null,
       "createdAt": "2026-08-24T05:37:49.075Z",
-      "updatedAt": "2026-09-01T11:31:03.561Z",
+      "updatedAt": "2026-09-16T08:22:50.066Z",
       "metadata": {}
     },
     "default:customer:assistant:history.1787549869078.85gw2u:playground-user": {
@@ -155,7 +155,7 @@
       "sensitivity": "standard",
       "expiresAt": null,
       "createdAt": "2026-08-24T05:40:45.745Z",
-      "updatedAt": "2026-08-31T04:45:29.968Z",
+      "updatedAt": "2026-09-16T04:17:14.445Z",
       "metadata": {}
     },
     "cleaning-demo:customer:assistant:history.1787550045749.iyyoqd:playground-user": {
@@ -1378,14 +1378,14 @@
       "scope": "customer",
       "namespace": "commerce",
       "key": "preference.lastOrderId",
-      "value": "ORD-MTGS16QC-DF3F48",
+      "value": "ORD-MU3SUJDN-A80A29",
       "tags": [
         "preference"
       ],
       "sensitivity": "standard",
       "expiresAt": null,
       "createdAt": "2026-08-24T13:32:32.304Z",
-      "updatedAt": "2026-08-31T05:07:21.313Z",
+      "updatedAt": "2026-09-16T07:48:52.774Z",
       "metadata": {}
     },
     "cleaning-demo:customer:cleaning:history.1787578883781.2wwfqj:playground-user": {
@@ -4283,6 +4283,144 @@
       "expiresAt": null,
       "createdAt": "2026-09-02T04:38:52.661Z",
       "updatedAt": "2026-09-02T04:45:02.878Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1789529548938.xkah4j:playground-user": {
+      "id": "default:customer:assistant:history.1789529548938.xkah4j:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1789529548938.xkah4j",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "hello how are you doing today"
+        },
+        "occurredAt": "2026-09-16T03:32:28.938Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T03:32:28.938Z",
+      "updatedAt": "2026-09-16T03:32:28.938Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1789532234453.n84e0t:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1789532234453.n84e0t:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1789532234453.n84e0t",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "hello how are you doing tody"
+        },
+        "occurredAt": "2026-09-16T04:17:14.453Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T04:17:14.453Z",
+      "updatedAt": "2026-09-16T04:17:14.453Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789536130756.muy49i:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1789536130756.muy49i:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789536130756.muy49i",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-CCH4RWVJ",
+          "requestIds": [
+            "CLN-CCH4RWVJ"
+          ],
+          "serviceId": "CLN010",
+          "count": 1
+        },
+        "occurredAt": "2026-09-16T05:22:10.756Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T05:22:10.756Z",
+      "updatedAt": "2026-09-16T05:22:10.756Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789536435450.ckvlb2:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1789536435450.ckvlb2:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789536435450.ckvlb2",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-60W0UXAK",
+          "requestIds": [
+            "CLN-60W0UXAK"
+          ],
+          "serviceId": "CLN010",
+          "count": 1
+        },
+        "occurredAt": "2026-09-16T05:27:15.450Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T05:27:15.450Z",
+      "updatedAt": "2026-09-16T05:27:15.450Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1789546970081.v6mkti:playground-user": {
+      "id": "default:customer:assistant:history.1789546970081.v6mkti:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1789546970081.v6mkti",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "hello i want a cleaning service for my apartment on friday"
+        },
+        "occurredAt": "2026-09-16T08:22:50.081Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T08:22:50.081Z",
+      "updatedAt": "2026-09-16T08:22:50.081Z",
       "metadata": {}
     }
   }

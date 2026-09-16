@@ -291,8 +291,55 @@
       "createdAt": "2026-09-02T04:45:12.322Z",
       "updatedAt": "2026-09-03T04:17:40.914Z",
       "expiresAt": "2026-09-02T05:00:12.322Z"
+    },
+    "RSV-MU3KAPGF-1414C9": {
+      "id": "RSV-MU3KAPGF-1414C9",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "cartId": "CART-MU3K9G26-3AFFD6",
+      "status": "expired",
+      "lines": [],
+      "createdAt": "2026-09-16T03:49:30.591Z",
+      "updatedAt": "2026-09-16T04:16:51.169Z",
+      "expiresAt": "2026-09-16T04:04:51.510Z"
+    },
+    "RSV-MU3SM2HR-8AA14E": {
+      "id": "RSV-MU3SM2HR-8AA14E",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "cartId": "CART-MU3SK1GM-E08FEF",
+      "status": "released",
+      "lines": [],
+      "createdAt": "2026-09-16T07:42:17.631Z",
+      "updatedAt": "2026-09-16T07:45:00.816Z",
+      "expiresAt": "2026-09-16T07:57:17.631Z",
+      "releaseReason": "cart_item_changed"
+    },
+    "RSV-MU3SPKEV-C74FF9": {
+      "id": "RSV-MU3SPKEV-C74FF9",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "cartId": "CART-MU3SK1GM-E08FEF",
+      "status": "released",
+      "lines": [],
+      "createdAt": "2026-09-16T07:45:00.823Z",
+      "updatedAt": "2026-09-16T07:45:32.901Z",
+      "expiresAt": "2026-09-16T08:00:00.823Z",
+      "releaseReason": "cart_quantity_changed"
+    },
+    "RSV-MU3SUJDG-60585F": {
+      "id": "RSV-MU3SUJDG-60585F",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "cartId": "CART-MU3SK1GM-E08FEF",
+      "status": "consumed",
+      "lines": [],
+      "createdAt": "2026-09-16T07:48:52.756Z",
+      "updatedAt": "2026-09-16T07:48:52.765Z",
+      "expiresAt": "2026-09-16T08:03:52.756Z",
+      "consumedAt": "2026-09-16T07:48:52.765Z"
     }
   },
   "movements": [],
-  "updatedAt": "2026-09-03T04:17:40.914Z"
+  "updatedAt": "2026-09-16T08:24:08.068Z"
 }

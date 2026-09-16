@@ -9144,460 +9144,6 @@
       "createdAt": "2026-08-29T10:48:25.023Z",
       "updatedAt": "2026-08-29T10:51:10.512Z"
     },
-    "cleaning-demo:playground:playground-user": {
-      "schemaVersion": 1,
-      "tenantId": "cleaning-demo",
-      "conversationId": "cleaning-demo:playground:playground-user",
-      "channel": "playground",
-      "customerId": "playground-user",
-      "language": "english",
-      "mode": "chatting",
-      "activePlugin": "cleaning",
-      "pendingQuestion": null,
-      "context": {
-        "goalHistory": [],
-        "lastMessage": "sofa size is 3 seater",
-        "lastCapability": "cleaning",
-        "conversationIntelligence": {
-          "selected": {
-            "capabilityId": "cleaning",
-            "priority": 212,
-            "intent": "cleaning.workflow_input",
-            "confidence": 1,
-            "entities": {
-              "serviceId": "CLN003",
-              "serviceName": "Furniture Cleaning",
-              "scopeText": "sofa size is 3 seater",
-              "quoteOnly": true,
-              "nonStandardScope": true,
-              "quoteTargetsCurrent": true,
-              "preserveWorkflow": true,
-              "units": 3,
-              "date": "today",
-              "time": "11:00",
-              "startTime": "11:00",
-              "pendingField": "units",
-              "preferredTimeOptions": [
-                "11:00"
-              ]
-            },
-            "reason": "active_cleaning_units_value"
-          },
-          "entities": {
-            "serviceId": "CLN003",
-            "serviceName": "Furniture Cleaning",
-            "scopeText": "sofa size is 3 seater",
-            "quoteOnly": true,
-            "nonStandardScope": true,
-            "quoteTargetsCurrent": true,
-            "preserveWorkflow": true,
-            "units": 3,
-            "date": "today",
-            "time": "11:00",
-            "startTime": "11:00",
-            "pendingField": "units",
-            "preferredTimeOptions": [
-              "11:00"
-            ]
-          },
-          "messageFrame": {
-            "version": "1.0",
-            "clauseCount": 1,
-            "intents": [],
-            "entities": {
-              "date": "today",
-              "time": "11:00",
-              "startTime": "11:00"
-            },
-            "hasMultipleIntents": false,
-            "primaryIntent": "information.price",
-            "resolvedIntents": [
-              {
-                "intent": "cleaning.workflow_input",
-                "capabilityId": "cleaning",
-                "confidence": 1,
-                "source": "capability_adapter"
-              }
-            ],
-            "localSemanticPrimaryIntent": "service.price",
-            "localSemanticAccepted": false,
-            "detectedLanguage": "en",
-            "primaryResolvedIntent": {
-              "capabilityId": "cleaning",
-              "intent": "cleaning.workflow_input",
-              "confidence": 1
-            }
-          },
-          "workflow": {
-            "stack": [
-              {
-                "capabilityId": "cleaning",
-                "workflow": "service_request",
-                "pendingField": "units"
-              }
-            ],
-            "current": {
-              "capabilityId": "cleaning",
-              "workflow": "service_request",
-              "pendingField": "units"
-            }
-          },
-          "goal": {
-            "current": null,
-            "nextGoal": null,
-            "transition": null,
-            "override": null
-          },
-          "correction": null,
-          "interruption": {
-            "type": "business_question",
-            "confidence": 0.82
-          },
-          "globalCommand": null,
-          "requiresClarification": false,
-          "clarificationReason": null,
-          "nlu": {
-            "used": true,
-            "validated": false,
-            "mode": "on",
-            "strategy": "adaptive",
-            "deterministicFallback": true,
-            "executionAuthority": "nova_deterministic_core",
-            "model": "openai/gpt-oss-20b",
-            "promptVersion": "nova-language-2.0",
-            "decision": "deterministic_only",
-            "invocationReason": "local_semantic_uncertain",
-            "error": "request_failed",
-            "httpStatus": null,
-            "providerMessage": null,
-            "providerErrorType": null,
-            "providerRequestId": null,
-            "latencyMs": 287.214,
-            "languageContract": null
-          }
-        },
-        "recentTurns": [
-          {
-            "text": "can i find somenone here to come and clean my sofa i am living in albarsha dubai",
-            "capabilityId": "cleaning",
-            "intent": "cleaning.service_request",
-            "entities": {
-              "temporal": {
-                "date": null,
-                "dateText": null,
-                "dateReference": null,
-                "weekday": null,
-                "time": null,
-                "startTime": null,
-                "endTime": null,
-                "durationHours": null,
-                "timeWindow": null,
-                "timeFlexible": false,
-                "invalidTime": null
-              },
-              "property": {},
-              "acquisition": {
-                "requested": false,
-                "kind": "service",
-                "isService": true,
-                "isProduct": false
-              },
-              "serviceSupport": {
-                "isSupportQuestion": false,
-                "category": null
-              },
-              "businessIdentity": {
-                "isBusinessIdentity": false,
-                "facet": null
-              },
-              "isPricingQuestion": false,
-              "isBookingAction": false
-            },
-            "at": "2026-09-01T04:33:47.052Z"
-          },
-          {
-            "text": "it is three seater sofa what are charges",
-            "capabilityId": "cleaning",
-            "intent": "cleaning.active_quote_question",
-            "entities": {
-              "temporal": {
-                "date": null,
-                "dateText": null,
-                "dateReference": null,
-                "weekday": null,
-                "time": null,
-                "startTime": null,
-                "endTime": null,
-                "durationHours": null,
-                "timeWindow": null,
-                "timeFlexible": false,
-                "invalidTime": null
-              },
-              "property": {},
-              "acquisition": {
-                "requested": false,
-                "kind": null,
-                "isService": false,
-                "isProduct": false
-              },
-              "serviceSupport": {
-                "isSupportQuestion": false,
-                "category": null
-              },
-              "businessIdentity": {
-                "isBusinessIdentity": false,
-                "facet": null
-              },
-              "isPricingQuestion": true,
-              "isBookingAction": false
-            },
-            "at": "2026-09-01T04:34:18.075Z"
-          },
-          {
-            "text": "3 seater sofa",
-            "capabilityId": "cleaning",
-            "intent": "cleaning.active_quote_question",
-            "entities": {
-              "temporal": {
-                "date": null,
-                "dateText": null,
-                "dateReference": null,
-                "weekday": null,
-                "time": null,
-                "startTime": null,
-                "endTime": null,
-                "durationHours": null,
-                "timeWindow": null,
-                "timeFlexible": false,
-                "invalidTime": null
-              },
-              "property": {
-                "units": 3
-              },
-              "acquisition": {
-                "requested": false,
-                "kind": null,
-                "isService": false,
-                "isProduct": false
-              },
-              "serviceSupport": {
-                "isSupportQuestion": false,
-                "category": null
-              },
-              "businessIdentity": {
-                "isBusinessIdentity": false,
-                "facet": null
-              },
-              "isPricingQuestion": false,
-              "isBookingAction": false
-            },
-            "at": "2026-09-01T04:34:29.333Z"
-          },
-          {
-            "text": "can you come today at 11 am",
-            "capabilityId": "cleaning",
-            "intent": "cleaning.workflow_input",
-            "entities": {
-              "temporal": {
-                "date": "today",
-                "dateText": null,
-                "dateReference": "today",
-                "weekday": null,
-                "time": "11:00",
-                "startTime": "11:00",
-                "endTime": null,
-                "durationHours": null,
-                "timeWindow": null,
-                "timeFlexible": false,
-                "invalidTime": null
-              },
-              "property": {},
-              "acquisition": {
-                "requested": true,
-                "kind": null,
-                "isService": false,
-                "isProduct": false
-              },
-              "serviceSupport": {
-                "isSupportQuestion": false,
-                "category": null
-              },
-              "businessIdentity": {
-                "isBusinessIdentity": false,
-                "facet": null
-              },
-              "isPricingQuestion": false,
-              "isBookingAction": false
-            },
-            "at": "2026-09-01T04:34:45.702Z"
-          },
-          {
-            "text": "sofa size is 3 seater",
-            "capabilityId": "cleaning",
-            "intent": "cleaning.workflow_input",
-            "entities": {
-              "temporal": {
-                "date": null,
-                "dateText": null,
-                "dateReference": null,
-                "weekday": null,
-                "time": null,
-                "startTime": null,
-                "endTime": null,
-                "durationHours": null,
-                "timeWindow": null,
-                "timeFlexible": false,
-                "invalidTime": null
-              },
-              "property": {
-                "units": 3
-              },
-              "acquisition": {
-                "requested": false,
-                "kind": null,
-                "isService": false,
-                "isProduct": false
-              },
-              "serviceSupport": {
-                "isSupportQuestion": false,
-                "category": null
-              },
-              "businessIdentity": {
-                "isBusinessIdentity": false,
-                "facet": null
-              },
-              "isPricingQuestion": false,
-              "isBookingAction": false
-            },
-            "at": "2026-09-01T04:35:06.454Z"
-          }
-        ],
-        "entities": {
-          "version": "2.0",
-          "text": "sofa size is 3 seater",
-          "normalized": "sofa size is 3 seater",
-          "temporal": {
-            "date": "today",
-            "dateText": null,
-            "dateReference": "today",
-            "weekday": null,
-            "time": "11:00",
-            "startTime": "11:00",
-            "endTime": null,
-            "durationHours": null,
-            "timeWindow": null,
-            "timeFlexible": false,
-            "invalidTime": null
-          },
-          "property": {
-            "units": 3
-          },
-          "fieldAmendment": null,
-          "acquisition": {
-            "requested": false,
-            "kind": "service",
-            "isService": false,
-            "isProduct": false
-          },
-          "identity": {
-            "name": null,
-            "phone": null,
-            "email": null,
-            "address": null
-          },
-          "serviceSupport": {
-            "isSupportQuestion": false,
-            "category": null
-          },
-          "businessIdentity": {
-            "isBusinessIdentity": false,
-            "facet": null
-          },
-          "isPricingQuestion": false,
-          "isBookingAction": false,
-          "isListRequest": false,
-          "isCancelAction": false
-        },
-        "memoryContext": {
-          "wantsRepeat": false,
-          "wantsSameTime": false,
-          "wantsSameAddress": false,
-          "wantsChange": false,
-          "referencedCapability": null,
-          "referencedService": null,
-          "lastBookingCapability": "cleaning",
-          "lastBookingTime": "11:00",
-          "lastAddress": "Villa 34, JVC Phase 2, Dubai",
-          "referencedDate": "today"
-        }
-      },
-      "capabilityState": {
-        "cleaning": {
-          "scopeText": "can i find somenone here to come and clean my sofa i am living in albarsha dubai",
-          "serviceId": "CLN003",
-          "serviceName": "Furniture Cleaning",
-          "requiredPricingFields": [
-            "units"
-          ],
-          "pricingServiceId": "furniture-sofa",
-          "pricingFirst": false,
-          "preferredDate": "01/09/2026",
-          "preferredTime": "11:00",
-          "startTime": "11:00",
-          "endTime": null,
-          "address": "Villa 34, JVC Phase 2, Dubai",
-          "name": "James Watson",
-          "phone": "03077374765",
-          "email": "zeeshan@gmil.com",
-          "scheduleError": null,
-          "durationHours": null,
-          "cleanerCount": null,
-          "step": "confirm",
-          "priceEnquiry": {
-            "serviceId": "CLN003",
-            "serviceName": "Furniture Cleaning",
-            "quoteOnly": true,
-            "scopeText": "3 seater sofa",
-            "units": 3,
-            "quote": {
-              "ok": true,
-              "serviceId": "furniture-sofa",
-              "serviceName": "Sofa Cleaning",
-              "operationalServiceId": "CLN003",
-              "currency": "AED",
-              "subtotal": 110,
-              "total": 110,
-              "baseSubtotal": 110,
-              "addOnTotal": 0,
-              "addOns": [],
-              "formula": "units=3",
-              "model": "linear"
-            }
-          },
-          "units": 3,
-          "quotedService": {
-            "ok": true,
-            "serviceId": "furniture-sofa",
-            "serviceName": "Sofa Cleaning",
-            "operationalServiceId": "CLN003",
-            "currency": "AED",
-            "subtotal": 110,
-            "total": 110,
-            "baseSubtotal": 110,
-            "addOnTotal": 0,
-            "addOns": [],
-            "formula": "units=3",
-            "model": "linear"
-          },
-          "total": 110,
-          "currency": "AED",
-          "savedDetailsOffered": true
-        }
-      },
-      "lastIntent": "cleaning_saved_customer_review",
-      "createdAt": "2026-09-01T04:33:46.294Z",
-      "updatedAt": "2026-09-01T04:35:06.455Z"
-    },
     "default:playground:playground-user1": {
       "schemaVersion": 1,
       "tenantId": "default",
@@ -10353,269 +9899,192 @@
       "customerId": "playground-user",
       "language": "english",
       "mode": "chatting",
-      "activePlugin": "catalog",
+      "activePlugin": "assistant",
       "pendingQuestion": null,
       "context": {
-        "goal": {
-          "id": "GOAL-MTL0LAJL",
-          "type": "purchase_product",
-          "status": "active",
-          "stage": "collecting_product_details",
-          "capabilityId": "catalog",
-          "categoryId": null,
-          "candidateIds": [],
-          "selectedProductId": "P008",
-          "selectedServiceId": null,
-          "entities": {
-            "productId": "P008",
-            "productName": "Polo Shirt",
-            "size": "S",
-            "nluIntents": [
-              "other"
-            ]
-          },
-          "createdAt": "2026-09-03T04:18:00.993Z",
-          "updatedAt": "2026-09-03T04:18:13.844Z"
-        },
-        "goalHistory": [
-          {
-            "at": "2026-09-03T04:18:01.025Z",
-            "type": "goal.product_selected",
-            "productId": "P008",
-            "goalId": "GOAL-MTL0LAJL"
-          },
-          {
-            "at": "2026-09-03T04:18:13.918Z",
-            "type": "goal.product_details_updated",
-            "entities": {
-              "size": "S",
-              "nluIntents": [
-                "other"
-              ],
-              "productId": "P008",
-              "productName": "Polo Shirt",
-              "color": null,
-              "quantity": null
-            },
-            "goalId": "GOAL-MTL0LAJL"
-          }
-        ],
-        "lastMessage": "change size to large",
-        "lastCapability": "system",
+        "assistantSource": "conversation_intelligence",
+        "assistantResponseSequence": 1,
+        "goalHistory": [],
+        "lastMessage": "hello i want a cleaning service for my apartment on friday",
+        "lastCapability": "assistant",
         "conversationIntelligence": {
           "selected": {
-            "capabilityId": "catalog",
-            "priority": 80,
-            "intent": "catalog.attribute_update",
-            "confidence": 0.998,
+            "capabilityId": "assistant",
+            "intent": "assistant.unsupported_capability",
+            "confidence": 0.9996,
+            "reason": "unsupported_tenant_capability",
             "entities": {
-              "productId": "P008",
-              "productName": "Polo Shirt",
-              "color": "Blue",
-              "size": "S",
-              "quantity": 2,
+              "serviceName": "Cleaning",
+              "subject": "Cleaning",
+              "date": "friday",
+              "dateText": "Friday",
+              "dateNormalizedHint": "2026-09-16",
               "nluIntents": [
-                "other"
-              ]
-            },
-            "reason": "active_catalog_attribute+remote_nlu_entity_enrichment"
+                "booking.create",
+                "booking.create"
+              ],
+              "serviceItems": [
+                {
+                  "serviceId": null,
+                  "serviceName": "Cleaning",
+                  "quantity": 1,
+                  "unit": null,
+                  "serviceVariant": null,
+                  "propertyType": null,
+                  "bedrooms": null,
+                  "staff": null,
+                  "durationHours": null,
+                  "confidence": 0.9
+                }
+              ],
+              "weekday": "friday",
+              "domain": "cleaning service"
+            }
           },
           "entities": {
-            "productId": "P008",
-            "productName": "Polo Shirt",
-            "color": "Blue",
-            "size": "large",
-            "quantity": 2,
+            "serviceName": "Cleaning",
+            "subject": "Cleaning",
+            "date": "friday",
+            "dateText": "Friday",
+            "dateNormalizedHint": "2026-09-16",
             "nluIntents": [
-              "other"
+              "booking.create",
+              "booking.create"
             ],
-            "corrections": [
+            "serviceItems": [
               {
-                "field": "size",
-                "from": null,
-                "to": "large"
-              },
-              {
-                "field": "quantity",
-                "from": null,
-                "to": "10"
-              },
-              {
-                "field": "size",
-                "from": null,
-                "to": "large"
-              },
-              {
-                "field": "quantity",
-                "from": null,
-                "to": "10"
+                "serviceId": null,
+                "serviceName": "Cleaning",
+                "quantity": 1,
+                "unit": null,
+                "serviceVariant": null,
+                "propertyType": null,
+                "bedrooms": null,
+                "staff": null,
+                "durationHours": null,
+                "confidence": 0.9
               }
-            ]
+            ],
+            "weekday": "friday",
+            "domain": "cleaning service"
           },
           "messageFrame": {
             "version": "1.0",
             "clauseCount": 1,
             "intents": [
               {
-                "intent": "conversation.correct",
+                "intent": "conversation.social.greeting",
+                "confidence": 0.99,
+                "clauseIndex": 0,
+                "modality": "asserted",
+                "source": "deterministic_frame"
+              },
+              {
+                "intent": "booking.create",
                 "confidence": 0.96,
                 "clauseIndex": 0,
                 "modality": "asserted",
                 "source": "deterministic_frame"
               },
               {
-                "intent": "other",
-                "confidence": 1,
+                "intent": "booking.create",
+                "confidence": 0.9,
                 "clauseIndex": null,
                 "modality": "asserted",
                 "source": "ai_language_contract",
-                "messageType": "correction"
+                "messageType": "request"
               }
             ],
             "entities": {
-              "size": "large",
+              "serviceName": "Cleaning",
+              "subject": "Cleaning",
+              "date": "friday",
+              "dateText": "Friday",
+              "dateNormalizedHint": "2026-09-16",
               "nluIntents": [
-                "other",
-                "other"
+                "booking.create",
+                "booking.create"
               ],
-              "corrections": [
+              "serviceItems": [
                 {
-                  "field": "size",
-                  "from": null,
-                  "to": "large"
-                },
-                {
-                  "field": "quantity",
-                  "from": null,
-                  "to": "10"
+                  "serviceId": null,
+                  "serviceName": "Cleaning",
+                  "quantity": 1,
+                  "unit": null,
+                  "serviceVariant": null,
+                  "propertyType": null,
+                  "bedrooms": null,
+                  "staff": null,
+                  "durationHours": null,
+                  "confidence": 0.9
                 }
-              ]
+              ],
+              "weekday": "friday"
             },
-            "hasMultipleIntents": true,
-            "primaryIntent": "conversation.correct",
+            "hasMultipleIntents": false,
+            "primaryIntent": "booking.create",
             "resolvedIntents": [
               {
-                "intent": "conversation.correct",
+                "intent": "conversation.social.greeting",
+                "confidence": 0.99,
+                "clauseIndex": 0,
+                "modality": "asserted",
+                "source": "deterministic_frame"
+              },
+              {
+                "intent": "booking.create",
                 "confidence": 0.96,
                 "clauseIndex": 0,
                 "modality": "asserted",
                 "source": "deterministic_frame"
               },
               {
-                "intent": "other",
-                "confidence": 1,
+                "intent": "booking.create",
+                "confidence": 0.9,
                 "clauseIndex": null,
                 "modality": "asserted",
                 "source": "ai_language_contract",
-                "messageType": "correction"
+                "messageType": "request"
               },
               {
-                "intent": "commerce.cart.update_variant",
-                "capabilityId": "commerce",
+                "intent": "catalog.unavailable_request",
+                "capabilityId": "catalog",
                 "confidence": 1,
                 "source": "capability_adapter"
               },
               {
-                "intent": "catalog.attribute_update",
-                "capabilityId": "catalog",
-                "confidence": 0.998,
+                "intent": "assistant.domain_mismatch",
+                "capabilityId": "assistant",
+                "confidence": 0.6,
                 "source": "capability_adapter"
               }
             ],
-            "localSemanticPrimaryIntent": "cart.update",
-            "localSemanticAccepted": false,
+            "localSemanticPrimaryIntent": "booking.create",
+            "localSemanticAccepted": true,
             "detectedLanguage": "en",
-            "primaryResolvedIntent": {
-              "capabilityId": "catalog",
-              "intent": "catalog.attribute_update",
-              "confidence": 0.998
-            },
             "languageContractVersion": "2.0",
-            "aiPrimaryIntent": "other"
-          },
-          "workflow": {
-            "stack": [
-              {
-                "capabilityId": "catalog",
-                "workflow": "product_selection",
-                "pendingField": "confirmation"
-              }
-            ],
-            "current": {
-              "capabilityId": "catalog",
-              "workflow": "product_selection",
-              "pendingField": "confirmation"
+            "aiPrimaryIntent": "booking.create",
+            "primaryResolvedIntent": {
+              "capabilityId": "assistant",
+              "intent": "assistant.unsupported_capability",
+              "confidence": 0.9996
             }
           },
+          "workflow": {
+            "stack": [],
+            "current": null
+          },
           "goal": {
-            "current": {
-              "id": "GOAL-MTL0LAJL",
-              "type": "purchase_product",
-              "status": "active",
-              "stage": "collecting_product_details",
-              "capabilityId": "catalog",
-              "categoryId": null,
-              "candidateIds": [],
-              "selectedProductId": "P008",
-              "selectedServiceId": null,
-              "entities": {
-                "productId": "P008",
-                "productName": "Polo Shirt",
-                "size": "S",
-                "nluIntents": [
-                  "other"
-                ]
-              },
-              "createdAt": "2026-09-03T04:18:00.993Z",
-              "updatedAt": "2026-09-03T04:18:13.844Z"
-            },
-            "nextGoal": {
-              "id": "GOAL-MTL0LAJL",
-              "type": "purchase_product",
-              "status": "active",
-              "stage": "collecting_product_details",
-              "capabilityId": "catalog",
-              "categoryId": null,
-              "candidateIds": [],
-              "selectedProductId": "P008",
-              "selectedServiceId": null,
-              "entities": {
-                "productId": "P008",
-                "productName": "Polo Shirt",
-                "size": "S",
-                "nluIntents": [
-                  "other"
-                ]
-              },
-              "createdAt": "2026-09-03T04:18:00.993Z",
-              "updatedAt": "2026-09-03T04:18:13.844Z"
-            },
-            "transition": {
-              "type": "goal.product_details_updated",
-              "productId": "P008",
-              "entities": {
-                "size": "S",
-                "nluIntents": [
-                  "other"
-                ],
-                "productId": "P008",
-                "productName": "Polo Shirt",
-                "color": null,
-                "quantity": null
-              }
-            },
+            "current": null,
+            "nextGoal": null,
+            "transition": null,
             "override": null
           },
-          "correction": {
-            "type": "replace",
-            "target": "size",
-            "value": 10,
-            "confidence": 0.9
-          },
+          "correction": null,
           "interruption": null,
           "globalCommand": null,
-          "requiresClarification": true,
-          "clarificationReason": "competing_deterministic_routes",
+          "requiresClarification": false,
+          "clarificationReason": null,
           "nlu": {
             "used": true,
             "validated": true,
@@ -10626,66 +10095,81 @@
             "model": "openai/gpt-oss-20b",
             "promptVersion": "nova-language-2.0",
             "decision": "ambiguous_unresolved",
-            "invocationReason": "competing_deterministic_routes",
+            "invocationReason": "semantic_route_conflict",
             "error": null,
             "httpStatus": null,
             "providerMessage": null,
             "providerErrorType": null,
             "providerRequestId": null,
-            "latencyMs": 1575.877,
+            "latencyMs": 1813.057,
             "languageContract": {
               "contractVersion": "2.0",
               "providerSchemaVersion": "2.0",
               "language": {
                 "code": "en",
-                "confidence": 1
+                "confidence": 0.9
               },
               "message": {
-                "type": "correction",
-                "actionSemantics": "change_request",
-                "certainty": "explicit",
-                "confidence": 1
+                "type": "request",
+                "actionSemantics": "draft_request",
+                "certainty": "implicit",
+                "confidence": 0.9
               },
               "primaryIntent": {
-                "name": "other",
-                "confidence": 1
+                "name": "booking.create",
+                "confidence": 0.9
               },
               "intents": [
                 {
-                  "name": "other",
-                  "messageType": "correction",
-                  "confidence": 1
+                  "name": "booking.create",
+                  "messageType": "request",
+                  "confidence": 0.9
                 }
               ],
               "workflow": {
                 "relationship": "continue",
-                "active": {
-                  "capabilityId": "catalog",
-                  "workflow": "product_selection",
-                  "pendingField": "confirmation"
-                }
+                "active": null
               },
               "entities": {
-                "size": "large",
+                "serviceName": "Cleaning",
+                "subject": "Cleaning",
+                "date": "2026-09-16",
+                "dateText": "Friday",
+                "dateNormalizedHint": "2026-09-16",
                 "nluIntents": [
-                  "other",
-                  "other"
+                  "booking.create",
+                  "booking.create"
                 ],
-                "corrections": [
+                "serviceItems": [
                   {
-                    "field": "size",
-                    "from": null,
-                    "to": "large"
-                  },
-                  {
-                    "field": "quantity",
-                    "from": null,
-                    "to": "10"
+                    "serviceId": null,
+                    "serviceName": "Cleaning",
+                    "quantity": 1,
+                    "unit": null,
+                    "serviceVariant": null,
+                    "propertyType": null,
+                    "bedrooms": null,
+                    "staff": null,
+                    "durationHours": null,
+                    "confidence": 0.9
                   }
                 ]
               },
               "items": {
-                "services": [],
+                "services": [
+                  {
+                    "serviceId": null,
+                    "serviceName": "Cleaning",
+                    "quantity": 1,
+                    "unit": null,
+                    "serviceVariant": null,
+                    "propertyType": null,
+                    "bedrooms": null,
+                    "staff": null,
+                    "durationHours": null,
+                    "confidence": 0.9
+                  }
+                ],
                 "products": []
               },
               "customerFields": {
@@ -10694,7 +10178,10 @@
                 "email": null
               },
               "requestedInformation": [],
-              "missingInformation": [],
+              "missingInformation": [
+                "staff",
+                "time"
+              ],
               "corrections": [],
               "ambiguities": [],
               "authority": {
@@ -10707,15 +10194,15 @@
         },
         "recentTurns": [
           {
-            "text": "hello i want two polo shirts in blue color",
-            "capabilityId": "catalog",
-            "intent": "catalog.product_interest",
+            "text": "hello i want a cleaning service for my apartment on friday",
+            "capabilityId": "assistant",
+            "intent": "assistant.unsupported_capability",
             "entities": {
               "temporal": {
                 "date": null,
                 "dateText": null,
                 "dateReference": null,
-                "weekday": null,
+                "weekday": "friday",
                 "time": null,
                 "startTime": null,
                 "endTime": null,
@@ -10724,51 +10211,13 @@
                 "timeFlexible": false,
                 "invalidTime": null
               },
-              "property": {},
+              "property": {
+                "propertyType": "apartment"
+              },
               "acquisition": {
                 "requested": true,
-                "kind": "product",
-                "isService": false,
-                "isProduct": true
-              },
-              "serviceSupport": {
-                "isSupportQuestion": false,
-                "category": null
-              },
-              "businessIdentity": {
-                "isBusinessIdentity": false,
-                "facet": null
-              },
-              "isPricingQuestion": false,
-              "isBookingAction": false
-            },
-            "at": "2026-09-03T04:18:01.025Z"
-          },
-          {
-            "text": "small",
-            "capabilityId": "catalog",
-            "intent": "catalog.attribute_update",
-            "entities": {
-              "temporal": {
-                "date": null,
-                "dateText": null,
-                "dateReference": null,
-                "weekday": null,
-                "time": null,
-                "startTime": null,
-                "endTime": null,
-                "durationHours": null,
-                "timeWindow": null,
-                "timeFlexible": false,
-                "invalidTime": null
-              },
-              "property": {
-                "serviceVariant": "small"
-              },
-              "acquisition": {
-                "requested": false,
-                "kind": null,
-                "isService": false,
+                "kind": "service",
+                "isService": true,
                 "isProduct": false
               },
               "serviceSupport": {
@@ -10782,98 +10231,18 @@
               "isPricingQuestion": false,
               "isBookingAction": false
             },
-            "at": "2026-09-03T04:18:13.918Z"
-          },
-          {
-            "text": "change size to large and quantity 10",
-            "capabilityId": "system",
-            "intent": null,
-            "entities": {
-              "temporal": {
-                "date": null,
-                "dateText": null,
-                "dateReference": null,
-                "weekday": null,
-                "time": null,
-                "startTime": null,
-                "endTime": null,
-                "durationHours": null,
-                "timeWindow": null,
-                "timeFlexible": false,
-                "invalidTime": null
-              },
-              "property": {
-                "serviceVariant": "large"
-              },
-              "acquisition": {
-                "requested": false,
-                "kind": null,
-                "isService": false,
-                "isProduct": false
-              },
-              "serviceSupport": {
-                "isSupportQuestion": false,
-                "category": null
-              },
-              "businessIdentity": {
-                "isBusinessIdentity": false,
-                "facet": null
-              },
-              "isPricingQuestion": false,
-              "isBookingAction": false
-            },
-            "at": "2026-09-03T04:47:26.996Z"
-          },
-          {
-            "text": "change size to large",
-            "capabilityId": "system",
-            "intent": null,
-            "entities": {
-              "temporal": {
-                "date": null,
-                "dateText": null,
-                "dateReference": null,
-                "weekday": null,
-                "time": null,
-                "startTime": null,
-                "endTime": null,
-                "durationHours": null,
-                "timeWindow": null,
-                "timeFlexible": false,
-                "invalidTime": null
-              },
-              "property": {
-                "serviceVariant": "large"
-              },
-              "acquisition": {
-                "requested": false,
-                "kind": null,
-                "isService": false,
-                "isProduct": false
-              },
-              "serviceSupport": {
-                "isSupportQuestion": false,
-                "category": null
-              },
-              "businessIdentity": {
-                "isBusinessIdentity": false,
-                "facet": null
-              },
-              "isPricingQuestion": false,
-              "isBookingAction": false
-            },
-            "at": "2026-09-03T04:47:46.148Z"
+            "at": "2026-09-16T08:22:50.115Z"
           }
         ],
         "entities": {
           "version": "2.0",
-          "text": "change size to large",
-          "normalized": "change size to large",
+          "text": "hello i want a cleaning service for my apartment on friday",
+          "normalized": "hello i want a cleaning service for my apartment on friday",
           "temporal": {
             "date": null,
             "dateText": null,
             "dateReference": null,
-            "weekday": null,
+            "weekday": "friday",
             "time": null,
             "startTime": null,
             "endTime": null,
@@ -10883,13 +10252,13 @@
             "invalidTime": null
           },
           "property": {
-            "serviceVariant": "large"
+            "propertyType": "apartment"
           },
           "fieldAmendment": null,
           "acquisition": {
-            "requested": false,
-            "kind": "product",
-            "isService": false,
+            "requested": true,
+            "kind": "service",
+            "isService": true,
             "isProduct": false
           },
           "identity": {
@@ -10918,27 +10287,462 @@
           "wantsChange": false,
           "referencedCapability": null,
           "referencedService": null,
-          "lastBookingCapability": "catalog",
+          "lastBookingCapability": null,
           "lastBookingTime": null,
           "lastAddress": null
         }
       },
-      "capabilityState": {
-        "catalog": {
-          "selectedProductId": "P008",
-          "selectedAttributes": {
-            "color": "Blue",
-            "quantity": 2,
-            "size": "S"
+      "capabilityState": {},
+      "lastIntent": "unsupported_capability",
+      "createdAt": "2026-09-16T08:22:45.849Z",
+      "updatedAt": "2026-09-16T08:22:50.116Z"
+    },
+    "cleaning-demo:playground:playground-user": {
+      "schemaVersion": 1,
+      "tenantId": "cleaning-demo",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "channel": "playground",
+      "customerId": "playground-user",
+      "language": "english",
+      "mode": "chatting",
+      "activePlugin": "cleaning",
+      "pendingQuestion": null,
+      "context": {
+        "goalHistory": [],
+        "lastMessage": "it has 4 bedrooms",
+        "lastCapability": "cleaning",
+        "conversationIntelligence": {
+          "selected": {
+            "capabilityId": "cleaning",
+            "priority": 212,
+            "intent": "cleaning.workflow_input",
+            "confidence": 1,
+            "entities": {
+              "date": "friday",
+              "weekday": "friday",
+              "propertyType": "apartment",
+              "preferredDateOptions": [
+                "friday"
+              ],
+              "scopeText": "it has 4 bedrooms",
+              "text": "hello i want a cleaning service for my apartment on friday",
+              "pendingCleaningType": true,
+              "selectedCleaningType": "deep",
+              "bedrooms": 4,
+              "nluIntents": [
+                "other"
+              ],
+              "pendingField": "bedrooms",
+              "preserveWorkflow": true
+            },
+            "reason": "active_cleaning_bedrooms_value+remote_nlu_correction_enrichment"
           },
-          "suggestedProductIds": [],
-          "browsingCategoryId": null,
-          "browsingFamily": null
+          "entities": {
+            "date": "friday",
+            "weekday": "friday",
+            "propertyType": "apartment",
+            "preferredDateOptions": [
+              "friday"
+            ],
+            "scopeText": "it has 4 bedrooms",
+            "text": "hello i want a cleaning service for my apartment on friday",
+            "pendingCleaningType": true,
+            "selectedCleaningType": "deep",
+            "bedrooms": 4,
+            "nluIntents": [
+              "other"
+            ],
+            "pendingField": "bedrooms",
+            "preserveWorkflow": true
+          },
+          "messageFrame": {
+            "version": "1.0",
+            "clauseCount": 1,
+            "intents": [
+              {
+                "intent": "other",
+                "confidence": 1,
+                "clauseIndex": null,
+                "modality": "asserted",
+                "source": "ai_language_contract",
+                "messageType": "correction"
+              }
+            ],
+            "entities": {
+              "date": "friday",
+              "weekday": "friday",
+              "bedrooms": 4,
+              "nluIntents": [
+                "other",
+                "other"
+              ]
+            },
+            "hasMultipleIntents": false,
+            "primaryIntent": "booking.create",
+            "resolvedIntents": [
+              {
+                "intent": "other",
+                "confidence": 1,
+                "clauseIndex": null,
+                "modality": "asserted",
+                "source": "ai_language_contract",
+                "messageType": "correction"
+              },
+              {
+                "intent": "cleaning.workflow_input",
+                "capabilityId": "cleaning",
+                "confidence": 1,
+                "source": "capability_adapter"
+              }
+            ],
+            "localSemanticPrimaryIntent": "conversation.confirm",
+            "localSemanticAccepted": false,
+            "detectedLanguage": "en",
+            "primaryResolvedIntent": {
+              "capabilityId": "cleaning",
+              "intent": "cleaning.workflow_input",
+              "confidence": 1
+            },
+            "languageContractVersion": "2.0",
+            "aiPrimaryIntent": "other"
+          },
+          "workflow": {
+            "stack": [
+              {
+                "capabilityId": "cleaning",
+                "workflow": "service_request",
+                "pendingField": "bedrooms"
+              }
+            ],
+            "current": {
+              "capabilityId": "cleaning",
+              "workflow": "service_request",
+              "pendingField": "bedrooms"
+            }
+          },
+          "goal": {
+            "current": null,
+            "nextGoal": null,
+            "transition": null,
+            "override": null
+          },
+          "correction": null,
+          "interruption": null,
+          "globalCommand": null,
+          "requiresClarification": false,
+          "clarificationReason": null,
+          "nlu": {
+            "used": true,
+            "validated": true,
+            "mode": "on",
+            "strategy": "adaptive",
+            "deterministicFallback": false,
+            "executionAuthority": "nova_deterministic_core",
+            "model": "openai/gpt-oss-20b",
+            "promptVersion": "nova-language-2.0",
+            "decision": "active_workflow_correction_enriched",
+            "invocationReason": "local_semantic_uncertain",
+            "error": null,
+            "httpStatus": null,
+            "providerMessage": null,
+            "providerErrorType": null,
+            "providerRequestId": null,
+            "latencyMs": 1370.234,
+            "languageContract": {
+              "contractVersion": "2.0",
+              "providerSchemaVersion": "2.0",
+              "language": {
+                "code": "en",
+                "confidence": 1
+              },
+              "message": {
+                "type": "correction",
+                "actionSemantics": "none",
+                "certainty": "implicit",
+                "confidence": 1
+              },
+              "primaryIntent": {
+                "name": "other",
+                "confidence": 1
+              },
+              "intents": [
+                {
+                  "name": "other",
+                  "messageType": "correction",
+                  "confidence": 1
+                }
+              ],
+              "workflow": {
+                "relationship": "continue",
+                "active": {
+                  "capabilityId": "cleaning",
+                  "workflow": "service_request",
+                  "pendingField": "bedrooms"
+                }
+              },
+              "entities": {
+                "bedrooms": 4,
+                "nluIntents": [
+                  "other",
+                  "other"
+                ]
+              },
+              "items": {
+                "services": [],
+                "products": []
+              },
+              "customerFields": {
+                "email": null,
+                "name": null,
+                "phone": null
+              },
+              "requestedInformation": [],
+              "missingInformation": [],
+              "corrections": [],
+              "ambiguities": [],
+              "authority": {
+                "interpretation": "ai_language_layer",
+                "execution": "nova_deterministic_core",
+                "mayExecute": false
+              }
+            }
+          }
+        },
+        "recentTurns": [
+          {
+            "text": "hello i want a cleaning service for my apartment on friday",
+            "capabilityId": "cleaning",
+            "intent": "cleaning.booking_type_clarification",
+            "entities": {
+              "temporal": {
+                "date": null,
+                "dateText": null,
+                "dateReference": null,
+                "weekday": "friday",
+                "time": null,
+                "startTime": null,
+                "endTime": null,
+                "durationHours": null,
+                "timeWindow": null,
+                "timeFlexible": false,
+                "invalidTime": null
+              },
+              "property": {
+                "propertyType": "apartment"
+              },
+              "acquisition": {
+                "requested": true,
+                "kind": "service",
+                "isService": true,
+                "isProduct": false
+              },
+              "serviceSupport": {
+                "isSupportQuestion": false,
+                "category": null
+              },
+              "businessIdentity": {
+                "isBusinessIdentity": false,
+                "facet": null
+              },
+              "isPricingQuestion": false,
+              "isBookingAction": false
+            },
+            "at": "2026-09-16T08:23:14.193Z"
+          },
+          {
+            "text": "i want deep cleaning",
+            "capabilityId": "cleaning",
+            "intent": "cleaning.booking_type_selected",
+            "entities": {
+              "temporal": {
+                "date": null,
+                "dateText": null,
+                "dateReference": null,
+                "weekday": null,
+                "time": null,
+                "startTime": null,
+                "endTime": null,
+                "durationHours": null,
+                "timeWindow": null,
+                "timeFlexible": false,
+                "invalidTime": null
+              },
+              "property": {
+                "cleaningType": "deep"
+              },
+              "acquisition": {
+                "requested": true,
+                "kind": "service",
+                "isService": true,
+                "isProduct": false
+              },
+              "serviceSupport": {
+                "isSupportQuestion": false,
+                "category": null
+              },
+              "businessIdentity": {
+                "isBusinessIdentity": false,
+                "facet": null
+              },
+              "isPricingQuestion": false,
+              "isBookingAction": false
+            },
+            "at": "2026-09-16T08:23:25.223Z"
+          },
+          {
+            "text": "it has 4 bedrooms",
+            "capabilityId": "cleaning",
+            "intent": "cleaning.workflow_input",
+            "entities": {
+              "temporal": {
+                "date": null,
+                "dateText": null,
+                "dateReference": null,
+                "weekday": null,
+                "time": null,
+                "startTime": null,
+                "endTime": null,
+                "durationHours": null,
+                "timeWindow": null,
+                "timeFlexible": false,
+                "invalidTime": null
+              },
+              "property": {
+                "bedrooms": 4
+              },
+              "acquisition": {
+                "requested": false,
+                "kind": null,
+                "isService": false,
+                "isProduct": false
+              },
+              "serviceSupport": {
+                "isSupportQuestion": false,
+                "category": null
+              },
+              "businessIdentity": {
+                "isBusinessIdentity": false,
+                "facet": null
+              },
+              "isPricingQuestion": false,
+              "isBookingAction": false
+            },
+            "at": "2026-09-16T08:23:43.477Z"
+          }
+        ],
+        "entities": {
+          "version": "2.0",
+          "text": "it has 4 bedrooms",
+          "normalized": "it has 4 bedrooms",
+          "temporal": {
+            "date": null,
+            "dateText": null,
+            "dateReference": null,
+            "weekday": "friday",
+            "time": null,
+            "startTime": null,
+            "endTime": null,
+            "durationHours": null,
+            "timeWindow": null,
+            "timeFlexible": false,
+            "invalidTime": null
+          },
+          "property": {
+            "propertyType": "apartment",
+            "cleaningType": "deep",
+            "bedrooms": 4
+          },
+          "fieldAmendment": null,
+          "acquisition": {
+            "requested": false,
+            "kind": "service",
+            "isService": false,
+            "isProduct": false
+          },
+          "identity": {
+            "name": null,
+            "phone": null,
+            "email": null,
+            "address": null
+          },
+          "serviceSupport": {
+            "isSupportQuestion": false,
+            "category": null
+          },
+          "businessIdentity": {
+            "isBusinessIdentity": false,
+            "facet": null
+          },
+          "isPricingQuestion": false,
+          "isBookingAction": false,
+          "isListRequest": false,
+          "isCancelAction": false
+        },
+        "memoryContext": {
+          "wantsRepeat": false,
+          "wantsSameTime": false,
+          "wantsSameAddress": false,
+          "wantsChange": false,
+          "referencedCapability": null,
+          "referencedService": "deep",
+          "lastBookingCapability": "cleaning",
+          "lastBookingTime": null,
+          "lastAddress": "Villa 34, JVC Phase 2, Dubai"
         }
       },
-      "lastIntent": "conversation_clarification_required",
-      "createdAt": "2026-09-03T04:17:59.835Z",
-      "updatedAt": "2026-09-03T04:47:46.149Z"
+      "capabilityState": {
+        "cleaning": {
+          "step": "time",
+          "pendingBookingType": {
+            "scope": {
+              "propertyType": "apartment",
+              "preferredDateOptions": [
+                "friday"
+              ],
+              "scopeText": "hello i want a cleaning service for my apartment on friday",
+              "date": "friday",
+              "weekday": "friday"
+            }
+          },
+          "propertyType": "apartment",
+          "cleaningType": "deep",
+          "preferredDateOptions": [
+            "friday"
+          ],
+          "scopeText": "i want deep cleaning",
+          "date": "friday",
+          "weekday": "friday",
+          "serviceId": "CLN010",
+          "serviceName": "Deep Cleaning",
+          "configuredServiceName": "Laundry Wash & Iron",
+          "pricingServiceId": "laundry-wash-iron-small",
+          "requiredPricingFields": [
+            "bedrooms"
+          ],
+          "pricingFirst": true,
+          "preferredDate": "18/09/2026",
+          "bedrooms": 4,
+          "quotedService": {
+            "ok": true,
+            "serviceId": "laundry-wash-iron-small",
+            "serviceName": "Laundry Wash & Iron Small Bag",
+            "operationalServiceId": "CLN010",
+            "currency": "AED",
+            "subtotal": 58.5,
+            "total": 58.5,
+            "baseSubtotal": 58.5,
+            "addOnTotal": 0,
+            "addOns": [],
+            "formula": "fixed price",
+            "model": "flat"
+          },
+          "total": 58.5,
+          "currency": "AED"
+        }
+      },
+      "lastIntent": "cleaning_bedrooms_saved",
+      "createdAt": "2026-09-16T08:23:12.196Z",
+      "updatedAt": "2026-09-16T08:23:43.477Z"
     }
   }
 }

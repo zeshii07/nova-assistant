@@ -88,5 +88,22 @@
     "confidence": 0.9,
     "responseIntent": "CONVERSATION_CLARIFICATION_REQUIRED",
     "timestamp": "2026-09-03T04:47:46.175Z"
+  },
+  {
+    "id": "default:default:playground:playground-user:1789544932812:qf1xy7",
+    "tenantId": "default",
+    "conversationId": "default:playground:playground-user",
+    "customerId": "playground-user",
+    "messageText": "lahore",
+    "selectedIntent": "commerce.checkout_input",
+    "selectedCapabilityId": "commerce",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.8881
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "COMMERCE_ORDER_CREATED",
+    "timestamp": "2026-09-16T07:48:52.812Z"
   }
 ]

@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "22.1.0",
+  "version": "22.3.0",
   "private": true,
-  "description": "Nova v22.1 \u2014 Catalog Alternative Match Fix + Plural Singular Fix + Price Type Clarification Re-ask",
+  "description": "Nova v22.3 \u2014 Includes correct tenant configurations (cleaning-demo + default)",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {

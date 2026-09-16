@@ -597,7 +597,12 @@ class CommerceCapability extends BaseCapability {
       const reply=`${mismatch}${example}\n\nI have not changed your cart or any saved product option.`;
       return result(reply,language,{...state,pendingMultiItemDraft:state?.pendingMultiItemDraft||[],...(pendingOrderEdit?{pendingOrderEdit}:{})} ,'commerce_multi_item_attribute_ambiguous');
     }
-    const items=mergeMultiItemDraft(state?.pendingMultiItemDraft||[],incoming);
+    // v22.2: If the conversation adapter sent 'new_product_request_clearing_draft',
+    // clear the stale pendingMultiItemDraft before merging. This ensures "add 1 polo shirt"
+    // starts fresh instead of merging with the stale "3 polo shirts" draft.
+    const clearStaleDraft = context.intelligence?.selected?.reason === 'new_product_request_clearing_draft';
+    const baseDraft = clearStaleDraft ? [] : (state?.pendingMultiItemDraft||[]);
+    const items=mergeMultiItemDraft(baseDraft,incoming);
     const prepared=[], issues=[], recognized=[];
     for(const item of items){
       const p=await catalog.getProductById(item.productId);

@@ -304,39 +304,6 @@
         "status": "active",
         "expiresAt": "2026-09-02T05:00:12.322Z"
       }
-    },
-    "default:playground-user": {
-      "id": "CART-MTL0LKI2-F95B7B",
-      "tenantId": "default",
-      "customerId": "playground-user",
-      "status": "active",
-      "items": [
-        {
-          "productId": "P008",
-          "variantId": null,
-          "sku": "POLO-PIQUE",
-          "name": "Polo Shirt",
-          "color": "Blue",
-          "size": "S",
-          "quantity": 2,
-          "unitPrice": 2200,
-          "currency": "PKR",
-          "inventory": null,
-          "variantSelectionRequired": true
-        }
-      ],
-      "checkout": {
-        "name": null,
-        "phone": null,
-        "email": null,
-        "city": null,
-        "address": null,
-        "landmark": null,
-        "paymentMethod": null,
-        "notes": null
-      },
-      "createdAt": "2026-09-03T04:18:13.899Z",
-      "updatedAt": "2026-09-03T04:18:13.899Z"
     }
   },
   "orders": {
@@ -541,12 +508,72 @@
       ],
       "createdAt": "2026-08-31T05:07:21.300Z",
       "updatedAt": "2026-08-31T05:07:21.300Z"
+    },
+    "ORD-MU3SUJDN-A80A29": {
+      "id": "ORD-MU3SUJDN-A80A29",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "status": "confirmed",
+      "items": [
+        {
+          "productId": "P008",
+          "variantId": null,
+          "sku": "POLO-PIQUE",
+          "name": "Polo Shirt",
+          "unitPrice": 2200,
+          "currency": "PKR",
+          "color": "Black",
+          "size": "S",
+          "quantity": 5,
+          "subtotal": 11000,
+          "inventory": null
+        },
+        {
+          "productId": "P001",
+          "variantId": null,
+          "sku": "TSHIRT-COTTON",
+          "name": "Cotton T-Shirt",
+          "unitPrice": 1500,
+          "currency": "PKR",
+          "color": "White",
+          "size": "M",
+          "quantity": 2,
+          "subtotal": 3000,
+          "inventory": null
+        }
+      ],
+      "total": 14000,
+      "currency": "PKR",
+      "customer": {
+        "name": "Aryan Ahmad",
+        "phone": "03086765345",
+        "email": null,
+        "city": "lahore",
+        "address": "ali town near metro station thokar niaz baig lahore",
+        "landmark": "",
+        "paymentMethod": "Cash on Delivery",
+        "notes": null
+      },
+      "paymentMethod": "Cash on Delivery",
+      "idempotencyKey": "order:b21bb717e24ab746f87669407cf3ac19",
+      "sourceCartId": "CART-MU3SK1GM-E08FEF",
+      "revision": 1,
+      "timeline": [
+        {
+          "action": "created",
+          "status": "confirmed",
+          "at": "2026-09-16T07:48:52.763Z"
+        }
+      ],
+      "createdAt": "2026-09-16T07:48:52.763Z",
+      "updatedAt": "2026-09-16T07:48:52.763Z"
     }
   },
   "orderKeys": {
     "default:order:2b026579e58d52c38121a7d517c57999": "ORD-MT79ZW62-A93E90",
     "default:order:edd02326b7f0d5fb39281fec094684fc": "ORD-MT8A8I7D-58C791",
     "default:order:c7e891ba1640768285b120267e450aec": "ORD-MTDS17R4-0AD2B2",
-    "default:order:117d3fa7a78204e256052d482ab02953": "ORD-MTGS16QC-DF3F48"
+    "default:order:117d3fa7a78204e256052d482ab02953": "ORD-MTGS16QC-DF3F48",
+    "default:order:b21bb717e24ab746f87669407cf3ac19": "ORD-MU3SUJDN-A80A29"
   }
 }

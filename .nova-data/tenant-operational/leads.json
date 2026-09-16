@@ -2735,11 +2735,11 @@
       "conversationId": "default:playground:playground-user",
       "source": "playground",
       "channel": "playground",
-      "lastCapabilityId": "catalog",
-      "status": "qualified",
+      "lastCapabilityId": "commerce",
+      "status": "converted",
       "contact": {
         "name": "Aryan Ahmad",
-        "phone": "0301926756543",
+        "phone": "03086765345",
         "email": "zeeshan@gmail.com"
       },
       "location": {},
@@ -2843,10 +2843,23 @@
         {
           "type": "productfamily",
           "value": "shirts"
+        },
+        {
+          "type": "servicename",
+          "value": "business.location"
+        },
+        {
+          "type": "subject",
+          "value": "business.location"
+        },
+        {
+          "type": "productname",
+          "value": "lahore"
         }
       ],
       "requirements": {
-        "quantity": 2
+        "quantity": 5,
+        "address": "ali town near metro station thokar niaz baig lahore"
       },
       "signals": [
         "intent:catalog.product_interest",
@@ -2861,122 +2874,128 @@
         "intent:commerce.cart.add_request",
         "intent:catalog.list",
         "intent:catalog.related_browse",
-        "intent:commerce.cart.view"
+        "intent:commerce.cart.view",
+        "intent:commerce.cart.remove_request",
+        "intent:commerce.checkout_input",
+        "intent:commerce.cart.update_quantity",
+        "requirement:address",
+        "intent:commerce.review.confirm"
       ],
       "recentMessages": [
         {
-          "text": "DO YOU HAVE LARGE SIZE JEANS",
+          "text": "ok now add 1 polo shirt white color small size",
           "capabilityId": "commerce",
-          "at": "2026-09-01T02:46:43.021Z"
+          "at": "2026-09-16T03:39:50.737Z"
         },
         {
-          "text": "do you have large jeans",
-          "capabilityId": "catalog",
-          "at": "2026-09-01T02:47:08.348Z"
-        },
-        {
-          "text": "denim jeans 36 size and black color",
+          "text": "i want to add not remove items do you understand",
           "capabilityId": "commerce",
-          "at": "2026-09-01T02:48:19.254Z"
+          "at": "2026-09-16T03:43:22.181Z"
         },
         {
-          "text": "add two school bags in black color",
+          "text": "hello i want to buy some shirts can you show me shirts variety",
+          "capabilityId": "catalog",
+          "at": "2026-09-16T03:44:59.210Z"
+        },
+        {
+          "text": "i want 4 cotton t shirts white color and small size and 5 polo shirts in black color medium size",
           "capabilityId": "commerce",
-          "at": "2026-09-01T02:51:30.797Z"
+          "at": "2026-09-16T03:48:04.091Z"
         },
         {
-          "text": "black color 5 pieces",
-          "capabilityId": "catalog",
-          "at": "2026-09-01T02:51:56.915Z"
-        },
-        {
-          "text": "confirm",
+          "text": "small size",
           "capabilityId": "commerce",
-          "at": "2026-09-01T02:52:09.137Z"
+          "at": "2026-09-16T03:48:31.797Z"
         },
         {
-          "text": "i want a denim jeans in red color if red is not available then black color",
-          "capabilityId": "catalog",
-          "at": "2026-09-01T02:54:39.802Z"
-        },
-        {
-          "text": "I AM LOOKING FOR a face whitening cream medicated do you have on your store",
-          "capabilityId": "catalog",
-          "at": "2026-09-01T09:38:47.678Z"
-        },
-        {
-          "text": "ok can i see details of aloe vera face wash",
-          "capabilityId": "catalog",
-          "at": "2026-09-01T10:03:33.195Z"
-        },
-        {
-          "text": "i want only one piece",
-          "capabilityId": "catalog",
-          "at": "2026-09-01T10:03:57.575Z"
-        },
-        {
-          "text": "can see your other products",
-          "capabilityId": "catalog",
-          "at": "2026-09-01T10:06:39.882Z"
-        },
-        {
-          "text": "can you show me yoga mat",
-          "capabilityId": "catalog",
-          "at": "2026-09-01T10:25:26.576Z"
-        },
-        {
-          "text": "black 3 piece",
-          "capabilityId": "catalog",
-          "at": "2026-09-01T10:27:06.056Z"
-        },
-        {
-          "text": "hello i want 2 polo shirts in large size black color",
-          "capabilityId": "catalog",
-          "at": "2026-09-01T10:33:43.689Z"
-        },
-        {
-          "text": "color should be blue all other is ok",
-          "capabilityId": "catalog",
-          "at": "2026-09-01T11:30:13.515Z"
-        },
-        {
-          "text": "show my cart",
+          "text": "ok confirm my order",
           "capabilityId": "commerce",
-          "at": "2026-09-01T11:30:38.373Z"
+          "at": "2026-09-16T03:49:30.668Z"
         },
         {
-          "text": "hello mai ny aik shirt lyni hai medium size mi",
-          "capabilityId": "catalog",
-          "at": "2026-09-02T03:32:37.824Z"
-        },
-        {
-          "text": "hello i want to buy two shirts one in large size and one in small size both in blue color and polo shirts",
+          "text": "ok use details",
           "capabilityId": "commerce",
-          "at": "2026-09-03T04:16:56.044Z"
+          "at": "2026-09-16T03:49:51.545Z"
         },
         {
-          "text": "hello i want two polo shirts in blue color",
+          "text": "hello i wnt 5 poloshirts in black color and small size",
           "capabilityId": "catalog",
-          "at": "2026-09-03T04:18:01.051Z"
+          "at": "2026-09-16T07:38:27.273Z"
         },
         {
-          "text": "small",
+          "text": "i want 5 polo shirts in black color and small size",
           "capabilityId": "catalog",
-          "at": "2026-09-03T04:18:14.034Z"
+          "at": "2026-09-16T07:40:43.013Z"
+        },
+        {
+          "text": "ok confirm",
+          "capabilityId": "commerce",
+          "at": "2026-09-16T07:42:17.666Z"
+        },
+        {
+          "text": "i want to add two cotton t shirts white color and medium size",
+          "capabilityId": "commerce",
+          "at": "2026-09-16T07:44:28.903Z"
+        },
+        {
+          "text": "yes confirm",
+          "capabilityId": "commerce",
+          "at": "2026-09-16T07:45:00.877Z"
+        },
+        {
+          "text": "reduce cotton t shirts quantity to 2 pieces",
+          "capabilityId": "commerce",
+          "at": "2026-09-16T07:45:32.935Z"
+        },
+        {
+          "text": "aryan Ahmad",
+          "capabilityId": "commerce",
+          "at": "2026-09-16T07:45:57.745Z"
+        },
+        {
+          "text": "03086765345",
+          "capabilityId": "commerce",
+          "at": "2026-09-16T07:46:09.884Z"
+        },
+        {
+          "text": "lahore",
+          "capabilityId": "commerce",
+          "at": "2026-09-16T07:46:18.001Z"
+        },
+        {
+          "text": "ali town near metro station thokar niaz baig lahore",
+          "capabilityId": "commerce",
+          "at": "2026-09-16T07:47:52.063Z"
+        },
+        {
+          "text": "skip",
+          "capabilityId": "commerce",
+          "at": "2026-09-16T07:48:09.859Z"
+        },
+        {
+          "text": "cod",
+          "capabilityId": "commerce",
+          "at": "2026-09-16T07:48:19.589Z"
+        },
+        {
+          "text": "ok confirm",
+          "capabilityId": "commerce",
+          "at": "2026-09-16T07:48:52.803Z"
         }
       ],
-      "transaction": null,
+      "transaction": {
+        "intent": "COMMERCE_ORDER_CREATED",
+        "convertedAt": "2026-09-16T07:48:52.803Z"
+      },
       "createdAt": "2026-08-31T08:24:25.526Z",
-      "updatedAt": "2026-09-03T04:18:14.034Z",
-      "revision": 35,
-      "score": 80,
+      "updatedAt": "2026-09-16T07:48:52.803Z",
+      "revision": 62,
+      "score": 100,
       "grade": "hot",
       "qualification": {
-        "missing": [
-          "location"
-        ],
-        "nextBestQuestion": "Where is the service or delivery needed?",
-        "complete": false
+        "missing": [],
+        "nextBestQuestion": null,
+        "complete": true
       }
     },
     "cleaning-demo:LD-D1PVXS": {
@@ -2987,7 +3006,7 @@
       "source": "playground",
       "channel": "playground",
       "lastCapabilityId": "cleaning",
-      "status": "qualified",
+      "status": "converted",
       "contact": {
         "name": "James Watson",
         "phone": "03077374765",
@@ -3040,12 +3059,29 @@
         {
           "type": "operationalserviceid",
           "value": "CLN003"
+        },
+        {
+          "type": "serviceid",
+          "value": "CLN010"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "configuredservicename",
+          "value": "Laundry Wash & Iron"
+        },
+        {
+          "type": "servicename",
+          "value": "Laundry Wash & Iron"
         }
       ],
       "requirements": {
-        "date": "today",
+        "date": "friday",
         "time": "11:00",
-        "startTime": "11:00"
+        "startTime": "11:00",
+        "timeWindow": "morning"
       },
       "signals": [
         "intent:cleaning.multi_service_quote_request",
@@ -3058,7 +3094,10 @@
         "intent:cleaning.workflow_input",
         "requirement:date",
         "requirement:time",
-        "requirement:startTime"
+        "requirement:startTime",
+        "intent:cleaning.booking_type_clarification",
+        "intent:cleaning.booking_type_selected",
+        "requirement:timeWindow"
       ],
       "recentMessages": [
         {
@@ -3100,13 +3139,46 @@
           "text": "sofa size is 3 seater",
           "capabilityId": "cleaning",
           "at": "2026-09-01T04:35:06.473Z"
+        },
+        {
+          "text": "i want to book a cleaning service for my apartment",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T04:17:35.660Z"
+        },
+        {
+          "text": "i want deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T04:17:53.802Z"
+        },
+        {
+          "text": "it has 4 bedrooms",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T04:18:39.082Z"
+        },
+        {
+          "text": "i want this on friday",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T05:21:44.000Z"
+        },
+        {
+          "text": "morning 11 am",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T05:21:56.860Z"
+        },
+        {
+          "text": "ok confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T05:22:10.776Z"
         }
       ],
-      "transaction": null,
+      "transaction": {
+        "intent": "CLEANING_REQUEST_CREATED",
+        "convertedAt": "2026-09-16T05:22:10.776Z"
+      },
       "createdAt": "2026-09-01T03:43:37.253Z",
-      "updatedAt": "2026-09-01T04:35:06.473Z",
-      "revision": 8,
-      "score": 90,
+      "updatedAt": "2026-09-16T05:22:10.776Z",
+      "revision": 14,
+      "score": 100,
       "grade": "hot",
       "qualification": {
         "missing": [],
@@ -3305,6 +3377,264 @@
           "location"
         ],
         "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-S76SQZ": {
+      "id": "LD-S76SQZ",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "source": "playground",
+      "channel": "playground",
+      "lastCapabilityId": "cleaning",
+      "status": "converted",
+      "contact": {
+        "name": "James Watson",
+        "phone": "03077374765",
+        "email": "zeeshan@gmil.com"
+      },
+      "location": {
+        "address": "Villa 34, JVC Phase 2, Dubai"
+      },
+      "interests": [
+        {
+          "type": "capability",
+          "value": "cleaning"
+        },
+        {
+          "type": "servicename",
+          "value": "Laundry Wash & Iron"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.workflow_input",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "ok show my orders",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T05:27:00.609Z"
+        },
+        {
+          "text": "ok confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T05:27:15.470Z"
+        }
+      ],
+      "transaction": {
+        "intent": "CLEANING_REQUEST_CREATED",
+        "convertedAt": "2026-09-16T05:27:15.470Z"
+      },
+      "createdAt": "2026-09-16T05:27:00.609Z",
+      "updatedAt": "2026-09-16T05:27:15.470Z",
+      "revision": 2,
+      "score": 100,
+      "grade": "hot",
+      "qualification": {
+        "missing": [
+          "requirements"
+        ],
+        "nextBestQuestion": "What outcome, quantity, scope, or schedule does the customer need?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-CC5DOA": {
+      "id": "LD-CC5DOA",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "source": "playground",
+      "channel": "playground",
+      "lastCapabilityId": "cleaning",
+      "status": "qualified",
+      "contact": {
+        "name": "James Watson",
+        "phone": "03077374765",
+        "email": "zeeshan@gmil.com"
+      },
+      "location": {
+        "address": "Villa 34, JVC Phase 2, Dubai"
+      },
+      "interests": [
+        {
+          "type": "capability",
+          "value": "cleaning"
+        },
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning Rate"
+        },
+        {
+          "type": "offeringid",
+          "value": "CLN001"
+        },
+        {
+          "type": "subject",
+          "value": "Standard / General Cleaning Rate"
+        },
+        {
+          "type": "capability",
+          "value": "system"
+        },
+        {
+          "type": "servicename",
+          "value": "Apartment Cleaning"
+        },
+        {
+          "type": "subject",
+          "value": "Apartment Cleaning"
+        },
+        {
+          "type": "serviceid",
+          "value": "CLN008"
+        },
+        {
+          "type": "serviceid",
+          "value": "CLN010"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "configuredservicename",
+          "value": "Laundry Wash & Iron"
+        }
+      ],
+      "requirements": {
+        "date": "friday"
+      },
+      "signals": [
+        "intent:cleaning.workflow_input",
+        "capability:cleaning",
+        "intent:CONVERSATION_CLARIFICATION_REQUIRED",
+        "capability:system",
+        "requirement:date",
+        "intent:cleaning.structured_service_request",
+        "intent:cleaning.booking_type_clarification",
+        "intent:cleaning.booking_type_selected"
+      ],
+      "recentMessages": [
+        {
+          "text": "show my order history",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T05:27:31.141Z"
+        },
+        {
+          "text": "hello i want a booking for cleaning service on friday for my 4 bedroom apartment are you available what are your charges",
+          "capabilityId": "system",
+          "at": "2026-09-16T07:59:16.079Z"
+        },
+        {
+          "text": "actually i was looking for a cleaning service for my apartment are you available on friday for apartment cleani ng service",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T08:00:47.272Z"
+        },
+        {
+          "text": "i want clening service for my aprtment",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T08:01:35.654Z"
+        },
+        {
+          "text": "i want deep cleaning service",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T08:01:56.274Z"
+        },
+        {
+          "text": "it has 4 bedrooms",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T08:02:56.155Z"
+        },
+        {
+          "text": "hello i want a cleaning service for my apartment on friday",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T08:23:14.225Z"
+        },
+        {
+          "text": "i want deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T08:23:25.247Z"
+        },
+        {
+          "text": "it has 4 bedrooms",
+          "capabilityId": "cleaning",
+          "at": "2026-09-16T08:23:43.497Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-16T05:27:31.141Z",
+      "updatedAt": "2026-09-16T08:23:43.497Z",
+      "revision": 9,
+      "score": 90,
+      "grade": "hot",
+      "qualification": {
+        "missing": [],
+        "nextBestQuestion": null,
+        "complete": true
+      }
+    },
+    "default:LD-O1PC9X": {
+      "id": "LD-O1PC9X",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "source": "playground",
+      "channel": "playground",
+      "lastCapabilityId": "assistant",
+      "status": "qualified",
+      "contact": {
+        "name": "Aryan Ahmad",
+        "phone": "03086765345",
+        "email": "zeeshan@gmail.com"
+      },
+      "location": {},
+      "interests": [
+        {
+          "type": "servicename",
+          "value": "Cleaning"
+        },
+        {
+          "type": "subject",
+          "value": "Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "assistant"
+        }
+      ],
+      "requirements": {
+        "date": "friday"
+      },
+      "signals": [
+        "intent:assistant.unsupported_capability",
+        "capability:assistant",
+        "requirement:date"
+      ],
+      "recentMessages": [
+        {
+          "text": "hello i want a cleaning service for my apartment on friday",
+          "capabilityId": "assistant",
+          "at": "2026-09-16T08:22:50.156Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-16T08:22:50.156Z",
+      "updatedAt": "2026-09-16T08:22:50.156Z",
+      "revision": 1,
+      "score": 74,
+      "grade": "warm",
+      "qualification": {
+        "missing": [
+          "location"
+        ],
+        "nextBestQuestion": "Where is the service or delivery needed?",
         "complete": false
       }
     }

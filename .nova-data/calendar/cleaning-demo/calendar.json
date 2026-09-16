@@ -163,6 +163,60 @@
       "releasedAt": null,
       "releaseReason": null,
       "eventId": "EVT-MTI3CDGU-205871CB"
+    },
+    "HLD-MU3NLVLU-9940166B": {
+      "id": "HLD-MU3NLVLU-9940166B",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN010"
+      ],
+      "subject": "Deep Cleaning",
+      "localDate": "18/09/2026",
+      "localTime": "11:00",
+      "endLocalTime": "16:00",
+      "startAt": "2026-09-18T07:00:00.000Z",
+      "endAt": "2026-09-18T12:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "idempotencyKey": "f309ac3d2c08bf085ef869423f52a2be0bbbe706908d5e9a6ecc1342504c41ab",
+      "createdAt": "2026-09-16T05:22:10.627Z",
+      "expiresAt": "2026-09-16T05:32:10.627Z",
+      "confirmedAt": "2026-09-16T05:22:10.739Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MU3NLVOZ-033F87DE"
+    },
+    "HLD-MU3NSESC-FB82ADAC": {
+      "id": "HLD-MU3NSESC-FB82ADAC",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN010"
+      ],
+      "subject": "Deep Cleaning",
+      "localDate": "18/09/2026",
+      "localTime": "11:00",
+      "endLocalTime": "16:00",
+      "startAt": "2026-09-18T07:00:00.000Z",
+      "endAt": "2026-09-18T12:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "idempotencyKey": "f309ac3d2c08bf085ef869423f52a2be0bbbe706908d5e9a6ecc1342504c41ab",
+      "createdAt": "2026-09-16T05:27:15.420Z",
+      "expiresAt": "2026-09-16T05:37:15.420Z",
+      "confirmedAt": "2026-09-16T05:27:15.436Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MU3NSESS-6383B71A"
     }
   },
   "events": {
@@ -372,6 +426,78 @@
           "at": "2026-09-01T03:11:45.201Z"
         }
       ]
+    },
+    "EVT-MU3NLVOZ-033F87DE": {
+      "id": "EVT-MU3NLVOZ-033F87DE",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-CCH4RWVJ",
+      "subject": "Laundry Wash & Iron",
+      "serviceIds": [
+        "CLN010"
+      ],
+      "localDate": "18/09/2026",
+      "localTime": "11:00",
+      "endLocalTime": "16:00",
+      "startAt": "2026-09-18T07:00:00.000Z",
+      "endAt": "2026-09-18T12:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "metadata": {
+        "requestIds": [
+          "CLN-CCH4RWVJ"
+        ]
+      },
+      "revision": 1,
+      "createdAt": "2026-09-16T05:22:10.739Z",
+      "updatedAt": "2026-09-16T05:22:10.739Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-09-16T05:22:10.739Z"
+        }
+      ]
+    },
+    "EVT-MU3NSESS-6383B71A": {
+      "id": "EVT-MU3NSESS-6383B71A",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-60W0UXAK",
+      "subject": "Laundry Wash & Iron",
+      "serviceIds": [
+        "CLN010"
+      ],
+      "localDate": "18/09/2026",
+      "localTime": "11:00",
+      "endLocalTime": "16:00",
+      "startAt": "2026-09-18T07:00:00.000Z",
+      "endAt": "2026-09-18T12:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "metadata": {
+        "requestIds": [
+          "CLN-60W0UXAK"
+        ]
+      },
+      "revision": 1,
+      "createdAt": "2026-09-16T05:27:15.436Z",
+      "updatedAt": "2026-09-16T05:27:15.436Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-09-16T05:27:15.436Z"
+        }
+      ]
     }
   },
   "idempotency": {
@@ -380,7 +506,8 @@
     "hold:b85cd6a1eede3ef249cea9666ba67ad5436d2b6ee174cf73520e7f9f831d8f07": "HLD-MT70PY0V-BE57E098",
     "hold:6d929c228725e884f53e7ce3a4c6cced60f2dd76dd82368ef4af4bd83aa73907": "HLD-MT70UZ1N-059652DB",
     "hold:9cb50fa55daf3454988bb784318e165820466a128f95e51189738bbb2c3d9a7b": "HLD-MTFGA8AC-653919A5",
-    "hold:af14c67c1355744820108916668a64323c03efccdf982b120206762942d59e9d": "HLD-MTI3CDCB-41EB9A4B"
+    "hold:af14c67c1355744820108916668a64323c03efccdf982b120206762942d59e9d": "HLD-MTI3CDCB-41EB9A4B",
+    "hold:f309ac3d2c08bf085ef869423f52a2be0bbbe706908d5e9a6ecc1342504c41ab": "HLD-MU3NSESC-FB82ADAC"
   },
   "audit": [
     {
@@ -544,7 +671,55 @@
         "referenceId": "CLN-6FCVH72A"
       },
       "at": "2026-09-01T03:11:45.202Z"
+    },
+    {
+      "id": "CAL-AUD-MU3NLVLV-242C7929",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MU3NLVLU-9940166B",
+        "customerId": "playground-user",
+        "localDate": "18/09/2026",
+        "localTime": "11:00"
+      },
+      "at": "2026-09-16T05:22:10.627Z"
+    },
+    {
+      "id": "CAL-AUD-MU3NLVOZ-4D4A736B",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MU3NLVOZ-033F87DE",
+        "holdId": "HLD-MU3NLVLU-9940166B",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-CCH4RWVJ"
+      },
+      "at": "2026-09-16T05:22:10.739Z"
+    },
+    {
+      "id": "CAL-AUD-MU3NSESC-9E4032D8",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MU3NSESC-FB82ADAC",
+        "customerId": "playground-user",
+        "localDate": "18/09/2026",
+        "localTime": "11:00"
+      },
+      "at": "2026-09-16T05:27:15.420Z"
+    },
+    {
+      "id": "CAL-AUD-MU3NSESS-243251E4",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MU3NSESS-6383B71A",
+        "holdId": "HLD-MU3NSESC-FB82ADAC",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-60W0UXAK"
+      },
+      "at": "2026-09-16T05:27:15.436Z"
     }
   ],
-  "updatedAt": "2026-09-01T03:11:45.205Z"
+  "updatedAt": "2026-09-16T05:27:15.437Z"
 }

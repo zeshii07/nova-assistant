@@ -1,0 +1,53 @@
+[
+  {
+    "id": "cleaning-demo:cleaning-demo:playground:playground-user:1789536130786:gt282c",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:playground:playground-user",
+    "customerId": "playground-user",
+    "messageText": "i want to book a cleaning service for my apartment",
+    "selectedIntent": "cleaning.booking_type_clarification",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.894
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-16T05:22:10.786Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:playground:playground-user:1789536420617:z4czmv",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:playground:playground-user",
+    "customerId": "playground-user",
+    "messageText": "it has 4 bedrooms",
+    "selectedIntent": "cleaning.workflow_input",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.3125
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": null,
+    "timestamp": "2026-09-16T05:27:00.617Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:playground:playground-user:1789536435481:xbhegk",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:playground:playground-user",
+    "customerId": "playground-user",
+    "messageText": "it has 4 bedrooms",
+    "selectedIntent": "cleaning.workflow_input",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.894
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-16T05:27:15.481Z"
+  }
+]

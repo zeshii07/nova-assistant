@@ -83,7 +83,15 @@ class CommerceConversationAdapter {
         entities={...mutation,target:'cart'};
         return {priority:this.priority,candidates:[{intent:'commerce.cart.mutate_request',confidence:1,priority:195,entities,reason:'compound_cart_mutation'}],entities,vocabularyMatches:[{type:'commerce_operation',value:'commerce.cart.mutate_request',score:1}]};
       }
-      if((removalRequested&&removalSubject)||cs?.pendingRemoval){
+      // v22.2: If pendingRemoval is active but the user is now trying to ADD
+      // items (not remove), exit the removal flow and process the add request.
+      // Previously, "ok now add 1 polo shirt" was hijacked by the pendingRemoval
+      // handler and treated as a removal request.
+      const addRequested=/\b(?:add|include|buy|purchase|order|i want|i need)\b/i.test(text);
+      if(cs?.pendingRemoval && addRequested && !removalRequested){
+        // Clear pendingRemoval and fall through to normal add/multi-item processing
+        // by NOT entering the removal block below.
+      } else if((removalRequested&&removalSubject)||cs?.pendingRemoval){
         const removal=extractProductRequests(message.text,products);
         const productIds=[...new Set(removal.items.map(item=>item.productId))];
         entities={requestedText:text,productIds,removals:removal.items.map(removalRequest),target:/\border\b/.test(text)||cs?.pendingRemoval?.target==='order'?'order':'auto',orderId:cs?.pendingRemoval?.orderId||cs?.lastOrderId||null};
@@ -101,6 +109,28 @@ class CommerceConversationAdapter {
         if(addition.items.length||addition.ambiguous.length){
           entities={items:addition.items,ambiguous:addition.ambiguous,targetOrder:true,orderId:cs?.lastOrderId||null};
           return {priority:this.priority,candidates:[{intent:'commerce.multi_item_request',confidence:1,priority:188,entities,reason:'confirmed_order_item_addition'}],entities,vocabularyMatches:addition.items.map(x=>({type:'product',value:x.name,canonical:x.productId,score:1}))};
+        }
+      }
+
+      // v22.2: If pendingMultiItemDraft exists but the user explicitly says
+      // "add" a NEW item, clear the stale draft and process as a new request.
+      // Previously, "add 1 polo shirt white small" was merged into the stale
+      // draft (which had "3 polo shirts" from the original "3 shirts" message),
+      // causing the wrong quantity.
+      const explicitAdd=/\b(?:add|include|also add|now add|i want|i need|buy|purchase)\b/i.test(text);
+      if(cs?.pendingMultiItemDraft?.length && explicitAdd){
+        // Check if this is a NEW product request (not just attributes for the draft)
+        const draftProductIds=new Set(cs.pendingMultiItemDraft.map(x=>x.productId));
+        const newRequests=extractProductRequests(message.text,products);
+        const isNewProduct=newRequests.items.some(item=>!draftProductIds.has(item.productId));
+        const hasExplicitQuantity=/(?:add|include)\s+\d+\s/i.test(text);
+        if(isNewProduct || hasExplicitQuantity){
+          // Clear the draft by emitting entities without the draft context.
+          // The capability will start fresh with these items.
+          if(newRequests.items.length){
+            const entities={items:newRequests.items,ambiguous:newRequests.ambiguous||[]};
+            return {priority:this.priority,candidates:[{intent:'commerce.multi_item_request',confidence:1,entities,reason:'new_product_request_clearing_draft'}],entities,vocabularyMatches:newRequests.items.map(x=>({type:'product',value:x.name,canonical:x.productId,score:1}))};
+          }
         }
       }
 

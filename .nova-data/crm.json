@@ -25,7 +25,7 @@
       "tenantId": "default",
       "customerId": "playground-user",
       "name": "Aryan Ahmad",
-      "phone": "0301926756543",
+      "phone": "03086765345",
       "email": "zeeshan@gmail.com",
       "preferredLanguage": "english",
       "status": "contact",
@@ -35,12 +35,12 @@
       "notes": [],
       "customFields": {
         "lastDelivery": {
-          "city": "lhore",
-          "address": "near ali town westwood colony lhore",
+          "city": "lahore",
+          "address": "ali town near metro station thokar niaz baig lahore",
           "landmark": null,
           "paymentMethod": "Cash on Delivery"
         },
-        "lastOrderId": "ORD-MTGS16QC-DF3F48"
+        "lastOrderId": "ORD-MU3SUJDN-A80A29"
       },
       "createdAt": "2026-08-24T05:21:17.435Z",
       "updatedAt": "2026-08-24T05:21:17.435Z"
@@ -1987,6 +1987,44 @@
         },
         "capabilityId": "cleaning",
         "createdAt": "2026-09-01T04:33:47.044Z"
+      },
+      {
+        "id": "act_1789532234463_fwj4mk",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-16T04:17:14.463Z"
+      },
+      {
+        "id": "act_1789536130753_2hlajg",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-CCH4RWVJ",
+          "requestIds": [
+            "CLN-CCH4RWVJ"
+          ],
+          "serviceId": "CLN010",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T05:22:10.753Z"
+      },
+      {
+        "id": "act_1789536435445_eaka5t",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-60W0UXAK",
+          "requestIds": [
+            "CLN-60W0UXAK"
+          ],
+          "serviceId": "CLN010",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T05:27:15.445Z"
       }
     ],
     "default:playground-user": [
@@ -3201,6 +3239,94 @@
         },
         "capabilityId": "catalog",
         "createdAt": "2026-09-03T04:18:13.891Z"
+      },
+      {
+        "id": "act_1789529548946_dtdwyw",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-16T03:32:28.946Z"
+      },
+      {
+        "id": "act_1789529683744_w81e0e",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "Blue",
+            "quantity": 2,
+            "size": "S"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-16T03:34:43.744Z"
+      },
+      {
+        "id": "act_1789530570600_hbcyik",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": null,
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-16T03:49:30.600Z"
+      },
+      {
+        "id": "act_1789544442975_yzjmg6",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "Black",
+            "size": "S",
+            "quantity": 5
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-16T07:40:42.975Z"
+      },
+      {
+        "id": "act_1789544537636_rpge9g",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P008",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-16T07:42:17.636Z"
+      },
+      {
+        "id": "act_1789544700828_5ko4h2",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P001",
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-16T07:45:00.828Z"
+      },
+      {
+        "id": "act_1789544932771_shwlod",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MU3SUJDN-A80A29",
+          "total": 14000
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-16T07:48:52.772Z"
+      },
+      {
+        "id": "act_1789546970094_1b2is5",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-16T08:22:50.094Z"
       }
     ],
     "default:debug-tv": [
