@@ -1,0 +1,720 @@
+[
+  {
+    "id": "cleaning-deep-villa-success",
+    "name": "Deep Villa Cleaning - Complete Booking",
+    "tenantId": "cleaning-demo",
+    "description": "User books deep cleaning for a 3-bedroom villa, provides all details, confirms",
+    "turns": [
+      {
+        "text": "i want deep cleaning for my villa",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "bedrooms"
+          ]
+        }
+      },
+      {
+        "text": "3",
+        "expect": {
+          "replyContains": [
+            "440",
+            "date"
+          ]
+        }
+      },
+      {
+        "text": "tomorrow at 10 AM",
+        "expect": {
+          "replyContains": [
+            "address"
+          ]
+        }
+      },
+      {
+        "text": "Villa 34, JVC Phase 2, Dubai",
+        "expect": {
+          "replyContains": [
+            "name"
+          ]
+        }
+      },
+      {
+        "text": "James Watson",
+        "expect": {
+          "replyContains": [
+            "phone"
+          ]
+        }
+      },
+      {
+        "text": "03012345678",
+        "expect": {
+          "replyContains": [
+            "confirm"
+          ]
+        }
+      },
+      {
+        "text": "confirm",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "received",
+            "CLN"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "cleaning-deep-apartment-success",
+    "name": "Deep Apartment Cleaning - Complete Booking",
+    "tenantId": "cleaning-demo",
+    "description": "User books deep cleaning for a 4-bedroom apartment",
+    "turns": [
+      {
+        "text": "i want cleaning for my apartment",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "Standard",
+            "Deep"
+          ]
+        }
+      },
+      {
+        "text": "deep cleaning",
+        "expect": {
+          "replyContains": [
+            "bedrooms"
+          ]
+        }
+      },
+      {
+        "text": "4",
+        "expect": {
+          "replyContains": [
+            "400",
+            "date"
+          ]
+        }
+      },
+      {
+        "text": "saturday at 2 PM",
+        "expect": {
+          "replyContains": [
+            "address"
+          ]
+        }
+      },
+      {
+        "text": "Apt 502, Marina Heights, Dubai Marina",
+        "expect": {
+          "replyContains": [
+            "name"
+          ]
+        }
+      },
+      {
+        "text": "Sarah Ahmed",
+        "expect": {
+          "replyContains": [
+            "phone"
+          ]
+        }
+      },
+      {
+        "text": "0561234567",
+        "expect": {
+          "replyContains": [
+            "confirm"
+          ]
+        }
+      },
+      {
+        "text": "confirm",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "received",
+            "Deep"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "cleaning-standard-apartment-success",
+    "name": "Standard Apartment Cleaning - Complete Booking",
+    "tenantId": "cleaning-demo",
+    "description": "User books standard cleaning with 2 cleaners for 3 hours",
+    "turns": [
+      {
+        "text": "i want cleaning for my apartment",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "Standard",
+            "Deep"
+          ]
+        }
+      },
+      {
+        "text": "standard cleaning",
+        "expect": {
+          "replyContains": [
+            "cleaners"
+          ]
+        }
+      },
+      {
+        "text": "2 cleaners for 3 hours",
+        "expect": {
+          "replyContains": [
+            "240",
+            "date"
+          ]
+        }
+      },
+      {
+        "text": "tomorrow",
+        "expect": {
+          "replyContains": [
+            "time"
+          ]
+        }
+      },
+      {
+        "text": "9 AM",
+        "expect": {
+          "replyContains": [
+            "address"
+          ]
+        }
+      },
+      {
+        "text": "Building 15, Apartment 302, Al Barsha, Dubai",
+        "expect": {
+          "replyContains": [
+            "name"
+          ]
+        }
+      },
+      {
+        "text": "Ali Khan",
+        "expect": {
+          "replyContains": [
+            "phone"
+          ]
+        }
+      },
+      {
+        "text": "0509876543",
+        "expect": {
+          "replyContains": [
+            "confirm"
+          ]
+        }
+      },
+      {
+        "text": "confirm",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "received",
+            "CLN"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "cleaning-sofa-cleaning-success",
+    "name": "Sofa Cleaning - Complete Booking",
+    "tenantId": "cleaning-demo",
+    "description": "User books 3-seater sofa cleaning",
+    "turns": [
+      {
+        "text": "i want furniture cleaning",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "Which type",
+            "furniture"
+          ]
+        }
+      },
+      {
+        "text": "sofa",
+        "expect": {
+          "replyContains": [
+            "size",
+            "seater"
+          ]
+        }
+      },
+      {
+        "text": "3 seater",
+        "expect": {
+          "replyContains": [
+            "110",
+            "date"
+          ]
+        }
+      },
+      {
+        "text": "tomorrow at 3 PM",
+        "expect": {
+          "replyContains": [
+            "address"
+          ]
+        }
+      },
+      {
+        "text": "Villa 7, Palm Jumeirah, Dubai",
+        "expect": {
+          "replyContains": [
+            "name"
+          ]
+        }
+      },
+      {
+        "text": "Fatima Al Zarooni",
+        "expect": {
+          "replyContains": [
+            "phone"
+          ]
+        }
+      },
+      {
+        "text": "0523456789",
+        "expect": {
+          "replyContains": [
+            "confirm"
+          ]
+        }
+      },
+      {
+        "text": "confirm",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "received",
+            "CLN"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "cleaning-multi-furniture-quote",
+    "name": "Multi-Item Furniture Quote",
+    "tenantId": "cleaning-demo",
+    "description": "User asks for charges for 2 sofas + 1 mattress, then books",
+    "turns": [
+      {
+        "text": "what are charges for 2 sofa 3 seater and 1 king mattress",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "Total",
+            "book"
+          ]
+        }
+      },
+      {
+        "text": "book these services",
+        "expect": {
+          "replyContains": [
+            "selected",
+            "date"
+          ]
+        }
+      },
+      {
+        "text": "saturday at 11 AM",
+        "expect": {
+          "replyContains": [
+            "address"
+          ]
+        }
+      },
+      {
+        "text": "House 15, JVC, Dubai",
+        "expect": {
+          "replyContains": [
+            "name"
+          ]
+        }
+      },
+      {
+        "text": "Mohammed Rashid",
+        "expect": {
+          "replyContains": [
+            "phone"
+          ]
+        }
+      },
+      {
+        "text": "0551234567",
+        "expect": {
+          "replyContains": [
+            "confirm"
+          ]
+        }
+      },
+      {
+        "text": "confirm",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "received"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "cleaning-deep-villa-cancel",
+    "name": "Deep Villa Cleaning - User Cancels",
+    "tenantId": "cleaning-demo",
+    "description": "User starts booking but cancels mid-way",
+    "turns": [
+      {
+        "text": "book deep cleaning for my villa",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "bedrooms"
+          ]
+        }
+      },
+      {
+        "text": "3 bedrooms",
+        "expect": {
+          "replyContains": [
+            "date"
+          ]
+        }
+      },
+      {
+        "text": "cancel",
+        "expect": {
+          "replyContains": [
+            "cancel"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "cleaning-availability-check",
+    "name": "Availability Check",
+    "tenantId": "cleaning-demo",
+    "description": "User asks if service is available on a specific day",
+    "turns": [
+      {
+        "text": "are you available on friday",
+        "expect": {
+          "replyContains": [
+            "friday",
+            "open"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "cleaning-pricing-question",
+    "name": "Pricing Question - Deep Apartment",
+    "tenantId": "cleaning-demo",
+    "description": "User asks for deep cleaning price without booking",
+    "turns": [
+      {
+        "text": "what are charges for 3 bedroom apartment deep cleaning",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "350"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "cleaning-deep-villa-roman-urdu",
+    "name": "Deep Villa Cleaning - Roman Urdu",
+    "tenantId": "cleaning-demo",
+    "description": "User communicates in Roman Urdu",
+    "turns": [
+      {
+        "text": "mujhy ghar ki safai chahiye deep cleaning",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "date"
+          ]
+        }
+      },
+      {
+        "text": "tomorrow at 10 AM",
+        "expect": {
+          "replyContains": [
+            "property",
+            "apartment",
+            "villa"
+          ]
+        }
+      },
+      {
+        "text": "villa",
+        "expect": {
+          "replyContains": [
+            "bedroom"
+          ]
+        }
+      },
+      {
+        "text": "3",
+        "expect": {
+          "replyContains": [
+            "440"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "retail-product-browse",
+    "name": "Retail - Browse Products",
+    "tenantId": "default",
+    "description": "User browses products",
+    "turns": [
+      {
+        "text": "show me watches",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "retail-add-to-cart-checkout",
+    "name": "Retail - Add to Cart and Checkout",
+    "tenantId": "default",
+    "description": "User adds a product and checks out",
+    "turns": [
+      {
+        "text": "i want to buy a smart watch",
+        "expect": {
+          "replyContains": [
+            "Smart Watch",
+            "watch"
+          ]
+        }
+      },
+      {
+        "text": "black color",
+        "expect": {
+          "replyContains": [
+            "many"
+          ]
+        }
+      },
+      {
+        "text": "2 pieces",
+        "expect": {
+          "replyContains": [
+            "confirm",
+            "order"
+          ]
+        }
+      },
+      {
+        "text": "confirm order",
+        "expect": {
+          "replyContains": [
+            "name"
+          ]
+        }
+      },
+      {
+        "text": "Zeeshan Ahmad",
+        "expect": {
+          "replyContains": [
+            "phone"
+          ]
+        }
+      },
+      {
+        "text": "03012345678",
+        "expect": {
+          "replyContains": [
+            "city"
+          ]
+        }
+      },
+      {
+        "text": "Dubai",
+        "expect": {
+          "replyContains": [
+            "address"
+          ]
+        }
+      },
+      {
+        "text": "Villa 34, Dubai Marina",
+        "expect": {
+          "replyContains": [
+            "landmark"
+          ]
+        }
+      },
+      {
+        "text": "skip",
+        "expect": {
+          "replyContains": [
+            "payment",
+            "Cash"
+          ]
+        }
+      },
+      {
+        "text": "cash on delivery",
+        "expect": {
+          "replyContains": [
+            "confirm"
+          ]
+        }
+      },
+      {
+        "text": "confirm",
+        "expect": {
+          "capabilityId": "commerce",
+          "replyContains": [
+            "confirmed",
+            "order"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "retail-multi-item-checkout",
+    "name": "Retail - Multi-Item Order",
+    "tenantId": "default",
+    "description": "User orders multiple products at once",
+    "turns": [
+      {
+        "text": "i want 2 cotton t shirts white small and 3 polo shirts black medium",
+        "expect": {
+          "capabilityId": "commerce",
+          "replyContains": [
+            "subtotal"
+          ]
+        }
+      },
+      {
+        "text": "confirm order",
+        "expect": {
+          "replyContains": [
+            "name"
+          ]
+        }
+      },
+      {
+        "text": "Aryan Ahmad",
+        "expect": {
+          "replyContains": [
+            "phone"
+          ]
+        }
+      },
+      {
+        "text": "03019267565",
+        "expect": {
+          "replyContains": [
+            "city"
+          ]
+        }
+      },
+      {
+        "text": "Lahore",
+        "expect": {
+          "replyContains": [
+            "address"
+          ]
+        }
+      },
+      {
+        "text": "near ali town, lahore",
+        "expect": {
+          "replyContains": [
+            "landmark"
+          ]
+        }
+      },
+      {
+        "text": "skip",
+        "expect": {
+          "replyContains": [
+            "payment",
+            "Cash"
+          ]
+        }
+      },
+      {
+        "text": "cash on delivery",
+        "expect": {
+          "replyContains": [
+            "confirm"
+          ]
+        }
+      },
+      {
+        "text": "confirm",
+        "expect": {
+          "capabilityId": "commerce",
+          "replyContains": [
+            "confirmed",
+            "order"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "retail-product-search-plural",
+    "name": "Retail - Product Search (Plural)",
+    "tenantId": "default",
+    "description": "User searches using plural form",
+    "turns": [
+      {
+        "text": "what watches do you have",
+        "expect": {
+          "capabilityId": "catalog",
+          "replyContains": [
+            "Smart Watch"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "retail-shirts-browse",
+    "name": "Retail - Browse Shirts",
+    "tenantId": "default",
+    "description": "User browses shirts",
+    "turns": [
+      {
+        "text": "what shirts do you have",
+        "expect": {
+          "capabilityId": "catalog",
+          "replyContains": [
+            "Cotton T-Shirt",
+            "Polo Shirt"
+          ]
+        }
+      }
+    ]
+  }
+]

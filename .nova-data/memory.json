@@ -81,7 +81,7 @@
       "sensitivity": "standard",
       "expiresAt": null,
       "createdAt": "2026-08-24T05:37:49.075Z",
-      "updatedAt": "2026-09-16T08:22:50.066Z",
+      "updatedAt": "2026-09-17T06:37:41.261Z",
       "metadata": {}
     },
     "default:customer:assistant:history.1787549869078.85gw2u:playground-user": {
@@ -155,7 +155,7 @@
       "sensitivity": "standard",
       "expiresAt": null,
       "createdAt": "2026-08-24T05:40:45.745Z",
-      "updatedAt": "2026-09-16T04:17:14.445Z",
+      "updatedAt": "2026-09-17T06:36:54.938Z",
       "metadata": {}
     },
     "cleaning-demo:customer:assistant:history.1787550045749.iyyoqd:playground-user": {
@@ -1043,7 +1043,7 @@
       "sensitivity": "standard",
       "expiresAt": null,
       "createdAt": "2026-08-24T09:15:04.973Z",
-      "updatedAt": "2026-09-01T04:33:47.038Z",
+      "updatedAt": "2026-09-17T06:38:00.343Z",
       "metadata": {}
     },
     "cleaning-demo:customer:cleaning:history.1787563006203.0nt5su:playground-user": {
@@ -4421,6 +4421,1050 @@
       "expiresAt": null,
       "createdAt": "2026-09-16T08:22:50.081Z",
       "updatedAt": "2026-09-16T08:22:50.081Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789565172517.12rzdn:multi-turn-cleaning-deep-villa-success-1789565162461": {
+      "id": "cleaning-demo:customer:cleaning:history.1789565172517.12rzdn:multi-turn-cleaning-deep-villa-success-1789565162461",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-success-1789565162461",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-success-1789565162461",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789565172517.12rzdn",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-61FIVEAF",
+          "requestIds": [
+            "CLN-61FIVEAF"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "occurredAt": "2026-09-16T13:26:12.517Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T13:26:12.517Z",
+      "updatedAt": "2026-09-16T13:26:12.517Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789565180353.8sseza:multi-turn-cleaning-deep-apartment-success-1789565172591": {
+      "id": "cleaning-demo:customer:cleaning:history.1789565180353.8sseza:multi-turn-cleaning-deep-apartment-success-1789565172591",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789565172591",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789565172591",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789565180353.8sseza",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-45JKWY0F",
+          "requestIds": [
+            "CLN-45JKWY0F"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "occurredAt": "2026-09-16T13:26:20.353Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T13:26:20.354Z",
+      "updatedAt": "2026-09-16T13:26:20.354Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-sofa-cleaning-success-1789565186803": {
+      "id": "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-sofa-cleaning-success-1789565186803",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-sofa-cleaning-success-1789565186803",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-sofa-cleaning-success-1789565186803",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "preference.lastCleaningService",
+      "value": "CLN003",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T13:26:27.369Z",
+      "updatedAt": "2026-09-16T13:26:27.369Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789565199883.fun8g4:multi-turn-cleaning-multi-furniture-quote-1789565193277": {
+      "id": "cleaning-demo:customer:cleaning:history.1789565199883.fun8g4:multi-turn-cleaning-multi-furniture-quote-1789565193277",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789565193277",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789565193277",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789565199883.fun8g4",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-1VFFDLU7",
+          "requestIds": [
+            "CLN-1VFFDLU7"
+          ],
+          "serviceId": "CLN003",
+          "count": 1
+        },
+        "occurredAt": "2026-09-16T13:26:39.883Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T13:26:39.883Z",
+      "updatedAt": "2026-09-16T13:26:39.883Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-deep-villa-roman-urdu-1789565206609": {
+      "id": "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-deep-villa-roman-urdu-1789565206609",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-roman-urdu-1789565206609",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-roman-urdu-1789565206609",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "preference.lastCleaningService",
+      "value": "CLN002",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T13:26:47.432Z",
+      "updatedAt": "2026-09-16T13:26:47.432Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-add-to-cart-checkout-1789565209921": {
+      "id": "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-add-to-cart-checkout-1789565209921",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789565209921",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789565209921",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P004",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T13:26:50.666Z",
+      "updatedAt": "2026-09-16T13:26:52.717Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:multi-turn-retail-add-to-cart-checkout-1789565209921": {
+      "id": "default:customer:catalog:preference.preferredColor:multi-turn-retail-add-to-cart-checkout-1789565209921",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789565209921",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789565209921",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "Black",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T13:26:51.927Z",
+      "updatedAt": "2026-09-16T13:26:52.723Z",
+      "metadata": {}
+    },
+    "default:customer:commerce:preference.lastOrderId:multi-turn-retail-multi-item-checkout-1789565223584": {
+      "id": "default:customer:commerce:preference.lastOrderId:multi-turn-retail-multi-item-checkout-1789565223584",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789565223584",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789565223584",
+      "scope": "customer",
+      "namespace": "commerce",
+      "key": "preference.lastOrderId",
+      "value": "ORD-MU44XKWQ-68B1F3",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T13:27:10.126Z",
+      "updatedAt": "2026-09-16T13:27:10.126Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-product-search-plural-1789565230180": {
+      "id": "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-product-search-plural-1789565230180",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-search-plural-1789565230180",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-product-search-plural-1789565230180",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P004",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T13:27:11.066Z",
+      "updatedAt": "2026-09-16T13:27:11.066Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789565574337.er3vjj:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1789565574337.er3vjj:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789565574337.er3vjj",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-C4DD4D4Y",
+          "requestIds": [
+            "CLN-C4DD4D4Y"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "occurredAt": "2026-09-16T13:32:54.337Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T13:32:54.337Z",
+      "updatedAt": "2026-09-16T13:32:54.337Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789572062030.ou5uxx:multi-turn-cleaning-deep-villa-success-1789572046928": {
+      "id": "cleaning-demo:customer:cleaning:history.1789572062030.ou5uxx:multi-turn-cleaning-deep-villa-success-1789572046928",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-success-1789572046928",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-success-1789572046928",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789572062030.ou5uxx",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-33AVE5YG",
+          "requestIds": [
+            "CLN-33AVE5YG"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "occurredAt": "2026-09-16T15:21:02.030Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T15:21:02.031Z",
+      "updatedAt": "2026-09-16T15:21:02.031Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789572069966.o8lax3:multi-turn-cleaning-deep-apartment-success-1789572062120": {
+      "id": "cleaning-demo:customer:cleaning:history.1789572069966.o8lax3:multi-turn-cleaning-deep-apartment-success-1789572062120",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789572062120",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789572062120",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789572069966.o8lax3",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-2BBHDHNN",
+          "requestIds": [
+            "CLN-2BBHDHNN"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "occurredAt": "2026-09-16T15:21:09.966Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T15:21:09.968Z",
+      "updatedAt": "2026-09-16T15:21:09.968Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789572079466.xnxr5o:multi-turn-cleaning-standard-apartment-success-1789572070041": {
+      "id": "cleaning-demo:customer:cleaning:history.1789572079466.xnxr5o:multi-turn-cleaning-standard-apartment-success-1789572070041",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-standard-apartment-success-1789572070041",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789572070041",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789572079466.xnxr5o",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-1F21WF6K",
+          "requestIds": [
+            "CLN-1F21WF6K"
+          ],
+          "serviceId": "CLN001",
+          "count": 1
+        },
+        "occurredAt": "2026-09-16T15:21:19.466Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T15:21:19.466Z",
+      "updatedAt": "2026-09-16T15:21:19.466Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-sofa-cleaning-success-1789572079579": {
+      "id": "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-sofa-cleaning-success-1789572079579",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-sofa-cleaning-success-1789572079579",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-sofa-cleaning-success-1789572079579",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "preference.lastCleaningService",
+      "value": "CLN003",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T15:21:20.401Z",
+      "updatedAt": "2026-09-16T15:21:20.401Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789572092357.22kr9r:multi-turn-cleaning-multi-furniture-quote-1789572085982": {
+      "id": "cleaning-demo:customer:cleaning:history.1789572092357.22kr9r:multi-turn-cleaning-multi-furniture-quote-1789572085982",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789572085982",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789572085982",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789572092357.22kr9r",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-98WBVOYM",
+          "requestIds": [
+            "CLN-98WBVOYM"
+          ],
+          "serviceId": "CLN003",
+          "count": 1
+        },
+        "occurredAt": "2026-09-16T15:21:32.357Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T15:21:32.357Z",
+      "updatedAt": "2026-09-16T15:21:32.357Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-deep-villa-roman-urdu-1789572096153": {
+      "id": "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-deep-villa-roman-urdu-1789572096153",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-roman-urdu-1789572096153",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-roman-urdu-1789572096153",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "preference.lastCleaningService",
+      "value": "CLN002",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T15:21:37.700Z",
+      "updatedAt": "2026-09-16T15:21:37.700Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-add-to-cart-checkout-1789572101231": {
+      "id": "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-add-to-cart-checkout-1789572101231",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789572101231",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789572101231",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P004",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T15:21:42.410Z",
+      "updatedAt": "2026-09-16T15:21:45.215Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:multi-turn-retail-add-to-cart-checkout-1789572101231": {
+      "id": "default:customer:catalog:preference.preferredColor:multi-turn-retail-add-to-cart-checkout-1789572101231",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789572101231",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789572101231",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "Black",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T15:21:44.043Z",
+      "updatedAt": "2026-09-16T15:21:45.220Z",
+      "metadata": {}
+    },
+    "default:customer:commerce:preference.lastOrderId:multi-turn-retail-add-to-cart-checkout-1789572101231": {
+      "id": "default:customer:commerce:preference.lastOrderId:multi-turn-retail-add-to-cart-checkout-1789572101231",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789572101231",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789572101231",
+      "scope": "customer",
+      "namespace": "commerce",
+      "key": "preference.lastOrderId",
+      "value": "ORD-MU4913WN-CE1CA2",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T15:21:53.184Z",
+      "updatedAt": "2026-09-16T15:21:53.184Z",
+      "metadata": {}
+    },
+    "default:customer:commerce:preference.lastOrderId:multi-turn-retail-multi-item-checkout-1789572113332": {
+      "id": "default:customer:commerce:preference.lastOrderId:multi-turn-retail-multi-item-checkout-1789572113332",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789572113332",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789572113332",
+      "scope": "customer",
+      "namespace": "commerce",
+      "key": "preference.lastOrderId",
+      "value": "ORD-MU491C1Q-3165D5",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T15:22:03.737Z",
+      "updatedAt": "2026-09-16T15:22:03.737Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-product-search-plural-1789572123821": {
+      "id": "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-product-search-plural-1789572123821",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-search-plural-1789572123821",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-product-search-plural-1789572123821",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P004",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T15:22:04.856Z",
+      "updatedAt": "2026-09-16T15:22:04.856Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789572463876.bj05lp:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1789572463876.bj05lp:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789572463876.bj05lp",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-D76VSZT0",
+          "requestIds": [
+            "CLN-D76VSZT0"
+          ],
+          "serviceId": "CLN003",
+          "count": 1
+        },
+        "occurredAt": "2026-09-16T15:27:43.876Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T15:27:43.876Z",
+      "updatedAt": "2026-09-16T15:27:43.876Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789572639057.wj0bvk:playground-user": {
+      "id": "cleaning-demo:customer:cleaning:history.1789572639057.wj0bvk:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789572639057.wj0bvk",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-97KTU4KS",
+          "requestIds": [
+            "CLN-97KTU4KS"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "occurredAt": "2026-09-16T15:30:39.057Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-16T15:30:39.057Z",
+      "updatedAt": "2026-09-16T15:30:39.057Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789626072851.798rc6:multi-turn-cleaning-deep-apartment-success-1789626065443": {
+      "id": "cleaning-demo:customer:cleaning:history.1789626072851.798rc6:multi-turn-cleaning-deep-apartment-success-1789626065443",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789626065443",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789626065443",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789626072851.798rc6",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-6H40VR8I",
+          "requestIds": [
+            "CLN-6H40VR8I"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "occurredAt": "2026-09-17T06:21:12.851Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:21:12.852Z",
+      "updatedAt": "2026-09-17T06:21:12.852Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789626080571.ohfwio:multi-turn-cleaning-standard-apartment-success-1789626072927": {
+      "id": "cleaning-demo:customer:cleaning:history.1789626080571.ohfwio:multi-turn-cleaning-standard-apartment-success-1789626072927",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-standard-apartment-success-1789626072927",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789626072927",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789626080571.ohfwio",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-553J556W",
+          "requestIds": [
+            "CLN-553J556W"
+          ],
+          "serviceId": "CLN001",
+          "count": 1
+        },
+        "occurredAt": "2026-09-17T06:21:20.571Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:21:20.571Z",
+      "updatedAt": "2026-09-17T06:21:20.571Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-sofa-cleaning-success-1789626080851": {
+      "id": "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-sofa-cleaning-success-1789626080851",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-sofa-cleaning-success-1789626080851",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-sofa-cleaning-success-1789626080851",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "preference.lastCleaningService",
+      "value": "CLN003",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:21:21.638Z",
+      "updatedAt": "2026-09-17T06:21:21.638Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789626093132.0pe7bq:multi-turn-cleaning-multi-furniture-quote-1789626087215": {
+      "id": "cleaning-demo:customer:cleaning:history.1789626093132.0pe7bq:multi-turn-cleaning-multi-furniture-quote-1789626087215",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789626087215",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626087215",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789626093132.0pe7bq",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-2HGWQ2KE",
+          "requestIds": [
+            "CLN-2HGWQ2KE"
+          ],
+          "serviceId": "CLN003",
+          "count": 1
+        },
+        "occurredAt": "2026-09-17T06:21:33.132Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:21:33.132Z",
+      "updatedAt": "2026-09-17T06:21:33.132Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-deep-villa-roman-urdu-1789626099610": {
+      "id": "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-deep-villa-roman-urdu-1789626099610",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-roman-urdu-1789626099610",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-roman-urdu-1789626099610",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "preference.lastCleaningService",
+      "value": "CLN002",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:21:40.719Z",
+      "updatedAt": "2026-09-17T06:21:40.719Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-add-to-cart-checkout-1789626105214": {
+      "id": "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-add-to-cart-checkout-1789626105214",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789626105214",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789626105214",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P004",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:21:46.486Z",
+      "updatedAt": "2026-09-17T06:21:49.790Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:multi-turn-retail-add-to-cart-checkout-1789626105214": {
+      "id": "default:customer:catalog:preference.preferredColor:multi-turn-retail-add-to-cart-checkout-1789626105214",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789626105214",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789626105214",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "Black",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:21:48.186Z",
+      "updatedAt": "2026-09-17T06:21:49.801Z",
+      "metadata": {}
+    },
+    "default:customer:commerce:preference.lastOrderId:multi-turn-retail-add-to-cart-checkout-1789626105214": {
+      "id": "default:customer:commerce:preference.lastOrderId:multi-turn-retail-add-to-cart-checkout-1789626105214",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789626105214",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789626105214",
+      "scope": "customer",
+      "namespace": "commerce",
+      "key": "preference.lastOrderId",
+      "value": "ORD-MU556NC3-9DE78B",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:21:59.361Z",
+      "updatedAt": "2026-09-17T06:21:59.361Z",
+      "metadata": {}
+    },
+    "default:customer:commerce:preference.lastOrderId:multi-turn-retail-multi-item-checkout-1789626119483": {
+      "id": "default:customer:commerce:preference.lastOrderId:multi-turn-retail-multi-item-checkout-1789626119483",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789626119483",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789626119483",
+      "scope": "customer",
+      "namespace": "commerce",
+      "key": "preference.lastOrderId",
+      "value": "ORD-MU556UKR-A6FF3C",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:22:08.739Z",
+      "updatedAt": "2026-09-17T06:22:08.739Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-product-search-plural-1789626128904": {
+      "id": "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-product-search-plural-1789626128904",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-search-plural-1789626128904",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-product-search-plural-1789626128904",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P004",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:22:10.146Z",
+      "updatedAt": "2026-09-17T06:22:10.146Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1789626202726.3z66r9:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1789626202726.3z66r9:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1789626202726.3z66r9",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello how re you doing today"
+        },
+        "occurredAt": "2026-09-17T06:23:22.726Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:23:22.726Z",
+      "updatedAt": "2026-09-17T06:23:22.726Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789626886251.0th5ex:multi-turn-cleaning-deep-apartment-success-1789626880501": {
+      "id": "cleaning-demo:customer:cleaning:history.1789626886251.0th5ex:multi-turn-cleaning-deep-apartment-success-1789626880501",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789626880501",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789626880501",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789626886251.0th5ex",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-7C49DVDB",
+          "requestIds": [
+            "CLN-7C49DVDB"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "occurredAt": "2026-09-17T06:34:46.251Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:34:46.252Z",
+      "updatedAt": "2026-09-17T06:34:46.252Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789626892859.0rw0z3:multi-turn-cleaning-standard-apartment-success-1789626886341": {
+      "id": "cleaning-demo:customer:cleaning:history.1789626892859.0rw0z3:multi-turn-cleaning-standard-apartment-success-1789626886341",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-standard-apartment-success-1789626886341",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789626886341",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789626892859.0rw0z3",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-0R5NDD02",
+          "requestIds": [
+            "CLN-0R5NDD02"
+          ],
+          "serviceId": "CLN001",
+          "count": 1
+        },
+        "occurredAt": "2026-09-17T06:34:52.859Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:34:52.859Z",
+      "updatedAt": "2026-09-17T06:34:52.859Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-sofa-cleaning-success-1789626892980": {
+      "id": "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-sofa-cleaning-success-1789626892980",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-sofa-cleaning-success-1789626892980",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-sofa-cleaning-success-1789626892980",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "preference.lastCleaningService",
+      "value": "CLN003",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:34:53.673Z",
+      "updatedAt": "2026-09-17T06:34:53.673Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:history.1789626906588.qeddy4:multi-turn-cleaning-multi-furniture-quote-1789626900813": {
+      "id": "cleaning-demo:customer:cleaning:history.1789626906588.qeddy4:multi-turn-cleaning-multi-furniture-quote-1789626900813",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789626900813",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626900813",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1789626906588.qeddy4",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-7EVX9H7P",
+          "requestIds": [
+            "CLN-7EVX9H7P"
+          ],
+          "serviceId": "CLN003",
+          "count": 1
+        },
+        "occurredAt": "2026-09-17T06:35:06.588Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:35:06.588Z",
+      "updatedAt": "2026-09-17T06:35:06.588Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-deep-villa-roman-urdu-1789626910418": {
+      "id": "cleaning-demo:customer:cleaning:preference.lastCleaningService:multi-turn-cleaning-deep-villa-roman-urdu-1789626910418",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-roman-urdu-1789626910418",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-roman-urdu-1789626910418",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "preference.lastCleaningService",
+      "value": "CLN002",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:35:11.189Z",
+      "updatedAt": "2026-09-17T06:35:11.189Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-add-to-cart-checkout-1789626915492": {
+      "id": "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-add-to-cart-checkout-1789626915492",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789626915492",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789626915492",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P004",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:35:16.423Z",
+      "updatedAt": "2026-09-17T06:35:18.451Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.preferredColor:multi-turn-retail-add-to-cart-checkout-1789626915492": {
+      "id": "default:customer:catalog:preference.preferredColor:multi-turn-retail-add-to-cart-checkout-1789626915492",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789626915492",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789626915492",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.preferredColor",
+      "value": "Black",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:35:17.397Z",
+      "updatedAt": "2026-09-17T06:35:18.456Z",
+      "metadata": {}
+    },
+    "default:customer:commerce:preference.lastOrderId:multi-turn-retail-add-to-cart-checkout-1789626915492": {
+      "id": "default:customer:commerce:preference.lastOrderId:multi-turn-retail-add-to-cart-checkout-1789626915492",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789626915492",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789626915492",
+      "scope": "customer",
+      "namespace": "commerce",
+      "key": "preference.lastOrderId",
+      "value": "ORD-MU55NY39-3E2921",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:35:26.451Z",
+      "updatedAt": "2026-09-17T06:35:26.451Z",
+      "metadata": {}
+    },
+    "default:customer:commerce:preference.lastOrderId:multi-turn-retail-multi-item-checkout-1789626926543": {
+      "id": "default:customer:commerce:preference.lastOrderId:multi-turn-retail-multi-item-checkout-1789626926543",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789626926543",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789626926543",
+      "scope": "customer",
+      "namespace": "commerce",
+      "key": "preference.lastOrderId",
+      "value": "ORD-MU55O5WE-BC8BB1",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:35:36.565Z",
+      "updatedAt": "2026-09-17T06:35:36.565Z",
+      "metadata": {}
+    },
+    "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-product-search-plural-1789626936676": {
+      "id": "default:customer:catalog:preference.lastProductViewed:multi-turn-retail-product-search-plural-1789626936676",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-search-plural-1789626936676",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-product-search-plural-1789626936676",
+      "scope": "customer",
+      "namespace": "catalog",
+      "key": "preference.lastProductViewed",
+      "value": "P004",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:35:38.125Z",
+      "updatedAt": "2026-09-17T06:35:38.125Z",
+      "metadata": {}
+    },
+    "cleaning-demo:customer:assistant:history.1789627014950.qab7db:playground-user": {
+      "id": "cleaning-demo:customer:assistant:history.1789627014950.qab7db:playground-user",
+      "tenantId": "cleaning-demo",
+      "customerId": "playground-user",
+      "conversationId": "cleaning-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1789627014950.qab7db",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "text": "hello how are you doing today"
+        },
+        "occurredAt": "2026-09-17T06:36:54.950Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:36:54.951Z",
+      "updatedAt": "2026-09-17T06:36:54.951Z",
+      "metadata": {}
+    },
+    "default:customer:assistant:history.1789627061269.52j7ix:playground-user": {
+      "id": "default:customer:assistant:history.1789627061269.52j7ix:playground-user",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "conversationId": "default:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1789627061269.52j7ix",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "text": "hello i want furniture cleaning service"
+        },
+        "occurredAt": "2026-09-17T06:37:41.269Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-09-17T06:37:41.269Z",
+      "updatedAt": "2026-09-17T06:37:41.269Z",
       "metadata": {}
     }
   }

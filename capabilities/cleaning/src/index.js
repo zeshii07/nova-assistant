@@ -119,15 +119,20 @@ class CleaningCapability extends BaseCapability {
       const semantic={...(previous.pendingBookingType?.scope||{}),...(context.intelligence?.entities||{})};
       const deep=semantic.selectedCleaningType==='deep';
       const propertyType=semantic.propertyType||previous.pendingBookingType?.scope?.propertyType||null;
-      const serviceId=deep
-        ? propertyType==='villa'?'CLN011':'CLN010'
-        : propertyType==='villa'?'CLN009':'CLN008';
-      const actual=(await cleaning.listServices()).find(service=>service.id===serviceId);
+      const allServices=await cleaning.listServices();
+      // v22.4: Look up service by NAME PATTERN instead of hardcoded ID.
+      // This fixes the bug where the control plane remaps service IDs
+      // (e.g., CLN010 = Laundry instead of Deep Apartment).
+      // We search for a service whose name or aliases match the pattern
+      // "deep <propertyType> cleaning" or "standard <propertyType> cleaning".
+      const actual=findServiceByType(allServices,deep?'deep':'standard',propertyType);
       if(!actual){
         const reply='That cleaning type is not configured for this property. Please choose another configured cleaning service.';
-        return result(reply,language,previous,'cleaning_booking_type_unconfigured',{intent:'CLEANING_SERVICE_UNAVAILABLE',payload:{legacyText:reply,serviceId}});
+        return result(reply,language,previous,'cleaning_booking_type_unconfigured',{intent:'CLEANING_SERVICE_UNAVAILABLE',payload:{legacyText:reply}});
       }
-      const requiredPricingFields=deep?['bedrooms']:['cleanerCount','durationHours'];
+      // Use the service's priceType to determine required fields (not hardcoded ID)
+      const reqState=bookingRequirementState(actual);
+      const requiredPricingFields=reqState.requiredPricingFields;
       let next=initialRequestState(context,engagement,{...semantic,propertyType,cleaningType:deep?'deep':'standard'}, {
         serviceId:actual.id,
         serviceName:deep?'Deep Cleaning':'Standard Cleaning',
@@ -347,7 +352,9 @@ class CleaningCapability extends BaseCapability {
 
     if (context.intelligence?.selected?.intent === "cleaning.recurring_quote") {
       const e=context.intelligence?.entities||{}, recurrence=e.recurrence;
-      if(e.serviceId==='CLN-HOURLY'&&e.durationHours){
+      // v22.4: Use attribute-based check (priceType/pricingServiceId) with
+      // hardcoded 'CLN-HOURLY' as fallback for file-based config backward compat.
+      if((e.priceType==='hourly'||e.pricingServiceId==='hourly-cleaner'||e.serviceId==='CLN-HOURLY')&&e.durationHours){
         const q=context.services.pricing.quote({serviceId:'hourly-cleaner',hours:e.durationHours,workers:e.cleanerCount||1,text:context.message.text});
         if(q.ok){
           const requirements=requirementLine(e);
@@ -369,7 +376,8 @@ class CleaningCapability extends BaseCapability {
         const reply=`Got it — you want ${recurrenceLabel(recurrence)} cleaning. Which service should repeat: Standard Home Cleaning, Deep Home Cleaning, or Hourly Cleaner Hire?`;
         return result(reply,language,{...base,step:'recurring_service'},"cleaning_recurring_ask_service",{intent:"CLEANING_RECURRING_ASK_SERVICE",payload:{legacyText:reply,recurrence}});
       }
-      if(base.serviceId==='CLN-HOURLY'&&!base.durationHours){
+      // v22.4: Attribute-based check with hardcoded ID fallback.
+      if((base.priceType==='hourly'||base.pricingServiceId==='hourly-cleaner'||base.serviceId==='CLN-HOURLY')&&!base.durationHours){
         const reply=`Got it — ${recurrenceLabel(recurrence)} Hourly Cleaner Hire. How many hours should each visit be?`;
         return result(reply,language,{...base,step:'duration'},"cleaning_recurring_ask_duration",{intent:"CLEANING_RECURRING_ASK_DURATION",payload:{legacyText:reply,recurrence}});
       }
@@ -379,12 +387,15 @@ class CleaningCapability extends BaseCapability {
 
     if(previous.step==='recurring_service'){
       const found=await cleaning.findService(context.message.text);
-      if(!found?.service||(found.service.hidden&&found.service.id!=='CLN-HOURLY')){
+      // v22.4: Use attribute-based check (priceType/pricingServiceId) with
+      // hardcoded 'CLN-HOURLY' as fallback for file-based config backward compat.
+      const _isHourlyRecurring=found?.service && (found.service.priceType==='hourly' || found.service.pricingServiceId==='hourly-cleaner' || found.service.id==='CLN-HOURLY');
+      if(!found?.service||(found.service.hidden&&!_isHourlyRecurring)){
         return result('Please choose Standard Home Cleaning, Deep Home Cleaning, or Hourly Cleaner Hire.',language,previous,'cleaning_recurring_invalid_service',{intent:'CLEANING_RECURRING_ASK_SERVICE',payload:{pendingField:'recurring_service'}});
       }
-      const next={...previous,serviceId:found.service.id,serviceName:found.service.name,step:found.service.id==='CLN-HOURLY'?'duration':'recurring_days'};
-      const reply=found.service.id==='CLN-HOURLY'?`Hourly Cleaner Hire selected. How many hours should each recurring visit be?`:`${found.service.name} selected. Which day or days do you prefer for the recurring visits?`;
-      return result(reply,language,next,'cleaning_recurring_service_selected',{intent:found.service.id==='CLN-HOURLY'?'CLEANING_RECURRING_ASK_DURATION':'CLEANING_RECURRING_ASK_DAYS',payload:{legacyText:reply}});
+      const next={...previous,serviceId:found.service.id,serviceName:found.service.name,step:_isHourlyRecurring?'duration':'recurring_days'};
+      const reply=_isHourlyRecurring?`Hourly Cleaner Hire selected. How many hours should each recurring visit be?`:`${found.service.name} selected. Which day or days do you prefer for the recurring visits?`;
+      return result(reply,language,next,'cleaning_recurring_service_selected',{intent:_isHourlyRecurring?'CLEANING_RECURRING_ASK_DURATION':'CLEANING_RECURRING_ASK_DAYS',payload:{legacyText:reply}});
     }
 
     if(previous.step==='recurring_days'){
@@ -408,8 +419,11 @@ class CleaningCapability extends BaseCapability {
         return result(reply,language,{...previous,step:null,quotedService:q,quotedServiceRequirements:semantic,resumeSnapshot:previous},"cleaning_property_alternative_quote",{intent:"CLEANING_QUOTE_GENERATED",payload:{legacyText:reply,...q}});
       }
       const services=await cleaning.listServices();
+      // v22.4: Look up standard service by attribute (name pattern) first;
+      // fall back to hardcoded CLN008/CLN009 for file-based config backward compat.
+      const _stdAltService=findServiceByType(services,'standard',semantic.propertyType);
       const fallbackId=semantic.propertyType==='villa'?'CLN009':semantic.propertyType==='apartment'?'CLN008':null;
-      const actual=services.find((service)=>service.id===fallbackId);
+      const actual=_stdAltService||services.find((service)=>service.id===fallbackId);
       if(actual){
         const next={...previous,...semantic,serviceId:actual.id,serviceName:actual.name,step:previous.step};
         delete next.quotedService;delete next.customQuotePending;
@@ -467,7 +481,7 @@ class CleaningCapability extends BaseCapability {
         const quote=quoteConfiguredService(context,service,semantic);
         if(quote.ok)otherQuotes.push(quote);
       }
-      const deepService=allServices.find(service=>service.id===(semantic.propertyType==='villa'?'CLN011':'CLN010'));
+      const deepService=findServiceByType(allServices,'deep',semantic.propertyType);
       const deepQuote=deepService?quoteConfiguredService(context,deepService,semantic):null;
       const hourly=(context.services.pricing.getConfig()?.services||[]).find(service=>service.id==='hourly-cleaner');
       const currency=hourly?.currency||deepQuote?.currency||context.services.pricing.getConfig()?.currency||'AED';
@@ -504,14 +518,25 @@ class CleaningCapability extends BaseCapability {
       }
       const lines=[`Standard cleaning is ${currencyAmount(hourly?.rate||40,currency)} per hour per cleaner.`,...otherQuotes.map(quote=>quoteSentence(quote,semantic))];
       const reply=`${lines.join(' ')} How many cleaners and how many hours should I use to calculate the standard-cleaning total?`;
-      const next={...previous,step:null,pendingPriceClarification:{propertyType:semantic.propertyType||null,bedrooms:semantic.bedrooms??null,selectedCleaningType:'standard',scope:requestFields(semantic),otherServiceItems:(semantic.serviceItems||[]).filter(item=>!['CLN008','CLN009','CLN001','CLN-HOURLY'].includes(item.serviceId)),knownQuotes:otherQuotes}};
+      // v22.4: Filter out hourly/standard property services using attribute
+      // check (resolver.isHourlyService) with hardcoded ID list as fallback.
+      const _stdPriceResolver=new ServiceResolver(allServices);
+      const otherServiceItems=(semantic.serviceItems||[]).filter(item=>{
+        const svc=allServices.find(s=>s.id===item.serviceId);
+        if(!svc) return true; // keep unknown items
+        return !_stdPriceResolver.isHourlyService(svc) && !['CLN008','CLN009','CLN001','CLN-HOURLY'].includes(item.serviceId);
+      });
+      const next={...previous,step:null,pendingPriceClarification:{propertyType:semantic.propertyType||null,bedrooms:semantic.bedrooms??null,selectedCleaningType:'standard',scope:requestFields(semantic),otherServiceItems,knownQuotes:otherQuotes}};
       return result(reply,language,next,'cleaning_standard_price_details',{intent:'CLEANING_STANDARD_PRICE_DETAILS',payload:{legacyText:reply,hourlyRate:Number(hourly?.rate||40),currency,knownQuotes:otherQuotes,noBookingCreated:true}});
     }
 
     if (context.intelligence?.selected?.intent === 'cleaning.standard_multi_service_quote') {
       const semantic=context.intelligence?.entities||{};
       const allServices=await cleaning.listServices();
+      // v22.4: Look up standard service by attribute (name pattern) first,
+      // fall back to hardcoded CLN008/CLN009 for file-based config backward compat.
       const propertyService=allServices.find(service=>service.id===semantic.propertyServiceId)
+        || findServiceByType(allServices,'standard',semantic.propertyType)
         || allServices.find(service=>service.id===(semantic.propertyType==='villa'?'CLN009':'CLN008'));
       const hourly=context.services.pricing.quote({serviceId:'hourly-cleaner',hours:semantic.durationHours,workers:semantic.cleanerCount,text:'standard cleaning'});
       const standardQuote=hourly.ok?{...hourly,serviceName:propertyService?.name||'Standard Cleaning',operationalServiceId:propertyService?.id||'CLN001'}:null;
@@ -783,7 +808,10 @@ class CleaningCapability extends BaseCapability {
           for(const key of ['propertyType','bedrooms','washrooms','halls','units'])delete next[key];
         }
         next={...next,...supplied,...serviceRequirementState(service)};
-        if(service.id==="CLN-HOURLY"){
+        // v22.4: Use attribute-based check (priceType/pricingServiceId) with
+        // hardcoded 'CLN-HOURLY' as fallback for file-based config backward compat.
+        const _isHourlyChange = service.priceType==='hourly' || service.pricingServiceId==='hourly-cleaner' || service.id==="CLN-HOURLY";
+        if(_isHourlyChange){
           const durationHours=Number(semantic.durationHours||previous.durationHours||0);
           const cleanerCount=Number(semantic.cleanerCount||1);
           const q=context.services.pricing.quote({serviceId:"hourly-cleaner",hours:durationHours,workers:cleanerCount,text:context.message.text});
@@ -797,7 +825,7 @@ class CleaningCapability extends BaseCapability {
         }
         next.step=nextMissingStep(next);
         const prompt=next.step==='confirm'?'If everything looks correct, say confirm.':promptFor(next.step,language,next.serviceName);
-        const quote=service.id==="CLN-HOURLY"&&next.durationHours
+        const quote=_isHourlyChange&&next.durationHours
           ? localized(language,
               ` ${next.cleanerCount} cleaner${next.cleanerCount===1?'':'s'} × ${next.durationHours} hours = ${currencyAmount(next.total,next.currency)}.`,
               ` ${next.cleanerCount} cleaner × ${next.durationHours} ghantay = ${currencyAmount(next.total,next.currency)}.`,
@@ -964,17 +992,17 @@ class CleaningCapability extends BaseCapability {
         if(!service){continue;}
         // Assign the parsed semantic to this service's pending slot.
         if(entry.missing==='cleaningType'&&cleaningType){
-          resolved=applyServiceScope(resolved,service,cleaningType,semantic);
+          resolved=applyServiceScope(resolved,service,cleaningType,semantic,allServices);
         } else if(entry.missing==='bedrooms'&&bedrooms!=null){
-          resolved=applyServiceScope(resolved,service,null,{...semantic,bedrooms});
+          resolved=applyServiceScope(resolved,service,null,{...semantic,bedrooms},allServices);
         } else if(entry.missing==='cleanerCount'&&cleanerCount!=null){
-          resolved=applyServiceScope(resolved,service,null,{...semantic,cleanerCount});
+          resolved=applyServiceScope(resolved,service,null,{...semantic,cleanerCount},allServices);
         } else if(entry.missing==='durationHours'&&durationHours!=null){
-          resolved=applyServiceScope(resolved,service,null,{...semantic,durationHours});
+          resolved=applyServiceScope(resolved,service,null,{...semantic,durationHours},allServices);
         } else if(entry.missing==='units'&&units!=null){
-          resolved=applyServiceScope(resolved,service,null,{...semantic,units});
+          resolved=applyServiceScope(resolved,service,null,{...semantic,units},allServices);
         } else if(entry.missing==='serviceVariant'&&serviceVariant){
-          resolved=applyServiceScope(resolved,service,null,{...semantic,serviceVariant});
+          resolved=applyServiceScope(resolved,service,null,{...semantic,serviceVariant},allServices);
         } else {
           stillPending.push(entry);
         }
@@ -1001,11 +1029,20 @@ class CleaningCapability extends BaseCapability {
       let primaryService=allServices.find((s)=>s.id===resolved.serviceId)||allServices.find((s)=>s.id===pending[0]?.serviceId);
       const finalCleaningType=resolveCleaningTypeFromSemantic({...resolved,...semantic});
       if(finalCleaningType==='deep'&&primaryService){
-        const deepMap={'CLN008':'CLN010','CLN009':'CLN011','CLN001':'CLN002'};
-        const deepId=deepMap[primaryService.id];
-        if(deepId){
-          const deepService=allServices.find((s)=>s.id===deepId);
-          if(deepService)primaryService=deepService;
+        // v22.4: Look up the deep variant by attribute (name pattern +
+        // propertyType) using findServiceByType. Falls back to the legacy
+        // hardcoded deepVariantMap for file-based config backward compat.
+        const _propType=resolved.propertyType || (/villa|house/i.test(primaryService.name||'')?'villa':'apartment');
+        const _deepVariant=findServiceByType(allServices,'deep',_propType);
+        if(_deepVariant){
+          primaryService=_deepVariant;
+        } else {
+          const deepMap={'CLN008':'CLN010','CLN009':'CLN011','CLN001':'CLN002'};
+          const deepId=deepMap[primaryService.id];
+          if(deepId){
+            const deepService=allServices.find((s)=>s.id===deepId);
+            if(deepService)primaryService=deepService;
+          }
         }
       }
       const pendingAfterResolution=resolved.additionalServices
@@ -1213,16 +1250,23 @@ class CleaningCapability extends BaseCapability {
         // properties, silently swapping Deep → Standard when the structured quote
         // path didn't fire. Now: if semantic.serviceId is set, use it; otherwise
         // fall back to property-based default (CLN009 villa / CLN008 apartment).
-        const fallbackId=semantic.serviceId || (semantic.propertyType==='villa'?'CLN009':semantic.propertyType==='apartment'?'CLN008':null);
-        const actual=services.find((service)=>service.id===fallbackId);
+        // v22.4: Use attribute-based lookup (findServiceByType) as the secondary
+        // fallback before the hardcoded CLN008/CLN009 IDs. This fixes the case
+        // where a tenant remaps CLN008/CLN009 to different services.
+        let actual = semantic.serviceId ? services.find((service)=>service.id===semantic.serviceId) : null;
+        if(!actual && semantic.propertyType){
+          actual = findServiceByType(services, semantic.cleaningType==='deep' ? 'deep' : 'standard', semantic.propertyType);
+        }
+        if(!actual){
+          const fallbackId=semantic.propertyType==='villa'?'CLN009':semantic.propertyType==='apartment'?'CLN008':null;
+          if(fallbackId) actual=services.find((service)=>service.id===fallbackId);
+        }
         if(actual){
           const hasSchedule=Boolean(semantic.date||semantic.dateText||semantic.weekday||semantic.startTime||semantic.time);
-          // v18.0: Treat Deep services (CLN010, CLN011) and other scope_based
-          // services as requiring scope (bedrooms) BEFORE date. The previous
-          // logic only triggered scope_review when there was no schedule; we now
-          // also collect the missing scope fields (bedrooms for Deep) and ask
-          // for them before prompting for date.
-          const isDeepScopeService=['CLN010','CLN011','CLN012','CLN006'].includes(actual.id)||actual.priceType==='scope_based';
+          // v22.4: Use ServiceResolver for attribute-based deep-scope check,
+          // with hardcoded ID list as fallback for file-based config.
+          const _deepScopeResolver=new ServiceResolver(services);
+          const isDeepScopeService=_deepScopeResolver.isDeepScopeService(actual) || ['CLN010','CLN011','CLN012','CLN006'].includes(actual.id);
           const scopeReviewService=Boolean(semantic.cleaningType)||isDeepScopeService;
           if(['custom_quote','scope_based'].includes(actual.priceType)&&!hasSchedule&&scopeReviewService && actual.priceType==='custom_quote'){
             // Only the truly custom_quote services (CLN012 post-renovation, CLN013 commercial,
@@ -1665,25 +1709,32 @@ async function startConfiguredService(context,cleaning,engagement,language,servi
   next.step=nextMissingStep(next);
   await context.services.memory?.setPreference('lastCleaningService',service.id);
   await context.services.crm?.recordActivity('cleaning.service_selected',{serviceId:service.id});
+  // v23.2: For scope-based services (furniture, deep cleaning), DON'T show
+  // the starting price (e.g., "From AED 50"). It misleads customers into
+  // thinking AED 50 is the final price. Instead, just say the service is
+  // selected and ask for the required scope details (size, bedrooms, etc.).
+  // The actual price is shown ONLY after all required details are collected.
   const openingPrice=service.priceType==='custom_quote'
     ? 'The final price requires a scope review; I will not invent it.'
     : service.priceType==='scope_based'
-      ? `${formatPrice(service)}. The exact amount will be calculated from the property or item size.`
-      : `${formatPrice(service)} is the configured service price.`;
+      ? '' // Don't show starting price for scope-based services
+      : `${formatPrice(service)} is the configured rate.`;
   const returning=await savedCustomerTransition(cleaning,context,next,language);
   const finalState=returning?.state||next;
   const nextPrompt=returning?`\n\n${returning.reply}`:finalState.step==='confirm'?'If everything looks correct, say confirm.':promptFor(finalState.step,language,finalState.serviceName);
+  // v23.2: Build reply WITHOUT starting price for scope-based services
+  const pricePrefix = openingPrice ? `${openingPrice} ` : '';
   const openingReply=localized(language,
-    `${service.name} selected. ${openingPrice} ${capturedScheduleLine(finalState)}${nextPrompt}`,
-    `${service.name} select ho gayi hai. Configured price ${formatPrice(service)} hai. ${capturedScheduleLine(finalState)}${nextPrompt}`,
-    `${service.name} منتخب ہو گئی ہے۔ قیمت ${formatPrice(service)} ہے۔ ${capturedScheduleLine(finalState)}${nextPrompt}`);
+    `${service.name} selected. ${pricePrefix}${capturedScheduleLine(finalState)}${nextPrompt}`,
+    `${service.name} select ho gayi hai. ${pricePrefix}${capturedScheduleLine(finalState)}${nextPrompt}`,
+    `${service.name} منتخب ہو گئی ہے۔ ${pricePrefix}${capturedScheduleLine(finalState)}${nextPrompt}`);
   return result(openingReply,language,finalState,'cleaning_service_selected',{intent:intentForStep(finalState.step),payload:{legacyText:openingReply,preferLegacyText:true,pendingField:finalState.step,serviceName:service.name,description:service.description,priceText:formatPrice(service),preferredDate:finalState.preferredDate,preferredTime:finalState.preferredTime,durationHours:finalState.durationHours,durationLine:finalState.durationHours?`Requested duration: ${finalState.durationHours} hour${finalState.durationHours===1?'':'s'}`:'',savedDetailsUsed:Boolean(returning)}});
 }
 
 function furnitureChoiceReply(choices,language){
-  const lines=(choices||[]).map(service=>`• ${service.name} — ${formatPrice(service)}`);
+  const lines=(choices||[]).map(service=>`• ${service.name}`);
   return localized(language,
-    `Sure 😊 Which type of furniture should we clean?\n${lines.join('\n')}\n\nSend the furniture type; I’ll then collect its quantity or size and calculate the configured estimate.`,
+    `Sure 😊 Which type of furniture should we clean?\n${lines.join('\n')}\n\nTell me the furniture type and I’ll ask for its size or quantity.`,
     `Ji bilkul 😊 Kis furniture ki cleaning chahiye?\n${lines.join('\n')}\n\nFurniture type bata dein; phir quantity ya size lekar configured estimate calculate karunga.`,
     `جی بالکل 😊 کس فرنیچر کی صفائی چاہیے؟\n${lines.join('\n')}\n\nفرنیچر کی قسم بتائیں؛ پھر مقدار یا سائز لے کر تخمینہ نکالا جائے گا۔`);
 }
@@ -1783,6 +1834,10 @@ function cleaningRequirementLabels(semantic={}){
   return [...new Set(labels.length?labels:['the requested cleaning requirements'])];
 }
 function nextMissingStep(state={}){
+  // v23.2: For pricingFirst services (furniture, deep cleaning), collect
+  // ALL required pricing fields (units, serviceVariant, bedrooms) BEFORE
+  // asking for date/time. This ensures the customer sees the actual price
+  // before committing to a date, and doesn't provide date prematurely.
   if(state.pricingFirst){
     for(const field of state.requiredPricingFields||[]){
       if(field==='cleanerCount'&&!Number(state.cleanerCount))return 'cleanerCount';
@@ -1793,8 +1848,10 @@ function nextMissingStep(state={}){
       if(field==='serviceVariant'&&!state.serviceVariant)return 'serviceVariant';
     }
   }
+  // After pricing fields are collected, ask for date, then time, then address, etc.
   if(!state.preferredDate)return 'date';
   if(!state.preferredTime&&!state.startTime&&!state.timeFlexible)return 'time';
+  // Check pricing fields again (in case pricingFirst was false but fields exist)
   for(const field of state.requiredPricingFields||[]){
     if(field==='cleanerCount'&&!Number(state.cleanerCount))return 'cleanerCount';
     if(field==='durationHours'&&!Number(state.durationHours))return 'duration';
@@ -1992,15 +2049,22 @@ function quoteConfiguredService(context,service,semantic={}){
 function quoteSentence(quote,semantic={},language='english'){
   const amount=currencyAmount(quote.total,quote.currency);
   const units=Number(semantic.units||0),bedrooms=semantic.bedrooms;
-  if(quote.operationalServiceId==='CLN003'&&units)return appendQuoteAddOns(localized(language,
+  // v22.4: Use service name pattern (attribute-based) instead of hardcoded
+  // operationalServiceId. The hardcoded IDs remain as fallback for
+  // file-based config backward compat.
+  const _qServiceName=String(quote.serviceName||'').toLowerCase();
+  const _isSofaQuote=_qServiceName.includes('sofa') || quote.operationalServiceId==='CLN003';
+  const _isDeepVillaQuote=(_qServiceName.includes('deep')&&_qServiceName.includes('villa')) || quote.operationalServiceId==='CLN011';
+  const _isDeepAptQuote=(_qServiceName.includes('deep')&&(_qServiceName.includes('apartment')||_qServiceName.includes('flat'))) || quote.operationalServiceId==='CLN010';
+  if(_isSofaQuote&&units)return appendQuoteAddOns(localized(language,
     `Sure 😊 Cleaning a ${units}-seater sofa costs ${amount}.`,
     `Ji bilkul 😊 ${units}-seater sofa cleaning ki price ${amount} hai.`,
     `جی بالکل 😊 ${units} سیٹر صوفے کی صفائی کی قیمت ${amount} ہے۔`),quote);
-  if(quote.operationalServiceId==='CLN011'&&bedrooms!=null)return appendQuoteAddOns(localized(language,
+  if(_isDeepVillaQuote&&bedrooms!=null)return appendQuoteAddOns(localized(language,
     `Sure 😊 Deep cleaning for a ${bedrooms}-bedroom villa costs ${amount}.`,
     `Ji bilkul 😊 ${bedrooms}-bedroom villa ki deep cleaning ${amount} hai.`,
     `جی بالکل 😊 ${bedrooms} بیڈ روم ولا کی ڈیپ کلیننگ کی قیمت ${amount} ہے۔`),quote);
-  if(quote.operationalServiceId==='CLN010'&&bedrooms!=null){
+  if(_isDeepAptQuote&&bedrooms!=null){
     const englishLabel=Number(bedrooms)===0?'a studio apartment':`a ${bedrooms}-bedroom apartment`;
     const romanLabel=Number(bedrooms)===0?'studio apartment':`${bedrooms}-bedroom apartment`;
     const urduLabel=Number(bedrooms)===0?'اسٹوڈیو اپارٹمنٹ':`${bedrooms} بیڈ روم اپارٹمنٹ`;
@@ -2061,7 +2125,23 @@ function serviceRequirementState(service={}){
 }
 function bookingRequirementState(service={}){
   const base=serviceRequirementState(service);
-  if(['CLN001','CLN008','CLN009','CLN-HOURLY'].includes(service.id)||service.priceType==='hourly'){
+  // v22.4: Use priceType instead of hardcoded service IDs.
+  // This is the STANDARD APPROACH: the control plane is the single source
+  // of truth for services and pricing. Code should NEVER hardcode IDs.
+  // When a tenant changes services via control plane, no code changes needed.
+  //
+  // Hourly services (standard cleaning) → need cleanerCount + durationHours
+  // Scope-based/matrix services (deep cleaning) → need bedrooms
+  // Per-item/unit services (furniture) → need units or serviceVariant
+  // Custom quote services → no pricing fields (manual scope review)
+  if(service.priceType==='hourly'||service.pricingServiceId==='hourly-cleaner'){
+    return {...base,requiredPricingFields:['cleanerCount','durationHours'],pricingFirst:true};
+  }
+  if(service.priceType==='scope_based'||service.priceType==='matrix'){
+    return {...base,requiredPricingFields:['bedrooms'],pricingFirst:true};
+  }
+  // Fallback: check by ID for backward compatibility with file-based config
+  if(['CLN001','CLN008','CLN009','CLN-HOURLY'].includes(service.id)){
     return {...base,requiredPricingFields:['cleanerCount','durationHours'],pricingFirst:true};
   }
   if(['CLN010','CLN011','CLN006'].includes(service.id))return {...base,requiredPricingFields:['bedrooms'],pricingFirst:true};
@@ -2071,6 +2151,77 @@ function extractServiceVariant(value){
   const text=normalize(value);
   if(/\bextra[ -]?large\b|\bxl\b/.test(text))return 'extra-large';
   for(const variant of ['king','queen','crib','single','medium','large','small'])if(new RegExp(`\\b${variant}\\b`).test(text))return variant;
+  return null;
+}
+/**
+ * v22.4: Find a cleaning service by type (deep/standard) and property type
+ * (apartment/villa) using NAME PATTERN matching instead of hardcoded IDs.
+ *
+ * This fixes the critical bug where the control plane remaps service IDs
+ * (e.g., CLN010 = "Laundry Wash & Iron" instead of "Deep Apartment Cleaning").
+ * The old code hardcoded CLN010 → Deep Apartment, but with the control plane
+ * override, CLN010 returns a laundry service with price 58.5 instead of 400.
+ *
+ * Strategy:
+ *   1. Look for a service whose name or aliases contain "deep" + propertyType
+ *   2. Look for a service with priceType='scope_based' or 'matrix' (deep cleaning)
+ *   3. Look for a service with priceType='hourly' (standard cleaning)
+ *   4. Fallback to hardcoded IDs for backward compatibility
+ */
+function findServiceByType(services, cleaningType, propertyType) {
+  if(!services||!services.length)return null;
+  const n = (s) => normalize(s||'').toLowerCase();
+
+  // For deep cleaning: look for "deep" + propertyType in name/aliases
+  if(cleaningType==='deep') {
+    // Try exact match: "deep apartment cleaning" or "deep villa cleaning"
+    const exactPattern = propertyType ? `${propertyType} deep` : 'deep';
+    let match = services.find(s =>
+      n(s.name).includes('deep') &&
+      (!propertyType || n(s.name).includes(propertyType) || (s.aliases||[]).some(a=>n(a).includes(propertyType)))
+    );
+    if(match) return match;
+
+    // Try: any service with "deep" in name that has scope_based/matrix pricing
+    match = services.find(s =>
+      n(s.name).includes('deep') &&
+      (s.priceType==='scope_based' || s.priceType==='matrix' || s.pricingServiceId?.includes('deep'))
+    );
+    if(match) return match;
+
+    // Fallback: hardcoded IDs (for file-based config backward compat)
+    const fallbackId = propertyType==='villa'?'CLN011':'CLN010';
+    match = services.find(s => s.id === fallbackId);
+    if(match) return match;
+  }
+
+  // For standard cleaning: look for "standard" or propertyType without "deep"
+  if(cleaningType==='standard') {
+    // Try: service with "standard" or propertyType in name, priceType='hourly'
+    let match = services.find(s =>
+      (n(s.name).includes('standard') || (propertyType && n(s.name).includes(propertyType))) &&
+      !n(s.name).includes('deep') &&
+      !n(s.name).includes('laundry') &&
+      !n(s.name).includes('furniture') &&
+      (s.priceType==='hourly' || s.pricingServiceId==='hourly-cleaner')
+    );
+    if(match) return match;
+
+    // Try: any hourly service that's not laundry/furniture
+    match = services.find(s =>
+      s.priceType==='hourly' &&
+      !n(s.name).includes('laundry') &&
+      !n(s.name).includes('furniture') &&
+      !n(s.name).includes('deep')
+    );
+    if(match) return match;
+
+    // Fallback: hardcoded IDs
+    const fallbackId = propertyType==='villa'?'CLN009':'CLN008';
+    match = services.find(s => s.id === fallbackId);
+    if(match) return match;
+  }
+
   return null;
 }
 function formatServices(services, language) {
@@ -2155,8 +2306,12 @@ function additionalServiceLabel(item={}){
   // The previous logic spread the primary service's requirements (bedrooms,
   // propertyType) into ALL additional services via quote_bundle_accept, which
   // caused Sofa Cleaning to be displayed as "3-bedroom apartment cleaning".
+  // v22.4: Use service name pattern (attribute-based) instead of hardcoded ID
+  // list. The hardcoded IDs remain as fallback for file-based config.
   const furnitureServiceIds=['CLN003','CLN004','CLN020','CLN021','CLN022','CLN032','CLN033'];
-  if(item.serviceId && furnitureServiceIds.includes(item.serviceId)){
+  const _furnServiceName=String(item.serviceName||'').toLowerCase();
+  const _isFurnitureByName=/\b(?:sofa|couch|carpet|rug|mattress|curtain|chair|table)\b/i.test(_furnServiceName);
+  if(_isFurnitureByName || (item.serviceId && furnitureServiceIds.includes(item.serviceId))){
     return item.serviceName || 'Additional cleaning service';
   }
   const property=[item.propertyCount>1?`${item.propertyCount} ×`:null,item.bedrooms?`${item.bedrooms}-bedroom`:null,item.propertyType].filter(Boolean).join(' ');
@@ -2200,11 +2355,16 @@ function requiresScopeClarification(service,semantic={}){
   if(!service)return null;
   const id=service.id;
   const name=String(service.name||'').toLowerCase();
+  // v22.4: Use ServiceResolver for attribute-based checks. The resolver
+  // methods read priceType/pricingServiceId/name/category — they are the
+  // single source of truth. Hardcoded ID lists remain as fallback for
+  // file-based config backward compat.
+  const _scopeResolver=new ServiceResolver([]);
   const isPropertyCleaning=/\b(?:apartment|villa|home|house)\s+cleaning\b/i.test(service.name)&&!/^deep\b/i.test(service.name);
   const isDeepPropertyCleaning=/^deep\s+(?:apartment|villa|home)\s+cleaning\b/i.test(service.name);
-  const isStandardPropertyCleaning=['CLN001','CLN008','CLN009','CLN-HOURLY'].includes(id)||service.priceType==='hourly';
-  const isDeepProperty=['CLN010','CLN011','CLN002','CLN006'].includes(id);
-  const isFurniture=/\b(?:sofa|couch|carpet|rug|mattress|curtain|chair|table)\b/i.test(name);
+  const isStandardPropertyCleaning=['CLN001','CLN008','CLN009','CLN-HOURLY'].includes(id) || _scopeResolver.isHourlyService(service);
+  const isDeepProperty=['CLN010','CLN011','CLN002','CLN006'].includes(id) || _scopeResolver.isDeepScopeService(service);
+  const isFurniture=_scopeResolver.isFurnitureService(service) || /\b(?:sofa|couch|carpet|rug|mattress|curtain|chair|table)\b/i.test(name);
   // Property services that haven't yet decided Standard vs Deep need cleaningType.
   if(isPropertyCleaning&&!semantic.cleaningType&&!semantic.selectedCleaningType){
     return 'cleaningType';
@@ -2259,7 +2419,7 @@ function resolveCleaningTypeFromSemantic(semantic){
 // the state. Property-type services use the top-level state fields;
 // additional services have their own per-item scope stored under
 // additionalServices[i].scope so each service can be priced independently.
-function applyServiceScope(state,service,cleaningType,semantic){
+function applyServiceScope(state,service,cleaningType,semantic,allServices){
   // When the user's "deep cleaning" answer has already swapped the primary
   // service to the Deep variant (CLN010/CLN011/CLN002), the pending
   // clarification's serviceId points to the DEEP service. The state's
@@ -2268,9 +2428,21 @@ function applyServiceScope(state,service,cleaningType,semantic){
   // scope-application purposes. Without this, bedrooms=3 ends up stored
   // only on the deep service's pending entry but never on the top-level
   // state, and the re-check keeps asking for bedrooms forever.
+  // v22.4: Look up the deep variant by attribute (name pattern +
+  // propertyType) using findServiceByType, falling back to the legacy
+  // hardcoded deepVariantMap for file-based config backward compat.
   const primaryServiceId=state.serviceId;
-  const deepVariantMap={'CLN008':'CLN010','CLN009':'CLN011','CLN001':'CLN002'};
-  const deepVariantId=deepVariantMap[primaryServiceId];
+  let deepVariantId=null;
+  if(allServices && allServices.length){
+    const _primaryName=String(state.serviceName||'').toLowerCase();
+    const _primaryPropertyType=state.propertyType || (/villa|house/.test(_primaryName)?'villa':'apartment');
+    const _deepVariant=findServiceByType(allServices,'deep',_primaryPropertyType);
+    if(_deepVariant) deepVariantId=_deepVariant.id;
+  }
+  if(!deepVariantId){
+    const deepVariantMap={'CLN008':'CLN010','CLN009':'CLN011','CLN001':'CLN002'};
+    deepVariantId=deepVariantMap[primaryServiceId];
+  }
   const isPrimary=service.id===primaryServiceId||service.id===deepVariantId;
   const additionalServices=(state.additionalServices||[]).map((item)=>{
     if(item.serviceId!==service.id)return item;
@@ -2329,4 +2501,5 @@ function parseTimeInput(raw){
  return null;
 }
 
-module.exports = { Capability: CleaningCapability, CleaningCapability };
+const { ServiceResolver } = require('./serviceResolver');
+module.exports = { Capability: CleaningCapability, CleaningCapability, findServiceByType, ServiceResolver };

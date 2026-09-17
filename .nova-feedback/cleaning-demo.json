@@ -49,5 +49,622 @@
     "confidence": 1,
     "responseIntent": "CLEANING_REQUEST_CREATED",
     "timestamp": "2026-09-16T05:27:15.481Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-success-1789565162461:1789565171220:fvlbvo",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-success-1789565162461",
+    "customerId": "multi-turn-cleaning-deep-villa-success-1789565162461",
+    "messageText": "i want deep cleaning for my villa",
+    "selectedIntent": "cleaning.structured_service_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": null,
+      "confidence": 0
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_READY_TO_CONFIRM",
+    "timestamp": "2026-09-16T13:26:11.220Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-success-1789565162461:1789565172554:30old7",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-success-1789565162461",
+    "customerId": "multi-turn-cleaning-deep-villa-success-1789565162461",
+    "messageText": "i want deep cleaning for my villa",
+    "selectedIntent": "cleaning.structured_service_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9923
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-16T13:26:12.554Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789565172591:1789565179727:zdymzy",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789565172591",
+    "customerId": "multi-turn-cleaning-deep-apartment-success-1789565172591",
+    "messageText": "i want cleaning for my apartment",
+    "selectedIntent": "cleaning.booking_type_clarification",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": null,
+      "confidence": 0
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_READY_TO_CONFIRM",
+    "timestamp": "2026-09-16T13:26:19.727Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789565172591:1789565180392:j4k7g5",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789565172591",
+    "customerId": "multi-turn-cleaning-deep-apartment-success-1789565172591",
+    "messageText": "i want cleaning for my apartment",
+    "selectedIntent": "cleaning.booking_type_clarification",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9923
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-16T13:26:20.392Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789565193277:1789565195039:l2cmtm",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789565193277",
+    "customerId": "multi-turn-cleaning-multi-furniture-quote-1789565193277",
+    "messageText": "what are charges for 2 sofa 3 seater and 1 king mattress",
+    "selectedIntent": "cleaning.multi_service_quote_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "booking.create",
+      "confidence": 0.3578
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_ASK_DATE",
+    "timestamp": "2026-09-16T13:26:35.040Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789565193277:1789565198684:tp377g",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789565193277",
+    "customerId": "multi-turn-cleaning-multi-furniture-quote-1789565193277",
+    "messageText": "what are charges for 2 sofa 3 seater and 1 king mattress",
+    "selectedIntent": "cleaning.multi_service_quote_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": null,
+      "confidence": 0
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_READY_TO_CONFIRM",
+    "timestamp": "2026-09-16T13:26:38.684Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789565193277:1789565200031:wia6gt",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789565193277",
+    "customerId": "multi-turn-cleaning-multi-furniture-quote-1789565193277",
+    "messageText": "what are charges for 2 sofa 3 seater and 1 king mattress",
+    "selectedIntent": "cleaning.multi_service_quote_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9923
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-16T13:26:40.031Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-cancel-1789565200067:1789565204068:lkdfnc",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-cancel-1789565200067",
+    "customerId": "multi-turn-cleaning-deep-villa-cancel-1789565200067",
+    "messageText": "3 bedrooms",
+    "selectedIntent": "cleaning.workflow_input",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": null,
+    "outcome": "negative",
+    "confidence": 0.9,
+    "responseIntent": null,
+    "timestamp": "2026-09-16T13:26:44.068Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:playground:playground-user:1789565574367:on8m12",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:playground:playground-user",
+    "customerId": "playground-user",
+    "messageText": "hello i want a cleaning service for my apartment on friday",
+    "selectedIntent": "cleaning.booking_type_clarification",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.7053
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-16T13:32:54.367Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-success-1789572046928:1789572061007:121te0",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-success-1789572046928",
+    "customerId": "multi-turn-cleaning-deep-villa-success-1789572046928",
+    "messageText": "i want deep cleaning for my villa",
+    "selectedIntent": "cleaning.structured_service_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": null,
+      "confidence": 0
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_READY_TO_CONFIRM",
+    "timestamp": "2026-09-16T15:21:01.007Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-success-1789572046928:1789572062089:eg1db8",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-success-1789572046928",
+    "customerId": "multi-turn-cleaning-deep-villa-success-1789572046928",
+    "messageText": "i want deep cleaning for my villa",
+    "selectedIntent": "cleaning.structured_service_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9923
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-16T15:21:02.089Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789572062120:1789572069243:zsufsu",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789572062120",
+    "customerId": "multi-turn-cleaning-deep-apartment-success-1789572062120",
+    "messageText": "i want cleaning for my apartment",
+    "selectedIntent": "cleaning.booking_type_clarification",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": null,
+      "confidence": 0
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_READY_TO_CONFIRM",
+    "timestamp": "2026-09-16T15:21:09.244Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789572062120:1789572070010:g043ei",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789572062120",
+    "customerId": "multi-turn-cleaning-deep-apartment-success-1789572062120",
+    "messageText": "i want cleaning for my apartment",
+    "selectedIntent": "cleaning.booking_type_clarification",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9923
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-16T15:21:10.010Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789572070041:1789572078104:02wha8",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789572070041",
+    "customerId": "multi-turn-cleaning-standard-apartment-success-1789572070041",
+    "messageText": "i want cleaning for my apartment",
+    "selectedIntent": "cleaning.booking_type_clarification",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": null,
+      "confidence": 0
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_READY_TO_CONFIRM",
+    "timestamp": "2026-09-16T15:21:18.104Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789572070041:1789572079533:quo06g",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789572070041",
+    "customerId": "multi-turn-cleaning-standard-apartment-success-1789572070041",
+    "messageText": "9 AM",
+    "selectedIntent": "cleaning.workflow_input",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9923
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-16T15:21:19.533Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789572085982:1789572087691:yg1yvg",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789572085982",
+    "customerId": "multi-turn-cleaning-multi-furniture-quote-1789572085982",
+    "messageText": "what are charges for 2 sofa 3 seater and 1 king mattress",
+    "selectedIntent": "cleaning.multi_service_quote_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "booking.create",
+      "confidence": 0.3578
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_ASK_DATE",
+    "timestamp": "2026-09-16T15:21:27.691Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789572085982:1789572091474:4unzvs",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789572085982",
+    "customerId": "multi-turn-cleaning-multi-furniture-quote-1789572085982",
+    "messageText": "what are charges for 2 sofa 3 seater and 1 king mattress",
+    "selectedIntent": "cleaning.multi_service_quote_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": null,
+      "confidence": 0
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_READY_TO_CONFIRM",
+    "timestamp": "2026-09-16T15:21:31.474Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789572085982:1789572092406:yz33sq",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789572085982",
+    "customerId": "multi-turn-cleaning-multi-furniture-quote-1789572085982",
+    "messageText": "what are charges for 2 sofa 3 seater and 1 king mattress",
+    "selectedIntent": "cleaning.multi_service_quote_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9923
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-16T15:21:32.406Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-cancel-1789572092437:1789572094461:c4l5kt",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-cancel-1789572092437",
+    "customerId": "multi-turn-cleaning-deep-villa-cancel-1789572092437",
+    "messageText": "3 bedrooms",
+    "selectedIntent": "cleaning.workflow_input",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": null,
+    "outcome": "negative",
+    "confidence": 0.9,
+    "responseIntent": null,
+    "timestamp": "2026-09-16T15:21:34.461Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:playground:playground-user:1789572463934:m5wff7",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:playground:playground-user",
+    "customerId": "playground-user",
+    "messageText": "i want sofa cleaning service on monday",
+    "selectedIntent": "cleaning.service_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.6609
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-16T15:27:43.934Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:playground:playground-user:1789572639109:c6s846",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:playground:playground-user",
+    "customerId": "playground-user",
+    "messageText": "i want deep cleaning service or my apartment on monday",
+    "selectedIntent": "cleaning.structured_service_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.6027
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-16T15:30:39.109Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789626065443:1789626072081:ztjk0e",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789626065443",
+    "customerId": "multi-turn-cleaning-deep-apartment-success-1789626065443",
+    "messageText": "i want cleaning for my apartment",
+    "selectedIntent": "cleaning.booking_type_clarification",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": null,
+      "confidence": 0
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_READY_TO_CONFIRM",
+    "timestamp": "2026-09-17T06:21:12.081Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789626065443:1789626072895:vhardx",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789626065443",
+    "customerId": "multi-turn-cleaning-deep-apartment-success-1789626065443",
+    "messageText": "i want cleaning for my apartment",
+    "selectedIntent": "cleaning.booking_type_clarification",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9923
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-17T06:21:12.895Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789626072927:1789626079755:6fk4vy",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789626072927",
+    "customerId": "multi-turn-cleaning-standard-apartment-success-1789626072927",
+    "messageText": "i want cleaning for my apartment",
+    "selectedIntent": "cleaning.booking_type_clarification",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": null,
+      "confidence": 0
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_READY_TO_CONFIRM",
+    "timestamp": "2026-09-17T06:21:19.755Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789626072927:1789626080682:s6k9de",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789626072927",
+    "customerId": "multi-turn-cleaning-standard-apartment-success-1789626072927",
+    "messageText": "9 AM",
+    "selectedIntent": "cleaning.workflow_input",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9923
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-17T06:21:20.682Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626087215:1789626088944:kjtfrp",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626087215",
+    "customerId": "multi-turn-cleaning-multi-furniture-quote-1789626087215",
+    "messageText": "what are charges for 2 sofa 3 seater and 1 king mattress",
+    "selectedIntent": "cleaning.multi_service_quote_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "booking.create",
+      "confidence": 0.3578
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_ASK_DATE",
+    "timestamp": "2026-09-17T06:21:28.944Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626087215:1789626092377:ugjizt",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626087215",
+    "customerId": "multi-turn-cleaning-multi-furniture-quote-1789626087215",
+    "messageText": "what are charges for 2 sofa 3 seater and 1 king mattress",
+    "selectedIntent": "cleaning.multi_service_quote_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": null,
+      "confidence": 0
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_READY_TO_CONFIRM",
+    "timestamp": "2026-09-17T06:21:32.377Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626087215:1789626093179:3vhs1x",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626087215",
+    "customerId": "multi-turn-cleaning-multi-furniture-quote-1789626087215",
+    "messageText": "what are charges for 2 sofa 3 seater and 1 king mattress",
+    "selectedIntent": "cleaning.multi_service_quote_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9923
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-17T06:21:33.179Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-cancel-1789626093228:1789626097095:huqez8",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-cancel-1789626093228",
+    "customerId": "multi-turn-cleaning-deep-villa-cancel-1789626093228",
+    "messageText": "3 bedrooms",
+    "selectedIntent": "cleaning.workflow_input",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": null,
+    "outcome": "negative",
+    "confidence": 0.9,
+    "responseIntent": null,
+    "timestamp": "2026-09-17T06:21:37.095Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789626880501:1789626885551:268tpv",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789626880501",
+    "customerId": "multi-turn-cleaning-deep-apartment-success-1789626880501",
+    "messageText": "i want cleaning for my apartment",
+    "selectedIntent": "cleaning.booking_type_clarification",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": null,
+      "confidence": 0
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_READY_TO_CONFIRM",
+    "timestamp": "2026-09-17T06:34:45.551Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789626880501:1789626886312:g3l7ib",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789626880501",
+    "customerId": "multi-turn-cleaning-deep-apartment-success-1789626880501",
+    "messageText": "i want cleaning for my apartment",
+    "selectedIntent": "cleaning.booking_type_clarification",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9923
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-17T06:34:46.312Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789626886341:1789626892177:b8f26t",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789626886341",
+    "customerId": "multi-turn-cleaning-standard-apartment-success-1789626886341",
+    "messageText": "i want cleaning for my apartment",
+    "selectedIntent": "cleaning.booking_type_clarification",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": null,
+      "confidence": 0
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_READY_TO_CONFIRM",
+    "timestamp": "2026-09-17T06:34:52.177Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789626886341:1789626892947:i0yt3m",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789626886341",
+    "customerId": "multi-turn-cleaning-standard-apartment-success-1789626886341",
+    "messageText": "9 AM",
+    "selectedIntent": "cleaning.workflow_input",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9923
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-17T06:34:52.947Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626900813:1789626902949:3oqy7c",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626900813",
+    "customerId": "multi-turn-cleaning-multi-furniture-quote-1789626900813",
+    "messageText": "what are charges for 2 sofa 3 seater and 1 king mattress",
+    "selectedIntent": "cleaning.multi_service_quote_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "booking.create",
+      "confidence": 0.3578
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_ASK_DATE",
+    "timestamp": "2026-09-17T06:35:02.949Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626900813:1789626905899:oem7pf",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626900813",
+    "customerId": "multi-turn-cleaning-multi-furniture-quote-1789626900813",
+    "messageText": "what are charges for 2 sofa 3 seater and 1 king mattress",
+    "selectedIntent": "cleaning.multi_service_quote_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": null,
+      "confidence": 0
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_READY_TO_CONFIRM",
+    "timestamp": "2026-09-17T06:35:05.899Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626900813:1789626906648:iro33w",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789626900813",
+    "customerId": "multi-turn-cleaning-multi-furniture-quote-1789626900813",
+    "messageText": "what are charges for 2 sofa 3 seater and 1 king mattress",
+    "selectedIntent": "cleaning.multi_service_quote_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9923
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "CLEANING_REQUEST_CREATED",
+    "timestamp": "2026-09-17T06:35:06.648Z"
+  },
+  {
+    "id": "cleaning-demo:cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-cancel-1789626906670:1789626908984:c6idk3",
+    "tenantId": "cleaning-demo",
+    "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-cancel-1789626906670",
+    "customerId": "multi-turn-cleaning-deep-villa-cancel-1789626906670",
+    "messageText": "3 bedrooms",
+    "selectedIntent": "cleaning.workflow_input",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": null,
+    "outcome": "negative",
+    "confidence": 0.9,
+    "responseIntent": null,
+    "timestamp": "2026-09-17T06:35:08.984Z"
   }
 ]

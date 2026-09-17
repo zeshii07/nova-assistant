@@ -964,6 +964,1024 @@
       "customFields": {},
       "createdAt": "2026-08-29T08:33:40.997Z",
       "updatedAt": "2026-08-29T08:33:40.997Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-success-1789565162461": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-success-1789565162461",
+      "name": "James Watson",
+      "phone": "03012345678",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Villa 34, JVC Phase 2, Dubai"
+        }
+      },
+      "createdAt": "2026-09-16T13:26:02.465Z",
+      "updatedAt": "2026-09-16T13:26:02.465Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-apartment-success-1789565172591": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789565172591",
+      "name": "Sarah Ahmed",
+      "phone": "0561234567",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Apt 502, Marina Heights, Dubai Marina"
+        }
+      },
+      "createdAt": "2026-09-16T13:26:12.592Z",
+      "updatedAt": "2026-09-16T13:26:12.592Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-standard-apartment-success-1789565180419": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-standard-apartment-success-1789565180419",
+      "name": null,
+      "phone": "0509876543",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T13:26:20.420Z",
+      "updatedAt": "2026-09-16T13:26:20.420Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-sofa-cleaning-success-1789565186803": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-sofa-cleaning-success-1789565186803",
+      "name": null,
+      "phone": "0523456789",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T13:26:26.803Z",
+      "updatedAt": "2026-09-16T13:26:26.803Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-multi-furniture-quote-1789565193277": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789565193277",
+      "name": "Mohammed Rashid",
+      "phone": "0551234567",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "House 15, JVC, Dubai"
+        }
+      },
+      "createdAt": "2026-09-16T13:26:33.277Z",
+      "updatedAt": "2026-09-16T13:26:33.277Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-cancel-1789565200067": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-cancel-1789565200067",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T13:26:40.067Z",
+      "updatedAt": "2026-09-16T13:26:40.067Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-availability-check-1789565204087": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-availability-check-1789565204087",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T13:26:44.090Z",
+      "updatedAt": "2026-09-16T13:26:44.090Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-pricing-question-1789565205046": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-pricing-question-1789565205046",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T13:26:45.049Z",
+      "updatedAt": "2026-09-16T13:26:45.049Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-roman-urdu-1789565206609": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-roman-urdu-1789565206609",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T13:26:46.609Z",
+      "updatedAt": "2026-09-16T13:26:46.609Z"
+    },
+    "default:multi-turn-retail-product-browse-1789565208953": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-browse-1789565208953",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T13:26:48.953Z",
+      "updatedAt": "2026-09-16T13:26:48.953Z"
+    },
+    "default:multi-turn-retail-add-to-cart-checkout-1789565209921": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789565209921",
+      "name": "Zeeshan Ahmad",
+      "phone": "03012345678",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastDelivery": {
+          "city": "Dubai",
+          "address": "Villa 34, Dubai Marina",
+          "landmark": "cash on delivery"
+        }
+      },
+      "createdAt": "2026-09-16T13:26:49.922Z",
+      "updatedAt": "2026-09-16T13:26:49.922Z"
+    },
+    "default:multi-turn-retail-multi-item-checkout-1789565223584": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789565223584",
+      "name": "Aryan Ahmad",
+      "phone": "03019267565",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastDelivery": {
+          "city": "Lahore",
+          "address": "near ali town, lahore",
+          "landmark": null,
+          "paymentMethod": "Cash on Delivery"
+        },
+        "lastOrderId": "ORD-MU44XKWQ-68B1F3"
+      },
+      "createdAt": "2026-09-16T13:27:03.586Z",
+      "updatedAt": "2026-09-16T13:27:03.586Z"
+    },
+    "default:multi-turn-retail-product-search-plural-1789565230180": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-search-plural-1789565230180",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T13:27:10.181Z",
+      "updatedAt": "2026-09-16T13:27:10.181Z"
+    },
+    "default:multi-turn-retail-shirts-browse-1789565231135": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-shirts-browse-1789565231135",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T13:27:11.135Z",
+      "updatedAt": "2026-09-16T13:27:11.135Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-success-1789572046928": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-success-1789572046928",
+      "name": "James Watson",
+      "phone": "03012345678",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Villa 34, JVC Phase 2, Dubai"
+        }
+      },
+      "createdAt": "2026-09-16T15:20:46.935Z",
+      "updatedAt": "2026-09-16T15:20:46.935Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-apartment-success-1789572062120": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789572062120",
+      "name": "Sarah Ahmed",
+      "phone": "0561234567",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Apt 502, Marina Heights, Dubai Marina"
+        }
+      },
+      "createdAt": "2026-09-16T15:21:02.120Z",
+      "updatedAt": "2026-09-16T15:21:02.120Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-standard-apartment-success-1789572070041": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-standard-apartment-success-1789572070041",
+      "name": "Ali Khan",
+      "phone": "0509876543",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Building 15, Apartment 302, Al Barsha, Dubai"
+        }
+      },
+      "createdAt": "2026-09-16T15:21:10.041Z",
+      "updatedAt": "2026-09-16T15:21:10.041Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-sofa-cleaning-success-1789572079579": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-sofa-cleaning-success-1789572079579",
+      "name": null,
+      "phone": "0523456789",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T15:21:19.579Z",
+      "updatedAt": "2026-09-16T15:21:19.579Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-multi-furniture-quote-1789572085982": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789572085982",
+      "name": "Mohammed Rashid",
+      "phone": "0551234567",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "House 15, JVC, Dubai"
+        }
+      },
+      "createdAt": "2026-09-16T15:21:25.982Z",
+      "updatedAt": "2026-09-16T15:21:25.982Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-cancel-1789572092437": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-cancel-1789572092437",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T15:21:32.438Z",
+      "updatedAt": "2026-09-16T15:21:32.438Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-availability-check-1789572094485": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-availability-check-1789572094485",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T15:21:34.486Z",
+      "updatedAt": "2026-09-16T15:21:34.486Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-pricing-question-1789572095198": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-pricing-question-1789572095198",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T15:21:35.198Z",
+      "updatedAt": "2026-09-16T15:21:35.198Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-roman-urdu-1789572096153": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-roman-urdu-1789572096153",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T15:21:36.153Z",
+      "updatedAt": "2026-09-16T15:21:36.153Z"
+    },
+    "default:multi-turn-retail-product-browse-1789572099765": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-browse-1789572099765",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T15:21:39.765Z",
+      "updatedAt": "2026-09-16T15:21:39.765Z"
+    },
+    "default:multi-turn-retail-add-to-cart-checkout-1789572101231": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789572101231",
+      "name": "Zeeshan Ahmad",
+      "phone": "03012345678",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastDelivery": {
+          "city": "Dubai",
+          "address": "Villa 34, Dubai Marina",
+          "landmark": null,
+          "paymentMethod": "Cash on Delivery"
+        },
+        "lastOrderId": "ORD-MU4913WN-CE1CA2"
+      },
+      "createdAt": "2026-09-16T15:21:41.231Z",
+      "updatedAt": "2026-09-16T15:21:41.231Z"
+    },
+    "default:multi-turn-retail-multi-item-checkout-1789572113332": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789572113332",
+      "name": "Aryan Ahmad",
+      "phone": "03019267565",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastDelivery": {
+          "city": "Lahore",
+          "address": "near ali town, lahore",
+          "landmark": null,
+          "paymentMethod": "Cash on Delivery"
+        },
+        "lastOrderId": "ORD-MU491C1Q-3165D5"
+      },
+      "createdAt": "2026-09-16T15:21:53.333Z",
+      "updatedAt": "2026-09-16T15:21:53.333Z"
+    },
+    "default:multi-turn-retail-product-search-plural-1789572123821": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-search-plural-1789572123821",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T15:22:03.821Z",
+      "updatedAt": "2026-09-16T15:22:03.821Z"
+    },
+    "default:multi-turn-retail-shirts-browse-1789572124938": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-shirts-browse-1789572124938",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-16T15:22:04.938Z",
+      "updatedAt": "2026-09-16T15:22:04.938Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-success-1789626055039": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-success-1789626055039",
+      "name": "James Watson",
+      "phone": "03012345678",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Villa 34, JVC Phase 2, Dubai"
+        }
+      },
+      "createdAt": "2026-09-17T06:20:55.042Z",
+      "updatedAt": "2026-09-17T06:20:55.042Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-apartment-success-1789626065443": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789626065443",
+      "name": "Sarah Ahmed",
+      "phone": "0561234567",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Apt 502, Marina Heights, Dubai Marina"
+        }
+      },
+      "createdAt": "2026-09-17T06:21:05.444Z",
+      "updatedAt": "2026-09-17T06:21:05.444Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-standard-apartment-success-1789626072927": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-standard-apartment-success-1789626072927",
+      "name": "Ali Khan",
+      "phone": "0509876543",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Building 15, Apartment 302, Al Barsha, Dubai"
+        }
+      },
+      "createdAt": "2026-09-17T06:21:12.927Z",
+      "updatedAt": "2026-09-17T06:21:12.927Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-sofa-cleaning-success-1789626080851": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-sofa-cleaning-success-1789626080851",
+      "name": null,
+      "phone": "0523456789",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:21:20.851Z",
+      "updatedAt": "2026-09-17T06:21:20.851Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-multi-furniture-quote-1789626087215": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789626087215",
+      "name": "Mohammed Rashid",
+      "phone": "0551234567",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "House 15, JVC, Dubai"
+        }
+      },
+      "createdAt": "2026-09-17T06:21:27.215Z",
+      "updatedAt": "2026-09-17T06:21:27.215Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-cancel-1789626093228": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-cancel-1789626093228",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:21:33.228Z",
+      "updatedAt": "2026-09-17T06:21:33.228Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-availability-check-1789626097177": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-availability-check-1789626097177",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:21:37.177Z",
+      "updatedAt": "2026-09-17T06:21:37.177Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-pricing-question-1789626098501": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-pricing-question-1789626098501",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:21:38.502Z",
+      "updatedAt": "2026-09-17T06:21:38.502Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-roman-urdu-1789626099610": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-roman-urdu-1789626099610",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:21:39.610Z",
+      "updatedAt": "2026-09-17T06:21:39.610Z"
+    },
+    "default:multi-turn-retail-product-browse-1789626103682": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-browse-1789626103682",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:21:43.682Z",
+      "updatedAt": "2026-09-17T06:21:43.682Z"
+    },
+    "default:multi-turn-retail-add-to-cart-checkout-1789626105214": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789626105214",
+      "name": "Zeeshan Ahmad",
+      "phone": "03012345678",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastDelivery": {
+          "city": "Dubai",
+          "address": "Villa 34, Dubai Marina",
+          "landmark": null,
+          "paymentMethod": "Cash on Delivery"
+        },
+        "lastOrderId": "ORD-MU556NC3-9DE78B"
+      },
+      "createdAt": "2026-09-17T06:21:45.214Z",
+      "updatedAt": "2026-09-17T06:21:45.214Z"
+    },
+    "default:multi-turn-retail-multi-item-checkout-1789626119483": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789626119483",
+      "name": "Aryan Ahmad",
+      "phone": "03019267565",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastDelivery": {
+          "city": "Lahore",
+          "address": "near ali town, lahore",
+          "landmark": null,
+          "paymentMethod": "Cash on Delivery"
+        },
+        "lastOrderId": "ORD-MU556UKR-A6FF3C"
+      },
+      "createdAt": "2026-09-17T06:21:59.484Z",
+      "updatedAt": "2026-09-17T06:21:59.484Z"
+    },
+    "default:multi-turn-retail-product-search-plural-1789626128904": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-search-plural-1789626128904",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:22:08.905Z",
+      "updatedAt": "2026-09-17T06:22:08.905Z"
+    },
+    "default:multi-turn-retail-shirts-browse-1789626130216": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-shirts-browse-1789626130216",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:22:10.216Z",
+      "updatedAt": "2026-09-17T06:22:10.216Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-success-1789626869417": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-success-1789626869417",
+      "name": "James Watson",
+      "phone": "03012345678",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Villa 34, JVC Phase 2, Dubai"
+        }
+      },
+      "createdAt": "2026-09-17T06:34:29.419Z",
+      "updatedAt": "2026-09-17T06:34:29.419Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-apartment-success-1789626880501": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789626880501",
+      "name": "Sarah Ahmed",
+      "phone": "0561234567",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Apt 502, Marina Heights, Dubai Marina"
+        }
+      },
+      "createdAt": "2026-09-17T06:34:40.502Z",
+      "updatedAt": "2026-09-17T06:34:40.502Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-standard-apartment-success-1789626886341": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-standard-apartment-success-1789626886341",
+      "name": "Ali Khan",
+      "phone": "0509876543",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Building 15, Apartment 302, Al Barsha, Dubai"
+        }
+      },
+      "createdAt": "2026-09-17T06:34:46.342Z",
+      "updatedAt": "2026-09-17T06:34:46.342Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-sofa-cleaning-success-1789626892980": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-sofa-cleaning-success-1789626892980",
+      "name": null,
+      "phone": "0523456789",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:34:52.984Z",
+      "updatedAt": "2026-09-17T06:34:52.984Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-multi-furniture-quote-1789626900813": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789626900813",
+      "name": "Mohammed Rashid",
+      "phone": "0551234567",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "House 15, JVC, Dubai"
+        }
+      },
+      "createdAt": "2026-09-17T06:35:00.813Z",
+      "updatedAt": "2026-09-17T06:35:00.813Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-cancel-1789626906670": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-cancel-1789626906670",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:35:06.673Z",
+      "updatedAt": "2026-09-17T06:35:06.673Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-availability-check-1789626909006": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-availability-check-1789626909006",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:35:09.007Z",
+      "updatedAt": "2026-09-17T06:35:09.007Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-pricing-question-1789626909600": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-pricing-question-1789626909600",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:35:09.600Z",
+      "updatedAt": "2026-09-17T06:35:09.600Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-roman-urdu-1789626910418": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-roman-urdu-1789626910418",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:35:10.419Z",
+      "updatedAt": "2026-09-17T06:35:10.419Z"
+    },
+    "default:multi-turn-retail-product-browse-1789626914345": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-browse-1789626914345",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:35:14.345Z",
+      "updatedAt": "2026-09-17T06:35:14.345Z"
+    },
+    "default:multi-turn-retail-add-to-cart-checkout-1789626915492": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789626915492",
+      "name": "Zeeshan Ahmad",
+      "phone": "03012345678",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastDelivery": {
+          "city": "Dubai",
+          "address": "Villa 34, Dubai Marina",
+          "landmark": null,
+          "paymentMethod": "Cash on Delivery"
+        },
+        "lastOrderId": "ORD-MU55NY39-3E2921"
+      },
+      "createdAt": "2026-09-17T06:35:15.493Z",
+      "updatedAt": "2026-09-17T06:35:15.493Z"
+    },
+    "default:multi-turn-retail-multi-item-checkout-1789626926543": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789626926543",
+      "name": "Aryan Ahmad",
+      "phone": "03019267565",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastDelivery": {
+          "city": "Lahore",
+          "address": "near ali town, lahore",
+          "landmark": null,
+          "paymentMethod": "Cash on Delivery"
+        },
+        "lastOrderId": "ORD-MU55O5WE-BC8BB1"
+      },
+      "createdAt": "2026-09-17T06:35:26.543Z",
+      "updatedAt": "2026-09-17T06:35:26.543Z"
+    },
+    "default:multi-turn-retail-product-search-plural-1789626936676": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-search-plural-1789626936676",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:35:36.677Z",
+      "updatedAt": "2026-09-17T06:35:36.677Z"
+    },
+    "default:multi-turn-retail-shirts-browse-1789626938384": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-shirts-browse-1789626938384",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T06:35:38.384Z",
+      "updatedAt": "2026-09-17T06:35:38.384Z"
     }
   },
   "activities": {
@@ -2025,6 +3043,104 @@
         },
         "capabilityId": "cleaning",
         "createdAt": "2026-09-16T05:27:15.445Z"
+      },
+      {
+        "id": "act_1789565574334_x54eoo",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-C4DD4D4Y",
+          "requestIds": [
+            "CLN-C4DD4D4Y"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T13:32:54.334Z"
+      },
+      {
+        "id": "act_1789572380605_24wzdq",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T15:26:20.605Z"
+      },
+      {
+        "id": "act_1789572463871_jlblyl",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-D76VSZT0",
+          "requestIds": [
+            "CLN-D76VSZT0"
+          ],
+          "serviceId": "CLN003",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T15:27:43.871Z"
+      },
+      {
+        "id": "act_1789572639052_bn60lv",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-97KTU4KS",
+          "requestIds": [
+            "CLN-97KTU4KS"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T15:30:39.052Z"
+      },
+      {
+        "id": "act_1789626202735_ol8n4r",
+        "type": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-17T06:23:22.735Z"
+      },
+      {
+        "id": "act_1789626242499_zejszy",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T06:24:02.499Z"
+      },
+      {
+        "id": "act_1789627014956_ksmj8g",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-17T06:36:54.956Z"
+      },
+      {
+        "id": "act_1789627036112_k6nxjv",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T06:37:16.112Z"
+      },
+      {
+        "id": "act_1789627080349_g523iw",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T06:38:00.349Z"
       }
     ],
     "default:playground-user": [
@@ -3327,6 +4443,16 @@
         },
         "capabilityId": "assistant",
         "createdAt": "2026-09-16T08:22:50.094Z"
+      },
+      {
+        "id": "act_1789627061275_b6qh2z",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-17T06:37:41.275Z"
       }
     ],
     "default:debug-tv": [
@@ -4202,6 +5328,656 @@
         },
         "capabilityId": "commerce",
         "createdAt": "2026-09-02T04:45:12.329Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-villa-success-1789565162461": [
+      {
+        "id": "act_1789565172514_etjbrh",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-61FIVEAF",
+          "requestIds": [
+            "CLN-61FIVEAF"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T13:26:12.514Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-apartment-success-1789565172591": [
+      {
+        "id": "act_1789565180351_ck5xdm",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-45JKWY0F",
+          "requestIds": [
+            "CLN-45JKWY0F"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T13:26:20.351Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-sofa-cleaning-success-1789565186803": [
+      {
+        "id": "act_1789565187376_vmmwt7",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T13:26:27.376Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-multi-furniture-quote-1789565193277": [
+      {
+        "id": "act_1789565199794_vn5iag",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-1VFFDLU7",
+          "requestIds": [
+            "CLN-1VFFDLU7"
+          ],
+          "serviceId": "CLN003",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T13:26:39.794Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-villa-roman-urdu-1789565206609": [
+      {
+        "id": "act_1789565207441_2jjztc",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T13:26:47.441Z"
+      }
+    ],
+    "default:multi-turn-retail-add-to-cart-checkout-1789565209921": [
+      {
+        "id": "act_1789565210674_bq87xs",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-16T13:26:50.674Z"
+      },
+      {
+        "id": "act_1789565211932_esw10l",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-16T13:26:51.932Z"
+      },
+      {
+        "id": "act_1789565212728_09yjs5",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black",
+            "quantity": 2
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-16T13:26:52.728Z"
+      },
+      {
+        "id": "act_1789565213710_p2kcfp",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P004",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-16T13:26:53.710Z"
+      }
+    ],
+    "default:multi-turn-retail-multi-item-checkout-1789565223584": [
+      {
+        "id": "act_1789565224990_v5l5pf",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": null,
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-16T13:27:04.990Z"
+      },
+      {
+        "id": "act_1789565230123_x874ki",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MU44XKWQ-68B1F3",
+          "total": 9600
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-16T13:27:10.123Z"
+      }
+    ],
+    "default:multi-turn-retail-product-search-plural-1789565230180": [
+      {
+        "id": "act_1789565231070_9i9fid",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-16T13:27:11.070Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-villa-success-1789572046928": [
+      {
+        "id": "act_1789572062022_r7gttz",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-33AVE5YG",
+          "requestIds": [
+            "CLN-33AVE5YG"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T15:21:02.022Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-apartment-success-1789572062120": [
+      {
+        "id": "act_1789572069963_13fxz2",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-2BBHDHNN",
+          "requestIds": [
+            "CLN-2BBHDHNN"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T15:21:09.963Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-standard-apartment-success-1789572070041": [
+      {
+        "id": "act_1789572079460_25l8o2",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-1F21WF6K",
+          "requestIds": [
+            "CLN-1F21WF6K"
+          ],
+          "serviceId": "CLN001",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T15:21:19.460Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-sofa-cleaning-success-1789572079579": [
+      {
+        "id": "act_1789572080410_uoaifi",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T15:21:20.410Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-multi-furniture-quote-1789572085982": [
+      {
+        "id": "act_1789572092352_q4n1a1",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-98WBVOYM",
+          "requestIds": [
+            "CLN-98WBVOYM"
+          ],
+          "serviceId": "CLN003",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T15:21:32.352Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-villa-roman-urdu-1789572096153": [
+      {
+        "id": "act_1789572097705_9cra24",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-16T15:21:37.705Z"
+      }
+    ],
+    "default:multi-turn-retail-add-to-cart-checkout-1789572101231": [
+      {
+        "id": "act_1789572102419_fuemrf",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-16T15:21:42.419Z"
+      },
+      {
+        "id": "act_1789572104055_t9hppr",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-16T15:21:44.056Z"
+      },
+      {
+        "id": "act_1789572105226_965ux2",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black",
+            "quantity": 2
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-16T15:21:45.226Z"
+      },
+      {
+        "id": "act_1789572106375_4vyga1",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P004",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-16T15:21:46.375Z"
+      },
+      {
+        "id": "act_1789572113179_5q8g9n",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MU4913WN-CE1CA2",
+          "total": 16000
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-16T15:21:53.179Z"
+      }
+    ],
+    "default:multi-turn-retail-multi-item-checkout-1789572113332": [
+      {
+        "id": "act_1789572116058_ljb6e0",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": null,
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-16T15:21:56.058Z"
+      },
+      {
+        "id": "act_1789572123731_mz6j4h",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MU491C1Q-3165D5",
+          "total": 9600
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-16T15:22:03.731Z"
+      }
+    ],
+    "default:multi-turn-retail-product-search-plural-1789572123821": [
+      {
+        "id": "act_1789572124863_aquedv",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-16T15:22:04.863Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-apartment-success-1789626065443": [
+      {
+        "id": "act_1789626072842_fzgra9",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-6H40VR8I",
+          "requestIds": [
+            "CLN-6H40VR8I"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T06:21:12.842Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-standard-apartment-success-1789626072927": [
+      {
+        "id": "act_1789626080567_z8z38r",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-553J556W",
+          "requestIds": [
+            "CLN-553J556W"
+          ],
+          "serviceId": "CLN001",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T06:21:20.567Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-sofa-cleaning-success-1789626080851": [
+      {
+        "id": "act_1789626081649_jernik",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T06:21:21.649Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-multi-furniture-quote-1789626087215": [
+      {
+        "id": "act_1789626093124_yppk4l",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-2HGWQ2KE",
+          "requestIds": [
+            "CLN-2HGWQ2KE"
+          ],
+          "serviceId": "CLN003",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T06:21:33.124Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-villa-roman-urdu-1789626099610": [
+      {
+        "id": "act_1789626100727_hjakpy",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T06:21:40.727Z"
+      }
+    ],
+    "default:multi-turn-retail-add-to-cart-checkout-1789626105214": [
+      {
+        "id": "act_1789626106496_kay0hu",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T06:21:46.496Z"
+      },
+      {
+        "id": "act_1789626108192_ub77pr",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T06:21:48.192Z"
+      },
+      {
+        "id": "act_1789626109807_272l61",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black",
+            "quantity": 2
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T06:21:49.807Z"
+      },
+      {
+        "id": "act_1789626111233_qkz1kt",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P004",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T06:21:51.233Z"
+      },
+      {
+        "id": "act_1789626119356_bsf73s",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MU556NC3-9DE78B",
+          "total": 16000
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T06:21:59.356Z"
+      }
+    ],
+    "default:multi-turn-retail-multi-item-checkout-1789626119483": [
+      {
+        "id": "act_1789626122134_g4e8pn",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": null,
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T06:22:02.134Z"
+      },
+      {
+        "id": "act_1789626128735_xfpdfj",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MU556UKR-A6FF3C",
+          "total": 9600
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T06:22:08.735Z"
+      }
+    ],
+    "default:multi-turn-retail-product-search-plural-1789626128904": [
+      {
+        "id": "act_1789626130151_s8s4gf",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T06:22:10.151Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-apartment-success-1789626880501": [
+      {
+        "id": "act_1789626886247_a0ojfs",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-7C49DVDB",
+          "requestIds": [
+            "CLN-7C49DVDB"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T06:34:46.247Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-standard-apartment-success-1789626886341": [
+      {
+        "id": "act_1789626892853_35dlx6",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-0R5NDD02",
+          "requestIds": [
+            "CLN-0R5NDD02"
+          ],
+          "serviceId": "CLN001",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T06:34:52.853Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-sofa-cleaning-success-1789626892980": [
+      {
+        "id": "act_1789626893677_fym3qx",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T06:34:53.677Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-multi-furniture-quote-1789626900813": [
+      {
+        "id": "act_1789626906582_s4jari",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-7EVX9H7P",
+          "requestIds": [
+            "CLN-7EVX9H7P"
+          ],
+          "serviceId": "CLN003",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T06:35:06.582Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-villa-roman-urdu-1789626910418": [
+      {
+        "id": "act_1789626911192_d2r6v1",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T06:35:11.193Z"
+      }
+    ],
+    "default:multi-turn-retail-add-to-cart-checkout-1789626915492": [
+      {
+        "id": "act_1789626916429_v7vddd",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T06:35:16.429Z"
+      },
+      {
+        "id": "act_1789626917401_mn9eas",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T06:35:17.401Z"
+      },
+      {
+        "id": "act_1789626918465_ylgn9t",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black",
+            "quantity": 2
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T06:35:18.465Z"
+      },
+      {
+        "id": "act_1789626919712_cs9p02",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P004",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T06:35:19.712Z"
+      },
+      {
+        "id": "act_1789626926444_bfqfek",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MU55NY39-3E2921",
+          "total": 16000
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T06:35:26.444Z"
+      }
+    ],
+    "default:multi-turn-retail-multi-item-checkout-1789626926543": [
+      {
+        "id": "act_1789626928255_b005g0",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": null,
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T06:35:28.255Z"
+      },
+      {
+        "id": "act_1789626936559_emleif",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MU55O5WE-BC8BB1",
+          "total": 9600
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T06:35:36.559Z"
+      }
+    ],
+    "default:multi-turn-retail-product-search-plural-1789626936676": [
+      {
+        "id": "act_1789626938130_evty23",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T06:35:38.130Z"
       }
     ]
   }

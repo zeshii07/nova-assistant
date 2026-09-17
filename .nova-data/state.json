@@ -9905,7 +9905,7 @@
         "assistantSource": "conversation_intelligence",
         "assistantResponseSequence": 1,
         "goalHistory": [],
-        "lastMessage": "hello i want a cleaning service for my apartment on friday",
+        "lastMessage": "hello i want furniture cleaning service",
         "lastCapability": "assistant",
         "conversationIntelligence": {
           "selected": {
@@ -9914,58 +9914,10 @@
             "confidence": 0.9996,
             "reason": "unsupported_tenant_capability",
             "entities": {
-              "serviceName": "Cleaning",
-              "subject": "Cleaning",
-              "date": "friday",
-              "dateText": "Friday",
-              "dateNormalizedHint": "2026-09-16",
-              "nluIntents": [
-                "booking.create",
-                "booking.create"
-              ],
-              "serviceItems": [
-                {
-                  "serviceId": null,
-                  "serviceName": "Cleaning",
-                  "quantity": 1,
-                  "unit": null,
-                  "serviceVariant": null,
-                  "propertyType": null,
-                  "bedrooms": null,
-                  "staff": null,
-                  "durationHours": null,
-                  "confidence": 0.9
-                }
-              ],
-              "weekday": "friday",
               "domain": "cleaning service"
             }
           },
           "entities": {
-            "serviceName": "Cleaning",
-            "subject": "Cleaning",
-            "date": "friday",
-            "dateText": "Friday",
-            "dateNormalizedHint": "2026-09-16",
-            "nluIntents": [
-              "booking.create",
-              "booking.create"
-            ],
-            "serviceItems": [
-              {
-                "serviceId": null,
-                "serviceName": "Cleaning",
-                "quantity": 1,
-                "unit": null,
-                "serviceVariant": null,
-                "propertyType": null,
-                "bedrooms": null,
-                "staff": null,
-                "durationHours": null,
-                "confidence": 0.9
-              }
-            ],
-            "weekday": "friday",
             "domain": "cleaning service"
           },
           "messageFrame": {
@@ -9985,42 +9937,9 @@
                 "clauseIndex": 0,
                 "modality": "asserted",
                 "source": "deterministic_frame"
-              },
-              {
-                "intent": "booking.create",
-                "confidence": 0.9,
-                "clauseIndex": null,
-                "modality": "asserted",
-                "source": "ai_language_contract",
-                "messageType": "request"
               }
             ],
-            "entities": {
-              "serviceName": "Cleaning",
-              "subject": "Cleaning",
-              "date": "friday",
-              "dateText": "Friday",
-              "dateNormalizedHint": "2026-09-16",
-              "nluIntents": [
-                "booking.create",
-                "booking.create"
-              ],
-              "serviceItems": [
-                {
-                  "serviceId": null,
-                  "serviceName": "Cleaning",
-                  "quantity": 1,
-                  "unit": null,
-                  "serviceVariant": null,
-                  "propertyType": null,
-                  "bedrooms": null,
-                  "staff": null,
-                  "durationHours": null,
-                  "confidence": 0.9
-                }
-              ],
-              "weekday": "friday"
-            },
+            "entities": {},
             "hasMultipleIntents": false,
             "primaryIntent": "booking.create",
             "resolvedIntents": [
@@ -10039,14 +9958,6 @@
                 "source": "deterministic_frame"
               },
               {
-                "intent": "booking.create",
-                "confidence": 0.9,
-                "clauseIndex": null,
-                "modality": "asserted",
-                "source": "ai_language_contract",
-                "messageType": "request"
-              },
-              {
                 "intent": "catalog.unavailable_request",
                 "capabilityId": "catalog",
                 "confidence": 1,
@@ -10060,10 +9971,8 @@
               }
             ],
             "localSemanticPrimaryIntent": "booking.create",
-            "localSemanticAccepted": true,
+            "localSemanticAccepted": false,
             "detectedLanguage": "en",
-            "languageContractVersion": "2.0",
-            "aiPrimaryIntent": "booking.create",
             "primaryResolvedIntent": {
               "capabilityId": "assistant",
               "intent": "assistant.unsupported_capability",
@@ -10087,114 +9996,27 @@
           "clarificationReason": null,
           "nlu": {
             "used": true,
-            "validated": true,
+            "validated": false,
             "mode": "on",
             "strategy": "adaptive",
-            "deterministicFallback": false,
+            "deterministicFallback": true,
             "executionAuthority": "nova_deterministic_core",
             "model": "openai/gpt-oss-20b",
             "promptVersion": "nova-language-2.0",
-            "decision": "ambiguous_unresolved",
+            "decision": "deterministic_only",
             "invocationReason": "semantic_route_conflict",
-            "error": null,
-            "httpStatus": null,
-            "providerMessage": null,
-            "providerErrorType": null,
-            "providerRequestId": null,
-            "latencyMs": 1813.057,
-            "languageContract": {
-              "contractVersion": "2.0",
-              "providerSchemaVersion": "2.0",
-              "language": {
-                "code": "en",
-                "confidence": 0.9
-              },
-              "message": {
-                "type": "request",
-                "actionSemantics": "draft_request",
-                "certainty": "implicit",
-                "confidence": 0.9
-              },
-              "primaryIntent": {
-                "name": "booking.create",
-                "confidence": 0.9
-              },
-              "intents": [
-                {
-                  "name": "booking.create",
-                  "messageType": "request",
-                  "confidence": 0.9
-                }
-              ],
-              "workflow": {
-                "relationship": "continue",
-                "active": null
-              },
-              "entities": {
-                "serviceName": "Cleaning",
-                "subject": "Cleaning",
-                "date": "2026-09-16",
-                "dateText": "Friday",
-                "dateNormalizedHint": "2026-09-16",
-                "nluIntents": [
-                  "booking.create",
-                  "booking.create"
-                ],
-                "serviceItems": [
-                  {
-                    "serviceId": null,
-                    "serviceName": "Cleaning",
-                    "quantity": 1,
-                    "unit": null,
-                    "serviceVariant": null,
-                    "propertyType": null,
-                    "bedrooms": null,
-                    "staff": null,
-                    "durationHours": null,
-                    "confidence": 0.9
-                  }
-                ]
-              },
-              "items": {
-                "services": [
-                  {
-                    "serviceId": null,
-                    "serviceName": "Cleaning",
-                    "quantity": 1,
-                    "unit": null,
-                    "serviceVariant": null,
-                    "propertyType": null,
-                    "bedrooms": null,
-                    "staff": null,
-                    "durationHours": null,
-                    "confidence": 0.9
-                  }
-                ],
-                "products": []
-              },
-              "customerFields": {
-                "name": null,
-                "phone": null,
-                "email": null
-              },
-              "requestedInformation": [],
-              "missingInformation": [
-                "staff",
-                "time"
-              ],
-              "corrections": [],
-              "ambiguities": [],
-              "authority": {
-                "interpretation": "ai_language_layer",
-                "execution": "nova_deterministic_core",
-                "mayExecute": false
-              }
-            }
+            "error": "http_400",
+            "httpStatus": 400,
+            "providerMessage": "Generated JSON does not match the expected schema. Please adjust your prompt. See 'failed_generation' for more details. Error: jsonschema: '/entities' does not validate with /properties/entities/required: missing properties: 'product', 'product_id'",
+            "providerErrorType": "invalid_request_error",
+            "providerRequestId": "req_01m2q1by91ehv8m5wbewyvgr38",
+            "latencyMs": 1473.368,
+            "languageContract": null
           }
         },
         "recentTurns": [
           {
-            "text": "hello i want a cleaning service for my apartment on friday",
+            "text": "hello i want furniture cleaning service",
             "capabilityId": "assistant",
             "intent": "assistant.unsupported_capability",
             "entities": {
@@ -10202,7 +10024,7 @@
                 "date": null,
                 "dateText": null,
                 "dateReference": null,
-                "weekday": "friday",
+                "weekday": null,
                 "time": null,
                 "startTime": null,
                 "endTime": null,
@@ -10211,9 +10033,7 @@
                 "timeFlexible": false,
                 "invalidTime": null
               },
-              "property": {
-                "propertyType": "apartment"
-              },
+              "property": {},
               "acquisition": {
                 "requested": true,
                 "kind": "service",
@@ -10231,18 +10051,18 @@
               "isPricingQuestion": false,
               "isBookingAction": false
             },
-            "at": "2026-09-16T08:22:50.115Z"
+            "at": "2026-09-17T06:37:41.288Z"
           }
         ],
         "entities": {
           "version": "2.0",
-          "text": "hello i want a cleaning service for my apartment on friday",
-          "normalized": "hello i want a cleaning service for my apartment on friday",
+          "text": "hello i want furniture cleaning service",
+          "normalized": "hello i want furniture cleaning service",
           "temporal": {
             "date": null,
             "dateText": null,
             "dateReference": null,
-            "weekday": "friday",
+            "weekday": null,
             "time": null,
             "startTime": null,
             "endTime": null,
@@ -10251,9 +10071,7 @@
             "timeFlexible": false,
             "invalidTime": null
           },
-          "property": {
-            "propertyType": "apartment"
-          },
+          "property": {},
           "fieldAmendment": null,
           "acquisition": {
             "requested": true,
@@ -10294,8 +10112,8 @@
       },
       "capabilityState": {},
       "lastIntent": "unsupported_capability",
-      "createdAt": "2026-09-16T08:22:45.849Z",
-      "updatedAt": "2026-09-16T08:22:50.116Z"
+      "createdAt": "2026-09-17T06:37:38.353Z",
+      "updatedAt": "2026-09-17T06:37:41.288Z"
     },
     "cleaning-demo:playground:playground-user": {
       "schemaVersion": 1,
@@ -10309,116 +10127,88 @@
       "pendingQuestion": null,
       "context": {
         "goalHistory": [],
-        "lastMessage": "it has 4 bedrooms",
+        "lastMessage": "hello i want furniture cleaning service",
         "lastCapability": "cleaning",
         "conversationIntelligence": {
           "selected": {
             "capabilityId": "cleaning",
-            "priority": 212,
-            "intent": "cleaning.workflow_input",
+            "priority": 200,
+            "intent": "cleaning.service_request",
             "confidence": 1,
             "entities": {
-              "date": "friday",
-              "weekday": "friday",
-              "propertyType": "apartment",
-              "preferredDateOptions": [
-                "friday"
-              ],
-              "scopeText": "it has 4 bedrooms",
-              "text": "hello i want a cleaning service for my apartment on friday",
-              "pendingCleaningType": true,
-              "selectedCleaningType": "deep",
-              "bedrooms": 4,
-              "nluIntents": [
-                "other"
-              ],
-              "pendingField": "bedrooms",
-              "preserveWorkflow": true
+              "serviceId": "CLN003",
+              "serviceName": "Furniture Cleaning",
+              "scopeText": "hello i want furniture cleaning service"
             },
-            "reason": "active_cleaning_bedrooms_value+remote_nlu_correction_enrichment"
+            "reason": "explicit_cleaning_service_transaction"
           },
           "entities": {
-            "date": "friday",
-            "weekday": "friday",
-            "propertyType": "apartment",
-            "preferredDateOptions": [
-              "friday"
-            ],
-            "scopeText": "it has 4 bedrooms",
-            "text": "hello i want a cleaning service for my apartment on friday",
-            "pendingCleaningType": true,
-            "selectedCleaningType": "deep",
-            "bedrooms": 4,
-            "nluIntents": [
-              "other"
-            ],
-            "pendingField": "bedrooms",
-            "preserveWorkflow": true
+            "serviceId": "CLN003",
+            "serviceName": "Furniture Cleaning",
+            "scopeText": "hello i want furniture cleaning service"
           },
           "messageFrame": {
             "version": "1.0",
             "clauseCount": 1,
             "intents": [
               {
-                "intent": "other",
-                "confidence": 1,
-                "clauseIndex": null,
+                "intent": "conversation.social.greeting",
+                "confidence": 0.99,
+                "clauseIndex": 0,
                 "modality": "asserted",
-                "source": "ai_language_contract",
-                "messageType": "correction"
+                "source": "deterministic_frame"
+              },
+              {
+                "intent": "booking.create",
+                "confidence": 0.96,
+                "clauseIndex": 0,
+                "modality": "asserted",
+                "source": "deterministic_frame"
               }
             ],
-            "entities": {
-              "date": "friday",
-              "weekday": "friday",
-              "bedrooms": 4,
-              "nluIntents": [
-                "other",
-                "other"
-              ]
-            },
+            "entities": {},
             "hasMultipleIntents": false,
             "primaryIntent": "booking.create",
             "resolvedIntents": [
               {
-                "intent": "other",
-                "confidence": 1,
-                "clauseIndex": null,
+                "intent": "conversation.social.greeting",
+                "confidence": 0.99,
+                "clauseIndex": 0,
                 "modality": "asserted",
-                "source": "ai_language_contract",
-                "messageType": "correction"
+                "source": "deterministic_frame"
               },
               {
-                "intent": "cleaning.workflow_input",
+                "intent": "booking.create",
+                "confidence": 0.96,
+                "clauseIndex": 0,
+                "modality": "asserted",
+                "source": "deterministic_frame"
+              },
+              {
+                "intent": "cleaning.service_request",
                 "capabilityId": "cleaning",
                 "confidence": 1,
                 "source": "capability_adapter"
+              },
+              {
+                "intent": "assistant.greet",
+                "capabilityId": "assistant",
+                "confidence": 0.35,
+                "source": "capability_adapter"
               }
             ],
-            "localSemanticPrimaryIntent": "conversation.confirm",
+            "localSemanticPrimaryIntent": "booking.create",
             "localSemanticAccepted": false,
             "detectedLanguage": "en",
             "primaryResolvedIntent": {
               "capabilityId": "cleaning",
-              "intent": "cleaning.workflow_input",
+              "intent": "cleaning.service_request",
               "confidence": 1
-            },
-            "languageContractVersion": "2.0",
-            "aiPrimaryIntent": "other"
+            }
           },
           "workflow": {
-            "stack": [
-              {
-                "capabilityId": "cleaning",
-                "workflow": "service_request",
-                "pendingField": "bedrooms"
-              }
-            ],
-            "current": {
-              "capabilityId": "cleaning",
-              "workflow": "service_request",
-              "pendingField": "bedrooms"
-            }
+            "stack": [],
+            "current": null
           },
           "goal": {
             "current": null,
@@ -10432,93 +10222,36 @@
           "requiresClarification": false,
           "clarificationReason": null,
           "nlu": {
-            "used": true,
-            "validated": true,
+            "used": false,
+            "validated": false,
             "mode": "on",
             "strategy": "adaptive",
             "deterministicFallback": false,
             "executionAuthority": "nova_deterministic_core",
-            "model": "openai/gpt-oss-20b",
-            "promptVersion": "nova-language-2.0",
-            "decision": "active_workflow_correction_enriched",
-            "invocationReason": "local_semantic_uncertain",
+            "model": null,
+            "promptVersion": null,
+            "decision": "not_configured",
+            "invocationReason": "deterministic_confident",
             "error": null,
             "httpStatus": null,
             "providerMessage": null,
             "providerErrorType": null,
             "providerRequestId": null,
-            "latencyMs": 1370.234,
-            "languageContract": {
-              "contractVersion": "2.0",
-              "providerSchemaVersion": "2.0",
-              "language": {
-                "code": "en",
-                "confidence": 1
-              },
-              "message": {
-                "type": "correction",
-                "actionSemantics": "none",
-                "certainty": "implicit",
-                "confidence": 1
-              },
-              "primaryIntent": {
-                "name": "other",
-                "confidence": 1
-              },
-              "intents": [
-                {
-                  "name": "other",
-                  "messageType": "correction",
-                  "confidence": 1
-                }
-              ],
-              "workflow": {
-                "relationship": "continue",
-                "active": {
-                  "capabilityId": "cleaning",
-                  "workflow": "service_request",
-                  "pendingField": "bedrooms"
-                }
-              },
-              "entities": {
-                "bedrooms": 4,
-                "nluIntents": [
-                  "other",
-                  "other"
-                ]
-              },
-              "items": {
-                "services": [],
-                "products": []
-              },
-              "customerFields": {
-                "email": null,
-                "name": null,
-                "phone": null
-              },
-              "requestedInformation": [],
-              "missingInformation": [],
-              "corrections": [],
-              "ambiguities": [],
-              "authority": {
-                "interpretation": "ai_language_layer",
-                "execution": "nova_deterministic_core",
-                "mayExecute": false
-              }
-            }
+            "latencyMs": 0,
+            "languageContract": null
           }
         },
         "recentTurns": [
           {
-            "text": "hello i want a cleaning service for my apartment on friday",
+            "text": "hello i want furniture cleaning service",
             "capabilityId": "cleaning",
-            "intent": "cleaning.booking_type_clarification",
+            "intent": "cleaning.service_request",
             "entities": {
               "temporal": {
                 "date": null,
                 "dateText": null,
                 "dateReference": null,
-                "weekday": "friday",
+                "weekday": null,
                 "time": null,
                 "startTime": null,
                 "endTime": null,
@@ -10527,9 +10260,7 @@
                 "timeFlexible": false,
                 "invalidTime": null
               },
-              "property": {
-                "propertyType": "apartment"
-              },
+              "property": {},
               "acquisition": {
                 "requested": true,
                 "kind": "service",
@@ -10547,98 +10278,18 @@
               "isPricingQuestion": false,
               "isBookingAction": false
             },
-            "at": "2026-09-16T08:23:14.193Z"
-          },
-          {
-            "text": "i want deep cleaning",
-            "capabilityId": "cleaning",
-            "intent": "cleaning.booking_type_selected",
-            "entities": {
-              "temporal": {
-                "date": null,
-                "dateText": null,
-                "dateReference": null,
-                "weekday": null,
-                "time": null,
-                "startTime": null,
-                "endTime": null,
-                "durationHours": null,
-                "timeWindow": null,
-                "timeFlexible": false,
-                "invalidTime": null
-              },
-              "property": {
-                "cleaningType": "deep"
-              },
-              "acquisition": {
-                "requested": true,
-                "kind": "service",
-                "isService": true,
-                "isProduct": false
-              },
-              "serviceSupport": {
-                "isSupportQuestion": false,
-                "category": null
-              },
-              "businessIdentity": {
-                "isBusinessIdentity": false,
-                "facet": null
-              },
-              "isPricingQuestion": false,
-              "isBookingAction": false
-            },
-            "at": "2026-09-16T08:23:25.223Z"
-          },
-          {
-            "text": "it has 4 bedrooms",
-            "capabilityId": "cleaning",
-            "intent": "cleaning.workflow_input",
-            "entities": {
-              "temporal": {
-                "date": null,
-                "dateText": null,
-                "dateReference": null,
-                "weekday": null,
-                "time": null,
-                "startTime": null,
-                "endTime": null,
-                "durationHours": null,
-                "timeWindow": null,
-                "timeFlexible": false,
-                "invalidTime": null
-              },
-              "property": {
-                "bedrooms": 4
-              },
-              "acquisition": {
-                "requested": false,
-                "kind": null,
-                "isService": false,
-                "isProduct": false
-              },
-              "serviceSupport": {
-                "isSupportQuestion": false,
-                "category": null
-              },
-              "businessIdentity": {
-                "isBusinessIdentity": false,
-                "facet": null
-              },
-              "isPricingQuestion": false,
-              "isBookingAction": false
-            },
-            "at": "2026-09-16T08:23:43.477Z"
+            "at": "2026-09-17T06:38:00.366Z"
           }
         ],
         "entities": {
           "version": "2.0",
-          "text": "it has 4 bedrooms",
-          "normalized": "it has 4 bedrooms",
+          "text": "hello i want furniture cleaning service",
+          "normalized": "hello i want furniture cleaning service",
           "temporal": {
             "date": null,
             "dateText": null,
             "dateReference": null,
-            "weekday": "friday",
+            "weekday": null,
             "time": null,
             "startTime": null,
             "endTime": null,
@@ -10647,16 +10298,12 @@
             "timeFlexible": false,
             "invalidTime": null
           },
-          "property": {
-            "propertyType": "apartment",
-            "cleaningType": "deep",
-            "bedrooms": 4
-          },
+          "property": {},
           "fieldAmendment": null,
           "acquisition": {
-            "requested": false,
+            "requested": true,
             "kind": "service",
-            "isService": false,
+            "isService": true,
             "isProduct": false
           },
           "identity": {
@@ -10684,65 +10331,39 @@
           "wantsSameAddress": false,
           "wantsChange": false,
           "referencedCapability": null,
-          "referencedService": "deep",
-          "lastBookingCapability": "cleaning",
+          "referencedService": null,
+          "lastBookingCapability": null,
           "lastBookingTime": null,
           "lastAddress": "Villa 34, JVC Phase 2, Dubai"
         }
       },
       "capabilityState": {
         "cleaning": {
-          "step": "time",
-          "pendingBookingType": {
-            "scope": {
-              "propertyType": "apartment",
-              "preferredDateOptions": [
-                "friday"
-              ],
-              "scopeText": "hello i want a cleaning service for my apartment on friday",
-              "date": "friday",
-              "weekday": "friday"
-            }
-          },
-          "propertyType": "apartment",
-          "cleaningType": "deep",
-          "preferredDateOptions": [
-            "friday"
-          ],
-          "scopeText": "i want deep cleaning",
-          "date": "friday",
-          "weekday": "friday",
-          "serviceId": "CLN010",
-          "serviceName": "Deep Cleaning",
-          "configuredServiceName": "Laundry Wash & Iron",
-          "pricingServiceId": "laundry-wash-iron-small",
+          "scopeText": "hello i want furniture cleaning service",
+          "serviceId": "CLN003",
+          "serviceName": "Furniture Cleaning",
           "requiredPricingFields": [
-            "bedrooms"
+            "units"
           ],
-          "pricingFirst": true,
-          "preferredDate": "18/09/2026",
-          "bedrooms": 4,
-          "quotedService": {
-            "ok": true,
-            "serviceId": "laundry-wash-iron-small",
-            "serviceName": "Laundry Wash & Iron Small Bag",
-            "operationalServiceId": "CLN010",
-            "currency": "AED",
-            "subtotal": 58.5,
-            "total": 58.5,
-            "baseSubtotal": 58.5,
-            "addOnTotal": 0,
-            "addOns": [],
-            "formula": "fixed price",
-            "model": "flat"
-          },
-          "total": 58.5,
-          "currency": "AED"
+          "pricingServiceId": "furniture-sofa",
+          "pricingFirst": false,
+          "preferredDate": null,
+          "preferredTime": null,
+          "startTime": null,
+          "endTime": null,
+          "address": null,
+          "name": null,
+          "phone": null,
+          "email": null,
+          "scheduleError": null,
+          "durationHours": null,
+          "cleanerCount": null,
+          "step": "date"
         }
       },
-      "lastIntent": "cleaning_bedrooms_saved",
-      "createdAt": "2026-09-16T08:23:12.196Z",
-      "updatedAt": "2026-09-16T08:23:43.477Z"
+      "lastIntent": "cleaning_service_selected",
+      "createdAt": "2026-09-17T06:37:58.470Z",
+      "updatedAt": "2026-09-17T06:38:00.366Z"
     }
   }
 }

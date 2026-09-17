@@ -304,6 +304,44 @@
         "status": "active",
         "expiresAt": "2026-09-02T05:00:12.322Z"
       }
+    },
+    "default:multi-turn-retail-add-to-cart-checkout-1789565209921": {
+      "id": "CART-MU44X7I7-427F43",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789565209921",
+      "status": "active",
+      "items": [
+        {
+          "productId": "P004",
+          "variantId": null,
+          "sku": "WATCH-SMART",
+          "name": "Smart Watch",
+          "color": "Black",
+          "size": null,
+          "quantity": 2,
+          "unitPrice": 8000,
+          "currency": "PKR",
+          "inventory": null,
+          "variantSelectionRequired": true
+        }
+      ],
+      "checkout": {
+        "name": "Zeeshan Ahmad",
+        "phone": "03012345678",
+        "email": null,
+        "city": "Dubai",
+        "address": "Villa 34, Dubai Marina",
+        "landmark": "cash on delivery",
+        "paymentMethod": null,
+        "notes": null
+      },
+      "createdAt": "2026-09-16T13:26:52.735Z",
+      "updatedAt": "2026-09-16T13:27:02.189Z",
+      "reservation": {
+        "id": "RSV-MU44X865-E86535",
+        "status": "active",
+        "expiresAt": "2026-09-16T13:41:53.597Z"
+      }
     }
   },
   "orders": {
@@ -567,6 +605,380 @@
       ],
       "createdAt": "2026-09-16T07:48:52.763Z",
       "updatedAt": "2026-09-16T07:48:52.763Z"
+    },
+    "ORD-MU44XKWQ-68B1F3": {
+      "id": "ORD-MU44XKWQ-68B1F3",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789565223584",
+      "status": "confirmed",
+      "items": [
+        {
+          "productId": "P001",
+          "variantId": null,
+          "sku": "TSHIRT-COTTON",
+          "name": "Cotton T-Shirt",
+          "unitPrice": 1500,
+          "currency": "PKR",
+          "color": "White",
+          "size": "S",
+          "quantity": 2,
+          "subtotal": 3000,
+          "inventory": null
+        },
+        {
+          "productId": "P008",
+          "variantId": null,
+          "sku": "POLO-PIQUE",
+          "name": "Polo Shirt",
+          "unitPrice": 2200,
+          "currency": "PKR",
+          "color": "Black",
+          "size": "M",
+          "quantity": 3,
+          "subtotal": 6600,
+          "inventory": null
+        }
+      ],
+      "total": 9600,
+      "currency": "PKR",
+      "customer": {
+        "name": "Aryan Ahmad",
+        "phone": "03019267565",
+        "email": null,
+        "city": "Lahore",
+        "address": "near ali town, lahore",
+        "landmark": "",
+        "paymentMethod": "Cash on Delivery",
+        "notes": null
+      },
+      "paymentMethod": "Cash on Delivery",
+      "idempotencyKey": "order:c61907c20d607a3c3927a270e8efbbef",
+      "sourceCartId": "CART-MU44XGEU-B0C602",
+      "revision": 1,
+      "timeline": [
+        {
+          "action": "created",
+          "status": "confirmed",
+          "at": "2026-09-16T13:27:10.106Z"
+        }
+      ],
+      "createdAt": "2026-09-16T13:27:10.106Z",
+      "updatedAt": "2026-09-16T13:27:10.106Z"
+    },
+    "ORD-MU4913WN-CE1CA2": {
+      "id": "ORD-MU4913WN-CE1CA2",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789572101231",
+      "status": "confirmed",
+      "items": [
+        {
+          "productId": "P004",
+          "variantId": null,
+          "sku": "WATCH-SMART",
+          "name": "Smart Watch",
+          "unitPrice": 8000,
+          "currency": "PKR",
+          "color": "Black",
+          "size": null,
+          "quantity": 2,
+          "subtotal": 16000,
+          "inventory": null
+        }
+      ],
+      "total": 16000,
+      "currency": "PKR",
+      "customer": {
+        "name": "Zeeshan Ahmad",
+        "phone": "03012345678",
+        "email": null,
+        "city": "Dubai",
+        "address": "Villa 34, Dubai Marina",
+        "landmark": "",
+        "paymentMethod": "Cash on Delivery",
+        "notes": null
+      },
+      "paymentMethod": "Cash on Delivery",
+      "idempotencyKey": "order:6f34e2b6b21eeb4162626d0329690229",
+      "sourceCartId": "CART-MU490XSI-7C0024",
+      "revision": 1,
+      "timeline": [
+        {
+          "action": "created",
+          "status": "confirmed",
+          "at": "2026-09-16T15:21:53.159Z"
+        }
+      ],
+      "createdAt": "2026-09-16T15:21:53.159Z",
+      "updatedAt": "2026-09-16T15:21:53.159Z"
+    },
+    "ORD-MU491C1Q-3165D5": {
+      "id": "ORD-MU491C1Q-3165D5",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789572113332",
+      "status": "confirmed",
+      "items": [
+        {
+          "productId": "P001",
+          "variantId": null,
+          "sku": "TSHIRT-COTTON",
+          "name": "Cotton T-Shirt",
+          "unitPrice": 1500,
+          "currency": "PKR",
+          "color": "White",
+          "size": "S",
+          "quantity": 2,
+          "subtotal": 3000,
+          "inventory": null
+        },
+        {
+          "productId": "P008",
+          "variantId": null,
+          "sku": "POLO-PIQUE",
+          "name": "Polo Shirt",
+          "unitPrice": 2200,
+          "currency": "PKR",
+          "color": "Black",
+          "size": "M",
+          "quantity": 3,
+          "subtotal": 6600,
+          "inventory": null
+        }
+      ],
+      "total": 9600,
+      "currency": "PKR",
+      "customer": {
+        "name": "Aryan Ahmad",
+        "phone": "03019267565",
+        "email": null,
+        "city": "Lahore",
+        "address": "near ali town, lahore",
+        "landmark": "",
+        "paymentMethod": "Cash on Delivery",
+        "notes": null
+      },
+      "paymentMethod": "Cash on Delivery",
+      "idempotencyKey": "order:91a9354a4a694f4005127ea6141879bc",
+      "sourceCartId": "CART-MU49152G-E24C4C",
+      "revision": 1,
+      "timeline": [
+        {
+          "action": "created",
+          "status": "confirmed",
+          "at": "2026-09-16T15:22:03.710Z"
+        }
+      ],
+      "createdAt": "2026-09-16T15:22:03.710Z",
+      "updatedAt": "2026-09-16T15:22:03.710Z"
+    },
+    "ORD-MU556NC3-9DE78B": {
+      "id": "ORD-MU556NC3-9DE78B",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789626105214",
+      "status": "confirmed",
+      "items": [
+        {
+          "productId": "P004",
+          "variantId": null,
+          "sku": "WATCH-SMART",
+          "name": "Smart Watch",
+          "unitPrice": 8000,
+          "currency": "PKR",
+          "color": "Black",
+          "size": null,
+          "quantity": 2,
+          "subtotal": 16000,
+          "inventory": null
+        }
+      ],
+      "total": 16000,
+      "currency": "PKR",
+      "customer": {
+        "name": "Zeeshan Ahmad",
+        "phone": "03012345678",
+        "email": null,
+        "city": "Dubai",
+        "address": "Villa 34, Dubai Marina",
+        "landmark": "",
+        "paymentMethod": "Cash on Delivery",
+        "notes": null
+      },
+      "paymentMethod": "Cash on Delivery",
+      "idempotencyKey": "order:8ca5c9c6b4953c3532ada0aae2f6b110",
+      "sourceCartId": "CART-MU556FZS-13E286",
+      "revision": 1,
+      "timeline": [
+        {
+          "action": "created",
+          "status": "confirmed",
+          "at": "2026-09-17T06:21:59.331Z"
+        }
+      ],
+      "createdAt": "2026-09-17T06:21:59.331Z",
+      "updatedAt": "2026-09-17T06:21:59.331Z"
+    },
+    "ORD-MU556UKR-A6FF3C": {
+      "id": "ORD-MU556UKR-A6FF3C",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789626119483",
+      "status": "confirmed",
+      "items": [
+        {
+          "productId": "P001",
+          "variantId": null,
+          "sku": "TSHIRT-COTTON",
+          "name": "Cotton T-Shirt",
+          "unitPrice": 1500,
+          "currency": "PKR",
+          "color": "White",
+          "size": "S",
+          "quantity": 2,
+          "subtotal": 3000,
+          "inventory": null
+        },
+        {
+          "productId": "P008",
+          "variantId": null,
+          "sku": "POLO-PIQUE",
+          "name": "Polo Shirt",
+          "unitPrice": 2200,
+          "currency": "PKR",
+          "color": "Black",
+          "size": "M",
+          "quantity": 3,
+          "subtotal": 6600,
+          "inventory": null
+        }
+      ],
+      "total": 9600,
+      "currency": "PKR",
+      "customer": {
+        "name": "Aryan Ahmad",
+        "phone": "03019267565",
+        "email": null,
+        "city": "Lahore",
+        "address": "near ali town, lahore",
+        "landmark": "",
+        "paymentMethod": "Cash on Delivery",
+        "notes": null
+      },
+      "paymentMethod": "Cash on Delivery",
+      "idempotencyKey": "order:7935b0178fc53a62cf68da369e1c7df8",
+      "sourceCartId": "CART-MU556OO8-E59EC9",
+      "revision": 1,
+      "timeline": [
+        {
+          "action": "created",
+          "status": "confirmed",
+          "at": "2026-09-17T06:22:08.715Z"
+        }
+      ],
+      "createdAt": "2026-09-17T06:22:08.715Z",
+      "updatedAt": "2026-09-17T06:22:08.715Z"
+    },
+    "ORD-MU55NY39-3E2921": {
+      "id": "ORD-MU55NY39-3E2921",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789626915492",
+      "status": "confirmed",
+      "items": [
+        {
+          "productId": "P004",
+          "variantId": null,
+          "sku": "WATCH-SMART",
+          "name": "Smart Watch",
+          "unitPrice": 8000,
+          "currency": "PKR",
+          "color": "Black",
+          "size": null,
+          "quantity": 2,
+          "subtotal": 16000,
+          "inventory": null
+        }
+      ],
+      "total": 16000,
+      "currency": "PKR",
+      "customer": {
+        "name": "Zeeshan Ahmad",
+        "phone": "03012345678",
+        "email": null,
+        "city": "Dubai",
+        "address": "Villa 34, Dubai Marina",
+        "landmark": "",
+        "paymentMethod": "Cash on Delivery",
+        "notes": null
+      },
+      "paymentMethod": "Cash on Delivery",
+      "idempotencyKey": "order:9f1d0dd648401c764a99915c7d4fe436",
+      "sourceCartId": "CART-MU55NRYE-06BAC6",
+      "revision": 1,
+      "timeline": [
+        {
+          "action": "created",
+          "status": "confirmed",
+          "at": "2026-09-17T06:35:26.421Z"
+        }
+      ],
+      "createdAt": "2026-09-17T06:35:26.421Z",
+      "updatedAt": "2026-09-17T06:35:26.421Z"
+    },
+    "ORD-MU55O5WE-BC8BB1": {
+      "id": "ORD-MU55O5WE-BC8BB1",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789626926543",
+      "status": "confirmed",
+      "items": [
+        {
+          "productId": "P001",
+          "variantId": null,
+          "sku": "TSHIRT-COTTON",
+          "name": "Cotton T-Shirt",
+          "unitPrice": 1500,
+          "currency": "PKR",
+          "color": "White",
+          "size": "S",
+          "quantity": 2,
+          "subtotal": 3000,
+          "inventory": null
+        },
+        {
+          "productId": "P008",
+          "variantId": null,
+          "sku": "POLO-PIQUE",
+          "name": "Polo Shirt",
+          "unitPrice": 2200,
+          "currency": "PKR",
+          "color": "Black",
+          "size": "M",
+          "quantity": 3,
+          "subtotal": 6600,
+          "inventory": null
+        }
+      ],
+      "total": 9600,
+      "currency": "PKR",
+      "customer": {
+        "name": "Aryan Ahmad",
+        "phone": "03019267565",
+        "email": null,
+        "city": "Lahore",
+        "address": "near ali town, lahore",
+        "landmark": "",
+        "paymentMethod": "Cash on Delivery",
+        "notes": null
+      },
+      "paymentMethod": "Cash on Delivery",
+      "idempotencyKey": "order:dd1220f74bd04783e9cfa09288dd20d2",
+      "sourceCartId": "CART-MU55NYPP-254105",
+      "revision": 1,
+      "timeline": [
+        {
+          "action": "created",
+          "status": "confirmed",
+          "at": "2026-09-17T06:35:36.542Z"
+        }
+      ],
+      "createdAt": "2026-09-17T06:35:36.542Z",
+      "updatedAt": "2026-09-17T06:35:36.542Z"
     }
   },
   "orderKeys": {
@@ -574,6 +986,13 @@
     "default:order:edd02326b7f0d5fb39281fec094684fc": "ORD-MT8A8I7D-58C791",
     "default:order:c7e891ba1640768285b120267e450aec": "ORD-MTDS17R4-0AD2B2",
     "default:order:117d3fa7a78204e256052d482ab02953": "ORD-MTGS16QC-DF3F48",
-    "default:order:b21bb717e24ab746f87669407cf3ac19": "ORD-MU3SUJDN-A80A29"
+    "default:order:b21bb717e24ab746f87669407cf3ac19": "ORD-MU3SUJDN-A80A29",
+    "default:order:c61907c20d607a3c3927a270e8efbbef": "ORD-MU44XKWQ-68B1F3",
+    "default:order:6f34e2b6b21eeb4162626d0329690229": "ORD-MU4913WN-CE1CA2",
+    "default:order:91a9354a4a694f4005127ea6141879bc": "ORD-MU491C1Q-3165D5",
+    "default:order:8ca5c9c6b4953c3532ada0aae2f6b110": "ORD-MU556NC3-9DE78B",
+    "default:order:7935b0178fc53a62cf68da369e1c7df8": "ORD-MU556UKR-A6FF3C",
+    "default:order:9f1d0dd648401c764a99915c7d4fe436": "ORD-MU55NY39-3E2921",
+    "default:order:dd1220f74bd04783e9cfa09288dd20d2": "ORD-MU55O5WE-BC8BB1"
   }
 }

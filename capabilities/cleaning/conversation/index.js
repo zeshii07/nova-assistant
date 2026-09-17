@@ -4,6 +4,11 @@ const { TemporalSemanticExtractor, parseClock } = require('../../../packages/con
 const { extractQueryFacets } = require('../../../packages/conversation-intelligence/src/queryFacetExtractor');
 const { extractFieldAmendment } = require('../../../packages/conversation-intelligence/src/fieldAmendmentExtractor');
 const { hasAcquisitionCue } = require('../../../packages/conversation-intelligence/src/acquisitionIntent');
+// v22.4: Import ServiceResolver for attribute-based service lookup
+// This replaces ALL hardcoded CLN IDs with dynamic attribute matching.
+// The control plane is now the single source of truth — code never
+// assumes which ID maps to which service.
+const { findServiceByType, ServiceResolver } = require('../src');
 const temporalExtractor=new TemporalSemanticExtractor();
 class CleaningConversationAdapter {
   constructor(){this.capabilityId='cleaning';this.priority=85;}
@@ -125,7 +130,11 @@ class CleaningConversationAdapter {
       }
     }
     if(pendingPriceClarification?.selectedCleaningType==='standard'&&timeEntities.durationHours&&timeEntities.cleanerCount){
-      const propertyServiceId=pendingPriceClarification.propertyType==='villa'?'CLN009':'CLN008';
+      // v22.4: Look up standard service by name pattern instead of hardcoded ID
+      const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
+      const allServices=await scoped?.listServices?.()||[];
+      const stdService=findServiceByType(allServices,'standard',pendingPriceClarification.propertyType);
+      const propertyServiceId=stdService?.id||(pendingPriceClarification.propertyType==='villa'?'CLN009':'CLN008');
       entities={...pendingPriceClarification.scope,...timeEntities,propertyServiceId,otherServiceItems:pendingPriceClarification.otherServiceItems||[],pricingRequested:true};
       candidates.push({intent:'cleaning.standard_multi_service_quote',confidence:1,priority:190,entities,reason:'standard_cleaning_workforce_price_complete'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'pricing',value:'standard_cleaning_total',score:1}]};
@@ -134,11 +143,13 @@ class CleaningConversationAdapter {
       const deep=resolvedCleaningType==='deep';
       const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
       const allServices=await scoped?.listServices?.()||[];
-      const chosenId=deep
+      // v22.4: Use findServiceByType instead of hardcoded IDs
+      const chosen=findServiceByType(allServices,deep?'deep':'standard',pendingPriceClarification.propertyType);
+      const chosenId=chosen?.id||(deep
         ? pendingPriceClarification.propertyType==='villa'?'CLN011':'CLN010'
-        : pendingPriceClarification.propertyType==='villa'?'CLN009':'CLN008';
-      const chosen=allServices.find(service=>service.id===chosenId);
-      const serviceItems=[...(chosen?[{serviceId:chosen.id,serviceName:chosen.name,score:110}]:[]),...(pendingPriceClarification.otherServiceItems||[])];
+        : pendingPriceClarification.propertyType==='villa'?'CLN009':'CLN008');
+      const chosenService=chosen||allServices.find(service=>service.id===chosenId);
+      const serviceItems=[...(chosenService?[{serviceId:chosenService.id,serviceName:chosenService.name,score:110}]:[]),...(pendingPriceClarification.otherServiceItems||[])];
       entities={...pendingPriceClarification.scope,...timeEntities,serviceItems,selectedCleaningType:deep?'deep':'standard',pricingRequested:true};
       const intent=deep
         ? 'cleaning.multi_service_quote_request'
@@ -496,7 +507,18 @@ class CleaningConversationAdapter {
         const genericRecurrenceOnly=/\b(recurring|monthly|weekly|every (?:week|month))\b/.test(normalizedText)
           && !/\b(maid|cleaner|housekeeping|home|house|apartment|villa|office|sofa|carpet|deep|move[ -]?(?:in|out))\b/.test(normalizedText);
         if(found?.service && !found.service.hidden && (found.score||0)>20 && !genericRecurrenceOnly){entities.serviceId=found.service.id;entities.serviceName=found.service.name;}
-        else if(genericCleaner){entities.serviceId='CLN-HOURLY';entities.serviceName='Hourly Cleaner Hire';entities.cleanerCount=entities.cleanerCount||1;}
+        else if(genericCleaner){
+          // v22.4: Look up the hourly cleaner service by attribute (priceType)
+          // with hardcoded 'CLN-HOURLY' as fallback for file-based config.
+          const _hourlyAllServices = await scoped?.listServices?.() || [];
+          const _hourlyService = _hourlyAllServices.find(s=>s.priceType==='hourly' && s.pricingServiceId==='hourly-cleaner')
+            || _hourlyAllServices.find(s=>s.id==='CLN-HOURLY');
+          entities.serviceId=_hourlyService?.id||'CLN-HOURLY';
+          entities.serviceName=_hourlyService?.name||'Hourly Cleaner Hire';
+          entities.priceType='hourly';
+          entities.pricingServiceId='hourly-cleaner';
+          entities.cleanerCount=entities.cleanerCount||1;
+        }
         candidates.push({intent:quote?'cleaning.recurring_quote':'cleaning.recurring_request',confidence:1,entities,reason:quote?'recurring_cleaning_quote':'recurring_cleaning_booking'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'constraint',value:'recurrence',score:1}]};
       }
@@ -594,9 +616,17 @@ class CleaningConversationAdapter {
       // A generic "deep cleaning" price interruption must not silently widen
       // an active Deep Apartment/Villa request back to Deep Home Cleaning.
       // Only an explicit property change is allowed to replace that scope.
+      // v22.4: Use attribute-based check (ServiceResolver) for the deep-scope
+      // detection, with hardcoded CLN IDs as fallback for file-based config.
       const activeService=allServices.find(service=>service.id===previous.serviceId)||null;
       const explicitPropertyChange=/\b(?:villa|vila|house|apartment|flat|studio)\b/.test(normalizedText);
-      if(explicitService?.id==='CLN002'&&['CLN010','CLN011'].includes(activeService?.id)&&!explicitPropertyChange){
+      const _convResolver=new ServiceResolver(allServices);
+      const _explicitIsDeepHome = explicitService && (
+        explicitService.id==='CLN002' ||
+        (_convResolver.isDeepScopeService(explicitService) && /deep/i.test(explicitService.name||'') && /home/i.test(explicitService.name||'') && !/(apartment|villa)/i.test(explicitService.name||''))
+      );
+      const _activeIsDeepScope = activeService && (_convResolver.isDeepScopeService(activeService) || ['CLN010','CLN011'].includes(activeService.id));
+      if(_explicitIsDeepHome && _activeIsDeepScope && !explicitPropertyChange){
         explicitService=activeService;
       }
       const inheritedPriceService=!explicitService&&previous.priceEnquiry?.serviceId
@@ -740,7 +770,8 @@ class CleaningConversationAdapter {
       }
       let m=normalizedText.match(/\b(\d+)\s*(?:bedrooms?|bed|bhk|bdrooms?|bd|bdrm)\b/);if(m)timeEntities.bedrooms=Number(m[1]);
       if(/\b(villa|vila|vill)\b/.test(normalizedText)||closestKeywordToken(normalizedText,['villa'],{maxDistance:2,minLength:4}))timeEntities.propertyType='villa';else if(/\b(apartment|flat|studio)\b/.test(normalizedText)||closestKeywordToken(normalizedText,['apartment'],{maxDistance:2,minLength:6}))timeEntities.propertyType='apartment';
-      const propertyCleaningTypeSpecified=Boolean(resolveCleaningType(normalizedText));
+      const propertyCleaningType=resolveCleaningType(normalizedText);
+      const propertyCleaningTypeSpecified=Boolean(propertyCleaningType);
       const namesOnlyPropertyCleaning=!/\b(?:office|sofa|couch|carpet|rug|mattress|chair|curtain|laundry|ac|duct|pest|disinfection|kitchen|bathroom|window|balcony|floor|move[ -]?(?:in|out)|post[ -]?(?:renovation|construction))\b/.test(normalizedText);
       const discussedSpecificService=Boolean(state.capabilityState?.availability?.lastDiscussedServiceId);
       // v20.0: Multi-item furniture detection (runs BEFORE the standalone quote
@@ -780,9 +811,23 @@ class CleaningConversationAdapter {
       // Route to quote-only so Nova shows the estimate and asks whether to
       // book. This must fire BEFORE the booking_type_clarification block.
       if(pricingRequested && !structuredRequest && !explicitBookingAction && (timeEntities.propertyType||timeEntities.bedrooms||propertyCleaningTypeSpecified)){
-        const explicitServiceForQuote=explicitService?.service&&isGenericPropertyCleaningService(explicitService.service)&&propertyCleaningTypeSpecified
-          ? (await scopedService?.listServices?.()||[]).find(s=>propertyCleaningTypeSpecified==='deep'?(timeEntities.propertyType==='apartment'?'CLN010':timeEntities.propertyType==='villa'?'CLN011':'CLN002'):(timeEntities.propertyType==='apartment'?'CLN008':timeEntities.propertyType==='villa'?'CLN009':'CLN001'))
-          : explicitService?.service;
+        // v22.4: Use findServiceByType for attribute-based lookup, with
+        // hardcoded CLN IDs as fallback for file-based config backward compat.
+        let explicitServiceForQuote;
+        if(explicitService?.service && isGenericPropertyCleaningService(explicitService.service) && propertyCleaningTypeSpecified){
+          const _cleaningType = propertyCleaningType || 'standard';
+          const _allServicesForQuote = await scopedService?.listServices?.() || [];
+          explicitServiceForQuote = findServiceByType(_allServicesForQuote, _cleaningType, timeEntities.propertyType);
+          if(!explicitServiceForQuote){
+            // Fallback: hardcoded IDs
+            const _fallbackId = _cleaningType==='deep'
+              ? (timeEntities.propertyType==='apartment'?'CLN010':timeEntities.propertyType==='villa'?'CLN011':'CLN002')
+              : (timeEntities.propertyType==='apartment'?'CLN008':timeEntities.propertyType==='villa'?'CLN009':'CLN001');
+            explicitServiceForQuote = _allServicesForQuote.find(s=>s.id===_fallbackId);
+          }
+        } else {
+          explicitServiceForQuote = explicitService?.service;
+        }
         entities={...timeEntities,serviceId:explicitServiceForQuote?.id||null,serviceName:explicitServiceForQuote?.name||null,pricingRequested:true,quoteOnly:true,text:normalizedText};
         candidates.push({intent:'cleaning.standalone_quote',confidence:1,priority:175,entities,reason:'explicit_structured_price_question'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'pricing',value:'structured_service_quote',score:1}]};
@@ -999,7 +1044,10 @@ class CleaningConversationAdapter {
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaner_count',score:1}]};
       }
     }
-    if(step && previous.serviceId==='CLN-HOURLY' && explicitCleanerCount && timeEntities.cleanerCount && !timeEntities.durationHours && /\b(actually|instead|only|just|i want|i need|mujhy|mujhe|chahiye|chahiyy|cleaners?|maids?)\b/.test(normalizedText)){
+    // v22.4: Use attribute-based check (priceType/pricingServiceId) with
+    // hardcoded 'CLN-HOURLY' as fallback for file-based config backward compat.
+    const _prevIsHourly = previous.serviceId==='CLN-HOURLY' || previous.priceType==='hourly' || previous.pricingServiceId==='hourly-cleaner';
+    if(step && _prevIsHourly && explicitCleanerCount && timeEntities.cleanerCount && !timeEntities.durationHours && /\b(actually|instead|only|just|i want|i need|mujhy|mujhe|chahiye|chahiyy|cleaners?|maids?)\b/.test(normalizedText)){
       entities={pendingField:step,cleanerCount:timeEntities.cleanerCount,preserveWorkflow:true};
       candidates.push({intent:'cleaning.cleaner_count_update',confidence:1,entities,reason:'active_hourly_cleaner_count_update'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaner_count_update',score:1}]};
@@ -1232,10 +1280,12 @@ async function detectMultiItemFurniture(text, scopedService) {
   // Define furniture item patterns: (regex, catalogServiceName)
   // Each pattern captures the item head (sofa/mattress/carpet/etc.) and
   // optionally a quantity and variant.
+  // v22.5: The serviceId values below are HINTS used for deduplication (so
+  // "sofa" and "couch" don't create two entries for the same service). The
+  // actual service lookup in the capability uses findService() which respects
+  // the control plane. So even if CLN003 is remapped, findService() resolves
+  // the correct service by name/alias match.
   const FURNITURE_PATTERNS = [
-    // v20.2: Added "seates?" typo tolerance (missing final "r" of "seater").
-    // Also added "seate" for singular typo. Now matches: seater, seaters,
-    // seats, seat, setas, seta, seates, seate, sitr, sitar.
     { head: 'sofa', serviceId: 'CLN003', variantRe: /(\d+)\s*(?:seaters?|seats?|setas?|seates?|sitr|sitar)\b/i, variantLabel: (m) => `${m[1]}-seater` },
     { head: 'couch', serviceId: 'CLN003', variantRe: /(\d+)\s*(?:seaters?|seats?|setas?|seates?)\b/i, variantLabel: (m) => `${m[1]}-seater` },
     { head: 'carpet', serviceId: 'CLN004', variantRe: /(\d+)\s*(?:metres?|meters?|m2|sqm|mtrs?)\b/i, variantLabel: (m) => `${m[1]} metre` },
@@ -1369,8 +1419,22 @@ function extractWeekdayOptions(value){
 }
 
 function isGenericPropertyCleaningService(service){
-  return ['CLN008','CLN009'].includes(service?.id)
-    || (/\b(?:apartment|villa|home) cleaning\b/i.test(service?.name||'')&&!/^Deep\b/i.test(service?.name||''));
+  // v22.4: Use priceType instead of hardcoded IDs.
+  // A "generic property cleaning service" is an hourly cleaning service
+  // (standard) that applies to apartments/villas/homes — NOT deep, NOT
+  // furniture, NOT laundry.
+  if(!service) return false;
+  const name = String(service.name || '').toLowerCase();
+  const isHourly = service.priceType === 'hourly' || service.pricingServiceId === 'hourly-cleaner';
+  const isProperty = /\b(?:apartment|villa|home|house|standard)\b/i.test(service.name || '') ||
+                     /\b(?:apartment|villa|home|house)\b/i.test((service.aliases || []).join(' '));
+  const isNotDeep = !name.includes('deep');
+  const isNotLaundry = !name.includes('laundry');
+  const isNotFurniture = !name.includes('furniture') && !name.includes('sofa') && !name.includes('carpet');
+  // Check priceType first (attribute-based), then fallback to ID (backward compat)
+  return (isHourly && isNotDeep && isNotLaundry && isNotFurniture) ||
+         ['CLN008','CLN009'].includes(service?.id) ||
+         (/\b(?:apartment|villa|home) cleaning\b/i.test(service?.name||'')&&!/^Deep\b/i.test(service?.name||''));
 }
 function resolveCleaningType(value){
   const text=normalizeText(value);

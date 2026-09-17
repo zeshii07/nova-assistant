@@ -105,5 +105,124 @@
     "confidence": 1,
     "responseIntent": "COMMERCE_ORDER_CREATED",
     "timestamp": "2026-09-16T07:48:52.812Z"
+  },
+  {
+    "id": "default:default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789565223584:1789565230158:luuwol",
+    "tenantId": "default",
+    "conversationId": "default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789565223584",
+    "customerId": "multi-turn-retail-multi-item-checkout-1789565223584",
+    "messageText": "Lahore",
+    "selectedIntent": "commerce.checkout_input",
+    "selectedCapabilityId": "commerce",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9903
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "COMMERCE_ORDER_CREATED",
+    "timestamp": "2026-09-16T13:27:10.158Z"
+  },
+  {
+    "id": "default:default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789572101231:1789572113235:sxyonw",
+    "tenantId": "default",
+    "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789572101231",
+    "customerId": "multi-turn-retail-add-to-cart-checkout-1789572101231",
+    "messageText": "Zeeshan Ahmad",
+    "selectedIntent": "commerce.checkout_input",
+    "selectedCapabilityId": "commerce",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9903
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "COMMERCE_ORDER_CREATED",
+    "timestamp": "2026-09-16T15:21:53.235Z"
+  },
+  {
+    "id": "default:default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789572113332:1789572123785:jtqm2i",
+    "tenantId": "default",
+    "conversationId": "default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789572113332",
+    "customerId": "multi-turn-retail-multi-item-checkout-1789572113332",
+    "messageText": "Lahore",
+    "selectedIntent": "commerce.checkout_input",
+    "selectedCapabilityId": "commerce",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9903
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "COMMERCE_ORDER_CREATED",
+    "timestamp": "2026-09-16T15:22:03.785Z"
+  },
+  {
+    "id": "default:default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789626105214:1789626119427:sn30it",
+    "tenantId": "default",
+    "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789626105214",
+    "customerId": "multi-turn-retail-add-to-cart-checkout-1789626105214",
+    "messageText": "Zeeshan Ahmad",
+    "selectedIntent": "commerce.checkout_input",
+    "selectedCapabilityId": "commerce",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9903
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "COMMERCE_ORDER_CREATED",
+    "timestamp": "2026-09-17T06:21:59.427Z"
+  },
+  {
+    "id": "default:default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789626119483:1789626128849:57bero",
+    "tenantId": "default",
+    "conversationId": "default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789626119483",
+    "customerId": "multi-turn-retail-multi-item-checkout-1789626119483",
+    "messageText": "Lahore",
+    "selectedIntent": "commerce.checkout_input",
+    "selectedCapabilityId": "commerce",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9903
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "COMMERCE_ORDER_CREATED",
+    "timestamp": "2026-09-17T06:22:08.849Z"
+  },
+  {
+    "id": "default:default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789626915492:1789626926517:mi0fdi",
+    "tenantId": "default",
+    "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789626915492",
+    "customerId": "multi-turn-retail-add-to-cart-checkout-1789626915492",
+    "messageText": "Zeeshan Ahmad",
+    "selectedIntent": "commerce.checkout_input",
+    "selectedCapabilityId": "commerce",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9903
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "COMMERCE_ORDER_CREATED",
+    "timestamp": "2026-09-17T06:35:26.518Z"
+  },
+  {
+    "id": "default:default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789626926543:1789626936629:h55mun",
+    "tenantId": "default",
+    "conversationId": "default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789626926543",
+    "customerId": "multi-turn-retail-multi-item-checkout-1789626926543",
+    "messageText": "Lahore",
+    "selectedIntent": "commerce.checkout_input",
+    "selectedCapabilityId": "commerce",
+    "mlPrediction": {
+      "intentId": "conversation.confirm",
+      "confidence": 0.9903
+    },
+    "outcome": "positive",
+    "confidence": 1,
+    "responseIntent": "COMMERCE_ORDER_CREATED",
+    "timestamp": "2026-09-17T06:35:36.629Z"
   }
 ]
