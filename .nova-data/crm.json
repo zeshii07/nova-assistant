@@ -1982,6 +1982,1330 @@
       "customFields": {},
       "createdAt": "2026-09-17T06:35:38.384Z",
       "updatedAt": "2026-09-17T06:35:38.384Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-success-1789640511175": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-success-1789640511175",
+      "name": "James Watson",
+      "phone": "03012345678",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Villa 34, JVC Phase 2, Dubai"
+        }
+      },
+      "createdAt": "2026-09-17T10:21:51.177Z",
+      "updatedAt": "2026-09-17T10:21:51.177Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-apartment-success-1789640519134": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789640519134",
+      "name": "Sarah Ahmed",
+      "phone": "0561234567",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Apt 502, Marina Heights, Dubai Marina"
+        }
+      },
+      "createdAt": "2026-09-17T10:21:59.134Z",
+      "updatedAt": "2026-09-17T10:21:59.134Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-standard-apartment-success-1789640524094": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-standard-apartment-success-1789640524094",
+      "name": "Ali Khan",
+      "phone": "0509876543",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Building 15, Apartment 302, Al Barsha, Dubai"
+        }
+      },
+      "createdAt": "2026-09-17T10:22:04.094Z",
+      "updatedAt": "2026-09-17T10:22:04.094Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-sofa-cleaning-success-1789640529155": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-sofa-cleaning-success-1789640529155",
+      "name": null,
+      "phone": "0523456789",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:22:09.156Z",
+      "updatedAt": "2026-09-17T10:22:09.156Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-multi-furniture-quote-1789640534713": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789640534713",
+      "name": "Mohammed Rashid",
+      "phone": "0551234567",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "House 15, JVC, Dubai"
+        }
+      },
+      "createdAt": "2026-09-17T10:22:14.713Z",
+      "updatedAt": "2026-09-17T10:22:14.713Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-cancel-1789640539204": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-cancel-1789640539204",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:22:19.204Z",
+      "updatedAt": "2026-09-17T10:22:19.204Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-availability-check-1789640540961": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-availability-check-1789640540961",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:22:20.961Z",
+      "updatedAt": "2026-09-17T10:22:20.961Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-pricing-question-1789640541517": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-pricing-question-1789640541517",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:22:21.517Z",
+      "updatedAt": "2026-09-17T10:22:21.517Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-roman-urdu-1789640542208": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-roman-urdu-1789640542208",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:22:22.208Z",
+      "updatedAt": "2026-09-17T10:22:22.208Z"
+    },
+    "default:multi-turn-retail-product-browse-1789640544633": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-browse-1789640544633",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:22:24.634Z",
+      "updatedAt": "2026-09-17T10:22:24.634Z"
+    },
+    "default:multi-turn-retail-add-to-cart-checkout-1789640545554": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789640545554",
+      "name": "Zeeshan Ahmad",
+      "phone": "03012345678",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastDelivery": {
+          "city": "Dubai",
+          "address": "Villa 34, Dubai Marina",
+          "landmark": null,
+          "paymentMethod": "Cash on Delivery"
+        },
+        "lastOrderId": "ORD-MU5DS2PA-5C6D2F"
+      },
+      "createdAt": "2026-09-17T10:22:25.554Z",
+      "updatedAt": "2026-09-17T10:22:25.554Z"
+    },
+    "default:multi-turn-retail-multi-item-checkout-1789640556037": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789640556037",
+      "name": "Aryan Ahmad",
+      "phone": "03019267565",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastDelivery": {
+          "city": "Lahore",
+          "address": "near ali town, lahore",
+          "landmark": null,
+          "paymentMethod": "Cash on Delivery"
+        },
+        "lastOrderId": "ORD-MU5DS8UH-1D9978"
+      },
+      "createdAt": "2026-09-17T10:22:36.037Z",
+      "updatedAt": "2026-09-17T10:22:36.037Z"
+    },
+    "default:multi-turn-retail-product-search-plural-1789640563988": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-search-plural-1789640563988",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:22:43.988Z",
+      "updatedAt": "2026-09-17T10:22:43.988Z"
+    },
+    "default:multi-turn-retail-shirts-browse-1789640564970": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-shirts-browse-1789640564970",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:22:44.971Z",
+      "updatedAt": "2026-09-17T10:22:44.971Z"
+    },
+    "cleaning-demo:multi-turn-multi-intent-booking-and-hours-1789640566426": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-multi-intent-booking-and-hours-1789640566426",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:22:46.427Z",
+      "updatedAt": "2026-09-17T10:22:46.427Z"
+    },
+    "cleaning-demo:multi-turn-multi-intent-pricing-and-availability-1789640569163": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-multi-intent-pricing-and-availability-1789640569163",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:22:49.164Z",
+      "updatedAt": "2026-09-17T10:22:49.164Z"
+    },
+    "cleaning-demo:multi-turn-multi-intent-cleaning-and-service-list-1789640571292": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-multi-intent-cleaning-and-service-list-1789640571292",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:22:51.293Z",
+      "updatedAt": "2026-09-17T10:22:51.293Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-success-1789641814081": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-success-1789641814081",
+      "name": "Ahmed Al Rashid",
+      "phone": "03012345678",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Villa 34, JVC Phase 2, Dubai"
+        }
+      },
+      "createdAt": "2026-09-17T10:43:34.085Z",
+      "updatedAt": "2026-09-17T10:43:34.085Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-apartment-success-1789641827756": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789641827756",
+      "name": "Sarah Ahmed",
+      "phone": "0561234567",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "Apt 502, Marina Heights, Dubai Marina"
+        }
+      },
+      "createdAt": "2026-09-17T10:43:47.757Z",
+      "updatedAt": "2026-09-17T10:43:47.757Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-standard-apartment-success-1789641835471": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-standard-apartment-success-1789641835471",
+      "name": null,
+      "phone": "0509876543",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:43:55.471Z",
+      "updatedAt": "2026-09-17T10:43:55.471Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-sofa-cleaning-success-1789641846281": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-sofa-cleaning-success-1789641846281",
+      "name": null,
+      "phone": "0523456789",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:44:06.282Z",
+      "updatedAt": "2026-09-17T10:44:06.282Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-multi-furniture-quote-1789641853314": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789641853314",
+      "name": "Mohammed Rashid",
+      "phone": "0551234567",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "House 15, JVC, Dubai"
+        }
+      },
+      "createdAt": "2026-09-17T10:44:13.315Z",
+      "updatedAt": "2026-09-17T10:44:13.315Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-cancel-1789641860676": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-cancel-1789641860676",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:44:20.677Z",
+      "updatedAt": "2026-09-17T10:44:20.677Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-availability-check-1789641863455": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-availability-check-1789641863455",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:44:23.455Z",
+      "updatedAt": "2026-09-17T10:44:23.455Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-pricing-question-1789641864310": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-pricing-question-1789641864310",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:44:24.310Z",
+      "updatedAt": "2026-09-17T10:44:24.310Z"
+    },
+    "cleaning-demo:multi-turn-cleaning-deep-villa-roman-urdu-1789641865376": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-roman-urdu-1789641865376",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:44:25.379Z",
+      "updatedAt": "2026-09-17T10:44:25.379Z"
+    },
+    "default:multi-turn-retail-product-browse-1789641869653": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-browse-1789641869653",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:44:29.653Z",
+      "updatedAt": "2026-09-17T10:44:29.653Z"
+    },
+    "default:multi-turn-retail-add-to-cart-checkout-1789641871102": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789641871102",
+      "name": "Zeeshan Ahmad",
+      "phone": "03012345678",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastDelivery": {
+          "city": "Dubai",
+          "address": "Villa 34, Dubai Marina",
+          "landmark": null,
+          "paymentMethod": "Cash on Delivery"
+        },
+        "lastOrderId": "ORD-MU5EKL1Y-4C3FD3"
+      },
+      "createdAt": "2026-09-17T10:44:31.102Z",
+      "updatedAt": "2026-09-17T10:44:31.102Z"
+    },
+    "default:multi-turn-retail-multi-item-checkout-1789641886233": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789641886233",
+      "name": "Aryan Ahmad",
+      "phone": "03019267565",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastDelivery": {
+          "city": "Lahore",
+          "address": "near ali town, lahore",
+          "landmark": null,
+          "paymentMethod": "Cash on Delivery"
+        },
+        "lastOrderId": "ORD-MU5EKSSA-C79492"
+      },
+      "createdAt": "2026-09-17T10:44:46.233Z",
+      "updatedAt": "2026-09-17T10:44:46.233Z"
+    },
+    "default:multi-turn-retail-product-search-plural-1789641896277": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-search-plural-1789641896277",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:44:56.278Z",
+      "updatedAt": "2026-09-17T10:44:56.278Z"
+    },
+    "default:multi-turn-retail-shirts-browse-1789641898037": {
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-shirts-browse-1789641898037",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:44:58.038Z",
+      "updatedAt": "2026-09-17T10:44:58.038Z"
+    },
+    "cleaning-demo:multi-turn-multi-intent-booking-and-hours-1789641899942": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-multi-intent-booking-and-hours-1789641899942",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:44:59.942Z",
+      "updatedAt": "2026-09-17T10:44:59.942Z"
+    },
+    "cleaning-demo:multi-turn-multi-intent-pricing-and-availability-1789641903831": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-multi-intent-pricing-and-availability-1789641903831",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:45:03.832Z",
+      "updatedAt": "2026-09-17T10:45:03.832Z"
+    },
+    "cleaning-demo:multi-turn-multi-intent-cleaning-and-service-list-1789641906935": {
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-multi-intent-cleaning-and-service-list-1789641906935",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "multi-turn-test",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-09-17T10:45:06.938Z",
+      "updatedAt": "2026-09-17T10:45:06.938Z"
+    },
+    "cleaning-demo:dataset-1791475387044-0": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475387044-0",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:07.047Z",
+      "updatedAt": "2026-10-08T16:03:07.047Z"
+    },
+    "cleaning-demo:dataset-1791475388649-1": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475388649-1",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:08.650Z",
+      "updatedAt": "2026-10-08T16:03:08.650Z"
+    },
+    "cleaning-demo:dataset-1791475389383-2": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475389383-2",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:09.383Z",
+      "updatedAt": "2026-10-08T16:03:09.383Z"
+    },
+    "cleaning-demo:dataset-1791475389970-3": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475389970-3",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:09.971Z",
+      "updatedAt": "2026-10-08T16:03:09.971Z"
+    },
+    "cleaning-demo:dataset-1791475390546-4": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475390546-4",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:10.547Z",
+      "updatedAt": "2026-10-08T16:03:10.547Z"
+    },
+    "cleaning-demo:dataset-1791475391165-5": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475391165-5",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:11.166Z",
+      "updatedAt": "2026-10-08T16:03:11.166Z"
+    },
+    "cleaning-demo:dataset-1791475391919-6": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475391919-6",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:11.920Z",
+      "updatedAt": "2026-10-08T16:03:11.920Z"
+    },
+    "cleaning-demo:dataset-1791475392616-7": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475392616-7",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:12.616Z",
+      "updatedAt": "2026-10-08T16:03:12.616Z"
+    },
+    "cleaning-demo:dataset-1791475393206-8": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475393206-8",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:13.207Z",
+      "updatedAt": "2026-10-08T16:03:13.207Z"
+    },
+    "cleaning-demo:dataset-1791475393926-9": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475393926-9",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:13.927Z",
+      "updatedAt": "2026-10-08T16:03:13.927Z"
+    },
+    "cleaning-demo:dataset-1791475394370-10": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475394370-10",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:14.370Z",
+      "updatedAt": "2026-10-08T16:03:14.370Z"
+    },
+    "cleaning-demo:dataset-1791475395069-11": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475395069-11",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:15.070Z",
+      "updatedAt": "2026-10-08T16:03:15.070Z"
+    },
+    "cleaning-demo:dataset-1791475395691-12": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475395691-12",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:15.692Z",
+      "updatedAt": "2026-10-08T16:03:15.692Z"
+    },
+    "cleaning-demo:dataset-1791475396231-13": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475396231-13",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:16.231Z",
+      "updatedAt": "2026-10-08T16:03:16.231Z"
+    },
+    "cleaning-demo:dataset-1791475397042-14": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475397042-14",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:17.042Z",
+      "updatedAt": "2026-10-08T16:03:17.042Z"
+    },
+    "cleaning-demo:dataset-1791475398061-15": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475398061-15",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:18.062Z",
+      "updatedAt": "2026-10-08T16:03:18.062Z"
+    },
+    "cleaning-demo:dataset-1791475398852-16": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475398852-16",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:18.852Z",
+      "updatedAt": "2026-10-08T16:03:18.852Z"
+    },
+    "cleaning-demo:dataset-1791475399654-17": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475399654-17",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:19.655Z",
+      "updatedAt": "2026-10-08T16:03:19.655Z"
+    },
+    "cleaning-demo:dataset-1791475400333-18": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475400333-18",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:20.333Z",
+      "updatedAt": "2026-10-08T16:03:20.333Z"
+    },
+    "cleaning-demo:dataset-1791475401382-19": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475401382-19",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:21.382Z",
+      "updatedAt": "2026-10-08T16:03:21.382Z"
+    },
+    "cleaning-demo:dataset-1791475402381-20": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475402381-20",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:22.382Z",
+      "updatedAt": "2026-10-08T16:03:22.382Z"
+    },
+    "cleaning-demo:dataset-1791475405862-21": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475405862-21",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:25.862Z",
+      "updatedAt": "2026-10-08T16:03:25.862Z"
+    },
+    "cleaning-demo:dataset-1791475407181-22": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475407181-22",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:27.181Z",
+      "updatedAt": "2026-10-08T16:03:27.181Z"
+    },
+    "cleaning-demo:dataset-1791475408438-23": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475408438-23",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:28.438Z",
+      "updatedAt": "2026-10-08T16:03:28.438Z"
+    },
+    "cleaning-demo:dataset-1791475409210-24": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475409210-24",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:29.210Z",
+      "updatedAt": "2026-10-08T16:03:29.210Z"
+    },
+    "cleaning-demo:dataset-1791475409960-25": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475409960-25",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:29.960Z",
+      "updatedAt": "2026-10-08T16:03:29.960Z"
+    },
+    "cleaning-demo:dataset-1791475411126-26": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475411126-26",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:31.126Z",
+      "updatedAt": "2026-10-08T16:03:31.126Z"
+    },
+    "cleaning-demo:dataset-1791475412426-27": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475412426-27",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:32.426Z",
+      "updatedAt": "2026-10-08T16:03:32.426Z"
+    },
+    "cleaning-demo:dataset-1791475413622-28": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475413622-28",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:33.622Z",
+      "updatedAt": "2026-10-08T16:03:33.622Z"
+    },
+    "cleaning-demo:dataset-1791475414407-29": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475414407-29",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:34.407Z",
+      "updatedAt": "2026-10-08T16:03:34.407Z"
+    },
+    "cleaning-demo:dataset-1791475415195-30": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475415195-30",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:35.195Z",
+      "updatedAt": "2026-10-08T16:03:35.195Z"
+    },
+    "cleaning-demo:dataset-1791475415934-31": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475415934-31",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:35.934Z",
+      "updatedAt": "2026-10-08T16:03:35.934Z"
+    },
+    "cleaning-demo:dataset-1791475416839-32": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475416839-32",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:36.839Z",
+      "updatedAt": "2026-10-08T16:03:36.839Z"
+    },
+    "cleaning-demo:dataset-1791475417314-33": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475417314-33",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:37.314Z",
+      "updatedAt": "2026-10-08T16:03:37.314Z"
+    },
+    "cleaning-demo:dataset-1791475417993-34": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475417993-34",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:37.993Z",
+      "updatedAt": "2026-10-08T16:03:37.993Z"
+    },
+    "cleaning-demo:dataset-1791475418528-35": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475418528-35",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:38.528Z",
+      "updatedAt": "2026-10-08T16:03:38.528Z"
+    },
+    "cleaning-demo:dataset-1791475419020-36": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475419020-36",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:39.020Z",
+      "updatedAt": "2026-10-08T16:03:39.020Z"
+    },
+    "cleaning-demo:dataset-1791475419581-37": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475419581-37",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:39.582Z",
+      "updatedAt": "2026-10-08T16:03:39.582Z"
+    },
+    "cleaning-demo:dataset-1791475420101-38": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475420101-38",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:40.101Z",
+      "updatedAt": "2026-10-08T16:03:40.101Z"
+    },
+    "cleaning-demo:dataset-1791475420878-39": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475420878-39",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:40.878Z",
+      "updatedAt": "2026-10-08T16:03:40.878Z"
+    },
+    "cleaning-demo:dataset-1791475421475-40": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475421475-40",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:41.475Z",
+      "updatedAt": "2026-10-08T16:03:41.475Z"
+    },
+    "cleaning-demo:dataset-1791475422042-41": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475422042-41",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:42.042Z",
+      "updatedAt": "2026-10-08T16:03:42.042Z"
+    },
+    "cleaning-demo:dataset-1791475422974-42": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475422974-42",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "roman_urdu",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:42.975Z",
+      "updatedAt": "2026-10-08T16:03:42.975Z"
+    },
+    "cleaning-demo:dataset-1791475423556-43": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475423556-43",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:43.556Z",
+      "updatedAt": "2026-10-08T16:03:43.556Z"
+    },
+    "cleaning-demo:dataset-1791475424146-44": {
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475424146-44",
+      "name": null,
+      "phone": null,
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "dataset",
+      "tags": [],
+      "notes": [],
+      "customFields": {},
+      "createdAt": "2026-10-08T16:03:44.146Z",
+      "updatedAt": "2026-10-08T16:03:44.146Z"
     }
   },
   "activities": {
@@ -3141,6 +4465,25 @@
         },
         "capabilityId": "cleaning",
         "createdAt": "2026-09-17T06:38:00.349Z"
+      },
+      {
+        "id": "act_1789640696064_vlymsr",
+        "type": "assistant.message",
+        "data": {
+          "intent": "knowledge_answer",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-17T10:24:56.064Z"
+      },
+      {
+        "id": "act_1789640726256_jrr7r2",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T10:25:26.256Z"
       }
     ],
     "default:playground-user": [
@@ -4453,6 +5796,173 @@
         },
         "capabilityId": "assistant",
         "createdAt": "2026-09-17T06:37:41.275Z"
+      },
+      {
+        "id": "act_1789641103830_s4vj6l",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-17T10:31:43.830Z"
+      },
+      {
+        "id": "act_1789641130116_f2idfu",
+        "type": "assistant.message",
+        "data": {
+          "intent": "unsupported_capability",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-17T10:32:10.116Z"
+      },
+      {
+        "id": "act_1789641976891_yl77wv",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-17T10:46:16.891Z"
+      },
+      {
+        "id": "act_1789642016247_njuf3x",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_hours",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-17T10:46:56.247Z"
+      },
+      {
+        "id": "act_1789642047256_wkp066",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P011",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T10:47:27.256Z"
+      },
+      {
+        "id": "act_1789650397334_y0x4gr",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P011",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T13:06:37.334Z"
+      },
+      {
+        "id": "act_1789722742544_p1wful",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P011",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-18T09:12:22.544Z"
+      },
+      {
+        "id": "act_1789723360327_6475aj",
+        "type": "assistant.message",
+        "data": {
+          "intent": "thanks",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-18T09:22:40.327Z"
+      },
+      {
+        "id": "act_1789723404000_quywlh",
+        "type": "assistant.message",
+        "data": {
+          "intent": "nlu_information_question",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-18T09:23:24.000Z"
+      },
+      {
+        "id": "act_1789723447063_rczv7d",
+        "type": "assistant.message",
+        "data": {
+          "intent": "nlu_information_question",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-18T09:24:07.063Z"
+      },
+      {
+        "id": "act_1789723641010_kst98l",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P003",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-18T09:27:21.010Z"
+      },
+      {
+        "id": "act_1789723664095_ui6doe",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P003",
+          "attributes": {
+            "color": "Black",
+            "quantity": 5
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-18T09:27:44.095Z"
+      },
+      {
+        "id": "act_1791217947255_adpdw1",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "playground"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-10-05T16:32:27.256Z"
+      },
+      {
+        "id": "act_1791217965075_zwkz45",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-10-05T16:32:45.075Z"
+      },
+      {
+        "id": "act_1791218180674_zmuezf",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P008",
+          "attributes": {
+            "color": "Black",
+            "quantity": 5,
+            "size": "S"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-10-05T16:36:20.674Z"
+      },
+      {
+        "id": "act_1791218422692_abi4db",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": null,
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-10-05T16:40:22.692Z"
       }
     ],
     "default:debug-tv": [
@@ -5978,6 +7488,655 @@
         },
         "capabilityId": "catalog",
         "createdAt": "2026-09-17T06:35:38.130Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-apartment-success-1789640519134": [
+      {
+        "id": "act_1789640524029_phikfl",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-981FSH8L",
+          "requestIds": [
+            "CLN-981FSH8L"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T10:22:04.029Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-standard-apartment-success-1789640524094": [
+      {
+        "id": "act_1789640529087_jjwp5j",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-4LPW90WI",
+          "requestIds": [
+            "CLN-4LPW90WI"
+          ],
+          "serviceId": "CLN001",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T10:22:09.087Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-sofa-cleaning-success-1789640529155": [
+      {
+        "id": "act_1789640529783_g5tx6g",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T10:22:09.783Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-multi-furniture-quote-1789640534713": [
+      {
+        "id": "act_1789640539093_83xrzt",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-DT2YKPBF",
+          "requestIds": [
+            "CLN-DT2YKPBF"
+          ],
+          "serviceId": "CLN003",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T10:22:19.093Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-villa-roman-urdu-1789640542208": [
+      {
+        "id": "act_1789640542815_2kw8lu",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T10:22:22.815Z"
+      }
+    ],
+    "default:multi-turn-retail-add-to-cart-checkout-1789640545554": [
+      {
+        "id": "act_1789640546333_l593g0",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T10:22:26.333Z"
+      },
+      {
+        "id": "act_1789640547303_w3j9nn",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T10:22:27.303Z"
+      },
+      {
+        "id": "act_1789640548333_wsxasv",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black",
+            "quantity": 2
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T10:22:28.333Z"
+      },
+      {
+        "id": "act_1789640549122_ahekf7",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P004",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T10:22:29.122Z"
+      },
+      {
+        "id": "act_1789640555966_l19ker",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MU5DS2PA-5C6D2F",
+          "total": 16000
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T10:22:35.966Z"
+      }
+    ],
+    "default:multi-turn-retail-multi-item-checkout-1789640556037": [
+      {
+        "id": "act_1789640557870_tkhorm",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": null,
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T10:22:37.870Z"
+      },
+      {
+        "id": "act_1789640563926_t3ksnx",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MU5DS8UH-1D9978",
+          "total": 9600
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T10:22:43.926Z"
+      }
+    ],
+    "default:multi-turn-retail-product-search-plural-1789640563988": [
+      {
+        "id": "act_1789640564894_iyaaw8",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T10:22:44.895Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-multi-intent-booking-and-hours-1789640566426": [
+      {
+        "id": "act_1789640568482_enbrbi",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_hours",
+          "channel": "multi-turn-test"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-17T10:22:48.482Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-multi-intent-pricing-and-availability-1789640569163": [
+      {
+        "id": "act_1789640571238_eg0c5k",
+        "type": "assistant.message",
+        "data": {
+          "intent": "nlu_information_question",
+          "channel": "multi-turn-test"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-17T10:22:51.238Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-villa-success-1789641814081": [
+      {
+        "id": "act_1789641827641_w495ll",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-CL1Z14SI",
+          "requestIds": [
+            "CLN-CL1Z14SI"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T10:43:47.641Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-apartment-success-1789641827756": [
+      {
+        "id": "act_1789641835046_gt2qo3",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-33G2AQOR",
+          "requestIds": [
+            "CLN-33G2AQOR"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T10:43:55.046Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-sofa-cleaning-success-1789641846281": [
+      {
+        "id": "act_1789641847154_spj7vg",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T10:44:07.154Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-multi-furniture-quote-1789641853314": [
+      {
+        "id": "act_1789641860583_n733zo",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-101D3UYB",
+          "requestIds": [
+            "CLN-101D3UYB"
+          ],
+          "serviceId": "CLN003",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T10:44:20.583Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-cleaning-deep-villa-roman-urdu-1789641865376": [
+      {
+        "id": "act_1789641867039_y40ci0",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-09-17T10:44:27.039Z"
+      }
+    ],
+    "default:multi-turn-retail-add-to-cart-checkout-1789641871102": [
+      {
+        "id": "act_1789641872789_zx5x66",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T10:44:32.789Z"
+      },
+      {
+        "id": "act_1789641873998_q6pbo6",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black"
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T10:44:33.998Z"
+      },
+      {
+        "id": "act_1789641875325_l477po",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {
+            "color": "Black",
+            "quantity": 2
+          }
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T10:44:35.325Z"
+      },
+      {
+        "id": "act_1789641876619_9epro4",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": "P004",
+          "cartItems": 1
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T10:44:36.619Z"
+      },
+      {
+        "id": "act_1789641886125_1jw4i5",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MU5EKL1Y-4C3FD3",
+          "total": 16000
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T10:44:46.125Z"
+      }
+    ],
+    "default:multi-turn-retail-multi-item-checkout-1789641886233": [
+      {
+        "id": "act_1789641888376_i7xgpt",
+        "type": "commerce.checkout_started",
+        "data": {
+          "productId": null,
+          "cartItems": 2
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T10:44:48.376Z"
+      },
+      {
+        "id": "act_1789641896145_608td2",
+        "type": "commerce.order_created",
+        "data": {
+          "orderId": "ORD-MU5EKSSA-C79492",
+          "total": 9600
+        },
+        "capabilityId": "commerce",
+        "createdAt": "2026-09-17T10:44:56.145Z"
+      }
+    ],
+    "default:multi-turn-retail-product-search-plural-1789641896277": [
+      {
+        "id": "act_1789641897935_1hno42",
+        "type": "catalog.product_viewed",
+        "data": {
+          "productId": "P004",
+          "attributes": {}
+        },
+        "capabilityId": "catalog",
+        "createdAt": "2026-09-17T10:44:57.935Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-multi-intent-booking-and-hours-1789641899942": [
+      {
+        "id": "act_1789641902915_qesfwk",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_hours",
+          "channel": "multi-turn-test"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-17T10:45:02.915Z"
+      }
+    ],
+    "cleaning-demo:multi-turn-multi-intent-pricing-and-availability-1789641903831": [
+      {
+        "id": "act_1789641906817_ktiov7",
+        "type": "assistant.message",
+        "data": {
+          "intent": "nlu_information_question",
+          "channel": "multi-turn-test"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-09-17T10:45:06.817Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475388649-1": [
+      {
+        "id": "act_1791475389233_9mmt5z",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:09.233Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475389383-2": [
+      {
+        "id": "act_1791475389916_e4chg3",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:09.917Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475391165-5": [
+      {
+        "id": "act_1791475391857_3hz0m9",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN001"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:11.857Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475394370-10": [
+      {
+        "id": "act_1791475394867_ts58wv",
+        "type": "cleaning.services_viewed",
+        "data": {
+          "count": 12,
+          "durationHours": null
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:14.867Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475395069-11": [
+      {
+        "id": "act_1791475395635_heevc4",
+        "type": "cleaning.services_viewed",
+        "data": {
+          "count": 12,
+          "durationHours": null
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:15.635Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475396231-13": [
+      {
+        "id": "act_1791475396955_8o5bb5",
+        "type": "cleaning.services_viewed",
+        "data": {
+          "count": 12,
+          "durationHours": null
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:16.955Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475397042-14": [
+      {
+        "id": "act_1791475398011_koigpd",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN001"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:18.011Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475401382-19": [
+      {
+        "id": "act_1791475402327_mqpsqe",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN001"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:22.327Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475405862-21": [
+      {
+        "id": "act_1791475407148_m5jtej",
+        "type": "assistant.message",
+        "data": {
+          "intent": "ask_hours",
+          "channel": "dataset"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-10-08T16:03:27.148Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475408438-23": [
+      {
+        "id": "act_1791475409150_db39vj",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:29.150Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475409210-24": [
+      {
+        "id": "act_1791475409863_xnq0gr",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:29.863Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475409960-25": [
+      {
+        "id": "act_1791475411044_p93xou",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:31.044Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475411126-26": [
+      {
+        "id": "act_1791475412341_mbe8xm",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN002"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:32.341Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475413622-28": [
+      {
+        "id": "act_1791475414270_798yh3",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:34.270Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475414407-29": [
+      {
+        "id": "act_1791475415124_3hpqi0",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:35.124Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475415195-30": [
+      {
+        "id": "act_1791475415696_fxk1bg",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:35.696Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475415934-31": [
+      {
+        "id": "act_1791475416772_lxpe59",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:36.772Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475417314-33": [
+      {
+        "id": "act_1791475417911_a9jp11",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN001"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:37.911Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475417993-34": [
+      {
+        "id": "act_1791475418475_qu3xm0",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN001"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:38.475Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475418528-35": [
+      {
+        "id": "act_1791475418977_jux1r1",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN001"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:38.977Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475419020-36": [
+      {
+        "id": "act_1791475419519_88yf9s",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN001"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:39.519Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475420101-38": [
+      {
+        "id": "act_1791475420810_tb4im5",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:40.810Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475420878-39": [
+      {
+        "id": "act_1791475421402_op7v0e",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:41.402Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475421475-40": [
+      {
+        "id": "act_1791475421974_tfwn9z",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:41.974Z"
+      }
+    ],
+    "cleaning-demo:dataset-1791475422042-41": [
+      {
+        "id": "act_1791475422917_i0bdc3",
+        "type": "cleaning.service_selected",
+        "data": {
+          "serviceId": "CLN003"
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-10-08T16:03:42.917Z"
       }
     ]
   }

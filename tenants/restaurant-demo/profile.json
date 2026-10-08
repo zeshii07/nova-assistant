@@ -41,5 +41,18 @@
   "business": {
     "description": "Semantic demo restaurant for testing restaurant conversations.",
     "contact": "+92 300 7770003"
+  },
+  "widget": {
+    "enabled": true,
+    "position": "bottom-right",
+    "themeColor": "#f97316",
+    "language": "auto",
+    "welcomeMessage": "Hi! 👋 I’m the Nova Bistro Assistant. I can help with the menu, dining options, takeaway information, food orders, and table reservations.",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Menu, dining options aur reservation request mein main aapki madad kar sakta hoon.",
+    "suggestions": [
+      "Show me the menu",
+      "Book a table for 2",
+      "What are today's specials?"
+    ]
   }
 }

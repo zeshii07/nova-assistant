@@ -9,26 +9,45 @@ const stateMachine = require("../../state-machine/src/stateMachine");
 const { extractEntities } = require("../../entity-extraction/src/unifiedEntityExtractor");
 // Import the conversation memory engine
 const { ConversationMemoryEngine } = require("../../conversation-memory/src/conversationMemoryEngine");
+// v24.0: Import Message Plan builder
+const { MessagePlanBuilder } = require("../../conversation-intelligence/src/messagePlan");
 
 /** Coordinates tenant, state, conversation intelligence, capability routing, humanization, events, replay and persistence. */
 class ExecutionEngine {
-  constructor({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId, services = {}, humanizationEngine = null, socialIntelligenceEngine = null, conversationIntelligenceEngine = null, replayService = null, feedbackCollector = null }) {
-    Object.assign(this, { tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId, services, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService, feedbackCollector });
+  constructor({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId, services = {}, humanizationEngine = null, socialIntelligenceEngine = null, conversationIntelligenceEngine = null, replayService = null, feedbackCollector = null, distributedLock = null, optimisticVersioning = null, idempotencyGuard = null }) {
+    Object.assign(this, { tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId, services, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService, feedbackCollector, distributedLock, optimisticVersioning, idempotencyGuard });
     // Initialize conversation memory engine
     this.memoryEngine = new ConversationMemoryEngine({ logger });
   }
 
   async process(message) {
     const processStarted = performance.now();
+    // v26.0: Generate correlation ID for all logs in this request
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const tenantId = message.tenantId || this.defaultTenantId;
     const tenant = this.tenantRepository.getById(tenantId);
     const conversationId = createConversationId(tenantId, message.channel, message.customerId);
+
+    // v26.0: Idempotency guard — prevent duplicate processing of retried webhooks
+    if (this.idempotencyGuard && message.messageId) {
+      try {
+        const { isDuplicate } = await this.idempotencyGuard.checkAndMark(message.channel || 'http', message.messageId);
+        if (isDuplicate) {
+          if (this.logger) this.logger.info('idempotency.duplicate_skipped', { tenantId, conversationId, messageId: message.messageId });
+          return { conversationId, reply: '', state: null, capabilityId: null, intelligence: null, replayId: null, duplicate: true };
+        }
+      } catch (error) {
+        if (this.logger) this.logger.warn('idempotency.check_failed', { error: error.message });
+      }
+    }
+
     let state = await this.stateRepository.get(conversationId);
     if (!state) state = createStateSchema({ tenantId, conversationId, channel: message.channel, customerId: message.customerId, language: tenant.defaultLanguage });
     // Snapshot state for rollback if a capability handler throws
     const stateBefore = stateMachine.snapshotState(state);
 
-    const logger = this.logger.child({ tenantId, conversationId });
+    // v26.0: Create logger with correlation ID for all logs in this request
+    const logger = this.logger.child({ tenantId, conversationId, requestId });
     let customer = this.services.crmService
       ? await this.services.crmService.ensureCustomer({ tenantId, customerId: message.customerId, channel: message.channel, preferredLanguage: state.language })
       : { id: message.customerId };
@@ -163,9 +182,59 @@ class ExecutionEngine {
 
     await this.eventBus.publish("message.received.v1", { tenantId, conversationId, message }, { source: "execution-engine" });
 
+    // === v24.0: Build Message Plan ===
+    // The Message Plan replaces the old "single winning capability" model.
+    // It can handle:
+    //   - Primary goal (e.g., book deep cleaning)
+    //   - Interruptions (e.g., "do you accept card?" while booking)
+    //   - Corrections (e.g., "actually 3 bedrooms not 4")
+    //   - Global commands (cancel, reset, undo, handoff)
+    //   - Clarification requests
+    const messagePlan = MessagePlanBuilder.build(intelligence, { state, tenant, message });
+    if (logger) {
+      logger.info('message_plan.built', {
+        planId: messagePlan.planId,
+        action: messagePlan.workflowAction,
+        primaryGoal: messagePlan.primaryGoal ? `${messagePlan.primaryGoal.capabilityId}/${messagePlan.primaryGoal.intent}` : 'none',
+        interruptions: messagePlan.interruptions.length,
+        correction: messagePlan.correction ? messagePlan.correction.field : null,
+        requiresClarification: messagePlan.requiresClarification,
+      });
+    }
+
+    // === Process interruptions first (read-only, no state mutation) ===
+    // Interruptions are side questions that can be answered without disrupting
+    // the primary workflow. Example: "book deep cleaning tomorrow at 10 and
+    // also do you accept card?" → answer payment question, then continue booking.
+    let interruptionReplies = [];
+    if (messagePlan.interruptions.length > 0) {
+      for (const interruption of messagePlan.interruptions) {
+        try {
+          const intCapability = this.capabilityRouter.registry.get(interruption.capabilityId);
+          if (intCapability && this.capabilityRouter.permissionService.canUse(tenant, intCapability.manifest)) {
+            const intContext = createCapabilityContext({
+              tenant, message, state, conversationId, customer,
+              services: { ...cachedServicesProxy, events: this.eventBus },
+              logger, intelligence: { selected: { intent: interruption.intent, confidence: interruption.confidence, entities: interruption.entities }, entities: interruption.entities }
+            });
+            const intResult = createCapabilityResult(await intCapability.execute(intContext));
+            if (intResult.reply) {
+              interruptionReplies.push(intResult.reply);
+            }
+          }
+        } catch (error) {
+          logger.warn('message_plan.interruption_failed', { capabilityId: interruption.capabilityId, intent: interruption.intent, error: error.message });
+        }
+      }
+    }
+
     // Highest-priority global commands never enter a business workflow.
     if (intelligence?.globalCommand) {
       const response = await this.#handleGlobalCommand({ intelligence, tenant, message, state, conversationId, customer, logger, stateBefore, processStarted, entities, memoryContext });
+      // Prepend interruption replies if any
+      if (interruptionReplies.length > 0) {
+        response.reply = `${interruptionReplies.join('\n\n')}\n\n${response.reply}`;
+      }
       return response;
     }
 
@@ -215,6 +284,11 @@ class ExecutionEngine {
     } catch (error) {
       logger.error("capability.execute_failed", { capabilityId: match.capability.id, error: error.message });
       result = createCapabilityResult({ handled: true, reply: "Sorry, I could not complete that request right now.", metadata: { error: "capability_execution_failed" } });
+    }
+
+    // v24.0: Prepend interruption replies to the main result
+    if (interruptionReplies.length > 0 && result.reply) {
+      result.reply = `${interruptionReplies.join('\n\n')}\n\n${result.reply}`;
     }
 
     await this.services.customerDataBridge?.sync({

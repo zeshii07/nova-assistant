@@ -41,6 +41,8 @@ const { TransformerEmbeddingService } = require("../../../packages/transformer-e
 // v21.0: Online learning & feedback loop
 const { FeedbackCollector } = require("../../../packages/feedback-collector/src/feedbackCollector");
 const { OnlineLearner } = require("../../../packages/online-learner/src/onlineLearner");
+// v26.0: Concurrency control (distributed locks, optimistic versioning, idempotency)
+const { DistributedLock, OptimisticVersioning, IdempotencyGuard } = require("../../../packages/concurrency-control/src/concurrencyControl");
 const { InMemoryMemoryRepository } = require("../../../packages/memory-engine/src/inMemoryMemoryRepository");
 const { MemoryPermissionService } = require("../../../packages/memory-engine/src/memoryPermissionService");
 const { MemoryService } = require("../../../packages/memory-engine/src/memoryService");
@@ -333,7 +335,18 @@ async function buildContainer() {
   const feedbackCollector = new FeedbackCollector({ logger, storageDir: path.resolve(__dirname, "../../../.nova-feedback") });
   const onlineLearner = new OnlineLearner({ feedbackCollector, mlIntentClassifier, logger });
 
-  const executionEngine = new ExecutionEngine({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId: config.defaultTenantId, services: { knowledgeService, llmRouter, memoryService, crmService, leadService, customerDataBridge, catalogService, commerceService, inventoryService, cleaningService, offeringService, bookingService, calendarService, offeringOrderService, engagementService, pricingService, handoffService, availabilityService, promptEngine, productMatcher: productEmbeddingMatcher }, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService, feedbackCollector });
+  // === v26.0: Production Concurrency Control ===
+  // Distributed locks prevent double-booking of calendar slots.
+  // Optimistic versioning prevents lost updates when concurrent messages
+  // modify the same conversation state.
+  // Idempotency guard prevents duplicate processing of retried webhooks.
+  // All three use Redis when available, with in-memory fallbacks.
+  const redisClient = storage?.redis?.client || null;
+  const distributedLock = new DistributedLock({ redisClient, logger });
+  const optimisticVersioning = new OptimisticVersioning({ redisClient, logger });
+  const idempotencyGuard = new IdempotencyGuard({ redisClient, logger });
+
+  const executionEngine = new ExecutionEngine({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId: config.defaultTenantId, services: { knowledgeService, llmRouter, memoryService, crmService, leadService, customerDataBridge, catalogService, commerceService, inventoryService, cleaningService, offeringService, bookingService, calendarService, offeringOrderService, engagementService, pricingService, handoffService, availabilityService, promptEngine, productMatcher: productEmbeddingMatcher }, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService, feedbackCollector, distributedLock, optimisticVersioning, idempotencyGuard });
   const channelRegistry = new ChannelRegistry().register(new HttpChatAdapter());
   const whatsappConfigRepository = new WhatsAppTenantConfigRepository({ tenantsDir: config.tenantsDir });
   const whatsappCloudClient = new WhatsAppCloudClient({ logger });

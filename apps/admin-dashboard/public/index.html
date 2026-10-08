@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <title>Nova Admin Dashboard</title>
+  <link rel="stylesheet" href="/admin/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ─── Sidebar ───────────────────────────────────────────────────────── -->
+    <aside class="sidebar">
+      <div class="brand">
+        <strong>Nova</strong>
+        <span>Admin Dashboard</span>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-route="overview">Overview</button>
+        <button class="nav-item" data-route="tenants">Tenants</button>
+        <button class="nav-item" data-route="conversations">Conversations</button>
+        <button class="nav-item" data-route="leads">Leads</button>
+        <button class="nav-item" data-route="ml">ML Insights</button>
+        <button class="nav-item" data-route="capabilities">Capabilities</button>
+        <button class="nav-item" data-route="datasets">Test Runner</button>
+        <button class="nav-item" data-route="inspector">Data Inspector</button>
+        <button class="nav-item" data-route="settings">Settings</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="status-pill" id="statusPill">
+          <span class="dot" id="statusDot"></span>
+          <span id="statusText">Booting…</span>
+        </div>
+        <a class="ext-link" href="/developer" target="_blank" rel="noopener">Developer Console ↗</a>
+        <a class="ext-link" href="/assistant" target="_blank" rel="noopener">Public Chat ↗</a>
+      </div>
+    </aside>
+
+    <!-- ─── Main content ──────────────────────────────────────────────────── -->
+    <main class="content">
+      <header class="content-header">
+        <div>
+          <h1 id="pageTitle">Overview</h1>
+          <p id="pageSubtitle" class="muted">Live system status and key metrics.</p>
+        </div>
+        <div class="header-actions">
+          <label class="tenant-picker">
+            <span>Tenant scope</span>
+            <select id="tenantSelect" aria-label="Tenant scope"><option value="">All tenants</option></select>
+          </label>
+          <label class="token-field">
+            <span>Admin token</span>
+            <input id="devToken" type="password" placeholder="Required on public host" aria-label="Admin token">
+          </label>
+          <button id="refreshBtn" title="Reload current view">⟳ Refresh</button>
+        </div>
+      </header>
+
+      <section id="view" class="view">
+        <div class="loading-card">Booting Nova Admin Dashboard…</div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/admin/app.js"></script>
+</body>
+</html>

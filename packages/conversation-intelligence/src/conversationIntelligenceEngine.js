@@ -322,6 +322,29 @@ module.exports.prioritizeDeterministicInterrupt=prioritizeDeterministicInterrupt
 module.exports.isReadOnlyInterruptCandidate=isReadOnlyInterruptCandidate;
 
 function detectUnsupportedDomain(text, tenant) {
-  if (!tenant.capabilities?.includes('cleaning') && /\b(cleaner|cleaning|maid|deep clean|office clean|house clean|safai|صفائی)\b/.test(text)) return 'cleaning service';
+  // v24.1: Don't flag "shoe cleaner" or "face cleaner" as cleaning service.
+  // Only flag if the message is about CLEANING SERVICE (not cleaning products).
+  // Check if the message is about a cleaning SERVICE (booking, scheduling, etc.)
+  // vs a cleaning PRODUCT (shoe cleaner, face wash, surface cleaner).
+  if (!tenant.capabilities?.includes('cleaning')) {
+    // Check for cleaning SERVICE intent (book, schedule, maid, etc.)
+    const isCleaningService = /\b(?:book|schedule|reserve|arrange|hire|maid|housekeeping|deep clean|office clean|house clean|safai|صفائی|cleaning service|cleaning for my|clean my (?:apartment|villa|house|home|office|sofa|carpet|mattress|curtain|furniture))\b/.test(text);
+    // Check for cleaning PRODUCT (shoe cleaner, face cleaner, surface cleaner, etc.)
+    const isCleaningProduct = /\b(?:shoe cleaner|shoe clean|face cleaner|face wash|surface cleaner|screen cleaner|glass cleaner|phone cleaner|lens cleaner)\b/.test(text);
+    // Check for standalone "cleaning" that could be a product search
+    const hasProductContext = /\b(?:product|buy|purchase|price|cost|available|have|do you (?:sell|have))\b/.test(text);
+    // Only flag as unsupported if it's clearly a cleaning SERVICE request
+    // and NOT a product search that happens to contain "clean" words
+    if (isCleaningService && !isCleaningProduct) return 'cleaning service';
+    // For standalone "cleaner" word, check if it could be a product
+    if (/\bcleaner\b/.test(text) && (hasProductContext || isCleaningProduct)) return null;
+    // For "cleaning" alone without service context, don't flag
+    if (/\bcleaning\b/.test(text) && !isCleaningService && !isCleaningProduct && !hasProductContext) {
+      // Ambiguous — could be product or service. Don't flag as unsupported.
+      return null;
+    }
+    // For explicit service keywords without product context
+    if (/\b(?:cleaning|safai|صفائی)\b/.test(text) && !isCleaningProduct && !hasProductContext) return 'cleaning service';
+  }
   return null;
 }

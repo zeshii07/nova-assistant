@@ -41,5 +41,18 @@
   "business": {
     "description": "Semantic demo clinic for testing healthcare conversations.",
     "contact": "+92 300 7770001"
+  },
+  "widget": {
+    "enabled": true,
+    "position": "bottom-right",
+    "themeColor": "#ef4444",
+    "language": "auto",
+    "welcomeMessage": "Hello! 👋 Welcome to the clinic assistant. I can help with available consultations, treatments, and appointment requests.",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Clinic assistant mein khush aamdeed. Available consultations, treatments aur appointment request mein madad kar sakta hoon.",
+    "suggestions": [
+      "What services do you offer?",
+      "Book an appointment",
+      "What are your hours?"
+    ]
   }
 }

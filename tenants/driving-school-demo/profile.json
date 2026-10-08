@@ -33,5 +33,18 @@
   "business": {
     "description": "Driving lessons for beginners and experienced drivers.",
     "contact": "+92 300 0000000"
+  },
+  "widget": {
+    "enabled": true,
+    "position": "bottom-right",
+    "themeColor": "#f59e0b",
+    "language": "auto",
+    "welcomeMessage": "Hello! 😊 I’m the City Drive Academy Assistant. How can I help you today?",
+    "welcomeMessageRomanUrdu": "Salam! Main aap ki kaise madad kar sakta hoon?",
+    "suggestions": [
+      "What courses do you offer?",
+      "Book a driving lesson",
+      "What are your fees?"
+    ]
   }
 }

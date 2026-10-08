@@ -40,7 +40,7 @@
         }
       },
       {
-        "text": "James Watson",
+        "text": "Ahmed Al Rashid",
         "expect": {
           "replyContains": [
             "phone"
@@ -712,6 +712,83 @@
           "replyContains": [
             "Cotton T-Shirt",
             "Polo Shirt"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "multi-intent-booking-and-hours",
+    "name": "Multi-Intent: Book Deep Cleaning + Ask Hours",
+    "tenantId": "cleaning-demo",
+    "description": "User starts booking AND asks about business hours in the same message",
+    "turns": [
+      {
+        "text": "book deep cleaning for my villa",
+        "expect": {
+          "capabilityId": "cleaning",
+          "replyContains": [
+            "bedrooms"
+          ]
+        }
+      },
+      {
+        "text": "3",
+        "expect": {
+          "replyContains": [
+            "440",
+            "date"
+          ]
+        }
+      },
+      {
+        "text": "what are your hours",
+        "expect": {
+          "replyContains": [
+            "hours",
+            "AM",
+            "PM"
+          ]
+        }
+      },
+      {
+        "text": "tomorrow at 10 AM",
+        "expect": {
+          "replyContains": [
+            "address"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "multi-intent-pricing-and-availability",
+    "name": "Multi-Intent: Ask Price + Ask Availability",
+    "tenantId": "cleaning-demo",
+    "description": "User asks about charges AND availability in one message",
+    "turns": [
+      {
+        "text": "how much for deep cleaning 3 bedroom apartment and are you available on friday",
+        "expect": {
+          "replyContains": [
+            "350"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "multi-intent-cleaning-and-service-list",
+    "name": "Multi-Intent: Start Booking + Ask Services",
+    "tenantId": "cleaning-demo",
+    "description": "User starts a booking and also asks what services are available",
+    "turns": [
+      {
+        "text": "i want cleaning for my apartment and what services do you have",
+        "expect": {
+          "replyContains": [
+            "Standard",
+            "Deep"
           ]
         }
       }

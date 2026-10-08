@@ -1,0 +1,7 @@
+{
+  "name": "nova-ner-enhancement",
+  "version": "1.0.0",
+  "description": "NER Enhancement Layer — fills gaps in deterministic entity extraction",
+  "main": "src/index.js",
+  "type": "commonjs"
+}

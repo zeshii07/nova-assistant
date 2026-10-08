@@ -53,5 +53,18 @@
     "crm.activity.write:commerce",
     "commerce.write:catalog"
   ],
-  "domain": "retail"
+  "domain": "retail",
+  "widget": {
+    "enabled": true,
+    "position": "bottom-right",
+    "themeColor": "#2d5bd1",
+    "language": "auto",
+    "welcomeMessage": "Hello! 👋 I’m the Demo Store Assistant. I can help you find products, compare options, manage your cart, and place or track an order.",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Store mein khush aamdeed. Products dekhne, compare karne ya order place karne mein main madad kar sakta hoon.",
+    "suggestions": [
+      "What products do you have?",
+      "Show me running shoes",
+      "Track my order"
+    ]
+  }
 }

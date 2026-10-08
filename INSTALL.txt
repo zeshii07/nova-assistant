@@ -1,0 +1,36 @@
+=================================================================
+  Nova Assistant v28.0 — Website Widget SDK + Admin Dashboard
+=================================================================
+
+DEPLOY TO RENDER (or any host)
+------------------------------
+1. Unzip this package over your local nova-assistant/ folder
+2. Commit + push to your Render-connected Git repo
+3. Render will auto-redeploy with v28.0
+4. Verify: curl https://nova-saas-test.onrender.com/health
+   Should return: "version":"28.0.0"
+
+WHAT'S IN THIS PACKAGE (v28.0)
+------------------------------
+  • Drop-in Website Widget SDK — <script src="/widget.js" data-tenant="...">
+  • Shadow DOM isolation + XSS-safe rendering
+  • CORS + rate limiting (30/min per IP+tenant, no Redis needed)
+  • Tenant verification + customerId validation
+  • Session persistence in localStorage (7-day TTL)
+  • Retry with exponential backoff (3 retries)
+  • Mobile responsive (fullscreen ≤ 480px)
+  • Admin Dashboard at /admin (from v27.0)
+  • All 8 tenant profiles updated with `widget` config block
+
+EMBED ON ANY WEBSITE
+--------------------
+  <script src="https://nova-saas-test.onrender.com/widget.js"
+          data-tenant="cleaning-demo"
+          async></script>
+
+8 TENANTS AVAILABLE
+-------------------
+  cleaning-demo, default, healthcare-demo, salon-demo,
+  restaurant-demo, education-demo, tutor-demo, driving-school-demo
+
+=================================================================

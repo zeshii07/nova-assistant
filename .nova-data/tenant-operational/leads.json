@@ -3646,7 +3646,7 @@
       "conversationId": "default:playground:playground-user",
       "source": "playground",
       "channel": "playground",
-      "lastCapabilityId": "assistant",
+      "lastCapabilityId": "commerce",
       "status": "qualified",
       "contact": {
         "name": "Aryan Ahmad",
@@ -3666,34 +3666,193 @@
         {
           "type": "capability",
           "value": "assistant"
+        },
+        {
+          "type": "productname",
+          "value": "Shoe Cleaner"
+        },
+        {
+          "type": "capability",
+          "value": "system"
+        },
+        {
+          "type": "categoryid",
+          "value": "footwear"
+        },
+        {
+          "type": "categoryterm",
+          "value": "shoe"
+        },
+        {
+          "type": "productid",
+          "value": "P011"
+        },
+        {
+          "type": "productname",
+          "value": "Running Shoes"
+        },
+        {
+          "type": "capability",
+          "value": "catalog"
+        },
+        {
+          "type": "categorynames",
+          "value": "Clothing, Electronics, Accessories, Footwear, Home & Office, Bags, Stationery, Personal Care, Kitchen, Fitness, Mobile Accessories, Travel"
+        },
+        {
+          "type": "productid",
+          "value": "P003"
+        },
+        {
+          "type": "productname",
+          "value": "Wireless Earbuds"
+        },
+        {
+          "type": "productid",
+          "value": "P008"
+        },
+        {
+          "type": "productname",
+          "value": "Polo Shirt"
+        },
+        {
+          "type": "productfamily",
+          "value": "shirts"
+        },
+        {
+          "type": "capability",
+          "value": "commerce"
         }
       ],
       "requirements": {
-        "date": "friday"
+        "date": "friday",
+        "quantity": 5
       },
       "signals": [
         "intent:assistant.unsupported_capability",
         "capability:assistant",
-        "requirement:date"
+        "requirement:date",
+        "requirement:quantity",
+        "intent:CONVERSATION_CLARIFICATION_REQUIRED",
+        "capability:system",
+        "intent:catalog.product_interest",
+        "capability:catalog",
+        "intent:catalog.unavailable_request",
+        "intent:catalog.attribute_update",
+        "intent:catalog.family_browse",
+        "intent:commerce.multi_item_request",
+        "capability:commerce",
+        "intent:commerce.confirm",
+        "intent:commerce.checkout_input"
       ],
       "recentMessages": [
         {
-          "text": "hello i want a cleaning service for my apartment on friday",
-          "capabilityId": "assistant",
-          "at": "2026-09-16T08:22:50.156Z"
+          "text": "do you have shoe cleaner",
+          "capabilityId": "catalog",
+          "at": "2026-09-17T10:47:27.375Z"
         },
         {
-          "text": "hello i want furniture cleaning service",
-          "capabilityId": "assistant",
-          "at": "2026-09-17T06:37:41.317Z"
+          "text": "i am looking for  shoe cleaner",
+          "capabilityId": "catalog",
+          "at": "2026-09-17T13:06:37.361Z"
+        },
+        {
+          "text": "hello i want to purchase some dress from your shop",
+          "capabilityId": "catalog",
+          "at": "2026-09-18T09:11:22.486Z"
+        },
+        {
+          "text": "what dresses category do you have",
+          "capabilityId": "catalog",
+          "at": "2026-09-18T09:11:55.135Z"
+        },
+        {
+          "text": "do you hve shoe cleaner here",
+          "capabilityId": "catalog",
+          "at": "2026-09-18T09:12:22.566Z"
+        },
+        {
+          "text": "What doctors and services do you have?",
+          "capabilityId": "catalog",
+          "at": "2026-09-18T09:24:22.903Z"
+        },
+        {
+          "text": "earbuds",
+          "capabilityId": "catalog",
+          "at": "2026-09-18T09:27:22.613Z"
+        },
+        {
+          "text": "black 5 pieces",
+          "capabilityId": "catalog",
+          "at": "2026-09-18T09:27:44.226Z"
+        },
+        {
+          "text": "can i get a polo shirt in red color ?",
+          "capabilityId": "catalog",
+          "at": "2026-10-05T16:32:45.117Z"
+        },
+        {
+          "text": "do you hve red shirts",
+          "capabilityId": "catalog",
+          "at": "2026-10-05T16:33:15.961Z"
+        },
+        {
+          "text": "ok please note my order and pack one polo shirt small size white color and two cotton t shirts in medium size navy color",
+          "capabilityId": "commerce",
+          "at": "2026-10-05T16:35:32.783Z"
+        },
+        {
+          "text": "confirm my order",
+          "capabilityId": "commerce",
+          "at": "2026-10-05T16:36:02.311Z"
+        },
+        {
+          "text": "small size",
+          "capabilityId": "catalog",
+          "at": "2026-10-05T16:36:20.704Z"
+        },
+        {
+          "text": "i want to order two polos shirts medium size and small color and 3 cotton t shirts in small size white color",
+          "capabilityId": "commerce",
+          "at": "2026-10-05T16:37:34.382Z"
+        },
+        {
+          "text": "i meant polo shirt",
+          "capabilityId": "commerce",
+          "at": "2026-10-05T16:38:27.460Z"
+        },
+        {
+          "text": "ok add 2 polo shirts in the order and tell me what colors do you have",
+          "capabilityId": "commerce",
+          "at": "2026-10-05T16:39:30.922Z"
+        },
+        {
+          "text": "white color",
+          "capabilityId": "commerce",
+          "at": "2026-10-05T16:39:52.218Z"
+        },
+        {
+          "text": "large size",
+          "capabilityId": "commerce",
+          "at": "2026-10-05T16:40:06.407Z"
+        },
+        {
+          "text": "confirm order",
+          "capabilityId": "commerce",
+          "at": "2026-10-05T16:40:22.716Z"
+        },
+        {
+          "text": "use my details",
+          "capabilityId": "commerce",
+          "at": "2026-10-05T16:43:41.067Z"
         }
       ],
       "transaction": null,
       "createdAt": "2026-09-16T08:22:50.156Z",
-      "updatedAt": "2026-09-17T06:37:41.317Z",
-      "revision": 2,
-      "score": 74,
-      "grade": "warm",
+      "updatedAt": "2026-10-05T16:43:41.067Z",
+      "revision": 25,
+      "score": 80,
+      "grade": "hot",
       "qualification": {
         "missing": [
           "location"
@@ -7177,10 +7336,22 @@
         {
           "type": "capability",
           "value": "cleaning"
+        },
+        {
+          "type": "productname",
+          "value": "king size mattress"
+        },
+        {
+          "type": "servicevariant",
+          "value": "king"
+        },
+        {
+          "type": "servicevariant",
+          "value": "large"
         }
       ],
       "requirements": {
-        "date": "friday",
+        "date": "monday",
         "time": "11:00",
         "startTime": "11:00"
       },
@@ -7212,12 +7383,32 @@
           "text": "hello i want furniture cleaning service",
           "capabilityId": "cleaning",
           "at": "2026-09-17T06:38:00.385Z"
+        },
+        {
+          "text": "ok i want to book cleaning service for my furniture",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:25:26.299Z"
+        },
+        {
+          "text": "i wnt on mondy around 11 am and wht are your prices",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:28:34.731Z"
+        },
+        {
+          "text": "it is king size mattress",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:30:49.255Z"
+        },
+        {
+          "text": "carpet is 1 meter large",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:31:10.294Z"
         }
       ],
       "transaction": null,
       "createdAt": "2026-09-17T06:24:02.539Z",
-      "updatedAt": "2026-09-17T06:38:00.385Z",
-      "revision": 4,
+      "updatedAt": "2026-09-17T10:31:10.294Z",
+      "revision": 8,
       "score": 90,
       "grade": "hot",
       "qualification": {
@@ -8319,6 +8510,4989 @@
           "name",
           "contact",
           "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-1YE9XY": {
+      "id": "LD-1YE9XY",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-success-1789640511175",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-success-1789640511175",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "qualified",
+      "contact": {
+        "name": "James Watson",
+        "phone": "03012345678"
+      },
+      "location": {
+        "address": "Villa 34, JVC Phase 2, Dubai"
+      },
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "tomorrow",
+        "time": "10:00",
+        "startTime": "10:00",
+        "address": "Villa 34, JVC Phase 2, Dubai"
+      },
+      "signals": [
+        "intent:cleaning.structured_service_request",
+        "capability:cleaning",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime",
+        "requirement:address",
+        "intent:cleaning.incomplete_confirmation"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want deep cleaning for my villa",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:21:51.933Z"
+        },
+        {
+          "text": "3",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:21:52.376Z"
+        },
+        {
+          "text": "tomorrow at 10 AM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:21:53.060Z"
+        },
+        {
+          "text": "Villa 34, JVC Phase 2, Dubai",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:21:55.647Z"
+        },
+        {
+          "text": "03012345678",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:21:58.498Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:21:59.063Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:21:51.933Z",
+      "updatedAt": "2026-09-17T10:21:59.063Z",
+      "revision": 6,
+      "score": 90,
+      "grade": "hot",
+      "qualification": {
+        "missing": [],
+        "nextBestQuestion": null,
+        "complete": true
+      }
+    },
+    "cleaning-demo:LD-POUNW1": {
+      "id": "LD-POUNW1",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789640519134",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789640519134",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "converted",
+      "contact": {
+        "name": "Sarah Ahmed",
+        "phone": "0561234567"
+      },
+      "location": {
+        "address": "Apt 502, Marina Heights, Dubai Marina"
+      },
+      "interests": [
+        {
+          "type": "capability",
+          "value": "cleaning"
+        },
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "configuredservicename",
+          "value": "Deep Cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "saturday",
+        "time": "14:00",
+        "startTime": "14:00",
+        "address": "Apt 502, Marina Heights, Dubai Marina"
+      },
+      "signals": [
+        "intent:cleaning.booking_type_clarification",
+        "capability:cleaning",
+        "intent:cleaning.booking_type_selected",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime",
+        "requirement:address"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want cleaning for my apartment",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:21:59.924Z"
+        },
+        {
+          "text": "deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:00.441Z"
+        },
+        {
+          "text": "4",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:00.963Z"
+        },
+        {
+          "text": "saturday at 2 PM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:01.347Z"
+        },
+        {
+          "text": "Apt 502, Marina Heights, Dubai Marina",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:02.115Z"
+        },
+        {
+          "text": "Sarah Ahmed",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:02.774Z"
+        },
+        {
+          "text": "0561234567",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:03.596Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:04.057Z"
+        }
+      ],
+      "transaction": {
+        "intent": "CLEANING_REQUEST_CREATED",
+        "convertedAt": "2026-09-17T10:22:04.057Z"
+      },
+      "createdAt": "2026-09-17T10:21:59.924Z",
+      "updatedAt": "2026-09-17T10:22:04.057Z",
+      "revision": 8,
+      "score": 100,
+      "grade": "hot",
+      "qualification": {
+        "missing": [],
+        "nextBestQuestion": null,
+        "complete": true
+      }
+    },
+    "cleaning-demo:LD-0U533D": {
+      "id": "LD-0U533D",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-standard-apartment-success-1789640524094",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789640524094",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "converted",
+      "contact": {
+        "name": "Ali Khan",
+        "phone": "0509876543"
+      },
+      "location": {
+        "address": "Building 15, Apartment 302, Al Barsha, Dubai"
+      },
+      "interests": [
+        {
+          "type": "capability",
+          "value": "cleaning"
+        },
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard Cleaning"
+        },
+        {
+          "type": "configuredservicename",
+          "value": "Standard / General Cleaning"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning"
+        }
+      ],
+      "requirements": {
+        "durationHours": 3,
+        "date": "tomorrow",
+        "time": "09:00",
+        "startTime": "09:00",
+        "address": "Building 15, Apartment 302, Al Barsha, Dubai"
+      },
+      "signals": [
+        "intent:cleaning.booking_type_clarification",
+        "capability:cleaning",
+        "intent:cleaning.booking_type_selected",
+        "requirement:durationHours",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime",
+        "requirement:address"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want cleaning for my apartment",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:04.853Z"
+        },
+        {
+          "text": "standard cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:05.380Z"
+        },
+        {
+          "text": "2 cleaners for 3 hours",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:05.962Z"
+        },
+        {
+          "text": "tomorrow",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:06.458Z"
+        },
+        {
+          "text": "9 AM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:06.844Z"
+        },
+        {
+          "text": "Building 15, Apartment 302, Al Barsha, Dubai",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:07.574Z"
+        },
+        {
+          "text": "Ali Khan",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:07.993Z"
+        },
+        {
+          "text": "0509876543",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:08.581Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:09.110Z"
+        }
+      ],
+      "transaction": {
+        "intent": "CLEANING_REQUEST_CREATED",
+        "convertedAt": "2026-09-17T10:22:09.110Z"
+      },
+      "createdAt": "2026-09-17T10:22:04.853Z",
+      "updatedAt": "2026-09-17T10:22:09.110Z",
+      "revision": 9,
+      "score": 100,
+      "grade": "hot",
+      "qualification": {
+        "missing": [],
+        "nextBestQuestion": null,
+        "complete": true
+      }
+    },
+    "cleaning-demo:LD-I3VH11": {
+      "id": "LD-I3VH11",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-sofa-cleaning-success-1789640529155",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-sofa-cleaning-success-1789640529155",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "qualified",
+      "contact": {
+        "phone": "0523456789"
+      },
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "tomorrow",
+        "time": "15:00",
+        "startTime": "15:00"
+      },
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime",
+        "intent:cleaning.incomplete_confirmation"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want furniture cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:09.807Z"
+        },
+        {
+          "text": "sofa",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:10.236Z"
+        },
+        {
+          "text": "3 seater",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:10.868Z"
+        },
+        {
+          "text": "tomorrow at 3 PM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:11.536Z"
+        },
+        {
+          "text": "Villa 7, Palm Jumeirah, Dubai",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:12.581Z"
+        },
+        {
+          "text": "Fatima Al Zarooni",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:13.198Z"
+        },
+        {
+          "text": "0523456789",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:14.153Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:14.662Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:22:09.807Z",
+      "updatedAt": "2026-09-17T10:22:14.662Z",
+      "revision": 8,
+      "score": 70,
+      "grade": "warm",
+      "qualification": {
+        "missing": [
+          "name",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-EXZ34L": {
+      "id": "LD-EXZ34L",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789640534713",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789640534713",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "converted",
+      "contact": {
+        "name": "Mohammed Rashid",
+        "phone": "0551234567"
+      },
+      "location": {
+        "address": "House 15, JVC, Dubai"
+      },
+      "interests": [
+        {
+          "type": "servicevariant",
+          "value": "3-seater"
+        },
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Sofa Cleaning"
+        },
+        {
+          "type": "multiitemfurniture",
+          "value": "true"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        },
+        {
+          "type": "serviceid",
+          "value": "furniture-sofa"
+        },
+        {
+          "type": "operationalserviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        }
+      ],
+      "requirements": {
+        "quantity": 2,
+        "date": "saturday",
+        "time": "11:00",
+        "startTime": "11:00",
+        "address": "House 15, JVC, Dubai"
+      },
+      "signals": [
+        "intent:cleaning.multi_service_quote_request",
+        "capability:cleaning",
+        "intent:cleaning.quote_accept",
+        "requirement:quantity",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime",
+        "requirement:address"
+      ],
+      "recentMessages": [
+        {
+          "text": "what are charges for 2 sofa 3 seater and 1 king mattress",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:15.527Z"
+        },
+        {
+          "text": "book these services",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:15.987Z"
+        },
+        {
+          "text": "saturday at 11 AM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:16.542Z"
+        },
+        {
+          "text": "House 15, JVC, Dubai",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:17.131Z"
+        },
+        {
+          "text": "Mohammed Rashid",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:17.745Z"
+        },
+        {
+          "text": "0551234567",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:18.421Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:19.143Z"
+        }
+      ],
+      "transaction": {
+        "intent": "CLEANING_REQUEST_CREATED",
+        "convertedAt": "2026-09-17T10:22:19.143Z"
+      },
+      "createdAt": "2026-09-17T10:22:15.527Z",
+      "updatedAt": "2026-09-17T10:22:19.143Z",
+      "revision": 7,
+      "score": 100,
+      "grade": "hot",
+      "qualification": {
+        "missing": [],
+        "nextBestQuestion": null,
+        "complete": true
+      }
+    },
+    "cleaning-demo:LD-PVYDJI": {
+      "id": "LD-PVYDJI",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-cancel-1789640539204",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-cancel-1789640539204",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.structured_service_request",
+        "capability:cleaning",
+        "intent:cleaning.workflow_input"
+      ],
+      "recentMessages": [
+        {
+          "text": "book deep cleaning for my villa",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:19.871Z"
+        },
+        {
+          "text": "3 bedrooms",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:20.401Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:22:19.871Z",
+      "updatedAt": "2026-09-17T10:22:20.401Z",
+      "revision": 2,
+      "score": 24,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-2URAW2": {
+      "id": "LD-2URAW2",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-availability-check-1789640540961",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-availability-check-1789640540961",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "availability",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "capability",
+          "value": "availability"
+        }
+      ],
+      "requirements": {
+        "date": "friday"
+      },
+      "signals": [
+        "intent:availability.day_service_question",
+        "capability:availability",
+        "requirement:date"
+      ],
+      "recentMessages": [
+        {
+          "text": "are you available on friday",
+          "capabilityId": "availability",
+          "at": "2026-09-17T10:22:21.480Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:22:21.480Z",
+      "updatedAt": "2026-09-17T10:22:21.480Z",
+      "revision": 1,
+      "score": 39,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-GF1PKT": {
+      "id": "LD-GF1PKT",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-pricing-question-1789640541517",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-pricing-question-1789640541517",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "deep-cleaning-matrix"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning Pricing Matrix"
+        },
+        {
+          "type": "operationalserviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.structured_quote_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "what are charges for 3 bedroom apartment deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:22.176Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:22:22.176Z",
+      "updatedAt": "2026-09-17T10:22:22.176Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-1OMSQN": {
+      "id": "LD-1OMSQN",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-roman-urdu-1789640542208",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-roman-urdu-1789640542208",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "tomorrow",
+        "time": "10:00",
+        "startTime": "10:00"
+      },
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime"
+      ],
+      "recentMessages": [
+        {
+          "text": "mujhy ghar ki safai chahiye deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:22.838Z"
+        },
+        {
+          "text": "tomorrow at 10 AM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:23.439Z"
+        },
+        {
+          "text": "villa",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:24.105Z"
+        },
+        {
+          "text": "3",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:24.573Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:22:22.838Z",
+      "updatedAt": "2026-09-17T10:22:24.573Z",
+      "revision": 4,
+      "score": 45,
+      "grade": "warm",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "default:LD-J85GIT": {
+      "id": "LD-J85GIT",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789640545554",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789640545554",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "commerce",
+      "status": "converted",
+      "contact": {
+        "name": "Zeeshan Ahmad",
+        "phone": "03012345678"
+      },
+      "location": {},
+      "interests": [
+        {
+          "type": "categoryid",
+          "value": "electronics"
+        },
+        {
+          "type": "categoryterm",
+          "value": "smart watch"
+        },
+        {
+          "type": "productid",
+          "value": "P004"
+        },
+        {
+          "type": "productname",
+          "value": "Smart Watch"
+        },
+        {
+          "type": "capability",
+          "value": "catalog"
+        },
+        {
+          "type": "capability",
+          "value": "commerce"
+        }
+      ],
+      "requirements": {
+        "quantity": 2
+      },
+      "signals": [
+        "intent:catalog.product_interest",
+        "capability:catalog",
+        "intent:catalog.attribute_update",
+        "requirement:quantity",
+        "intent:commerce.confirm",
+        "capability:commerce",
+        "intent:commerce.checkout_input",
+        "intent:commerce.review.confirm"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want to buy a smart watch",
+          "capabilityId": "catalog",
+          "at": "2026-09-17T10:22:26.358Z"
+        },
+        {
+          "text": "black color",
+          "capabilityId": "catalog",
+          "at": "2026-09-17T10:22:27.324Z"
+        },
+        {
+          "text": "2 pieces",
+          "capabilityId": "catalog",
+          "at": "2026-09-17T10:22:28.376Z"
+        },
+        {
+          "text": "confirm order",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:29.146Z"
+        },
+        {
+          "text": "Zeeshan Ahmad",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:31.140Z"
+        },
+        {
+          "text": "03012345678",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:32.392Z"
+        },
+        {
+          "text": "Dubai",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:33.113Z"
+        },
+        {
+          "text": "Villa 34, Dubai Marina",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:33.920Z"
+        },
+        {
+          "text": "skip",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:34.421Z"
+        },
+        {
+          "text": "cash on delivery",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:35.048Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:35.996Z"
+        }
+      ],
+      "transaction": {
+        "intent": "COMMERCE_ORDER_CREATED",
+        "convertedAt": "2026-09-17T10:22:35.996Z"
+      },
+      "createdAt": "2026-09-17T10:22:26.358Z",
+      "updatedAt": "2026-09-17T10:22:35.996Z",
+      "revision": 11,
+      "score": 100,
+      "grade": "hot",
+      "qualification": {
+        "missing": [
+          "location"
+        ],
+        "nextBestQuestion": "Where is the service or delivery needed?",
+        "complete": false
+      }
+    },
+    "default:LD-VZB0V1": {
+      "id": "LD-VZB0V1",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789640556037",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789640556037",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "commerce",
+      "status": "converted",
+      "contact": {
+        "name": "Aryan Ahmad",
+        "phone": "03019267565"
+      },
+      "location": {},
+      "interests": [
+        {
+          "type": "capability",
+          "value": "commerce"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:commerce.multi_item_request",
+        "capability:commerce",
+        "intent:commerce.confirm",
+        "intent:commerce.checkout_input",
+        "intent:commerce.review.confirm"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want 2 cotton t shirts white small and 3 polo shirts black medium",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:36.978Z"
+        },
+        {
+          "text": "confirm order",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:37.893Z"
+        },
+        {
+          "text": "Aryan Ahmad",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:38.943Z"
+        },
+        {
+          "text": "03019267565",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:39.796Z"
+        },
+        {
+          "text": "Lahore",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:40.488Z"
+        },
+        {
+          "text": "near ali town, lahore",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:41.104Z"
+        },
+        {
+          "text": "skip",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:41.739Z"
+        },
+        {
+          "text": "cash on delivery",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:42.786Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:22:43.955Z"
+        }
+      ],
+      "transaction": {
+        "intent": "COMMERCE_ORDER_CREATED",
+        "convertedAt": "2026-09-17T10:22:43.955Z"
+      },
+      "createdAt": "2026-09-17T10:22:36.978Z",
+      "updatedAt": "2026-09-17T10:22:43.955Z",
+      "revision": 9,
+      "score": 100,
+      "grade": "hot",
+      "qualification": {
+        "missing": [
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What outcome, quantity, scope, or schedule does the customer need?",
+        "complete": false
+      }
+    },
+    "default:LD-2MP50B": {
+      "id": "LD-2MP50B",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-search-plural-1789640563988",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-product-search-plural-1789640563988",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "catalog",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "productid",
+          "value": "P004"
+        },
+        {
+          "type": "productname",
+          "value": "Smart Watch"
+        },
+        {
+          "type": "capability",
+          "value": "catalog"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:catalog.product_interest",
+        "capability:catalog"
+      ],
+      "recentMessages": [
+        {
+          "text": "what watches do you have",
+          "capabilityId": "catalog",
+          "at": "2026-09-17T10:22:44.926Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:22:44.926Z",
+      "updatedAt": "2026-09-17T10:22:44.926Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "default:LD-CSN4CQ": {
+      "id": "LD-CSN4CQ",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-shirts-browse-1789640564970",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-shirts-browse-1789640564970",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "catalog",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "productfamily",
+          "value": "shirts"
+        },
+        {
+          "type": "capability",
+          "value": "catalog"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:catalog.family_browse",
+        "capability:catalog"
+      ],
+      "recentMessages": [
+        {
+          "text": "what shirts do you have",
+          "capabilityId": "catalog",
+          "at": "2026-09-17T10:22:46.392Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:22:46.392Z",
+      "updatedAt": "2026-09-17T10:22:46.392Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-P7JOQ6": {
+      "id": "LD-P7JOQ6",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-multi-intent-booking-and-hours-1789640566426",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-multi-intent-booking-and-hours-1789640566426",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "tomorrow",
+        "time": "10:00",
+        "startTime": "10:00"
+      },
+      "signals": [
+        "intent:cleaning.structured_service_request",
+        "capability:cleaning",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime"
+      ],
+      "recentMessages": [
+        {
+          "text": "book deep cleaning for my villa",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:46.927Z"
+        },
+        {
+          "text": "3",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:47.463Z"
+        },
+        {
+          "text": "tomorrow at 10 AM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:49.115Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:22:46.927Z",
+      "updatedAt": "2026-09-17T10:22:49.115Z",
+      "revision": 3,
+      "score": 45,
+      "grade": "warm",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-P2X0XC": {
+      "id": "LD-P2X0XC",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-multi-intent-pricing-and-availability-1789640569163",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-multi-intent-pricing-and-availability-1789640569163",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "assistant",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning Pricing Matrix"
+        },
+        {
+          "type": "offeringid",
+          "value": "CLN002"
+        },
+        {
+          "type": "subject",
+          "value": "Deep Cleaning Pricing Matrix"
+        },
+        {
+          "type": "capability",
+          "value": "assistant"
+        }
+      ],
+      "requirements": {
+        "date": "Friday"
+      },
+      "signals": [
+        "intent:assistant.nlu_information_question",
+        "capability:assistant",
+        "requirement:date"
+      ],
+      "recentMessages": [
+        {
+          "text": "how much for deep cleaning 3 bedroom apartment and are you available on friday",
+          "capabilityId": "assistant",
+          "at": "2026-09-17T10:22:51.260Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:22:51.260Z",
+      "updatedAt": "2026-09-17T10:22:51.260Z",
+      "revision": 1,
+      "score": 39,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-8A1UL1": {
+      "id": "LD-8A1UL1",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-multi-intent-cleaning-and-service-list-1789640571292",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-multi-intent-cleaning-and-service-list-1789640571292",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.booking_type_clarification",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want cleaning for my apartment and what services do you have",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:22:52.418Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:22:52.418Z",
+      "updatedAt": "2026-09-17T10:22:52.418Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-EUHVE6": {
+      "id": "LD-EUHVE6",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-success-1789641814081",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-success-1789641814081",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "converted",
+      "contact": {
+        "name": "Ahmed Al Rashid",
+        "phone": "03012345678"
+      },
+      "location": {
+        "address": "Villa 34, JVC Phase 2, Dubai"
+      },
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "tomorrow",
+        "time": "10:00",
+        "startTime": "10:00",
+        "address": "Villa 34, JVC Phase 2, Dubai"
+      },
+      "signals": [
+        "intent:cleaning.structured_service_request",
+        "capability:cleaning",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime",
+        "requirement:address"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want deep cleaning for my villa",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:37.984Z"
+        },
+        {
+          "text": "3",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:39.087Z"
+        },
+        {
+          "text": "tomorrow at 10 AM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:40.799Z"
+        },
+        {
+          "text": "Villa 34, JVC Phase 2, Dubai",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:43.179Z"
+        },
+        {
+          "text": "Ahmed Al Rashid",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:45.561Z"
+        },
+        {
+          "text": "03012345678",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:46.767Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:47.690Z"
+        }
+      ],
+      "transaction": {
+        "intent": "CLEANING_REQUEST_CREATED",
+        "convertedAt": "2026-09-17T10:43:47.690Z"
+      },
+      "createdAt": "2026-09-17T10:43:37.984Z",
+      "updatedAt": "2026-09-17T10:43:47.690Z",
+      "revision": 7,
+      "score": 100,
+      "grade": "hot",
+      "qualification": {
+        "missing": [],
+        "nextBestQuestion": null,
+        "complete": true
+      }
+    },
+    "cleaning-demo:LD-QG7GN9": {
+      "id": "LD-QG7GN9",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789641827756",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789641827756",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "converted",
+      "contact": {
+        "name": "Sarah Ahmed",
+        "phone": "0561234567"
+      },
+      "location": {
+        "address": "Apt 502, Marina Heights, Dubai Marina"
+      },
+      "interests": [
+        {
+          "type": "capability",
+          "value": "cleaning"
+        },
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "configuredservicename",
+          "value": "Deep Cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "saturday",
+        "time": "14:00",
+        "startTime": "14:00",
+        "address": "Apt 502, Marina Heights, Dubai Marina"
+      },
+      "signals": [
+        "intent:cleaning.booking_type_clarification",
+        "capability:cleaning",
+        "intent:cleaning.booking_type_selected",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime",
+        "requirement:address"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want cleaning for my apartment",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:48.600Z"
+        },
+        {
+          "text": "deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:49.384Z"
+        },
+        {
+          "text": "4",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:50.531Z"
+        },
+        {
+          "text": "saturday at 2 PM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:51.492Z"
+        },
+        {
+          "text": "Apt 502, Marina Heights, Dubai Marina",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:52.667Z"
+        },
+        {
+          "text": "Sarah Ahmed",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:53.589Z"
+        },
+        {
+          "text": "0561234567",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:54.277Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:55.094Z"
+        }
+      ],
+      "transaction": {
+        "intent": "CLEANING_REQUEST_CREATED",
+        "convertedAt": "2026-09-17T10:43:55.094Z"
+      },
+      "createdAt": "2026-09-17T10:43:48.600Z",
+      "updatedAt": "2026-09-17T10:43:55.094Z",
+      "revision": 8,
+      "score": 100,
+      "grade": "hot",
+      "qualification": {
+        "missing": [],
+        "nextBestQuestion": null,
+        "complete": true
+      }
+    },
+    "cleaning-demo:LD-NQS3DQ": {
+      "id": "LD-NQS3DQ",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-standard-apartment-success-1789641835471",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789641835471",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "qualified",
+      "contact": {
+        "phone": "0509876543"
+      },
+      "location": {},
+      "interests": [
+        {
+          "type": "capability",
+          "value": "cleaning"
+        },
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard Cleaning"
+        },
+        {
+          "type": "configuredservicename",
+          "value": "Standard / General Cleaning"
+        }
+      ],
+      "requirements": {
+        "durationHours": 3,
+        "date": "tomorrow",
+        "time": "09:00",
+        "startTime": "09:00"
+      },
+      "signals": [
+        "intent:cleaning.booking_type_clarification",
+        "capability:cleaning",
+        "intent:cleaning.booking_type_selected",
+        "requirement:durationHours",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime",
+        "intent:cleaning.incomplete_confirmation"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want cleaning for my apartment",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:56.942Z"
+        },
+        {
+          "text": "standard cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:58.067Z"
+        },
+        {
+          "text": "2 cleaners for 3 hours",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:58.866Z"
+        },
+        {
+          "text": "tomorrow",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:43:59.630Z"
+        },
+        {
+          "text": "9 AM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:00.845Z"
+        },
+        {
+          "text": "Ali Khan",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:04.355Z"
+        },
+        {
+          "text": "0509876543",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:05.518Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:06.232Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:43:56.942Z",
+      "updatedAt": "2026-09-17T10:44:06.232Z",
+      "revision": 8,
+      "score": 70,
+      "grade": "warm",
+      "qualification": {
+        "missing": [
+          "name",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-JBUV42": {
+      "id": "LD-JBUV42",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-sofa-cleaning-success-1789641846281",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-sofa-cleaning-success-1789641846281",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "qualified",
+      "contact": {
+        "phone": "0523456789"
+      },
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "tomorrow",
+        "time": "15:00",
+        "startTime": "15:00"
+      },
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime",
+        "intent:cleaning.incomplete_confirmation"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want furniture cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:07.183Z"
+        },
+        {
+          "text": "sofa",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:08.008Z"
+        },
+        {
+          "text": "3 seater",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:09.233Z"
+        },
+        {
+          "text": "tomorrow at 3 PM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:10.046Z"
+        },
+        {
+          "text": "Villa 7, Palm Jumeirah, Dubai",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:11.002Z"
+        },
+        {
+          "text": "Fatima Al Zarooni",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:11.813Z"
+        },
+        {
+          "text": "0523456789",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:12.553Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:13.249Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:44:07.183Z",
+      "updatedAt": "2026-09-17T10:44:13.249Z",
+      "revision": 8,
+      "score": 70,
+      "grade": "warm",
+      "qualification": {
+        "missing": [
+          "name",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-744C78": {
+      "id": "LD-744C78",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789641853314",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789641853314",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "converted",
+      "contact": {
+        "name": "Mohammed Rashid",
+        "phone": "0551234567"
+      },
+      "location": {
+        "address": "House 15, JVC, Dubai"
+      },
+      "interests": [
+        {
+          "type": "servicevariant",
+          "value": "3-seater"
+        },
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Sofa Cleaning"
+        },
+        {
+          "type": "multiitemfurniture",
+          "value": "true"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        },
+        {
+          "type": "serviceid",
+          "value": "furniture-sofa"
+        },
+        {
+          "type": "operationalserviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        }
+      ],
+      "requirements": {
+        "quantity": 2,
+        "date": "saturday",
+        "time": "11:00",
+        "startTime": "11:00",
+        "address": "House 15, JVC, Dubai"
+      },
+      "signals": [
+        "intent:cleaning.multi_service_quote_request",
+        "capability:cleaning",
+        "intent:cleaning.quote_accept",
+        "requirement:quantity",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime",
+        "requirement:address"
+      ],
+      "recentMessages": [
+        {
+          "text": "what are charges for 2 sofa 3 seater and 1 king mattress",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:15.359Z"
+        },
+        {
+          "text": "book these services",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:16.034Z"
+        },
+        {
+          "text": "saturday at 11 AM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:16.697Z"
+        },
+        {
+          "text": "House 15, JVC, Dubai",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:17.596Z"
+        },
+        {
+          "text": "Mohammed Rashid",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:18.611Z"
+        },
+        {
+          "text": "0551234567",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:19.516Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:20.619Z"
+        }
+      ],
+      "transaction": {
+        "intent": "CLEANING_REQUEST_CREATED",
+        "convertedAt": "2026-09-17T10:44:20.619Z"
+      },
+      "createdAt": "2026-09-17T10:44:15.359Z",
+      "updatedAt": "2026-09-17T10:44:20.619Z",
+      "revision": 7,
+      "score": 100,
+      "grade": "hot",
+      "qualification": {
+        "missing": [],
+        "nextBestQuestion": null,
+        "complete": true
+      }
+    },
+    "cleaning-demo:LD-OTEMG2": {
+      "id": "LD-OTEMG2",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-cancel-1789641860676",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-cancel-1789641860676",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.structured_service_request",
+        "capability:cleaning",
+        "intent:cleaning.workflow_input"
+      ],
+      "recentMessages": [
+        {
+          "text": "book deep cleaning for my villa",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:21.540Z"
+        },
+        {
+          "text": "3 bedrooms",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:22.752Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:44:21.540Z",
+      "updatedAt": "2026-09-17T10:44:22.752Z",
+      "revision": 2,
+      "score": 24,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-21SWYD": {
+      "id": "LD-21SWYD",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-availability-check-1789641863455",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-availability-check-1789641863455",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "availability",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "capability",
+          "value": "availability"
+        }
+      ],
+      "requirements": {
+        "date": "friday"
+      },
+      "signals": [
+        "intent:availability.day_service_question",
+        "capability:availability",
+        "requirement:date"
+      ],
+      "recentMessages": [
+        {
+          "text": "are you available on friday",
+          "capabilityId": "availability",
+          "at": "2026-09-17T10:44:24.226Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:44:24.226Z",
+      "updatedAt": "2026-09-17T10:44:24.226Z",
+      "revision": 1,
+      "score": 39,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-LLX3NI": {
+      "id": "LD-LLX3NI",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-pricing-question-1789641864310",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-pricing-question-1789641864310",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "deep-cleaning-matrix"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning Pricing Matrix"
+        },
+        {
+          "type": "operationalserviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.structured_quote_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "what are charges for 3 bedroom apartment deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:25.315Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:44:25.315Z",
+      "updatedAt": "2026-09-17T10:44:25.315Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-F2F7H9": {
+      "id": "LD-F2F7H9",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-roman-urdu-1789641865376",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-roman-urdu-1789641865376",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "tomorrow",
+        "time": "10:00",
+        "startTime": "10:00"
+      },
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime"
+      ],
+      "recentMessages": [
+        {
+          "text": "mujhy ghar ki safai chahiye deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:27.085Z"
+        },
+        {
+          "text": "tomorrow at 10 AM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:27.930Z"
+        },
+        {
+          "text": "villa",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:28.552Z"
+        },
+        {
+          "text": "3",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:44:29.422Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:44:27.085Z",
+      "updatedAt": "2026-09-17T10:44:29.422Z",
+      "revision": 4,
+      "score": 45,
+      "grade": "warm",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "default:LD-8P0EBO": {
+      "id": "LD-8P0EBO",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789641871102",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-add-to-cart-checkout-1789641871102",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "commerce",
+      "status": "converted",
+      "contact": {
+        "name": "Zeeshan Ahmad",
+        "phone": "03012345678"
+      },
+      "location": {},
+      "interests": [
+        {
+          "type": "categoryid",
+          "value": "electronics"
+        },
+        {
+          "type": "categoryterm",
+          "value": "smart watch"
+        },
+        {
+          "type": "productid",
+          "value": "P004"
+        },
+        {
+          "type": "productname",
+          "value": "Smart Watch"
+        },
+        {
+          "type": "capability",
+          "value": "catalog"
+        },
+        {
+          "type": "capability",
+          "value": "commerce"
+        },
+        {
+          "type": "servicename",
+          "value": "phone"
+        },
+        {
+          "type": "subject",
+          "value": "phone"
+        },
+        {
+          "type": "productname",
+          "value": "03012345678"
+        }
+      ],
+      "requirements": {
+        "quantity": 2
+      },
+      "signals": [
+        "intent:catalog.product_interest",
+        "capability:catalog",
+        "intent:catalog.attribute_update",
+        "requirement:quantity",
+        "intent:commerce.confirm",
+        "capability:commerce",
+        "intent:commerce.checkout_input",
+        "intent:commerce.review.confirm"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want to buy a smart watch",
+          "capabilityId": "catalog",
+          "at": "2026-09-17T10:44:32.822Z"
+        },
+        {
+          "text": "black color",
+          "capabilityId": "catalog",
+          "at": "2026-09-17T10:44:34.029Z"
+        },
+        {
+          "text": "2 pieces",
+          "capabilityId": "catalog",
+          "at": "2026-09-17T10:44:35.426Z"
+        },
+        {
+          "text": "confirm order",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:36.644Z"
+        },
+        {
+          "text": "Zeeshan Ahmad",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:37.456Z"
+        },
+        {
+          "text": "03012345678",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:39.958Z"
+        },
+        {
+          "text": "Dubai",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:41.192Z"
+        },
+        {
+          "text": "Villa 34, Dubai Marina",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:42.112Z"
+        },
+        {
+          "text": "skip",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:43.119Z"
+        },
+        {
+          "text": "cash on delivery",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:44.816Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:46.163Z"
+        }
+      ],
+      "transaction": {
+        "intent": "COMMERCE_ORDER_CREATED",
+        "convertedAt": "2026-09-17T10:44:46.163Z"
+      },
+      "createdAt": "2026-09-17T10:44:32.822Z",
+      "updatedAt": "2026-09-17T10:44:46.163Z",
+      "revision": 11,
+      "score": 100,
+      "grade": "hot",
+      "qualification": {
+        "missing": [
+          "location"
+        ],
+        "nextBestQuestion": "Where is the service or delivery needed?",
+        "complete": false
+      }
+    },
+    "default:LD-W42AY9": {
+      "id": "LD-W42AY9",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789641886233",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-multi-item-checkout-1789641886233",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "commerce",
+      "status": "converted",
+      "contact": {
+        "name": "Aryan Ahmad",
+        "phone": "03019267565"
+      },
+      "location": {},
+      "interests": [
+        {
+          "type": "capability",
+          "value": "commerce"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:commerce.multi_item_request",
+        "capability:commerce",
+        "intent:commerce.confirm",
+        "intent:commerce.checkout_input",
+        "intent:commerce.review.confirm"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want 2 cotton t shirts white small and 3 polo shirts black medium",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:47.161Z"
+        },
+        {
+          "text": "confirm order",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:48.407Z"
+        },
+        {
+          "text": "Aryan Ahmad",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:49.660Z"
+        },
+        {
+          "text": "03019267565",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:50.946Z"
+        },
+        {
+          "text": "Lahore",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:51.880Z"
+        },
+        {
+          "text": "near ali town, lahore",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:52.714Z"
+        },
+        {
+          "text": "skip",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:53.720Z"
+        },
+        {
+          "text": "cash on delivery",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:54.494Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "commerce",
+          "at": "2026-09-17T10:44:56.216Z"
+        }
+      ],
+      "transaction": {
+        "intent": "COMMERCE_ORDER_CREATED",
+        "convertedAt": "2026-09-17T10:44:56.216Z"
+      },
+      "createdAt": "2026-09-17T10:44:47.161Z",
+      "updatedAt": "2026-09-17T10:44:56.216Z",
+      "revision": 9,
+      "score": 100,
+      "grade": "hot",
+      "qualification": {
+        "missing": [
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What outcome, quantity, scope, or schedule does the customer need?",
+        "complete": false
+      }
+    },
+    "default:LD-J8V75A": {
+      "id": "LD-J8V75A",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-product-search-plural-1789641896277",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-product-search-plural-1789641896277",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "catalog",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "productid",
+          "value": "P004"
+        },
+        {
+          "type": "productname",
+          "value": "Smart Watch"
+        },
+        {
+          "type": "capability",
+          "value": "catalog"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:catalog.product_interest",
+        "capability:catalog"
+      ],
+      "recentMessages": [
+        {
+          "text": "what watches do you have",
+          "capabilityId": "catalog",
+          "at": "2026-09-17T10:44:57.979Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:44:57.979Z",
+      "updatedAt": "2026-09-17T10:44:57.979Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "default:LD-IBPJG4": {
+      "id": "LD-IBPJG4",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-shirts-browse-1789641898037",
+      "conversationId": "default:multi-turn-test:multi-turn-retail-shirts-browse-1789641898037",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "catalog",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "productfamily",
+          "value": "shirts"
+        },
+        {
+          "type": "capability",
+          "value": "catalog"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:catalog.family_browse",
+        "capability:catalog"
+      ],
+      "recentMessages": [
+        {
+          "text": "what shirts do you have",
+          "capabilityId": "catalog",
+          "at": "2026-09-17T10:44:59.886Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:44:59.886Z",
+      "updatedAt": "2026-09-17T10:44:59.886Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-N1REAK": {
+      "id": "LD-N1REAK",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-multi-intent-booking-and-hours-1789641899942",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-multi-intent-booking-and-hours-1789641899942",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "tomorrow",
+        "time": "10:00",
+        "startTime": "10:00"
+      },
+      "signals": [
+        "intent:cleaning.structured_service_request",
+        "capability:cleaning",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime"
+      ],
+      "recentMessages": [
+        {
+          "text": "book deep cleaning for my villa",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:45:00.618Z"
+        },
+        {
+          "text": "3",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:45:01.338Z"
+        },
+        {
+          "text": "tomorrow at 10 AM",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:45:03.749Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:45:00.618Z",
+      "updatedAt": "2026-09-17T10:45:03.749Z",
+      "revision": 3,
+      "score": 45,
+      "grade": "warm",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-1EQFCH": {
+      "id": "LD-1EQFCH",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-multi-intent-pricing-and-availability-1789641903831",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-multi-intent-pricing-and-availability-1789641903831",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "assistant",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning Pricing Matrix"
+        },
+        {
+          "type": "offeringid",
+          "value": "CLN002"
+        },
+        {
+          "type": "subject",
+          "value": "Deep Cleaning Pricing Matrix"
+        },
+        {
+          "type": "capability",
+          "value": "assistant"
+        }
+      ],
+      "requirements": {
+        "date": "Friday"
+      },
+      "signals": [
+        "intent:assistant.nlu_information_question",
+        "capability:assistant",
+        "requirement:date"
+      ],
+      "recentMessages": [
+        {
+          "text": "how much for deep cleaning 3 bedroom apartment and are you available on friday",
+          "capabilityId": "assistant",
+          "at": "2026-09-17T10:45:06.858Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:45:06.858Z",
+      "updatedAt": "2026-09-17T10:45:06.858Z",
+      "revision": 1,
+      "score": 39,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-23USYF": {
+      "id": "LD-23USYF",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-multi-intent-cleaning-and-service-list-1789641906935",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-multi-intent-cleaning-and-service-list-1789641906935",
+      "source": "multi-turn-test",
+      "channel": "multi-turn-test",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.booking_type_clarification",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want cleaning for my apartment and what services do you have",
+          "capabilityId": "cleaning",
+          "at": "2026-09-17T10:45:09.788Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-09-17T10:45:09.788Z",
+      "updatedAt": "2026-09-17T10:45:09.788Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-WVW1Y2": {
+      "id": "LD-WVW1Y2",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475387044-0",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475387044-0",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:08.581Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:08.581Z",
+      "updatedAt": "2026-10-08T16:03:08.581Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-RBSXSI": {
+      "id": "LD-RBSXSI",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475388649-1",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475388649-1",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "deep clean karwani hai",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:09.349Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:09.349Z",
+      "updatedAt": "2026-10-08T16:03:09.349Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-7HO4PO": {
+      "id": "LD-7HO4PO",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475389383-2",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475389383-2",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "i need sofa cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:09.943Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:09.943Z",
+      "updatedAt": "2026-10-08T16:03:09.943Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-IQI4XW": {
+      "id": "LD-IQI4XW",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475389970-3",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475389970-3",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "sofa safai chahiye",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:10.504Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:10.504Z",
+      "updatedAt": "2026-10-08T16:03:10.504Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-U07DDE": {
+      "id": "LD-U07DDE",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475390546-4",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475390546-4",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "carpet cleaning please",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:11.132Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:11.132Z",
+      "updatedAt": "2026-10-08T16:03:11.132Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-3J1IZC": {
+      "id": "LD-3J1IZC",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475391165-5",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475391165-5",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "office cleaning chahiye",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:11.884Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:11.884Z",
+      "updatedAt": "2026-10-08T16:03:11.884Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-B2JIIX": {
+      "id": "LD-B2JIIX",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475391919-6",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475391919-6",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "commercial cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:12.585Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:12.585Z",
+      "updatedAt": "2026-10-08T16:03:12.585Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-WVKK6E": {
+      "id": "LD-WVKK6E",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475392616-7",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475392616-7",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "move out cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:13.165Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:13.165Z",
+      "updatedAt": "2026-10-08T16:03:13.165Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-UOS52O": {
+      "id": "LD-UOS52O",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475393206-8",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475393206-8",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "house cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:13.898Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:13.898Z",
+      "updatedAt": "2026-10-08T16:03:13.898Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-PWJG2W": {
+      "id": "LD-PWJG2W",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475393926-9",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475393926-9",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "ghar ki safai",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:14.340Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:14.340Z",
+      "updatedAt": "2026-10-08T16:03:14.340Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-NCW9UV": {
+      "id": "LD-NCW9UV",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475394370-10",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475394370-10",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "servicelines",
+          "value": "• Standard / General Cleaning — AED 40 per hour per cleaner\n• Deep Cleaning — From AED 200; exact price depends on the configured size/scope\n• Furniture Cleanin"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_explore",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "i need a cleaner",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:15.015Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:15.015Z",
+      "updatedAt": "2026-10-08T16:03:15.015Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-JQJLDJ": {
+      "id": "LD-JQJLDJ",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475395069-11",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475395069-11",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "servicelines",
+          "value": "• Standard / General Cleaning — AED 40 per hour per cleaner\n• Deep Cleaning — From AED 200; exact price depends on the configured size/scope\n• Furniture Cleanin"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_explore",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "can you send a cleaner",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:15.666Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:15.666Z",
+      "updatedAt": "2026-10-08T16:03:15.666Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-EUA2BU": {
+      "id": "LD-EUA2BU",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475395691-12",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475395691-12",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "cleaner chahiye",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:16.204Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:16.204Z",
+      "updatedAt": "2026-10-08T16:03:16.204Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-SO2P4K": {
+      "id": "LD-SO2P4K",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475396231-13",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475396231-13",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "servicelines",
+          "value": "• Standard / General Cleaning — AED 40 per hour per cleaner\n• Deep Cleaning — From AED 200; exact price depends on the configured size/scope\n• Furniture Cleanin"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_explore",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "mujhe safai karwani hai",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:16.998Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:16.998Z",
+      "updatedAt": "2026-10-08T16:03:16.998Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-WA0ETD": {
+      "id": "LD-WA0ETD",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475397042-14",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475397042-14",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "need someone to clean my house",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:18.033Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:18.033Z",
+      "updatedAt": "2026-10-08T16:03:18.033Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-4M5WS0": {
+      "id": "LD-4M5WS0",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475398061-15",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475398061-15",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN012"
+        },
+        {
+          "type": "servicename",
+          "value": "AC & Maintenance Services"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "cleaning service chahiye",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:18.825Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:18.825Z",
+      "updatedAt": "2026-10-08T16:03:18.825Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-4S2R1K": {
+      "id": "LD-4S2R1K",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475398852-16",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475398852-16",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "tomorrow",
+        "durationHours": 2
+      },
+      "signals": [
+        "intent:cleaning.pricing_request",
+        "capability:cleaning",
+        "requirement:date",
+        "requirement:durationHours"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want a cleaner tomorrow for two hours",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:19.630Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:19.630Z",
+      "updatedAt": "2026-10-08T16:03:19.630Z",
+      "revision": 1,
+      "score": 41,
+      "grade": "warm",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-DCB7CW": {
+      "id": "LD-DCB7CW",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475399654-17",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475399654-17",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "tomorrow",
+        "durationHours": 2
+      },
+      "signals": [
+        "intent:cleaning.pricing_request",
+        "capability:cleaning",
+        "requirement:date",
+        "requirement:durationHours"
+      ],
+      "recentMessages": [
+        {
+          "text": "kal 2 ghantay ke liye cleaner chahiye",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:20.301Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:20.301Z",
+      "updatedAt": "2026-10-08T16:03:20.301Z",
+      "revision": 1,
+      "score": 41,
+      "grade": "warm",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-FMO2AV": {
+      "id": "LD-FMO2AV",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475400333-18",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475400333-18",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "tomorrow",
+        "timeWindow": "morning"
+      },
+      "signals": [
+        "intent:cleaning.booking_type_clarification",
+        "capability:cleaning",
+        "requirement:date",
+        "requirement:timeWindow"
+      ],
+      "recentMessages": [
+        {
+          "text": "can someone clean my apartment tomorrow morning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:21.347Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:21.347Z",
+      "updatedAt": "2026-10-08T16:03:21.347Z",
+      "revision": 1,
+      "score": 41,
+      "grade": "warm",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-K9LEEM": {
+      "id": "LD-K9LEEM",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475401382-19",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475401382-19",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "tomorrow",
+        "timeWindow": "afternoon"
+      },
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning",
+        "requirement:date",
+        "requirement:timeWindow"
+      ],
+      "recentMessages": [
+        {
+          "text": "office cleaning tomorrow afternoon",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:22.351Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:22.351Z",
+      "updatedAt": "2026-10-08T16:03:22.351Z",
+      "revision": 1,
+      "score": 41,
+      "grade": "warm",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-DNR7GJ": {
+      "id": "LD-DNR7GJ",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475402381-20",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475402381-20",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "availability",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "availability"
+        }
+      ],
+      "requirements": {
+        "date": "tomorrow"
+      },
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning",
+        "intent:availability.slot_question",
+        "capability:availability",
+        "requirement:date"
+      ],
+      "recentMessages": [
+        {
+          "text": "deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:22.933Z"
+        },
+        {
+          "text": "tomorrow",
+          "capabilityId": "availability",
+          "at": "2026-10-08T16:03:25.826Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:22.933Z",
+      "updatedAt": "2026-10-08T16:03:25.826Z",
+      "revision": 2,
+      "score": 43,
+      "grade": "warm",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-IVA0IL": {
+      "id": "LD-IVA0IL",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475405862-21",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475405862-21",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:26.498Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:26.498Z",
+      "updatedAt": "2026-10-08T16:03:26.498Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-O5MXLN": {
+      "id": "LD-O5MXLN",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475407181-22",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475407181-22",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning",
+        "intent:cleaning.cancel_none"
+      ],
+      "recentMessages": [
+        {
+          "text": "deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:27.640Z"
+        },
+        {
+          "text": "cancel my request",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:28.395Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:27.640Z",
+      "updatedAt": "2026-10-08T16:03:28.395Z",
+      "revision": 2,
+      "score": 24,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-LCOLJO": {
+      "id": "LD-LCOLJO",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475408438-23",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475408438-23",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "i need deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:29.182Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:29.182Z",
+      "updatedAt": "2026-10-08T16:03:29.182Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-OYFVVY": {
+      "id": "LD-OYFVVY",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475409210-24",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475409210-24",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "can i book deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:29.912Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:29.912Z",
+      "updatedAt": "2026-10-08T16:03:29.912Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-QOX4C5": {
+      "id": "LD-QOX4C5",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475409960-25",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475409960-25",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:31.085Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:31.085Z",
+      "updatedAt": "2026-10-08T16:03:31.085Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-FKYNL2": {
+      "id": "LD-FKYNL2",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475411126-26",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475411126-26",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "please arrange deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:32.390Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:32.390Z",
+      "updatedAt": "2026-10-08T16:03:32.390Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-904JW3": {
+      "id": "LD-904JW3",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475412426-27",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475412426-27",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "mujhe deep cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:33.586Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:33.586Z",
+      "updatedAt": "2026-10-08T16:03:33.586Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-MGAINO": {
+      "id": "LD-MGAINO",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475413622-28",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475413622-28",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "i need sofa cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:34.340Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:34.340Z",
+      "updatedAt": "2026-10-08T16:03:34.340Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-MNATFR": {
+      "id": "LD-MNATFR",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475414407-29",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475414407-29",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "can i book sofa cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:35.159Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:35.159Z",
+      "updatedAt": "2026-10-08T16:03:35.159Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-R3PSHA": {
+      "id": "LD-R3PSHA",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475415195-30",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475415195-30",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want sofa cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:35.823Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:35.823Z",
+      "updatedAt": "2026-10-08T16:03:35.823Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-XXDTC1": {
+      "id": "LD-XXDTC1",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475415934-31",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475415934-31",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "please arrange sofa cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:36.805Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:36.805Z",
+      "updatedAt": "2026-10-08T16:03:36.805Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-K3UTQW": {
+      "id": "LD-K3UTQW",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475416839-32",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475416839-32",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "mujhe sofa cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:37.283Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:37.283Z",
+      "updatedAt": "2026-10-08T16:03:37.283Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-R377YZ": {
+      "id": "LD-R377YZ",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475417314-33",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475417314-33",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "i need office cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:37.961Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:37.961Z",
+      "updatedAt": "2026-10-08T16:03:37.961Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-GEJ1Q3": {
+      "id": "LD-GEJ1Q3",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475417993-34",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475417993-34",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "can i book office cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:38.500Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:38.500Z",
+      "updatedAt": "2026-10-08T16:03:38.500Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-AO8RJY": {
+      "id": "LD-AO8RJY",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475418528-35",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475418528-35",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want office cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:39.000Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:39.000Z",
+      "updatedAt": "2026-10-08T16:03:39.000Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-3YFDIL": {
+      "id": "LD-3YFDIL",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475419020-36",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475419020-36",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "please arrange office cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:39.557Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:39.557Z",
+      "updatedAt": "2026-10-08T16:03:39.557Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-L98JCE": {
+      "id": "LD-L98JCE",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475419581-37",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475419581-37",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN001"
+        },
+        {
+          "type": "servicename",
+          "value": "Standard / General Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "mujhe office cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:40.073Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:40.073Z",
+      "updatedAt": "2026-10-08T16:03:40.073Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-BC7U6Q": {
+      "id": "LD-BC7U6Q",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475420101-38",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475420101-38",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "i need carpet cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:40.843Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:40.843Z",
+      "updatedAt": "2026-10-08T16:03:40.843Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-83ZKXR": {
+      "id": "LD-83ZKXR",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475420878-39",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475420878-39",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "can i book carpet cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:41.438Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:41.438Z",
+      "updatedAt": "2026-10-08T16:03:41.438Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-FO6NDT": {
+      "id": "LD-FO6NDT",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475421475-40",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475421475-40",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want carpet cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:42.016Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:42.016Z",
+      "updatedAt": "2026-10-08T16:03:42.016Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-YH3KEC": {
+      "id": "LD-YH3KEC",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475422042-41",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475422042-41",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.service_request",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "please arrange carpet cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:42.950Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:42.950Z",
+      "updatedAt": "2026-10-08T16:03:42.950Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-5BRUMH": {
+      "id": "LD-5BRUMH",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475422974-42",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475422974-42",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "new",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "serviceid",
+          "value": "CLN003"
+        },
+        {
+          "type": "servicename",
+          "value": "Furniture Cleaning"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {},
+      "signals": [
+        "intent:cleaning.standalone_quote",
+        "capability:cleaning"
+      ],
+      "recentMessages": [
+        {
+          "text": "mujhe carpet cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:43.524Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:43.524Z",
+      "updatedAt": "2026-10-08T16:03:43.524Z",
+      "revision": 1,
+      "score": 22,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "requirements",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-9TREE8": {
+      "id": "LD-9TREE8",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475423556-43",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475423556-43",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "durationHours": 2
+      },
+      "signals": [
+        "intent:cleaning.pricing_request",
+        "capability:cleaning",
+        "requirement:durationHours"
+      ],
+      "recentMessages": [
+        {
+          "text": "what do you charge for two hours of cleaning",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:44.123Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:44.123Z",
+      "updatedAt": "2026-10-08T16:03:44.123Z",
+      "revision": 1,
+      "score": 39,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
+          "location"
+        ],
+        "nextBestQuestion": "What name should we use?",
+        "complete": false
+      }
+    },
+    "cleaning-demo:LD-MB0YXT": {
+      "id": "LD-MB0YXT",
+      "tenantId": "cleaning-demo",
+      "customerId": "dataset-1791475424146-44",
+      "conversationId": "cleaning-demo:dataset:dataset-1791475424146-44",
+      "source": "dataset",
+      "channel": "dataset",
+      "lastCapabilityId": "cleaning",
+      "status": "engaged",
+      "contact": {},
+      "location": {},
+      "interests": [
+        {
+          "type": "capability",
+          "value": "cleaning"
+        }
+      ],
+      "requirements": {
+        "durationHours": 2
+      },
+      "signals": [
+        "intent:cleaning.pricing_request",
+        "capability:cleaning",
+        "requirement:durationHours"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want a clenr for two hours what will be charges",
+          "capabilityId": "cleaning",
+          "at": "2026-10-08T16:03:44.989Z"
+        }
+      ],
+      "transaction": null,
+      "createdAt": "2026-10-08T16:03:44.989Z",
+      "updatedAt": "2026-10-08T16:03:44.989Z",
+      "revision": 1,
+      "score": 39,
+      "grade": "cold",
+      "qualification": {
+        "missing": [
+          "name",
+          "contact",
           "location"
         ],
         "nextBestQuestion": "What name should we use?",

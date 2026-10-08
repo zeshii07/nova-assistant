@@ -517,8 +517,115 @@
       "updatedAt": "2026-09-17T06:35:36.545Z",
       "expiresAt": "2026-09-17T06:50:36.537Z",
       "consumedAt": "2026-09-17T06:35:36.545Z"
+    },
+    "RSV-MU5DRXFH-DA2160": {
+      "id": "RSV-MU5DRXFH-DA2160",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789640545554",
+      "cartId": "CART-MU5DRWTZ-45770C",
+      "status": "released",
+      "lines": [],
+      "createdAt": "2026-09-17T10:22:29.117Z",
+      "updatedAt": "2026-09-17T10:22:35.943Z",
+      "expiresAt": "2026-09-17T10:37:35.018Z",
+      "releaseReason": "reservation_replaced"
+    },
+    "RSV-MU5DS2P3-C4473B": {
+      "id": "RSV-MU5DS2P3-C4473B",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789640545554",
+      "cartId": "CART-MU5DRWTZ-45770C",
+      "status": "consumed",
+      "lines": [],
+      "createdAt": "2026-09-17T10:22:35.943Z",
+      "updatedAt": "2026-09-17T10:22:35.953Z",
+      "expiresAt": "2026-09-17T10:37:35.943Z",
+      "consumedAt": "2026-09-17T10:22:35.953Z"
+    },
+    "RSV-MU5DS46H-839BFA": {
+      "id": "RSV-MU5DS46H-839BFA",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789640556037",
+      "cartId": "CART-MU5DS3GX-B20985",
+      "status": "released",
+      "lines": [],
+      "createdAt": "2026-09-17T10:22:37.865Z",
+      "updatedAt": "2026-09-17T10:22:43.909Z",
+      "expiresAt": "2026-09-17T10:37:42.750Z",
+      "releaseReason": "reservation_replaced"
+    },
+    "RSV-MU5DS8UD-2DC087": {
+      "id": "RSV-MU5DS8UD-2DC087",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789640556037",
+      "cartId": "CART-MU5DS3GX-B20985",
+      "status": "consumed",
+      "lines": [],
+      "createdAt": "2026-09-17T10:22:43.909Z",
+      "updatedAt": "2026-09-17T10:22:43.916Z",
+      "expiresAt": "2026-09-17T10:37:43.909Z",
+      "consumedAt": "2026-09-17T10:22:43.916Z"
+    },
+    "RSV-MU5EKDQB-EA1C00": {
+      "id": "RSV-MU5EKDQB-EA1C00",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789641871102",
+      "cartId": "CART-MU5EKCR8-4AE6CD",
+      "status": "released",
+      "lines": [],
+      "createdAt": "2026-09-17T10:44:36.611Z",
+      "updatedAt": "2026-09-17T10:44:46.084Z",
+      "expiresAt": "2026-09-17T10:59:44.767Z",
+      "releaseReason": "reservation_replaced"
+    },
+    "RSV-MU5EKL1G-4D11C3": {
+      "id": "RSV-MU5EKL1G-4D11C3",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-add-to-cart-checkout-1789641871102",
+      "cartId": "CART-MU5EKCR8-4AE6CD",
+      "status": "consumed",
+      "lines": [],
+      "createdAt": "2026-09-17T10:44:46.084Z",
+      "updatedAt": "2026-09-17T10:44:46.110Z",
+      "expiresAt": "2026-09-17T10:59:46.085Z",
+      "consumedAt": "2026-09-17T10:44:46.110Z"
+    },
+    "RSV-MU5EKMSQ-3A0F97": {
+      "id": "RSV-MU5EKMSQ-3A0F97",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789641886233",
+      "cartId": "CART-MU5EKLU6-084362",
+      "status": "released",
+      "lines": [],
+      "createdAt": "2026-09-17T10:44:48.362Z",
+      "updatedAt": "2026-09-17T10:44:56.104Z",
+      "expiresAt": "2026-09-17T10:59:54.458Z",
+      "releaseReason": "reservation_replaced"
+    },
+    "RSV-MU5EKSRS-54C275": {
+      "id": "RSV-MU5EKSRS-54C275",
+      "tenantId": "default",
+      "customerId": "multi-turn-retail-multi-item-checkout-1789641886233",
+      "cartId": "CART-MU5EKLU6-084362",
+      "status": "consumed",
+      "lines": [],
+      "createdAt": "2026-09-17T10:44:56.104Z",
+      "updatedAt": "2026-09-17T10:44:56.126Z",
+      "expiresAt": "2026-09-17T10:59:56.104Z",
+      "consumedAt": "2026-09-17T10:44:56.126Z"
+    },
+    "RSV-MUVH78GU-F92FB2": {
+      "id": "RSV-MUVH78GU-F92FB2",
+      "tenantId": "default",
+      "customerId": "playground-user",
+      "cartId": "CART-MUVH4RJE-459FA5",
+      "status": "expired",
+      "lines": [],
+      "createdAt": "2026-10-05T16:40:22.686Z",
+      "updatedAt": "2026-10-08T16:04:40.658Z",
+      "expiresAt": "2026-10-05T16:58:41.041Z"
     }
   },
   "movements": [],
-  "updatedAt": "2026-09-17T06:35:36.545Z"
+  "updatedAt": "2026-10-08T16:04:40.658Z"
 }

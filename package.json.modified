@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "28.0.0",
+  "version": "27.0.0",
   "private": true,
-  "description": "Nova v28.0 — Website Widget SDK (drop-in embeddable chat for any website, with CORS, rate limiting, Shadow DOM isolation, session persistence)",
+  "description": "Nova v27.0 — Admin Dashboard (operator console for tenants, conversations, leads, ML insights, capabilities, datasets)",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {

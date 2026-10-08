@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nova Widget Embed Test</title>
+  <style>
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      margin: 0; padding: 40px;
+      background: #f4f6fa; color: #111;
+      line-height: 1.6;
+    }
+    h1 { font-size: 28px; margin: 0 0 8px; }
+    h2 { font-size: 18px; margin: 28px 0 10px; color: #444; }
+    p { color: #555; max-width: 600px; }
+    code {
+      background: #1b263e; color: #d9e3f7;
+      padding: 2px 7px; border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 13px;
+    }
+    pre {
+      background: #1b263e; color: #d9e3f7;
+      padding: 16px; border-radius: 8px; overflow: auto;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 12px; line-height: 1.5;
+      max-width: 600px;
+    }
+    .controls {
+      display: flex; gap: 10px; margin: 24px 0; flex-wrap: wrap;
+    }
+    .controls select, .controls button {
+      padding: 8px 12px; border-radius: 8px;
+      border: 1px solid #d4dae6; background: #fff;
+      font-size: 13px; font-family: inherit; cursor: pointer;
+    }
+    .controls button { background: #2d5bd1; color: #fff; border-color: #2d5bd1; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px; border-radius: 12px;
+      background: #d1fae5; color: #065f46;
+      font-size: 11px; font-weight: 600;
+      margin-left: 8px; vertical-align: middle;
+    }
+    .info {
+      background: #fef3c7; color: #92400e;
+      padding: 12px 16px; border-radius: 8px;
+      font-size: 13px; max-width: 600px; margin: 16px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Nova Widget Embed Test <span class="badge">v28.0</span></h1>
+  <p>This page demonstrates the Nova Website Widget SDK embedded as a third-party script. The widget loads in a Shadow DOM (isolated from this page's styles), persists session in localStorage, and respects per-tenant config.</p>
+
+  <div class="info">
+    <strong>Test mode:</strong> This page is served from the Nova origin itself (same-origin). To verify cross-origin CORS, host this HTML on a different domain or open it via <code>file://</code>.
+  </div>
+
+  <h2>1. Try the widget</h2>
+  <p>Click the chat bubble in the bottom-right corner to start. Switch tenants and the widget will reload with the new tenant's branding, welcome message, and suggestions.</p>
+
+  <div class="controls">
+    <select id="tenantSwitcher">
+      <option value="cleaning-demo">cleaning-demo (SparkleCare, emerald)</option>
+      <option value="default">default (Demo Store, blue)</option>
+      <option value="healthcare-demo">healthcare-demo (NovaCare, red)</option>
+      <option value="salon-demo">salon-demo (pink)</option>
+      <option value="restaurant-demo">restaurant-demo (orange)</option>
+      <option value="education-demo">education-demo (violet)</option>
+      <option value="tutor-demo">tutor-demo (cyan)</option>
+      <option value="driving-school-demo">driving-school-demo (amber)</option>
+    </select>
+    <button id="reloadWidget">Reload widget with selected tenant</button>
+  </div>
+
+  <h2>2. Embed code</h2>
+  <p>Copy this snippet onto any HTML page. Replace <code>your-nova.com</code> with your Nova server URL and <code>cleaning-demo</code> with your tenant ID.</p>
+  <pre>&lt;script
+  src="https://your-nova.com/widget.js"
+  data-tenant="cleaning-demo"
+  data-position="bottom-right"
+  data-color="#10b981"
+  async&gt;
+&lt;/script&gt;</pre>
+
+  <h2>3. Optional data attributes</h2>
+  <p>The widget reads these attributes from the script tag (all optional, override tenant config):</p>
+  <ul>
+    <li><code>data-tenant</code> — required, your tenant ID</li>
+    <li><code>data-position</code> — <code>bottom-right</code> (default) or <code>bottom-left</code></li>
+    <li><code>data-color</code> — hex color for the bubble + header (e.g. <code>#10b981</code>)</li>
+    <li><code>data-language</code> — <code>auto</code> (default), <code>english</code>, or <code>roman_urdu</code></li>
+    <li><code>data-welcome</code> — override the welcome message</li>
+  </ul>
+
+  <h2>4. Security features</h2>
+  <ul>
+    <li><strong>Shadow DOM isolation</strong> — host page CSS cannot leak in, widget CSS cannot leak out</li>
+    <li><strong>XSS-safe rendering</strong> — all user/assistant text rendered via <code>textContent</code>, never <code>innerHTML</code></li>
+    <li><strong>Tenant-scoped sessions</strong> — localStorage keys are <code>nova-widget:&lt;tenantId&gt;</code>, no cross-tenant data leakage</li>
+    <li><strong>CORS preflight</strong> — server handles OPTIONS for cross-origin embeds</li>
+    <li><strong>Rate limiting</strong> — 30 messages per minute per IP+tenant, returns 429 with Retry-After</li>
+    <li><strong>Tenant verification</strong> — server rejects requests for unknown tenant IDs with HTTP 404</li>
+    <li><strong>Customer ID validation</strong> — server enforces <code>^[a-zA-Z0-9_-]+$</code>, max 128 chars</li>
+    <li><strong>Message length cap</strong> — 4,000 chars per message (server-enforced)</li>
+    <li><strong>No PII collected</strong> — customer ID is a random UUID, no name/email/phone stored client-side</li>
+    <li><strong>CSP headers</strong> — <code>default-src 'none'; script-src 'self'</code> on /widget.js</li>
+  </ul>
+
+  <h2>5. Availability features</h2>
+  <ul>
+    <li><strong>Retry with backoff</strong> — 3 retries on network failure (1s, 2s, 4s delays)</li>
+    <li><strong>15s request timeout</strong> — prevents hung requests</li>
+    <li><strong>Graceful degradation</strong> — if config endpoint is unreachable, widget uses defaults and shows an error bubble</li>
+    <li><strong>Session persistence</strong> — conversation survives page refresh, expires after 7 days</li>
+    <li><strong>State recovery</strong> — if server restarts (memory mode), widget generates new customerId and resumes cleanly</li>
+    <li><strong>Message queue</strong> — rapid-fire messages are queued and sent sequentially</li>
+    <li><strong>Async load</strong> — never blocks page render</li>
+  </ul>
+
+  <script>
+    // Tenant switcher: remove the existing widget, change data-tenant, re-add
+    document.getElementById('reloadWidget').addEventListener('click', () => {
+      const tenantId = document.getElementById('tenantSwitcher').value;
+      // Remove existing widget
+      delete window.__NOVA_WIDGET_MOUNTED__;
+      const existing = document.getElementById('nova-widget-host');
+      if (existing) existing.remove();
+      // Remove existing widget script
+      const oldScript = document.querySelector('script[data-nova-widget]');
+      if (oldScript) oldScript.remove();
+      // Inject a fresh script tag
+      const s = document.createElement('script');
+      s.src = '/widget.js';
+      s.setAttribute('data-tenant', tenantId);
+      s.setAttribute('data-nova-widget', 'true');
+      s.async = true;
+      document.body.appendChild(s);
+    });
+  </script>
+
+  <!-- Initial widget load with cleaning-demo -->
+  <script src="/widget.js" data-tenant="cleaning-demo" data-nova-widget="true" async></script>
+</body>
+</html>

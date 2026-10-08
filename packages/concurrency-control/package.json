@@ -1,0 +1,7 @@
+{
+  "name": "nova-concurrency-control",
+  "version": "1.0.0",
+  "description": "Distributed locks and optimistic concurrency control for production safety",
+  "main": "src/index.js",
+  "type": "commonjs"
+}

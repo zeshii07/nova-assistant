@@ -649,6 +649,168 @@
       "releasedAt": null,
       "releaseReason": null,
       "eventId": "EVT-MU55NIRR-5AC034C1"
+    },
+    "HLD-MU5DRE1V-0BC6EE41": {
+      "id": "HLD-MU5DRE1V-0BC6EE41",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789640519134",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789640519134",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN002"
+      ],
+      "subject": "Deep Cleaning",
+      "localDate": "19/09/2026",
+      "localTime": "14:00",
+      "endLocalTime": "19:00",
+      "startAt": "2026-09-19T10:00:00.000Z",
+      "endAt": "2026-09-19T15:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "idempotencyKey": "f29858da486af1db58fc15835468c6d9f046c5f548a0f30f372da627bce149f3",
+      "createdAt": "2026-09-17T10:22:04.003Z",
+      "expiresAt": "2026-09-17T10:32:04.003Z",
+      "confirmedAt": "2026-09-17T10:22:04.021Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MU5DRE2D-03C3B018"
+    },
+    "HLD-MU5DRHYB-199C0E13": {
+      "id": "HLD-MU5DRHYB-199C0E13",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-standard-apartment-success-1789640524094",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-standard-apartment-success-1789640524094",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN001"
+      ],
+      "subject": "Standard Cleaning",
+      "localDate": "18/09/2026",
+      "localTime": "09:00",
+      "endLocalTime": "12:00",
+      "startAt": "2026-09-18T05:00:00.000Z",
+      "endAt": "2026-09-18T08:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 2,
+      "idempotencyKey": "206ecafc2171904783d7e86c49e5f7605d5eea0455eec205ea57c59b84149c99",
+      "createdAt": "2026-09-17T10:22:09.059Z",
+      "expiresAt": "2026-09-17T10:32:09.059Z",
+      "confirmedAt": "2026-09-17T10:22:09.077Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MU5DRHYT-14E7BD7F"
+    },
+    "HLD-MU5DRPO1-33E4E700": {
+      "id": "HLD-MU5DRPO1-33E4E700",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789640534713",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789640534713",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN003"
+      ],
+      "subject": "Sofa Cleaning",
+      "localDate": "19/09/2026",
+      "localTime": "11:00",
+      "endLocalTime": "12:30",
+      "startAt": "2026-09-19T07:00:00.000Z",
+      "endAt": "2026-09-19T08:30:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "idempotencyKey": "efb0aa5928b55a967450635eafbbf3eb59cb81133f8be9b9745d111eb280a5ff",
+      "createdAt": "2026-09-17T10:22:19.057Z",
+      "expiresAt": "2026-09-17T10:32:19.057Z",
+      "confirmedAt": "2026-09-17T10:22:19.080Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MU5DRPOO-51088D93"
+    },
+    "HLD-MU5EJBWR-BB8A12CD": {
+      "id": "HLD-MU5EJBWR-BB8A12CD",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-success-1789641814081",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-villa-success-1789641814081",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN002"
+      ],
+      "subject": "Deep Cleaning",
+      "localDate": "18/09/2026",
+      "localTime": "10:00",
+      "endLocalTime": "15:00",
+      "startAt": "2026-09-18T06:00:00.000Z",
+      "endAt": "2026-09-18T11:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "idempotencyKey": "8139ac716d99e613a3c00769eafd4049b62b32301a5895630f582b8b82985fea",
+      "createdAt": "2026-09-17T10:43:47.595Z",
+      "expiresAt": "2026-09-17T10:53:47.595Z",
+      "confirmedAt": "2026-09-17T10:43:47.625Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MU5EJBXL-AF8C072E"
+    },
+    "HLD-MU5EJHMS-3CB266DA": {
+      "id": "HLD-MU5EJHMS-3CB266DA",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789641827756",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-deep-apartment-success-1789641827756",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN002"
+      ],
+      "subject": "Deep Cleaning",
+      "localDate": "19/09/2026",
+      "localTime": "14:00",
+      "endLocalTime": "19:00",
+      "startAt": "2026-09-19T10:00:00.000Z",
+      "endAt": "2026-09-19T15:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "idempotencyKey": "f96cd1efa91d61c7253112bbe08749602e27b7f3774252f98be40f694b2895c3",
+      "createdAt": "2026-09-17T10:43:55.012Z",
+      "expiresAt": "2026-09-17T10:53:55.012Z",
+      "confirmedAt": "2026-09-17T10:43:55.033Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MU5EJHND-3561EEAE"
+    },
+    "HLD-MU5EK1CD-2FF48425": {
+      "id": "HLD-MU5EK1CD-2FF48425",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789641853314",
+      "conversationId": "cleaning-demo:multi-turn-test:multi-turn-cleaning-multi-furniture-quote-1789641853314",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN003"
+      ],
+      "subject": "Sofa Cleaning",
+      "localDate": "19/09/2026",
+      "localTime": "11:00",
+      "endLocalTime": "12:30",
+      "startAt": "2026-09-19T07:00:00.000Z",
+      "endAt": "2026-09-19T08:30:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "idempotencyKey": "f2251383f6a93a64d0fa1dce3dd9eff6d5ae261b6a43f89359757526b6e199df",
+      "createdAt": "2026-09-17T10:44:20.557Z",
+      "expiresAt": "2026-09-17T10:54:20.557Z",
+      "confirmedAt": "2026-09-17T10:44:20.573Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MU5EK1CT-932E8721"
     }
   },
   "events": {
@@ -1506,6 +1668,222 @@
           "at": "2026-09-17T06:35:06.567Z"
         }
       ]
+    },
+    "EVT-MU5DRE2D-03C3B018": {
+      "id": "EVT-MU5DRE2D-03C3B018",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789640519134",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-981FSH8L",
+      "subject": "Deep Cleaning",
+      "serviceIds": [
+        "CLN002"
+      ],
+      "localDate": "19/09/2026",
+      "localTime": "14:00",
+      "endLocalTime": "19:00",
+      "startAt": "2026-09-19T10:00:00.000Z",
+      "endAt": "2026-09-19T15:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "metadata": {
+        "requestIds": [
+          "CLN-981FSH8L"
+        ]
+      },
+      "revision": 1,
+      "createdAt": "2026-09-17T10:22:04.021Z",
+      "updatedAt": "2026-09-17T10:22:04.021Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-09-17T10:22:04.021Z"
+        }
+      ]
+    },
+    "EVT-MU5DRHYT-14E7BD7F": {
+      "id": "EVT-MU5DRHYT-14E7BD7F",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-standard-apartment-success-1789640524094",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-4LPW90WI",
+      "subject": "Standard / General Cleaning",
+      "serviceIds": [
+        "CLN001"
+      ],
+      "localDate": "18/09/2026",
+      "localTime": "09:00",
+      "endLocalTime": "12:00",
+      "startAt": "2026-09-18T05:00:00.000Z",
+      "endAt": "2026-09-18T08:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 2,
+      "metadata": {
+        "requestIds": [
+          "CLN-4LPW90WI"
+        ]
+      },
+      "revision": 1,
+      "createdAt": "2026-09-17T10:22:09.077Z",
+      "updatedAt": "2026-09-17T10:22:09.077Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-09-17T10:22:09.077Z"
+        }
+      ]
+    },
+    "EVT-MU5DRPOO-51088D93": {
+      "id": "EVT-MU5DRPOO-51088D93",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789640534713",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-DT2YKPBF",
+      "subject": "Furniture Cleaning",
+      "serviceIds": [
+        "CLN003"
+      ],
+      "localDate": "19/09/2026",
+      "localTime": "11:00",
+      "endLocalTime": "12:30",
+      "startAt": "2026-09-19T07:00:00.000Z",
+      "endAt": "2026-09-19T08:30:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "metadata": {
+        "requestIds": [
+          "CLN-DT2YKPBF"
+        ]
+      },
+      "revision": 1,
+      "createdAt": "2026-09-17T10:22:19.080Z",
+      "updatedAt": "2026-09-17T10:22:19.080Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-09-17T10:22:19.080Z"
+        }
+      ]
+    },
+    "EVT-MU5EJBXL-AF8C072E": {
+      "id": "EVT-MU5EJBXL-AF8C072E",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-villa-success-1789641814081",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-CL1Z14SI",
+      "subject": "Deep Cleaning",
+      "serviceIds": [
+        "CLN002"
+      ],
+      "localDate": "18/09/2026",
+      "localTime": "10:00",
+      "endLocalTime": "15:00",
+      "startAt": "2026-09-18T06:00:00.000Z",
+      "endAt": "2026-09-18T11:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "metadata": {
+        "requestIds": [
+          "CLN-CL1Z14SI"
+        ]
+      },
+      "revision": 1,
+      "createdAt": "2026-09-17T10:43:47.625Z",
+      "updatedAt": "2026-09-17T10:43:47.625Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-09-17T10:43:47.625Z"
+        }
+      ]
+    },
+    "EVT-MU5EJHND-3561EEAE": {
+      "id": "EVT-MU5EJHND-3561EEAE",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-deep-apartment-success-1789641827756",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-33G2AQOR",
+      "subject": "Deep Cleaning",
+      "serviceIds": [
+        "CLN002"
+      ],
+      "localDate": "19/09/2026",
+      "localTime": "14:00",
+      "endLocalTime": "19:00",
+      "startAt": "2026-09-19T10:00:00.000Z",
+      "endAt": "2026-09-19T15:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "metadata": {
+        "requestIds": [
+          "CLN-33G2AQOR"
+        ]
+      },
+      "revision": 1,
+      "createdAt": "2026-09-17T10:43:55.033Z",
+      "updatedAt": "2026-09-17T10:43:55.033Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-09-17T10:43:55.033Z"
+        }
+      ]
+    },
+    "EVT-MU5EK1CT-932E8721": {
+      "id": "EVT-MU5EK1CT-932E8721",
+      "tenantId": "cleaning-demo",
+      "customerId": "multi-turn-cleaning-multi-furniture-quote-1789641853314",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-101D3UYB",
+      "subject": "Furniture Cleaning",
+      "serviceIds": [
+        "CLN003"
+      ],
+      "localDate": "19/09/2026",
+      "localTime": "11:00",
+      "endLocalTime": "12:30",
+      "startAt": "2026-09-19T07:00:00.000Z",
+      "endAt": "2026-09-19T08:30:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "metadata": {
+        "requestIds": [
+          "CLN-101D3UYB"
+        ]
+      },
+      "revision": 1,
+      "createdAt": "2026-09-17T10:44:20.573Z",
+      "updatedAt": "2026-09-17T10:44:20.573Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-09-17T10:44:20.573Z"
+        }
+      ]
     }
   },
   "idempotency": {
@@ -1531,7 +1909,13 @@
     "hold:55337e6f540c61fa78f5710be350c0bd0835ee768356f6077faaaf573943f227": "HLD-MU556331-A446A39A",
     "hold:66c02f6286fc3647ddcbc695b556021c2733c315155abb1ca7529f12145f35a1": "HLD-MU55N31M-FD366EC3",
     "hold:2243a402fc387e5241647c1e2750fb45c4db8ad3680b4d245b6fe843fb333bbd": "HLD-MU55N85Z-A8B975C1",
-    "hold:860f22853edf08ae80d39d1435fafeacee2e8cc66ac6622863bb2c6b950b7565": "HLD-MU55NIR6-81F37D63"
+    "hold:860f22853edf08ae80d39d1435fafeacee2e8cc66ac6622863bb2c6b950b7565": "HLD-MU55NIR6-81F37D63",
+    "hold:f29858da486af1db58fc15835468c6d9f046c5f548a0f30f372da627bce149f3": "HLD-MU5DRE1V-0BC6EE41",
+    "hold:206ecafc2171904783d7e86c49e5f7605d5eea0455eec205ea57c59b84149c99": "HLD-MU5DRHYB-199C0E13",
+    "hold:efb0aa5928b55a967450635eafbbf3eb59cb81133f8be9b9745d111eb280a5ff": "HLD-MU5DRPO1-33E4E700",
+    "hold:8139ac716d99e613a3c00769eafd4049b62b32301a5895630f582b8b82985fea": "HLD-MU5EJBWR-BB8A12CD",
+    "hold:f96cd1efa91d61c7253112bbe08749602e27b7f3774252f98be40f694b2895c3": "HLD-MU5EJHMS-3CB266DA",
+    "hold:f2251383f6a93a64d0fa1dce3dd9eff6d5ae261b6a43f89359757526b6e199df": "HLD-MU5EK1CD-2FF48425"
   },
   "audit": [
     {
@@ -2127,7 +2511,151 @@
         "referenceId": "CLN-7EVX9H7P"
       },
       "at": "2026-09-17T06:35:06.568Z"
+    },
+    {
+      "id": "CAL-AUD-MU5DRE1V-0CAD61BA",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MU5DRE1V-0BC6EE41",
+        "customerId": "multi-turn-cleaning-deep-apartment-success-1789640519134",
+        "localDate": "19/09/2026",
+        "localTime": "14:00"
+      },
+      "at": "2026-09-17T10:22:04.003Z"
+    },
+    {
+      "id": "CAL-AUD-MU5DRE2D-B96ABF63",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MU5DRE2D-03C3B018",
+        "holdId": "HLD-MU5DRE1V-0BC6EE41",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-981FSH8L"
+      },
+      "at": "2026-09-17T10:22:04.021Z"
+    },
+    {
+      "id": "CAL-AUD-MU5DRHYB-B840950E",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MU5DRHYB-199C0E13",
+        "customerId": "multi-turn-cleaning-standard-apartment-success-1789640524094",
+        "localDate": "18/09/2026",
+        "localTime": "09:00"
+      },
+      "at": "2026-09-17T10:22:09.060Z"
+    },
+    {
+      "id": "CAL-AUD-MU5DRHYT-3882886E",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MU5DRHYT-14E7BD7F",
+        "holdId": "HLD-MU5DRHYB-199C0E13",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-4LPW90WI"
+      },
+      "at": "2026-09-17T10:22:09.077Z"
+    },
+    {
+      "id": "CAL-AUD-MU5DRPO1-BE35841C",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MU5DRPO1-33E4E700",
+        "customerId": "multi-turn-cleaning-multi-furniture-quote-1789640534713",
+        "localDate": "19/09/2026",
+        "localTime": "11:00"
+      },
+      "at": "2026-09-17T10:22:19.057Z"
+    },
+    {
+      "id": "CAL-AUD-MU5DRPOO-D7A71377",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MU5DRPOO-51088D93",
+        "holdId": "HLD-MU5DRPO1-33E4E700",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-DT2YKPBF"
+      },
+      "at": "2026-09-17T10:22:19.080Z"
+    },
+    {
+      "id": "CAL-AUD-MU5EJBWR-4E76C240",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MU5EJBWR-BB8A12CD",
+        "customerId": "multi-turn-cleaning-deep-villa-success-1789641814081",
+        "localDate": "18/09/2026",
+        "localTime": "10:00"
+      },
+      "at": "2026-09-17T10:43:47.596Z"
+    },
+    {
+      "id": "CAL-AUD-MU5EJBXL-2FA377F9",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MU5EJBXL-AF8C072E",
+        "holdId": "HLD-MU5EJBWR-BB8A12CD",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-CL1Z14SI"
+      },
+      "at": "2026-09-17T10:43:47.625Z"
+    },
+    {
+      "id": "CAL-AUD-MU5EJHMT-8492C0FE",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MU5EJHMS-3CB266DA",
+        "customerId": "multi-turn-cleaning-deep-apartment-success-1789641827756",
+        "localDate": "19/09/2026",
+        "localTime": "14:00"
+      },
+      "at": "2026-09-17T10:43:55.013Z"
+    },
+    {
+      "id": "CAL-AUD-MU5EJHND-17BF4CF1",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MU5EJHND-3561EEAE",
+        "holdId": "HLD-MU5EJHMS-3CB266DA",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-33G2AQOR"
+      },
+      "at": "2026-09-17T10:43:55.033Z"
+    },
+    {
+      "id": "CAL-AUD-MU5EK1CD-877912AE",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MU5EK1CD-2FF48425",
+        "customerId": "multi-turn-cleaning-multi-furniture-quote-1789641853314",
+        "localDate": "19/09/2026",
+        "localTime": "11:00"
+      },
+      "at": "2026-09-17T10:44:20.557Z"
+    },
+    {
+      "id": "CAL-AUD-MU5EK1CT-BFFD514D",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MU5EK1CT-932E8721",
+        "holdId": "HLD-MU5EK1CD-2FF48425",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-101D3UYB"
+      },
+      "at": "2026-09-17T10:44:20.574Z"
     }
   ],
-  "updatedAt": "2026-09-17T06:35:06.572Z"
+  "updatedAt": "2026-09-17T10:44:20.575Z"
 }

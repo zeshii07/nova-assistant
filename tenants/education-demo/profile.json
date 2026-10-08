@@ -41,5 +41,18 @@
   "business": {
     "description": "Semantic demo school/academy for testing education conversations.",
     "contact": "+92 300 7770002"
+  },
+  "widget": {
+    "enabled": true,
+    "position": "bottom-right",
+    "themeColor": "#8b5cf6",
+    "language": "auto",
+    "welcomeMessage": "Hi! 👋 I can help with grades, programs, admissions, or a campus visit. What would you like to know?",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Grades, programs, admissions ya campus visit ke bare mein pooch sakte hain.",
+    "suggestions": [
+      "Tell me about your programs",
+      "What is the admission process?",
+      "Book a consultation"
+    ]
   }
 }

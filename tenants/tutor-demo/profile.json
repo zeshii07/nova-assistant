@@ -41,5 +41,18 @@
   "business": {
     "description": "Config-only tutoring demo proving Nova can onboard an unseen service business without new engine code.",
     "contact": "+92 300 7770007"
+  },
+  "widget": {
+    "enabled": true,
+    "position": "bottom-right",
+    "themeColor": "#06b6d4",
+    "language": "auto",
+    "welcomeMessage": "Hi! 👋 I can help with tutoring subjects, lesson information, and booking a session.",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Tutoring subjects aur session booking mein main madad kar sakta hoon.",
+    "suggestions": [
+      "What subjects do you teach?",
+      "Book a tutoring session",
+      "What are your fees?"
+    ]
   }
 }

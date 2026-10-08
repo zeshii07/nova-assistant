@@ -29,12 +29,6 @@ async function startServer() {
       if (req.method === "GET" && (url.pathname === "/admin" || url.pathname.startsWith("/admin/"))) {
         return serveAdminAsset(res, url.pathname);
       }
-      // v28.0 Website Widget SDK — drop-in embeddable script.
-      // Customers include <script src="https://your-nova.com/widget.js" data-tenant="cleaning-demo"></script>
-      // and the widget auto-mounts on any page. Served with strict CSP + Cache-Control.
-      if (req.method === "GET" && (url.pathname === "/widget.js" || url.pathname === "/widget-config.js" || url.pathname === "/widget-test")) {
-        return serveWidgetAsset(res, url.pathname);
-      }
 
       if (req.method === "GET" && url.pathname === "/health") {
         const health = await Promise.all(container.registry.list().map((item) => item.health()));
@@ -625,106 +619,15 @@ async function startServer() {
       }
       // ─── End admin dashboard endpoints ──────────────────────────────────────
 
-      // v28.0 — CORS preflight for all widget endpoints.
-      // Must be the very first thing checked so OPTIONS never hits auth.
-      if (req.method === "OPTIONS" && (url.pathname === "/api/chat" || url.pathname.startsWith("/api/widget/"))) {
-        const origin = String(req.headers['origin'] || '*');
-        res.writeHead(204, {
-          'Access-Control-Allow-Origin': origin,
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'content-type, x-nova-tenant-id',
-          'Access-Control-Max-Age': '600',
-          'Access-Control-Expose-Headers': 'X-Request-Id, X-RateLimit-Remaining'
-        });
-        return res.end();
-      }
-
       if (req.method === "POST" && url.pathname === "/api/chat") {
-        // ─── v28.0 Website Widget SDK security & scalability hardening ────────
-        const origin = String(req.headers['origin'] || '*');
-        // IP-based rate limiter (in-memory, no Redis needed).
-        // 30 msgs/min per IP per tenant. Returns 429 with Retry-After header.
-        const clientIp = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
         const body = await readJson(req);
-        const tenantIdForRateLimit = String(body.tenantId || container.config.defaultTenantId);
-        const rateResult = checkWidgetRateLimit(`${clientIp}:${tenantIdForRateLimit}`);
-        if (!rateResult.allowed) {
-          res.writeHead(429, {
-            'Content-Type': 'application/json; charset=utf-8',
-            'Access-Control-Allow-Origin': origin,
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'content-type',
-            'Retry-After': String(rateResult.retryAfterSeconds),
-            'X-RateLimit-Limit': '30',
-            'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset': String(rateResult.resetAt)
-          });
-          return res.end(JSON.stringify({ ok:false, error:'Rate limit exceeded. Please slow down.', retryAfterSeconds: rateResult.retryAfterSeconds }));
-        }
         if(String(body.text||'').trim().length>4000)throw new ValidationError('Message is too long. Please keep it under 4,000 characters.');
-        // Tenant verification: reject unknown tenants so attackers cannot
-        // probe internal tenant IDs through the public endpoint.
-        const tenantId = String(body.tenantId || container.config.defaultTenantId);
-        try { container.tenantRepository.getById(tenantId); }
-        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
-        // CustomerId cap: 128 chars, alphanumeric + dash/underscore only.
-        // The widget generates a per-browser UUID; we just need to prevent
-        // abuse vectors like injecting tenantIds or SQL via customerId.
-        // Auto-generate if missing so anonymous widget users work out-of-box.
-        let customerId = String(body.customerId || '').trim();
-        if (customerId.length === 0) {
-          customerId = `widget-${crypto.randomUUID()}`;
-        } else if (customerId.length > 128 || !/^[a-zA-Z0-9_-]+$/.test(customerId)) {
-          return sendJson(res, 400, { ok:false, error:'Invalid customerId' });
-        }
-        body.customerId = customerId;
-        body.tenantId = tenantId;
-        body.channel = 'widget';
-        if (!body.metadata) body.metadata = {};
-        body.metadata.source = 'widget';
-        body.metadata.origin = origin;
-        body.metadata.clientIp = clientIp;
         const adapter = container.channelRegistry.get("http");
         const message = adapter.normalizeIncoming(body);
         const result = await container.executionEngine.process(message);
-        // CORS headers on the response so the browser exposes the body to JS
-        res.setHeader('Access-Control-Allow-Origin', origin);
-        res.setHeader('Access-Control-Expose-Headers', 'X-Request-Id, X-RateLimit-Remaining');
-        res.setHeader('X-Request-Id', requestCorrelationId(req) || crypto.randomUUID());
-        res.setHeader('X-RateLimit-Remaining', String(rateResult.remaining));
+        // Public chat returns only the customer-facing envelope. Routing,
+        // workflow state and experience diagnostics remain developer-only.
         return sendJson(res, 200, adapter.formatOutgoing(result));
-      }
-
-      // v28.0 — Public widget config endpoint (no auth required, read-only)
-      // Returns ONLY what the widget needs to bootstrap: assistantName,
-      // welcomeMessage, themeColor, position, language, suggestions.
-      // Sensitive tenant data (permissions, internal IDs) never leaves the server.
-      const widgetConfigMatch = url.pathname.match(/^\/api\/widget\/config\/([^/]+)$/);
-      if (req.method === "GET" && widgetConfigMatch) {
-        const tenantId = decodeURIComponent(widgetConfigMatch[1]);
-        try { container.tenantRepository.getById(tenantId); }
-        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
-        const profile = container.tenantRepository.getById(tenantId);
-        const branding = profile.branding || {};
-        const widget = profile.widget || {};
-        const business = profile.business || {};
-        const origin = String(req.headers['origin'] || '*');
-        res.setHeader('Access-Control-Allow-Origin', origin);
-        res.setHeader('Cache-Control', 'public, max-age=300');
-        return sendJson(res, 200, {
-          ok:true,
-          tenantId,
-          assistantName: branding.assistantName || 'Nova',
-          welcomeMessage: widget.welcomeMessage || branding.welcomeMessage || 'Hi! How can I help you today?',
-          welcomeMessageRomanUrdu: widget.welcomeMessageRomanUrdu || branding.welcomeMessageRomanUrdu || null,
-          themeColor: widget.themeColor || '#2d5bd1',
-          position: widget.position || 'bottom-right',
-          language: widget.language || 'auto',
-          suggestions: widget.suggestions || [],
-          businessName: profile.name || '',
-          businessDescription: business.description || '',
-          enabled: widget.enabled !== false
-        });
       }
 
       return sendJson(res, 404, { ok: false, error: "Not found" });
@@ -787,39 +690,6 @@ function controlPlaneActor(req, tenantId) {
   };
 }
 function requestCorrelationId(req){return String(req.headers['x-request-id']||req.headers['x-correlation-id']||'').trim()||null;}
-
-// ─── v28.0 Widget rate limiter ──────────────────────────────────────────────
-// In-memory sliding-window rate limiter. No Redis required.
-// Limits: 30 messages per 60 seconds per (IP + tenantId) bucket.
-// Buckets older than 5 minutes are garbage-collected on every call.
-// On a multi-instance deployment without Redis this limiter is per-process,
-// so each Nova instance allows 30/min independently (e.g., 3 pods × 30 = 90/min).
-// When Redis is configured in v26 hardening, swap this for a Redis SETEX-based
-// limiter for global counting across instances.
-const WIDGET_RATE_LIMIT = { windowMs: 60_000, max: 30, gcMs: 5 * 60_000 };
-const _widgetBuckets = new Map();
-let _widgetLastGc = Date.now();
-function checkWidgetRateLimit(key) {
-  const now = Date.now();
-  if (now - _widgetLastGc > WIDGET_RATE_LIMIT.gcMs) {
-    for (const [k, entry] of _widgetBuckets) if (now - entry.windowStart > WIDGET_RATE_LIMIT.windowMs) _widgetBuckets.delete(k);
-    _widgetLastGc = now;
-  }
-  let entry = _widgetBuckets.get(key);
-  if (!entry || now - entry.windowStart > WIDGET_RATE_LIMIT.windowMs) {
-    entry = { windowStart: now, count: 0 };
-    _widgetBuckets.set(key, entry);
-  }
-  entry.count += 1;
-  const remaining = Math.max(0, WIDGET_RATE_LIMIT.max - entry.count);
-  const resetAt = entry.windowStart + WIDGET_RATE_LIMIT.windowMs;
-  return {
-    allowed: entry.count <= WIDGET_RATE_LIMIT.max,
-    remaining,
-    resetAt,
-    retryAfterSeconds: entry.count > WIDGET_RATE_LIMIT.max ? Math.ceil((resetAt - now) / 1000) : 0
-  };
-}
 function serveDeveloperAsset(res, pathname) {
   const root = path.resolve(__dirname, "../../developer-console/public");
   const relative = ["/developer","/developer/","/developers","/developers/"].includes(pathname) ? "index.html" : pathname.replace(/^\/developers?\//, "");
@@ -850,38 +720,6 @@ function serveAdminAsset(res, pathname) {
   if (outsideRoot || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return sendText(res, 404, "Not found");
   const ext = path.extname(file); const types = { ".html":"text/html; charset=utf-8", ".js":"application/javascript; charset=utf-8", ".css":"text/css; charset=utf-8" };
   res.writeHead(200, { "Content-Type":types[ext] || "application/octet-stream", "Cache-Control":"no-store" }); res.end(fs.readFileSync(file));
-}
-function serveWidgetAsset(res, pathname) {
-  const root = path.resolve(__dirname, "../../widget/public");
-  const relativeMap = {
-    "/widget.js": "widget.js",
-    "/widget-config.js": "widget-config.js",
-    "/widget-test": "index.html"
-  };
-  const relative = relativeMap[pathname];
-  if (!relative) return sendText(res, 404, "Not found");
-  const file = path.resolve(root, relative);
-  if (!fs.existsSync(file)) return sendText(res, 404, "Widget asset not found: " + relative);
-  const ext = path.extname(file);
-  const types = { ".html":"text/html; charset=utf-8", ".js":"application/javascript; charset=utf-8", ".css":"text/css; charset=utf-8" };
-  // widget.js is served cross-origin; CSP ensures the script cannot be
-  // hijacked to inject other origins' content. Cache-Control no-store so
-  // tenants get instant config changes when they update their profile.
-  if (pathname === "/widget-test") {
-    res.writeHead(200, { "Content-Type":types[ext] || "application/octet-stream", "Cache-Control":"no-store" });
-  } else {
-    // Served with CORS Access-Control-Allow-Origin: * so any website can
-    // load the script. The script is self-contained and only talks to
-    // /api/widget/config and /api/chat (which have their own CORS).
-    res.writeHead(200, {
-      "Content-Type":types[ext] || "application/octet-stream",
-      "Cache-Control":"no-store, must-revalidate",
-      "Access-Control-Allow-Origin":"*",
-      "X-Content-Type-Options":"nosniff",
-      "Content-Security-Policy":"default-src 'none'; script-src 'self'"
-    });
-  }
-  res.end(fs.readFileSync(file));
 }
 function listTenants(tenantsDir, tenantRepository = null) {
   if (!fs.existsSync(tenantsDir)) return [];
