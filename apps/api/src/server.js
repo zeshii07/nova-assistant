@@ -865,13 +865,35 @@ async function startServer() {
         });
       }
 
-      const adminTenantActionMatch = url.pathname.match(/^\/api\/admin\/tenants\/([^/]+)\/(suspend|activate|delete)$/);
+      const adminTenantActionMatch = url.pathname.match(/^\/api\/admin\/tenants\/([^/]+)\/(suspend|activate|delete|export)$/);
       if (req.method === "POST" && adminTenantActionMatch) {
         const tenantId = decodeURIComponent(adminTenantActionMatch[1]);
         const action = adminTenantActionMatch[2];
         try { container.tenantRepository.getById(tenantId); }
         catch { return sendJson(res, 404, { ok:false, error:'Tenant not found' }); }
 
+        if (action === 'export') {
+          // Export tenant folder as a zip so it can be committed to git
+          // (Render's ephemeral filesystem wipes new tenants on restart)
+          const tenantDir = path.join(container.config.tenantsDir, tenantId);
+          if (!fs.existsSync(tenantDir)) return sendJson(res, 404, { ok:false, error:'Tenant folder not found' });
+          // Return a JSON manifest of all files in the tenant folder
+          // so the dashboard can reconstruct them
+          const files = [];
+          function walk(dir, rel='') {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const fullPath = path.join(dir, entry.name);
+              const relPath = rel ? `${rel}/${entry.name}` : entry.name;
+              if (entry.isDirectory()) { walk(fullPath, relPath); continue; }
+              try {
+                const content = fs.readFileSync(fullPath, 'utf8');
+                files.push({ path: relPath, content });
+              } catch {}
+            }
+          }
+          walk(tenantDir);
+          return sendJson(res, 200, { ok:true, tenantId, files });
+        }
         if (action === 'delete') {
           // Don't actually delete demo tenants — just mark them suspended for safety
           const profilePath = path.join(container.config.tenantsDir, tenantId, 'profile.json');
@@ -1017,13 +1039,45 @@ async function startServer() {
       }
 
       if (req.method === "POST" && url.pathname === "/api/chat") {
-        // ─── v28.0 Website Widget SDK security & scalability hardening ────────
+        // ─── v30.1.4 Widget API Key Security ──────────────────────────────────
+        // Tenants can require an API key for widget requests by setting
+        // widget.apiKey in their profile.json. If set, requests must include
+        // x-nova-api-key header matching the key.
+        // This prevents unauthorized websites from embedding your Nova agent.
+        // If widget.apiKey is NOT set, the widget is open (anyone can embed).
         const origin = String(req.headers['origin'] || '*');
-        // IP-based rate limiter (in-memory, no Redis needed).
-        // 30 msgs/min per IP per tenant. Returns 429 with Retry-After header.
         const clientIp = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
         const body = await readJson(req);
         const tenantIdForRateLimit = String(body.tenantId || container.config.defaultTenantId);
+
+        // v30.1.4: Check if tenant has API key protection enabled
+        let tenantProfile = null;
+        try { tenantProfile = container.tenantRepository.getById(tenantIdForRateLimit); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+
+        const widgetApiKey = tenantProfile?.widget?.apiKey;
+        const allowedDomains = tenantProfile?.widget?.allowedDomains;
+
+        if (widgetApiKey) {
+          // API key is required
+          const suppliedKey = String(req.headers['x-nova-api-key'] || body.apiKey || '');
+          if (suppliedKey !== widgetApiKey) {
+            return sendJson(res, 403, { ok:false, error:'Invalid API key. This widget requires authorization.' });
+          }
+        }
+
+        // v30.1.4: Domain whitelist (optional)
+        if (allowedDomains && Array.isArray(allowedDomains) && allowedDomains.length > 0) {
+          const requestOrigin = String(req.headers['origin'] || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
+          const isAllowed = allowedDomains.some(d => {
+            const clean = d.replace(/^https?:\/\//, '').replace(/\/$/, '');
+            return requestOrigin === clean || requestOrigin.endsWith('.' + clean);
+          });
+          if (!isAllowed && requestOrigin) {
+            return sendJson(res, 403, { ok:false, error:'This domain is not authorized to use this widget.' });
+          }
+        }
+
         const rateResult = checkWidgetRateLimit(`${clientIp}:${tenantIdForRateLimit}`);
         if (!rateResult.allowed) {
           res.writeHead(429, {
@@ -1103,6 +1157,9 @@ async function startServer() {
           businessName: profile.name || '',
           businessDescription: business.description || '',
           enabled: widget.enabled !== false,
+          // v30.1.4: Security status (does NOT expose the actual key)
+          requiresApiKey: !!widget.apiKey,
+          allowedDomains: widget.allowedDomains || [],
           // v29 agent persona
           agent: {
             avatar: widget.agentAvatar || 'marcus',

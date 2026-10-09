@@ -1,70 +1,76 @@
 =================================================================
-  Nova Assistant v30.1.2 — Widget Bugfix + UI Enhancement
+  Nova Assistant v30.1.4 — Security + Byt Cleaners + Bugfixes
 =================================================================
 
-WHAT'S FIXED IN v30.1.2
------------------------
-  1. "Could not reach the assistant" errors
-     - Root cause: Render free tier sleeps after 15 min of inactivity.
-       First request after sleep takes 30-50s to respond, causing the
-       widget's 15s timeout to fire and show the error.
-     - Fix: improved retry logic with longer delays for timeout errors
-       (waits 2s, 4s, 8s instead of 1s, 2s, 4s) to give the server time
-       to wake up
-     - Fix: better error classification — distinguishes between:
-       * timeout (server starting up — shows "Please try again")
-       * network (server unreachable — shows "Cannot reach server")
-       * mixed_content (HTTPS page + HTTP Nova — shows security warning)
-       * HTTP errors (404, 429, 500 — shows actual error)
+WHAT'S NEW IN v30.1.4
+---------------------
+  1. WIDGET API KEY SECURITY (Issue 3: unauthorized use)
+     - Tenants can now require an API key for widget requests
+     - Set widget.apiKey in profile.json to require authorization
+     - Set widget.allowedDomains to whitelist specific websites
+     - Without the key, requests return 403 Forbidden
+     - The widget reads the key from data-api-key attribute:
+       <script src="..."
+         data-tenant="cleaning-demo"
+         data-api-key="sk_your_secret_key"
+         async></script>
+     - Open access (no key) is the default — opt-in security
 
-  2. "Could not reach Nova server. Using defaults."
-     - This is a WARNING, not an error. The widget loads with defaults
-       if the config endpoint is unreachable, so chat still works.
-     - Fix: this message now only shows in the chat panel if the chat
-       ALSO fails. If only config fails but chat works, no message shown.
+  2. BYT CLEANERS DUBAI TENANT (permanent)
+     - Created from cleaning-template
+     - Agent: Maya (aria avatar)
+     - Theme: sky blue (#0ea5e9)
+     - Owner: owner@bytcleaners.ae
+     - Tenant ID: byt-cleaners-dubai
 
-  3. Retry button on error
-     - When a message fails to send, the widget now shows a "↻ Retry"
-       button below the error message
-     - Clicking it re-sends the last user message automatically
+  3. TENANT EXPORT FEATURE (Issue 1: tenants disappear on restart)
+     - New endpoint: POST /api/admin/tenants/{id}/export
+     - Returns all tenant files as JSON manifest
+     - Use this to download tenant config from Render and commit to git
+     - This solves the Render ephemeral filesystem issue
 
-  4. Connection status indicator
-     - The header subtitle now shows connection status with a colored dot:
-       * Green dot = connected
-       * Yellow blinking dot = connecting
-       * Red dot = connection error
-       * Yellow dot = rate limited
-
-  5. UI enhancements
-     - Smoother message animations (fade-in + slide-up)
-     - Better typing indicator (larger dots, better spacing)
-     - Custom scrollbar styling
-     - Better error message styling (yellow warning style)
-     - Improved mobile layout
-     - Better message bubble spacing
+  4. CONNECTION FIX (v30.1.3 included)
+     - Widget now uses data-server attribute to detect Nova URL
+     - Better error messages with detected URL shown
 
 INSTALL
 -------
   cd /path/to/your/nova-assistant
-  unzip -o nova-v30.1.2-widget-fix.zip
+  unzip -o nova-v30-1-4-security-byt.zip
   npm install
+  git add -A
+  git commit -m "v30.1.4: API key security + Byt Cleaners Dubai + export feature"
+  git push
 
-RUN
----
-  node apps/api/src/server.js
+ENABLING API KEY PROTECTION (optional, per-tenant)
+---------------------------------------------------
+To protect a tenant's widget from unauthorized embedding:
 
-  Widget: http://localhost:3000/widget-test
-  Admin:  http://localhost:3000/admin
+1. Edit tenants/{tenantId}/profile.json
+2. Add to the "widget" block:
+   "apiKey": "sk_your_secret_key_here",
+   "allowedDomains": ["yourwebsite.com", "www.yourwebsite.com"]
 
-NOTE ON RENDER FREE TIER
-------------------------
-  Render's free tier sleeps after 15 min of inactivity. The first
-  request after sleep takes 30-50s while the server boots. The widget
-  now handles this gracefully with longer retry delays.
+3. Update the embed snippet on your website:
+   <script src="https://nova-saas-test.onrender.com/widget.js"
+     data-tenant="cleaning-demo"
+     data-api-key="sk_your_secret_key_here"
+     data-server="https://nova-saas-test.onrender.com"
+     async></script>
 
-  To avoid cold starts entirely:
-  - Upgrade to Render's paid tier ($7/month) — no sleep
-  - Or use a cron service (like cron-job.org) to ping /health every
-    10 minutes to keep the server awake
+4. Now only websites with the correct API key can use your widget.
+   Other websites that try to embed it will get 403 Forbidden.
+
+KEEPING TENANTS ON RENDER (preventing disappearance)
+----------------------------------------------------
+Render's free tier has an ephemeral filesystem. New tenants created
+via the dashboard disappear on restart. To make them permanent:
+
+1. Create the tenant via /admin → Onboard Business
+2. Test it works
+3. Export it: POST /api/admin/tenants/{id}/export
+4. Save the returned files to your local nova-assistant/tenants/{id}/
+5. git add -A && git commit && git push
+6. Render redeploys with the tenant permanently in the repo
 
 =================================================================

@@ -27,21 +27,49 @@
   const DATA_LANGUAGE = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-language')) || null;
   const DATA_WELCOME = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-welcome')) || null;
   const DATA_AVATAR = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-avatar')) || null;
+  const DATA_API_KEY = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-api-key')) || null;
 
   if (!TENANT_ID) {
     console.error('[Nova Widget] data-tenant attribute is required. Example: <script src="/widget.js" data-tenant="cleaning-demo"></script>');
     return;
   }
 
-  // v30.1.1: Allow overriding the Nova server URL via data-server attribute.
-  // If not set, use the script's src origin (standard behavior).
-  // This fixes issues where the widget is loaded from a CDN but the API
-  // is on a different origin.
+  // v30.1.3: Robust Nova server URL detection.
+  // Priority: data-server attribute > script tag src > window.location.
+  // The last fallback only works if the widget is served from the same
+  // origin as the page (rare for third-party embedding).
+  // If we can't determine the Nova origin, we show a clear error
+  // telling the user to add data-server="https://your-nova.com".
   const DATA_SERVER = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-server')) || null;
-  const NOVA_ORIGIN = DATA_SERVER || new URL(SCRIPT_TAG ? SCRIPT_TAG.src : window.location.href).origin;
+  let NOVA_ORIGIN = null;
+
+  if (DATA_SERVER) {
+    // Explicit override — highest priority
+    NOVA_ORIGIN = DATA_SERVER.replace(/\/$/, ''); // strip trailing slash
+  } else if (SCRIPT_TAG && SCRIPT_TAG.src) {
+    // Script tag has src — use its origin
+    try { NOVA_ORIGIN = new URL(SCRIPT_TAG.src).origin; } catch {}
+  }
+
+  // If we still don't have NOVA_ORIGIN, check if there's a global
+  // NOVA_SERVER_URL set before the widget loaded (for SPA scenarios)
+  if (!NOVA_ORIGIN && window.NOVA_SERVER_URL) {
+    NOVA_ORIGIN = window.NOVA_SERVER_URL.replace(/\/$/, '');
+  }
+
+  // Last resort: use the current page origin (only works if Nova is
+  // same-origin, which is rare for third-party embedding)
+  if (!NOVA_ORIGIN) {
+    NOVA_ORIGIN = window.location.origin;
+    console.warn('[Nova Widget] Could not determine Nova server URL from script tag. Using page origin as fallback. If this fails, add data-server="https://your-nova.com" to the script tag.');
+  }
+
   const API_CHAT = `${NOVA_ORIGIN}/api/chat`;
   const API_CONFIG = `${NOVA_ORIGIN}/api/widget/config/${encodeURIComponent(TENANT_ID)}`;
   const AVATARS_URL = `${NOVA_ORIGIN}/avatars.js`;
+
+  // v30.1.3: Log the detected Nova server URL for debugging
+  console.info('[Nova Widget] Nova server detected:', NOVA_ORIGIN, '| Tenant:', TENANT_ID, '| Config URL:', API_CONFIG);
   const STORAGE_KEY = `nova-widget:${TENANT_ID}`;
   const VISITED_KEY = `nova-widget-visited:${TENANT_ID}`;
   const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7;
@@ -184,6 +212,7 @@
   async function loadConfig() {
     try {
       state.connectionError = null;
+      console.info('[Nova Widget] Fetching config from:', API_CONFIG);
       const r = await fetchWithRetry(API_CONFIG, { method: 'GET' }, 2);
       const data = await r.json();
       if (!data.ok) throw new Error(data.error || 'Config load failed');
@@ -195,6 +224,7 @@
         welcomeMessage: DATA_WELCOME || data.welcomeMessage || 'Hi! How can I help?'
       };
       state.retries = 0;
+      console.info('[Nova Widget] Config loaded successfully:', data.assistantName || data.businessName);
     } catch (err) {
       const classified = classifyError(err);
       state.config = {
@@ -207,8 +237,8 @@
         proactiveGreeting: { enabled: false, delaySeconds: 5, message: null, pageRules: [] }
       };
       state.connectionError = classified;
-      // Don't show this as a permanent error — the chat might still work
-      console.warn('[Nova Widget] Config load failed:', classified.message);
+      console.error('[Nova Widget] Config load FAILED. URL:', API_CONFIG, 'Error:', classified);
+      console.error('[Nova Widget] If the URL above is NOT your Nova server, add data-server="https://your-nova-server.com" to the script tag.');
     }
   }
 
@@ -228,9 +258,11 @@
     updateConnectionStatus('connecting');
 
     try {
+      const headers = { 'content-type': 'application/json' };
+      if (DATA_API_KEY) headers['x-nova-api-key'] = DATA_API_KEY;
       const response = await fetchWithRetry(API_CHAT, {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers,
         body: JSON.stringify({
           tenantId: TENANT_ID,
           customerId: state.customerId,
@@ -243,6 +275,11 @@
       state.typing = false;
       renderTyping();
 
+      if (response.status === 403) {
+        const data = await response.json().catch(() => ({}));
+        state.messages.push({ role: 'system', text: `🔒 ${data.error || 'Unauthorized. This widget requires an API key.'}`, ts: Date.now() });
+        renderMessages(); saveSession(); updateConnectionStatus('error'); return;
+      }
       if (response.status === 429) {
         const data = await response.json().catch(() => ({}));
         const retryAfter = data.retryAfterSeconds || 60;
@@ -756,12 +793,20 @@
         appendMessageEl(msg.role, msg.text);
       }
     }
-    // If there's a connection error, show it
+    // If there's a connection error, show it with the URL for debugging
     if (state.connectionError) {
       const errEl = document.createElement('div');
       errEl.className = 'nova-message system';
+      // Show the detected URL so the user can see if it's wrong
       errEl.textContent = `⚠️ ${state.connectionError.message}`;
       messagesEl.appendChild(errEl);
+
+      // If the URL looks wrong (not the Nova server), show a hint
+      const hintEl = document.createElement('div');
+      hintEl.className = 'nova-message system';
+      hintEl.style.fontSize = '11px';
+      hintEl.textContent = `Nova server: ${NOVA_ORIGIN} — If this is wrong, add data-server="https://your-nova.com" to the script tag.`;
+      messagesEl.appendChild(hintEl);
     }
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
