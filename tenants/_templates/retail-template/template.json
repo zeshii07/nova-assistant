@@ -1,0 +1,16 @@
+{
+  "id": "retail-template",
+  "label": "Retail Store",
+  "description": "Product catalog, browsing, cart, checkout, order tracking",
+  "icon": "🛍️",
+  "domain": "retail",
+  "capabilities": [
+    "assistant",
+    "crm",
+    "catalog",
+    "commerce"
+  ],
+  "defaultServices": [],
+  "sourceTenant": "default",
+  "createdAt": "2026-10-09T04:08:35.955Z"
+}

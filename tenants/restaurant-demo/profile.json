@@ -53,6 +53,55 @@
       "Show me the menu",
       "Book a table for 2",
       "What are today's specials?"
-    ]
+    ],
+    "agentAvatar": "natalie",
+    "agentName": "Natalie",
+    "agentTitle": "Reservation Desk",
+    "preChatForm": {
+      "enabled": true,
+      "fields": [
+        {
+          "id": "name",
+          "label": "Your name",
+          "type": "text",
+          "required": true,
+          "placeholder": "John Doe"
+        },
+        {
+          "id": "phone",
+          "label": "Phone (optional)",
+          "type": "tel",
+          "required": false,
+          "placeholder": "+971 50 123 4567"
+        }
+      ]
+    },
+    "proactiveGreeting": {
+      "enabled": true,
+      "delaySeconds": 5,
+      "message": "Hi! 👋 I'm Natalie. I can help you reserve a table or tell you about today's specials.",
+      "pageRules": []
+    }
+  },
+  "notifications": {
+    "enabled": true,
+    "recipientEmails": [],
+    "events": {
+      "booking_confirmed": true,
+      "order_placed": true,
+      "lead_captured": true,
+      "handoff_requested": true,
+      "nova_failed": true
+    },
+    "quietHours": {
+      "enabled": false,
+      "start": "22:00",
+      "end": "07:00",
+      "timezone": "UTC"
+    },
+    "dailyDigest": {
+      "enabled": false,
+      "sendAt": "09:00"
+    }
   }
 }

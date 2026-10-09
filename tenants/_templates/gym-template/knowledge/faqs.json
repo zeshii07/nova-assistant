@@ -1,0 +1,10 @@
+[
+  {
+    "question": "What are your opening hours?",
+    "answer": "{{business_hours}}"
+  },
+  {
+    "question": "Do you offer personal training?",
+    "answer": "Yes! Book a personal training session with one of our certified trainers."
+  }
+]

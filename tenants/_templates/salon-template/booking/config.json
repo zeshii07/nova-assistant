@@ -1,0 +1,30 @@
+{
+  "enabled": true,
+  "mode": "appointment",
+  "defaultSubject": null,
+  "triggerTerms": [
+    "book",
+    "appointment",
+    "can i get",
+    "i want",
+    "need",
+    "appoint"
+  ],
+  "requiredFields": [
+    "subject",
+    "date",
+    "time",
+    "name",
+    "phone"
+  ],
+  "confirmedLabel": "Appointment request received",
+  "readyLabel": "Your appointment request is ready",
+  "confirmPrompt": "Confirm this appointment request when you are ready.",
+  "prompts": {
+    "subject": "Which salon service would you like to book?",
+    "date": "What date would you prefer?",
+    "time": "What time would you prefer?",
+    "name": "May I have your full name?",
+    "phone": "What is the best contact phone number to reach you on?"
+  }
+}

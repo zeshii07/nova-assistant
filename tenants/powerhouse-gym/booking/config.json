@@ -1,0 +1,6 @@
+{
+  "enabled": true,
+  "mode": "appointment",
+  "slotDurationMinutes": 60,
+  "leadTimeHours": 2
+}

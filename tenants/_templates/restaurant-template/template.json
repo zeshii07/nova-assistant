@@ -1,0 +1,16 @@
+{
+  "id": "restaurant-template",
+  "label": "Restaurant",
+  "description": "Menu browsing, table reservations, takeout orders",
+  "icon": "🍽️",
+  "domain": "restaurant",
+  "capabilities": [
+    "assistant",
+    "crm",
+    "offering",
+    "booking"
+  ],
+  "defaultServices": [],
+  "sourceTenant": "restaurant-demo",
+  "createdAt": "2026-10-09T04:08:35.957Z"
+}

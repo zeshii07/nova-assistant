@@ -1,0 +1,4 @@
+{
+  "customerCreated": "Welcome {{customer_name}}! Your details have been saved.",
+  "customerUpdated": "Your details have been updated."
+}

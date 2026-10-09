@@ -1,36 +1,51 @@
 =================================================================
-  Nova Assistant v28.0 — Website Widget SDK + Admin Dashboard
+  Nova Assistant v30.1 — Tenant Templates & Onboarding Wizard
 =================================================================
 
-DEPLOY TO RENDER (or any host)
-------------------------------
-1. Unzip this package over your local nova-assistant/ folder
-2. Commit + push to your Render-connected Git repo
-3. Render will auto-redeploy with v28.0
-4. Verify: curl https://nova-saas-test.onrender.com/health
-   Should return: "version":"28.0.0"
-
-WHAT'S IN THIS PACKAGE (v28.0)
-------------------------------
-  • Drop-in Website Widget SDK — <script src="/widget.js" data-tenant="...">
-  • Shadow DOM isolation + XSS-safe rendering
-  • CORS + rate limiting (30/min per IP+tenant, no Redis needed)
-  • Tenant verification + customerId validation
-  • Session persistence in localStorage (7-day TTL)
-  • Retry with exponential backoff (3 retries)
-  • Mobile responsive (fullscreen ≤ 480px)
-  • Admin Dashboard at /admin (from v27.0)
-  • All 8 tenant profiles updated with `widget` config block
-
-EMBED ON ANY WEBSITE
---------------------
-  <script src="https://nova-saas-test.onrender.com/widget.js"
-          data-tenant="cleaning-demo"
-          async></script>
-
-8 TENANTS AVAILABLE
+WHAT'S NEW IN v30.1
 -------------------
-  cleaning-demo, default, healthcare-demo, salon-demo,
-  restaurant-demo, education-demo, tutor-demo, driving-school-demo
+  • 4 pre-built templates (cleaning, retail, salon, restaurant)
+  • Custom template creation for totally new business types
+  • 2-minute onboarding wizard (pick template → enter details → get snippet)
+  • Tenant management list with search, filter, stats
+  • Each business gets its own isolated data (CRM, bookings, leads)
+  • No more editing JSON files to add a new business!
+
+INSTALL
+-------
+  cd /path/to/your/nova-assistant
+  unzip -o nova-v30.1-templates.zip
+  npm install
+
+RUN
+---
+  node apps/api/src/server.js
+
+  Open http://localhost:3000/admin → "Onboard Business" tab
+
+ONBOARD A NEW BUSINESS (2 minutes)
+-----------------------------------
+  1. Open /admin → click "Onboard Business"
+  2. Pick a template (Cleaning, Retail, Salon, Restaurant, or Custom)
+  3. Enter business name + owner email + phone + hours + location
+  4. Pick widget color + agent name + avatar
+  5. Click "Create business & get embed snippet"
+  6. Copy the snippet → paste on the business's website
+
+CREATE A CUSTOM TEMPLATE (for new business types)
+------------------------------------------------
+  1. /admin → "Onboard Business" → click "Build from scratch"
+  2. Enter template ID (e.g., "gym-template"), label ("Gym / Fitness")
+  3. Pick icon emoji (💪), domain (fitness), capabilities
+  4. List services (one per line: name | price | currency | unit)
+  5. Click "Create custom template"
+  6. Now you can onboard gyms from this template!
+
+MANAGE TENANTS
+--------------
+  /admin → "Tenants" tab
+  - Search by name, filter by template
+  - See stats (leads, notifications) per tenant
+  - Click any tenant to view conversations, leads, notifications
 
 =================================================================

@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Monthly Membership",
+    "priceType": "fixed",
+    "price": 200,
+    "currency": "AED",
+    "unit": "per month"
+  },
+  {
+    "name": "Personal Training Session",
+    "priceType": "fixed",
+    "price": 150,
+    "currency": "AED",
+    "unit": "per session"
+  },
+  {
+    "name": "Group Class",
+    "priceType": "fixed",
+    "price": 50,
+    "currency": "AED",
+    "unit": "per class"
+  }
+]

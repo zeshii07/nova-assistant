@@ -60,6 +60,57 @@
       "What cleaning services do you offer?",
       "I need a deep cleaning quote",
       "Book a cleaning for tomorrow"
-    ]
+    ],
+    "agentAvatar": "david",
+    "agentName": "David",
+    "agentTitle": "Booking Agent",
+    "preChatForm": {
+      "enabled": true,
+      "fields": [
+        {
+          "id": "name",
+          "label": "Your name",
+          "type": "text",
+          "required": true,
+          "placeholder": "John Doe"
+        },
+        {
+          "id": "phone",
+          "label": "Phone (optional)",
+          "type": "tel",
+          "required": false,
+          "placeholder": "+971 50 123 4567"
+        }
+      ]
+    },
+    "proactiveGreeting": {
+      "enabled": true,
+      "delaySeconds": 5,
+      "message": "Hi! 👋 I'm David, your booking agent. Need a cleaning quote or want to schedule a service? I'm here to help.",
+      "pageRules": []
+    }
+  },
+  "notifications": {
+    "enabled": true,
+    "recipientEmails": [
+      "owner@sparklecare.com"
+    ],
+    "events": {
+      "booking_confirmed": true,
+      "order_placed": true,
+      "lead_captured": true,
+      "handoff_requested": true,
+      "nova_failed": true
+    },
+    "quietHours": {
+      "enabled": false,
+      "start": "22:00",
+      "end": "07:00",
+      "timezone": "UTC"
+    },
+    "dailyDigest": {
+      "enabled": false,
+      "sendAt": "09:00"
+    }
   }
 }

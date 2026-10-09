@@ -3,145 +3,155 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Nova Widget Embed Test</title>
+  <title>Nova Widget v29.0 — Agent Persona Test</title>
   <style>
-    body {
-      font-family: Inter, system-ui, sans-serif;
-      margin: 0; padding: 40px;
-      background: #f4f6fa; color: #111;
-      line-height: 1.6;
-    }
+    body { font-family: Inter, system-ui, sans-serif; margin: 0; padding: 40px 20px; max-width: 720px; margin: 0 auto; color: #111; line-height: 1.6; }
     h1 { font-size: 28px; margin: 0 0 8px; }
     h2 { font-size: 18px; margin: 28px 0 10px; color: #444; }
-    p { color: #555; max-width: 600px; }
-    code {
-      background: #1b263e; color: #d9e3f7;
-      padding: 2px 7px; border-radius: 4px;
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-      font-size: 13px;
-    }
-    pre {
-      background: #1b263e; color: #d9e3f7;
-      padding: 16px; border-radius: 8px; overflow: auto;
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-      font-size: 12px; line-height: 1.5;
-      max-width: 600px;
-    }
-    .controls {
-      display: flex; gap: 10px; margin: 24px 0; flex-wrap: wrap;
-    }
-    .controls select, .controls button {
-      padding: 8px 12px; border-radius: 8px;
-      border: 1px solid #d4dae6; background: #fff;
-      font-size: 13px; font-family: inherit; cursor: pointer;
-    }
+    p { color: #555; }
+    code { background: #1b263e; color: #d9e3f7; padding: 2px 7px; border-radius: 4px; font-size: 13px; }
+    pre { background: #1b263e; color: #d9e3f7; padding: 16px; border-radius: 8px; overflow: auto; font-size: 12px; line-height: 1.5; }
+    .controls { display: flex; gap: 10px; margin: 16px 0; flex-wrap: wrap; align-items: center; }
+    .controls select, .controls button { padding: 8px 12px; border-radius: 8px; border: 1px solid #d4dae6; background: #fff; font-size: 13px; font-family: inherit; cursor: pointer; }
     .controls button { background: #2d5bd1; color: #fff; border-color: #2d5bd1; }
-    .badge {
-      display: inline-block;
-      padding: 2px 8px; border-radius: 12px;
-      background: #d1fae5; color: #065f46;
-      font-size: 11px; font-weight: 600;
-      margin-left: 8px; vertical-align: middle;
-    }
-    .info {
-      background: #fef3c7; color: #92400e;
-      padding: 12px 16px; border-radius: 8px;
-      font-size: 13px; max-width: 600px; margin: 16px 0;
-    }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; background: #d1fae5; color: #065f46; font-size: 11px; font-weight: 600; margin-left: 8px; vertical-align: middle; }
+    .info { background: #fef3c7; color: #92400e; padding: 12px 16px; border-radius: 8px; font-size: 13px; margin: 16px 0; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+    .grid > div { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; font-size: 13px; }
+    .grid strong { display: block; margin-bottom: 4px; color: #111; }
   </style>
 </head>
 <body>
-  <h1>Nova Widget Embed Test <span class="badge">v28.0</span></h1>
-  <p>This page demonstrates the Nova Website Widget SDK embedded as a third-party script. The widget loads in a Shadow DOM (isolated from this page's styles), persists session in localStorage, and respects per-tenant config.</p>
+  <h1>Nova Widget v29.0 <span class="badge">Agent Persona</span></h1>
+  <p>This page demonstrates the new v29.0 widget features: agent avatar (instead of message icon), pre-chat form, proactive greeting, and 4 position options.</p>
 
   <div class="info">
-    <strong>Test mode:</strong> This page is served from the Nova origin itself (same-origin). To verify cross-origin CORS, host this HTML on a different domain or open it via <code>file://</code>.
+    <strong>What's new in v29.0:</strong><br>
+    1. Agent avatar (10 pre-built SVG portraits) replaces the message icon<br>
+    2. Speech-bubble welcome message appears before chat opens<br>
+    3. Pre-chat form (name + phone) captures lead info before chat starts<br>
+    4. Proactive greeting auto-opens after 5 seconds (first visit only)<br>
+    5. Four positions: bottom-right, bottom-left, bottom-center, side-panel
   </div>
 
-  <h2>1. Try the widget</h2>
-  <p>Click the chat bubble in the bottom-right corner to start. Switch tenants and the widget will reload with the new tenant's branding, welcome message, and suggestions.</p>
+  <h2>Try it live</h2>
+  <p>Switch tenants and positions to see different agent personas and layouts. The widget reloads instantly.</p>
 
   <div class="controls">
-    <select id="tenantSwitcher">
-      <option value="cleaning-demo">cleaning-demo (SparkleCare, emerald)</option>
-      <option value="default">default (Demo Store, blue)</option>
-      <option value="healthcare-demo">healthcare-demo (NovaCare, red)</option>
-      <option value="salon-demo">salon-demo (pink)</option>
-      <option value="restaurant-demo">restaurant-demo (orange)</option>
-      <option value="education-demo">education-demo (violet)</option>
-      <option value="tutor-demo">tutor-demo (cyan)</option>
-      <option value="driving-school-demo">driving-school-demo (amber)</option>
-    </select>
-    <button id="reloadWidget">Reload widget with selected tenant</button>
+    <label><strong>Tenant:</strong>
+      <select id="tenantSwitcher">
+        <option value="cleaning-demo">SparkleCare (David)</option>
+        <option value="default">Demo Store (Marcus)</option>
+        <option value="healthcare-demo">NovaCare (Aria)</option>
+        <option value="salon-demo">Salon (Sophie)</option>
+        <option value="restaurant-demo">Restaurant (Natalie)</option>
+        <option value="education-demo">Education (Emma)</option>
+        <option value="tutor-demo">Tutor (Olivia)</option>
+        <option value="driving-school-demo">Driving School (Liam)</option>
+      </select>
+    </label>
+    <label><strong>Position:</strong>
+      <select id="positionSwitcher">
+        <option value="bottom-right">Bottom Right</option>
+        <option value="bottom-left">Bottom Left</option>
+        <option value="bottom-center">Bottom Center</option>
+        <option value="side-panel">Side Panel (slides from right)</option>
+      </select>
+    </label>
+    <button id="reloadWidget">Apply</button>
+    <button id="clearStorage" style="background:#ef4444;border-color:#ef4444">Clear session</button>
   </div>
 
-  <h2>2. Embed code</h2>
-  <p>Copy this snippet onto any HTML page. Replace <code>your-nova.com</code> with your Nova server URL and <code>cleaning-demo</code> with your tenant ID.</p>
-  <pre>&lt;script
+  <h2>v29.0 embed snippet</h2>
+  <pre id="embedSnippet">&lt;script
   src="https://your-nova.com/widget.js"
   data-tenant="cleaning-demo"
   data-position="bottom-right"
-  data-color="#10b981"
   async&gt;
 &lt;/script&gt;</pre>
 
-  <h2>3. Optional data attributes</h2>
-  <p>The widget reads these attributes from the script tag (all optional, override tenant config):</p>
-  <ul>
-    <li><code>data-tenant</code> — required, your tenant ID</li>
-    <li><code>data-position</code> — <code>bottom-right</code> (default) or <code>bottom-left</code></li>
-    <li><code>data-color</code> — hex color for the bubble + header (e.g. <code>#10b981</code>)</li>
-    <li><code>data-language</code> — <code>auto</code> (default), <code>english</code>, or <code>roman_urdu</code></li>
-    <li><code>data-welcome</code> — override the welcome message</li>
-  </ul>
+  <h2>Available agent avatars</h2>
+  <p>10 pre-built SVG portraits. Set via <code>data-avatar</code> attribute or in tenant config:</p>
+  <div class="grid" id="avatarGrid"></div>
 
-  <h2>4. Security features</h2>
-  <ul>
-    <li><strong>Shadow DOM isolation</strong> — host page CSS cannot leak in, widget CSS cannot leak out</li>
-    <li><strong>XSS-safe rendering</strong> — all user/assistant text rendered via <code>textContent</code>, never <code>innerHTML</code></li>
-    <li><strong>Tenant-scoped sessions</strong> — localStorage keys are <code>nova-widget:&lt;tenantId&gt;</code>, no cross-tenant data leakage</li>
-    <li><strong>CORS preflight</strong> — server handles OPTIONS for cross-origin embeds</li>
-    <li><strong>Rate limiting</strong> — 30 messages per minute per IP+tenant, returns 429 with Retry-After</li>
-    <li><strong>Tenant verification</strong> — server rejects requests for unknown tenant IDs with HTTP 404</li>
-    <li><strong>Customer ID validation</strong> — server enforces <code>^[a-zA-Z0-9_-]+$</code>, max 128 chars</li>
-    <li><strong>Message length cap</strong> — 4,000 chars per message (server-enforced)</li>
-    <li><strong>No PII collected</strong> — customer ID is a random UUID, no name/email/phone stored client-side</li>
-    <li><strong>CSP headers</strong> — <code>default-src 'none'; script-src 'self'</code> on /widget.js</li>
-  </ul>
-
-  <h2>5. Availability features</h2>
-  <ul>
-    <li><strong>Retry with backoff</strong> — 3 retries on network failure (1s, 2s, 4s delays)</li>
-    <li><strong>15s request timeout</strong> — prevents hung requests</li>
-    <li><strong>Graceful degradation</strong> — if config endpoint is unreachable, widget uses defaults and shows an error bubble</li>
-    <li><strong>Session persistence</strong> — conversation survives page refresh, expires after 7 days</li>
-    <li><strong>State recovery</strong> — if server restarts (memory mode), widget generates new customerId and resumes cleanly</li>
-    <li><strong>Message queue</strong> — rapid-fire messages are queued and sent sequentially</li>
-    <li><strong>Async load</strong> — never blocks page render</li>
-  </ul>
+  <h2>v29.0 configuration (per-tenant)</h2>
+  <p>Each tenant's <code>profile.json</code> now supports these widget fields:</p>
+  <pre>{
+  "widget": {
+    "enabled": true,
+    "position": "bottom-right",
+    "themeColor": "#10b981",
+    "agentAvatar": "david",
+    "agentName": "David",
+    "agentTitle": "Booking Agent",
+    "welcomeMessage": "Hi! How can I help?",
+    "suggestions": ["What services do you offer?", "Book now"],
+    "preChatForm": {
+      "enabled": true,
+      "fields": [
+        { "id": "name", "label": "Your name", "type": "text", "required": true },
+        { "id": "phone", "label": "Phone (optional)", "type": "tel", "required": false }
+      ]
+    },
+    "proactiveGreeting": {
+      "enabled": true,
+      "delaySeconds": 5,
+      "message": "Hi! I'm David, your booking agent. Need a quote?"
+    }
+  }
+}</pre>
 
   <script>
-    // Tenant switcher: remove the existing widget, change data-tenant, re-add
-    document.getElementById('reloadWidget').addEventListener('click', () => {
+    // Render avatar preview grid
+    function renderAvatarGrid() {
+      const grid = document.getElementById('avatarGrid');
+      grid.innerHTML = '';
+      if (!window.NOVA_AVATARS) return;
+      const keys = window.NOVA_AVATARS.keys ? window.NOVA_AVATARS.keys() : Object.keys(window.NOVA_AVATARS).filter(k => typeof window.NOVA_AVATARS[k] === 'object' && window.NOVA_AVATARS[k].svg);
+      for (const key of keys) {
+        const avatar = window.NOVA_AVATARS[key];
+        const div = document.createElement('div');
+        div.innerHTML = `<div style="width:48px;height:48px;border-radius:50%;overflow:hidden;margin-bottom:6px">${avatar.svg}</div><strong>${avatar.name}</strong>${avatar.title}<br><code style="font-size:11px">data-avatar="${key}"</code>`;
+        grid.appendChild(div);
+      }
+    }
+
+    // Load avatars for the preview grid
+    const avatarsScript = document.createElement('script');
+    avatarsScript.src = '/avatars.js';
+    avatarsScript.onload = renderAvatarGrid;
+    document.head.appendChild(avatarsScript);
+
+    // Tenant + position switcher
+    function applyConfig() {
       const tenantId = document.getElementById('tenantSwitcher').value;
-      // Remove existing widget
+      const position = document.getElementById('positionSwitcher').value;
       delete window.__NOVA_WIDGET_MOUNTED__;
       const existing = document.getElementById('nova-widget-host');
       if (existing) existing.remove();
-      // Remove existing widget script
       const oldScript = document.querySelector('script[data-nova-widget]');
       if (oldScript) oldScript.remove();
-      // Inject a fresh script tag
       const s = document.createElement('script');
       s.src = '/widget.js';
       s.setAttribute('data-tenant', tenantId);
+      s.setAttribute('data-position', position);
       s.setAttribute('data-nova-widget', 'true');
       s.async = true;
       document.body.appendChild(s);
+      // Update embed snippet
+      document.getElementById('embedSnippet').textContent =
+        `<script\n  src="https://your-nova.com/widget.js"\n  data-tenant="${tenantId}"\n  data-position="${position}"\n  async>\n</script>`;
+    }
+    document.getElementById('reloadWidget').addEventListener('click', applyConfig);
+
+    document.getElementById('clearStorage').addEventListener('click', () => {
+      Object.keys(localStorage).filter(k => k.startsWith('nova-widget')).forEach(k => localStorage.removeItem(k));
+      alert('Session cleared. Reload to see the proactive greeting again.');
+      location.reload();
     });
   </script>
 
-  <!-- Initial widget load with cleaning-demo -->
-  <script src="/widget.js" data-tenant="cleaning-demo" data-nova-widget="true" async></script>
+  <!-- Initial widget load -->
+  <script src="/widget.js" data-tenant="cleaning-demo" data-position="bottom-right" data-nova-widget="true" async></script>
 </body>
 </html>

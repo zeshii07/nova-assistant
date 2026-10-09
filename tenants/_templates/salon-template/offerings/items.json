@@ -1,0 +1,82 @@
+[
+  {
+    "id": "haircut",
+    "name": "Haircut",
+    "aliases": [
+      "hair cut"
+    ],
+    "type": "service",
+    "category": "hair",
+    "description": "Professional haircut and finishing.",
+    "price": 1500,
+    "durationMinutes": 45,
+    "bookable": true
+  },
+  {
+    "id": "hair-styling",
+    "name": "Hair Styling",
+    "aliases": [
+      "hair styling",
+      "style my hair",
+      "blow dry",
+      "blow-dry",
+      "blowdry"
+    ],
+    "type": "service",
+    "category": "hair",
+    "description": "Hair styling for casual or event looks.",
+    "price": 2500,
+    "durationMinutes": 60,
+    "bookable": true
+  },
+  {
+    "id": "beard-grooming",
+    "name": "Beard Grooming",
+    "aliases": [
+      "beard grooming",
+      "beared grooming",
+      "beard trim"
+    ],
+    "type": "service",
+    "category": "grooming",
+    "description": "Beard trim, shaping and grooming.",
+    "price": 1000,
+    "durationMinutes": 30,
+    "bookable": true
+  },
+  {
+    "id": "facial",
+    "name": "Facial",
+    "aliases": [
+      "facial treatment"
+    ],
+    "type": "service",
+    "category": "beauty",
+    "description": "Refreshing facial service.",
+    "price": 3000,
+    "durationMinutes": 60,
+    "bookable": true
+  },
+  {
+    "id": "hair-color",
+    "name": "Hair Color",
+    "aliases": [
+      "dye my hair",
+      "dying my hair",
+      "hair coloring",
+      "hair colour",
+      "hair dye",
+      "hair dying"
+    ],
+    "type": "service",
+    "category": "hair",
+    "description": "Hair color service; final price can vary by hair length.",
+    "price": 4500,
+    "pricePrefix": "From ",
+    "durationMinutes": 120,
+    "bookable": true,
+    "colors": [
+      "Black"
+    ]
+  }
+]

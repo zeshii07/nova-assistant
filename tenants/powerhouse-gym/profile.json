@@ -1,0 +1,98 @@
+{
+  "id": "powerhouse-gym",
+  "name": "PowerHouse Gym",
+  "status": "active",
+  "defaultLanguage": "english",
+  "capabilities": [
+    "assistant",
+    "crm",
+    "offering",
+    "booking"
+  ],
+  "domain": "fitness",
+  "branding": {
+    "assistantName": "PowerHouse Gym Assistant",
+    "welcomeMessage": "Hi! 👋 Welcome to PowerHouse Gym. Want to book a class or a personal training session?"
+  },
+  "business": {
+    "description": "PowerHouse Gym - PowerHouse Gym",
+    "contact": "+971 50 999 8888",
+    "email": "owner@powerhouse.ae",
+    "hours": "5 AM - 11 PM Daily",
+    "location": "Business Bay, Dubai"
+  },
+  "features": {
+    "llmFallback": true
+  },
+  "permissions": [
+    "knowledge.read",
+    "memory.read:assistant",
+    "memory.write:assistant",
+    "crm.customer.read:assistant",
+    "crm.customer.write:assistant",
+    "crm.activity.write:assistant"
+  ],
+  "widget": {
+    "enabled": true,
+    "position": "bottom-right",
+    "themeColor": "#dc2626",
+    "language": "auto",
+    "welcomeMessage": "Hi! 👋 Welcome to PowerHouse Gym. Want to book a class or a personal training session?",
+    "agentAvatar": "liam",
+    "agentName": "Max",
+    "agentTitle": "Assistant",
+    "suggestions": [
+      "What classes do you offer?",
+      "Book a personal training session",
+      "Membership prices"
+    ],
+    "preChatForm": {
+      "enabled": true,
+      "fields": [
+        {
+          "id": "name",
+          "label": "Your name",
+          "type": "text",
+          "required": true,
+          "placeholder": "John Doe"
+        },
+        {
+          "id": "phone",
+          "label": "Phone (optional)",
+          "type": "tel",
+          "required": false,
+          "placeholder": "+971 50 123 4567"
+        }
+      ]
+    },
+    "proactiveGreeting": {
+      "enabled": true,
+      "delaySeconds": 5,
+      "message": "Hi! 👋 I'm Max. How can I help you today?",
+      "pageRules": []
+    }
+  },
+  "notifications": {
+    "enabled": true,
+    "recipientEmails": [
+      "owner@powerhouse.ae"
+    ],
+    "events": {
+      "booking_confirmed": true,
+      "order_placed": true,
+      "lead_captured": true,
+      "handoff_requested": true,
+      "nova_failed": true
+    },
+    "quietHours": {
+      "enabled": false,
+      "start": "22:00",
+      "end": "07:00",
+      "timezone": "UTC"
+    },
+    "dailyDigest": {
+      "enabled": false,
+      "sendAt": "09:00"
+    }
+  }
+}

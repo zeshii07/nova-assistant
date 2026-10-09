@@ -1,0 +1,58 @@
+[
+  {
+    "id": "chicken-biryani",
+    "name": "Chicken Biryani",
+    "aliases": [
+      "biryani",
+      "chicken biryani"
+    ],
+    "type": "menu_item",
+    "category": "Pakistani",
+    "description": "Chicken biryani served with raita.",
+    "price": 650,
+    "bookable": false,
+    "orderable": true
+  },
+  {
+    "id": "beef-burger",
+    "name": "Beef Burger",
+    "aliases": [
+      "burger",
+      "beef burger"
+    ],
+    "type": "menu_item",
+    "category": "Burgers",
+    "description": "Beef burger with fries.",
+    "price": 850,
+    "bookable": false,
+    "orderable": true
+  },
+  {
+    "id": "alfredo-pasta",
+    "name": "Alfredo Pasta",
+    "aliases": [
+      "pasta",
+      "alfredo"
+    ],
+    "type": "menu_item",
+    "category": "Continental",
+    "description": "Creamy Alfredo pasta.",
+    "price": 1200,
+    "bookable": false,
+    "orderable": true
+  },
+  {
+    "id": "grilled-chicken",
+    "name": "Grilled Chicken",
+    "aliases": [
+      "grill chicken",
+      "grilled chicken"
+    ],
+    "type": "menu_item",
+    "category": "Continental",
+    "description": "Grilled chicken with seasonal sides.",
+    "price": 1500,
+    "bookable": false,
+    "orderable": true
+  }
+]

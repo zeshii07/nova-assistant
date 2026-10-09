@@ -1,0 +1,14 @@
+{
+  "maxLength": 1200,
+  "emojiLevel": "low",
+  "allowHumor": false,
+  "allowedLanguages": [
+    "english",
+    "roman_urdu",
+    "urdu"
+  ],
+  "forbiddenPhrases": [
+    "guaranteed slot"
+  ],
+  "alwaysGreet": false
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "clothing",
+    "name": "Clothing",
+    "emoji": "👕"
+  },
+  {
+    "id": "electronics",
+    "name": "Electronics",
+    "emoji": "📱"
+  },
+  {
+    "id": "accessories",
+    "name": "Accessories",
+    "emoji": "⌚"
+  },
+  {
+    "id": "footwear",
+    "name": "Footwear",
+    "emoji": "👟"
+  },
+  {
+    "id": "home-office",
+    "name": "Home & Office",
+    "emoji": "🏠"
+  },
+  {
+    "id": "bags",
+    "name": "Bags",
+    "emoji": "🎒"
+  },
+  {
+    "id": "stationery",
+    "name": "Stationery",
+    "emoji": "✏️"
+  },
+  {
+    "id": "personal-care",
+    "name": "Personal Care",
+    "emoji": "🧴"
+  },
+  {
+    "id": "kitchen",
+    "name": "Kitchen",
+    "emoji": "🍳"
+  },
+  {
+    "id": "fitness",
+    "name": "Fitness",
+    "emoji": "🏋️"
+  },
+  {
+    "id": "mobile-accessories",
+    "name": "Mobile Accessories",
+    "emoji": "📲"
+  },
+  {
+    "id": "travel",
+    "name": "Travel",
+    "emoji": "🧳"
+  }
+]

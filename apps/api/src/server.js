@@ -32,7 +32,7 @@ async function startServer() {
       // v28.0 Website Widget SDK — drop-in embeddable script.
       // Customers include <script src="https://your-nova.com/widget.js" data-tenant="cleaning-demo"></script>
       // and the widget auto-mounts on any page. Served with strict CSP + Cache-Control.
-      if (req.method === "GET" && (url.pathname === "/widget.js" || url.pathname === "/widget-config.js" || url.pathname === "/widget-test")) {
+      if (req.method === "GET" && (url.pathname === "/widget.js" || url.pathname === "/widget-config.js" || url.pathname === "/avatars.js" || url.pathname === "/widget-test")) {
         return serveWidgetAsset(res, url.pathname);
       }
 
@@ -563,6 +563,16 @@ async function startServer() {
           const profile = container.tenantRepository.getById(t.id);
           const branding = profile?.branding || {};
           const business = profile?.business || {};
+          const notifications = profile?.notifications || {};
+          // Try to get activity counts (best-effort, doesn't fail if no data)
+          let leadCount = 0, bookingCount = 0, notificationCount = 0, lastActivity = null;
+          try {
+            const leadSummary = container.leadService?.summary?.(t.id);
+            if (leadSummary) leadCount = leadSummary.total || 0;
+          } catch {}
+          try {
+            notificationCount = container.notificationService ? container.notificationService.notificationLog.totalCount(t.id) : 0;
+          } catch {}
           return {
             id: t.id,
             name: t.name,
@@ -575,11 +585,314 @@ async function startServer() {
             location: business.location || profile?.location || '',
             currency: business.currency || profile?.currency || 'PKR',
             status: profile?.status || 'active',
-            defaultLanguage: profile?.defaultLanguage || 'english'
+            defaultLanguage: profile?.defaultLanguage || 'english',
+            templateId: profile?._template?.templateId || null,
+            sourceTenant: profile?._template?.sourceTenant || null,
+            isCustom: !profile?._template?.templateId,
+            createdAt: profile?._template?.createdAt || null,
+            widgetEnabled: profile?.widget?.enabled !== false,
+            notificationsEnabled: notifications.enabled !== false,
+            notificationRecipients: (notifications.recipientEmails || []).length,
+            stats: { leads: leadCount, notifications: notificationCount }
           };
         });
         return sendJson(res, 200, { ok:true, tenants: enriched });
       }
+
+      // ─── v30.1 Template & Tenant Creation endpoints ────────────────────────
+      if (req.method === "GET" && url.pathname === "/api/admin/templates") {
+        const templatesDir = path.resolve(container.config.tenantsDir, "_templates");
+        const templates = [];
+        if (fs.existsSync(templatesDir)) {
+          for (const dir of fs.readdirSync(templatesDir).sort()) {
+            const templateJsonPath = path.join(templatesDir, dir, "template.json");
+            if (!fs.existsSync(templateJsonPath)) continue;
+            try {
+              const tpl = JSON.parse(fs.readFileSync(templateJsonPath, 'utf8'));
+              templates.push(tpl);
+            } catch {}
+          }
+        }
+        return sendJson(res, 200, { ok:true, templates });
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/admin/templates/create") {
+        const body = await readJson(req);
+        const templateId = String(body.id || '').trim().replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+        const label = String(body.label || '').trim();
+        if (!templateId || !label) return sendJson(res, 400, { ok:false, error:'id and label are required' });
+        if (!/^[a-z0-9-]+$/.test(templateId)) return sendJson(res, 400, { ok:false, error:'id must be lowercase letters, numbers, hyphens only' });
+
+        const templatesDir = path.resolve(container.config.tenantsDir, "_templates");
+        const newTemplateDir = path.join(templatesDir, templateId);
+        if (fs.existsSync(newTemplateDir)) return sendJson(res, 409, { ok:false, error:'Template already exists' });
+
+        // For custom templates, we build a minimal but functional tenant from scratch
+        const capabilities = Array.isArray(body.capabilities) && body.capabilities.length
+          ? body.capabilities : ['assistant', 'crm'];
+        const domain = String(body.domain || 'generic').trim();
+        const services = Array.isArray(body.services) ? body.services : [];
+        const faqs = Array.isArray(body.faqs) ? body.faqs : [];
+        const businessFacts = body.businessFacts && typeof body.businessFacts === 'object' ? body.businessFacts : {};
+
+        fs.mkdirSync(path.join(newTemplateDir, 'knowledge'), { recursive: true });
+        fs.mkdirSync(path.join(newTemplateDir, 'templates'), { recursive: true });
+
+        // template.json
+        fs.writeFileSync(path.join(newTemplateDir, 'template.json'), JSON.stringify({
+          id: templateId, label, description: String(body.description || ''), icon: body.icon || '🏢',
+          domain, capabilities, defaultServices: services, sourceTenant: null,
+          isCustom: true, createdAt: new Date().toISOString()
+        }, null, 2) + '\n', 'utf8');
+
+        // profile.json with placeholders
+        const profile = {
+          id: '{{tenant_id}}', name: '{{business_name}}', status: 'active', defaultLanguage: 'english',
+          capabilities, domain,
+          branding: {
+            assistantName: '{{business_name}} Assistant',
+            welcomeMessage: body.welcomeMessage || 'Hi! 👋 Welcome to {{business_name}}. How can I help you today?'
+          },
+          business: {
+            description: '{{business_description}}', contact: '{{owner_phone}}', email: '{{owner_email}}',
+            hours: '{{business_hours}}', location: '{{business_location}}'
+          },
+          features: { llmFallback: true },
+          permissions: ['knowledge.read', 'memory.read:assistant', 'memory.write:assistant', 'crm.customer.read:assistant', 'crm.customer.write:assistant', 'crm.activity.write:assistant'],
+          widget: {
+            enabled: true, position: 'bottom-right', themeColor: '{{theme_color}}', language: 'auto',
+            welcomeMessage: body.welcomeMessage || 'Hi! 👋 Welcome to {{business_name}}. How can I help you today?',
+            agentAvatar: body.agentAvatar || 'marcus', agentName: '{{agent_name}}', agentTitle: 'Assistant',
+            suggestions: body.suggestions || ['What services do you offer?', 'Book now', 'What are your hours?'],
+            preChatForm: { enabled: true, fields: [
+              { id: 'name', label: 'Your name', type: 'text', required: true, placeholder: 'John Doe' },
+              { id: 'phone', label: 'Phone (optional)', type: 'tel', required: false, placeholder: '+971 50 123 4567' }
+            ]},
+            proactiveGreeting: { enabled: true, delaySeconds: 5, message: "Hi! 👋 I'm {{agent_name}}. How can I help you today?", pageRules: [] }
+          },
+          notifications: {
+            enabled: true, recipientEmails: ['{{owner_email}}'],
+            events: { booking_confirmed: true, order_placed: true, lead_captured: true, handoff_requested: true, nova_failed: true },
+            quietHours: { enabled: false, start: '22:00', end: '07:00', timezone: 'UTC' },
+            dailyDigest: { enabled: false, sendAt: '09:00' }
+          },
+          _template: { isTemplate: true, templateId, sourceTenant: null, createdAt: new Date().toISOString() }
+        };
+        fs.writeFileSync(path.join(newTemplateDir, 'profile.json'), JSON.stringify(profile, null, 2) + '\n', 'utf8');
+
+        // knowledge/business.json
+        fs.writeFileSync(path.join(newTemplateDir, 'knowledge/business.json'), JSON.stringify({
+          name: '{{business_name}}', description: '{{business_description}}',
+          contact: '{{owner_phone}}', email: '{{owner_email}}', hours: '{{business_hours}}', location: '{{business_location}}',
+          ...businessFacts
+        }, null, 2) + '\n', 'utf8');
+
+        // knowledge/faqs.json
+        fs.writeFileSync(path.join(newTemplateDir, 'knowledge/faqs.json'), JSON.stringify(faqs, null, 2) + '\n', 'utf8');
+
+        // personality.json
+        fs.writeFileSync(path.join(newTemplateDir, 'personality.json'), JSON.stringify({
+          tone: 'friendly, professional, helpful',
+          style: 'concise but warm, uses emojis sparingly',
+          language: 'auto'
+        }, null, 2) + '\n', 'utf8');
+
+        // policies.json
+        fs.writeFileSync(path.join(newTemplateDir, 'policies.json'), JSON.stringify({
+          cancellation: 'Please contact us at least 24 hours in advance for cancellations.',
+          refunds: 'Refund policy varies by service. Please ask for details.',
+          rescheduling: 'Rescheduling is free up to 12 hours before the appointment.'
+        }, null, 2) + '\n', 'utf8');
+
+        // If cleaning capability, create cleaning/services.json with the template services
+        if (capabilities.includes('cleaning') && services.length) {
+          fs.mkdirSync(path.join(newTemplateDir, 'cleaning'), { recursive: true });
+          fs.writeFileSync(path.join(newTemplateDir, 'cleaning/services.json'), JSON.stringify(services, null, 2) + '\n', 'utf8');
+          fs.mkdirSync(path.join(newTemplateDir, 'pricing'), { recursive: true });
+          fs.writeFileSync(path.join(newTemplateDir, 'pricing/services.json'), JSON.stringify(services, null, 2) + '\n', 'utf8');
+        }
+
+        // If catalog capability, create catalog files
+        if (capabilities.includes('catalog')) {
+          fs.mkdirSync(path.join(newTemplateDir, 'catalog'), { recursive: true });
+          fs.writeFileSync(path.join(newTemplateDir, 'catalog/products.json'), JSON.stringify([], null, 2) + '\n', 'utf8');
+          fs.writeFileSync(path.join(newTemplateDir, 'catalog/categories.json'), JSON.stringify([], null, 2) + '\n', 'utf8');
+          fs.writeFileSync(path.join(newTemplateDir, 'catalog/synonyms.json'), JSON.stringify({}, null, 2) + '\n', 'utf8');
+        }
+
+        // If offering capability, create offerings files
+        if (capabilities.includes('offering')) {
+          fs.mkdirSync(path.join(newTemplateDir, 'offerings'), { recursive: true });
+          fs.writeFileSync(path.join(newTemplateDir, 'offerings/items.json'), JSON.stringify(services, null, 2) + '\n', 'utf8');
+          fs.writeFileSync(path.join(newTemplateDir, 'offerings/config.json'), JSON.stringify({ bookingMode: 'appointment' }, null, 2) + '\n', 'utf8');
+        }
+
+        // If booking capability, create booking config
+        if (capabilities.includes('booking')) {
+          fs.mkdirSync(path.join(newTemplateDir, 'booking'), { recursive: true });
+          fs.writeFileSync(path.join(newTemplateDir, 'booking/config.json'), JSON.stringify({
+            enabled: true, mode: 'appointment', slotDurationMinutes: 60, leadTimeHours: 2
+          }, null, 2) + '\n', 'utf8');
+          fs.mkdirSync(path.join(newTemplateDir, 'calendar'), { recursive: true });
+          fs.writeFileSync(path.join(newTemplateDir, 'calendar/config.json'), JSON.stringify({
+            enabled: true, provider: 'local', timezone: 'Asia/Karachi'
+          }, null, 2) + '\n', 'utf8');
+        }
+
+        // WhatsApp channel (disabled by default)
+        fs.mkdirSync(path.join(newTemplateDir, 'channels'), { recursive: true });
+        fs.writeFileSync(path.join(newTemplateDir, 'channels/whatsapp.json'), JSON.stringify({
+          enabled: false, graphVersion: 'v23.0'
+        }, null, 2) + '\n', 'utf8');
+
+        // Templates (response templates)
+        fs.writeFileSync(path.join(newTemplateDir, 'templates/assistant.json'), JSON.stringify({
+          greeting: '{{welcome_message}}',
+          fallback: "I'm not sure about that. Let me connect you with our team.",
+          closing: 'Is there anything else I can help you with?'
+        }, null, 2) + '\n', 'utf8');
+        fs.writeFileSync(path.join(newTemplateDir, 'templates/crm.json'), JSON.stringify({
+          customerCreated: 'Welcome {{customer_name}}! Your details have been saved.',
+          customerUpdated: 'Your details have been updated.'
+        }, null, 2) + '\n', 'utf8');
+
+        return sendJson(res, 201, { ok:true, templateId, message: `Custom template '${label}' created. Use it to onboard new tenants.` });
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/admin/tenants/create") {
+        const body = await readJson(req);
+        const templateId = String(body.templateId || '').trim();
+        const businessName = String(body.businessName || '').trim();
+        if (!templateId || !businessName) return sendJson(res, 400, { ok:false, error:'templateId and businessName are required' });
+
+        // Verify template exists
+        const templateDir = path.resolve(container.config.tenantsDir, "_templates", templateId);
+        if (!fs.existsSync(templateDir)) return sendJson(res, 404, { ok:false, error:'Template not found' });
+
+        // Generate tenant ID from business name
+        let tenantId = String(body.tenantId || '').trim();
+        if (!tenantId) {
+          tenantId = businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+          // Ensure uniqueness
+          let suffix = 1;
+          while (fs.existsSync(path.join(container.config.tenantsDir, tenantId))) {
+            tenantId = `${businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-${suffix}`;
+            suffix += 1;
+          }
+        }
+        if (!/^[a-z0-9-]+$/.test(tenantId)) return sendJson(res, 400, { ok:false, error:'tenantId must be lowercase letters, numbers, hyphens only' });
+
+        const newTenantDir = path.join(container.config.tenantsDir, tenantId);
+        if (fs.existsSync(newTenantDir)) return sendJson(res, 409, { ok:false, error:'Tenant already exists' });
+
+        // Clone template directory recursively
+        const copyTemplate = (src, dst) => {
+          fs.mkdirSync(dst, { recursive: true });
+          for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+            const srcPath = path.join(src, entry.name);
+            const dstPath = path.join(dst, entry.name);
+            if (entry.isDirectory()) copyTemplate(srcPath, dstPath);
+            else fs.copyFileSync(srcPath, dstPath);
+          }
+        };
+        copyTemplate(templateDir, newTenantDir);
+
+        // Replace placeholders in profile.json
+        const replacements = {
+          '{{tenant_id}}': tenantId,
+          '{{business_name}}': businessName,
+          '{{business_description}}': String(body.description || `${businessName} - ${businessName}`),
+          '{{owner_email}}': String(body.ownerEmail || ''),
+          '{{owner_phone}}': String(body.ownerPhone || ''),
+          '{{business_hours}}': String(body.hours || ''),
+          '{{business_location}}': String(body.location || ''),
+          '{{theme_color}}': String(body.themeColor || '#2d5bd1'),
+          '{{agent_name}}': String(body.agentName || `${businessName} Assistant`),
+          '{{welcome_message}}': String(body.welcomeMessage || `Hi! 👋 Welcome to ${businessName}. How can I help you today?`)
+        };
+
+        const profilePath = path.join(newTenantDir, 'profile.json');
+        let profileContent = fs.readFileSync(profilePath, 'utf8');
+        for (const [placeholder, value] of Object.entries(replacements)) {
+          profileContent = profileContent.split(placeholder).join(value);
+        }
+        // Remove the _template marker (this is now a real tenant)
+        const profile = JSON.parse(profileContent);
+        delete profile._template;
+        profile.id = tenantId;
+        profile.name = businessName;
+        if (body.agentAvatar) profile.widget = profile.widget || {}, profile.widget.agentAvatar = body.agentAvatar;
+        if (body.agentName) profile.widget = profile.widget || {}, profile.widget.agentName = body.agentName;
+        if (body.agentTitle) profile.widget = profile.widget || {}, profile.widget.agentTitle = body.agentTitle;
+        if (body.suggestions && Array.isArray(body.suggestions)) profile.widget = profile.widget || {}, profile.widget.suggestions = body.suggestions;
+        if (body.ownerEmail) {
+          profile.notifications = profile.notifications || {};
+          profile.notifications.recipientEmails = [body.ownerEmail];
+        }
+        fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2) + '\n', 'utf8');
+
+        // Replace placeholders in other JSON files (knowledge, etc.)
+        function replaceInDir(dir) {
+          for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+            const fullPath = path.join(dir, entry.name);
+            if (entry.isDirectory()) { replaceInDir(fullPath); continue; }
+            if (!entry.name.endsWith('.json') && !entry.name.endsWith('.md')) continue;
+            try {
+              let content = fs.readFileSync(fullPath, 'utf8');
+              let changed = false;
+              for (const [placeholder, value] of Object.entries(replacements)) {
+                if (content.includes(placeholder)) { content = content.split(placeholder).join(value); changed = true; }
+              }
+              if (changed) fs.writeFileSync(fullPath, content, 'utf8');
+            } catch {}
+          }
+        }
+        replaceInDir(newTenantDir);
+
+        // Clear tenant cache so the new tenant is picked up
+        container.tenantRepository.clearCache(tenantId);
+
+        // Return success with the new tenant + embed snippet
+        const novaOrigin = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers['host'] || 'localhost:3000'}`;
+        const embedSnippet = `<script src="${novaOrigin}/widget.js" data-tenant="${tenantId}" async></script>`;
+
+        return sendJson(res, 201, {
+          ok: true,
+          tenant: { id: tenantId, name: businessName, templateId, domain: profile.domain || 'generic', capabilities: profile.capabilities || [] },
+          embedSnippet,
+          adminUrl: `/admin`,
+          message: `Tenant '${businessName}' created from template '${templateId}'. Widget is ready to embed.`
+        });
+      }
+
+      const adminTenantActionMatch = url.pathname.match(/^\/api\/admin\/tenants\/([^/]+)\/(suspend|activate|delete)$/);
+      if (req.method === "POST" && adminTenantActionMatch) {
+        const tenantId = decodeURIComponent(adminTenantActionMatch[1]);
+        const action = adminTenantActionMatch[2];
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Tenant not found' }); }
+
+        if (action === 'delete') {
+          // Don't actually delete demo tenants — just mark them suspended for safety
+          const profilePath = path.join(container.config.tenantsDir, tenantId, 'profile.json');
+          const profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+          if (profile._template?.isTemplate) return sendJson(res, 403, { ok:false, error:'Cannot delete a template' });
+          // Move to _deleted folder instead of permanent delete
+          const deletedDir = path.join(container.config.tenantsDir, '_deleted');
+          fs.mkdirSync(deletedDir, { recursive: true });
+          fs.renameSync(path.join(container.config.tenantsDir, tenantId), path.join(deletedDir, `${tenantId}-${Date.now()}`));
+          container.tenantRepository.clearCache(tenantId);
+          return sendJson(res, 200, { ok:true, message:`Tenant '${tenantId}' deleted.` });
+        }
+        // suspend/activate
+        const profilePath = path.join(container.config.tenantsDir, tenantId, 'profile.json');
+        const profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+        profile.status = action === 'suspend' ? 'suspended' : 'active';
+        fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2) + '\n', 'utf8');
+        container.tenantRepository.clearCache(tenantId);
+        return sendJson(res, 200, { ok:true, tenantId, status: profile.status });
+      }
+      // ─── End v30.1 template & tenant creation endpoints ─────────────────────
 
       const adminLeadsMatch = url.pathname.match(/^\/api\/admin\/leads\/([^/]+)$/);
       if (req.method === "GET" && adminLeadsMatch) {
@@ -623,6 +936,70 @@ async function startServer() {
         const report = await runDataset(container, String(body.dataset || ""));
         return sendJson(res, 200, report);
       }
+
+      // ─── v30.0 Notification endpoints ─────────────────────────────────────
+      const adminNotificationsMatch = url.pathname.match(/^\/api\/admin\/notifications\/([^/]+)$/);
+      if (req.method === "GET" && adminNotificationsMatch) {
+        const tenantId = decodeURIComponent(adminNotificationsMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const limit = Number(url.searchParams.get("limit") || 100);
+        const unreadOnly = url.searchParams.get("unreadOnly") === "true";
+        const [notifications, unreadCount, totalCount] = await Promise.all([
+          container.notificationService.listNotifications(tenantId, { limit, unreadOnly }),
+          container.notificationService.unreadCount(tenantId),
+          container.notificationService.notificationLog.totalCount(tenantId)
+        ]);
+        return sendJson(res, 200, { ok:true, tenantId, notifications, unreadCount, totalCount, emailService: container.emailService.getStatus() });
+      }
+      if (req.method === "POST" && adminNotificationsMatch) {
+        const body = await readJson(req);
+        const tenantId = decodeURIComponent(adminNotificationsMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const result = await container.notificationService.markAllRead(tenantId);
+        return sendJson(res, 200, { ok:true, markedRead: result });
+      }
+
+      const adminNotificationReadMatch = url.pathname.match(/^\/api\/admin\/notifications\/([^/]+)\/([^/]+)\/read$/);
+      if (req.method === "POST" && adminNotificationReadMatch) {
+        const tenantId = decodeURIComponent(adminNotificationReadMatch[1]);
+        const notificationId = decodeURIComponent(adminNotificationReadMatch[2]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const result = await container.notificationService.markRead(tenantId, notificationId);
+        return result ? sendJson(res, 200, { ok:true, notification: result }) : sendJson(res, 404, { ok:false, error:'Notification not found' });
+      }
+
+      const adminNotificationPrefsMatch = url.pathname.match(/^\/api\/admin\/notifications\/([^/]+)\/preferences$/);
+      if (req.method === "GET" && adminNotificationPrefsMatch) {
+        const tenantId = decodeURIComponent(adminNotificationPrefsMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const prefs = container.notificationService.getPreferences(tenantId);
+        return sendJson(res, 200, { ok:true, tenantId, preferences: prefs, emailService: container.emailService.getStatus() });
+      }
+      if (req.method === "PUT" && adminNotificationPrefsMatch) {
+        const tenantId = decodeURIComponent(adminNotificationPrefsMatch[1]);
+        const body = await readJson(req);
+        try {
+          const profile = container.tenantRepository.getById(tenantId);
+          profile.notifications = body.preferences || body;
+          // Persist back to profile.json
+          const profilePath = path.join(container.config.tenantsDir, tenantId, "profile.json");
+          fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2) + '\n', 'utf8');
+          container.tenantRepository.clearCache(tenantId);
+          return sendJson(res, 200, { ok:true, tenantId, preferences: profile.notifications });
+        } catch (error) {
+          return sendJson(res, 500, { ok:false, error: error.message });
+        }
+      }
+
+      if (req.method === "GET" && url.pathname === "/api/admin/notifications/email/test") {
+        const result = await container.emailService.verifyConnection();
+        return sendJson(res, 200, { ok: result.ok, status: result });
+      }
+      // ─── End v30.0 notification endpoints ───────────────────────────────────
       // ─── End admin dashboard endpoints ──────────────────────────────────────
 
       // v28.0 — CORS preflight for all widget endpoints.
@@ -698,6 +1075,7 @@ async function startServer() {
       // v28.0 — Public widget config endpoint (no auth required, read-only)
       // Returns ONLY what the widget needs to bootstrap: assistantName,
       // welcomeMessage, themeColor, position, language, suggestions.
+      // v29.0 — extended with agent persona, pre-chat form, proactive greeting.
       // Sensitive tenant data (permissions, internal IDs) never leaves the server.
       const widgetConfigMatch = url.pathname.match(/^\/api\/widget\/config\/([^/]+)$/);
       if (req.method === "GET" && widgetConfigMatch) {
@@ -714,6 +1092,7 @@ async function startServer() {
         return sendJson(res, 200, {
           ok:true,
           tenantId,
+          // v28 core fields
           assistantName: branding.assistantName || 'Nova',
           welcomeMessage: widget.welcomeMessage || branding.welcomeMessage || 'Hi! How can I help you today?',
           welcomeMessageRomanUrdu: widget.welcomeMessageRomanUrdu || branding.welcomeMessageRomanUrdu || null,
@@ -723,7 +1102,18 @@ async function startServer() {
           suggestions: widget.suggestions || [],
           businessName: profile.name || '',
           businessDescription: business.description || '',
-          enabled: widget.enabled !== false
+          enabled: widget.enabled !== false,
+          // v29 agent persona
+          agent: {
+            avatar: widget.agentAvatar || 'marcus',
+            name: widget.agentName || branding.assistantName || 'Nova',
+            title: widget.agentTitle || 'Assistant',
+            online: true
+          },
+          // v29 pre-chat form (optional)
+          preChatForm: widget.preChatForm || { enabled: false, fields: [] },
+          // v29 proactive greeting (optional)
+          proactiveGreeting: widget.proactiveGreeting || { enabled: false, delaySeconds: 5, message: null, pageRules: [] }
         });
       }
 
@@ -856,6 +1246,7 @@ function serveWidgetAsset(res, pathname) {
   const relativeMap = {
     "/widget.js": "widget.js",
     "/widget-config.js": "widget-config.js",
+    "/avatars.js": "avatars.js",
     "/widget-test": "index.html"
   };
   const relative = relativeMap[pathname];
@@ -886,6 +1277,8 @@ function serveWidgetAsset(res, pathname) {
 function listTenants(tenantsDir, tenantRepository = null) {
   if (!fs.existsSync(tenantsDir)) return [];
   return fs.readdirSync(tenantsDir).sort().flatMap((id) => {
+    // v30.1: skip internal folders (_templates, _deleted)
+    if (id.startsWith('_')) return [];
     const profilePath=path.join(tenantsDir,id,"profile.json");
     if(!fs.existsSync(profilePath)) return [];
     try { const p=tenantRepository?.getById(id)||JSON.parse(fs.readFileSync(profilePath,"utf8")); return [{id:p.id,name:p.name,domain:p.domain||"generic",capabilities:p.capabilities||[]}]; }

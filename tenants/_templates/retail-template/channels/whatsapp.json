@@ -1,0 +1,11 @@
+{
+  "enabled": false,
+  "graphVersion": "REPLACE_WITH_META_GRAPH_VERSION",
+  "phoneNumberIdEnv": "WHATSAPP_PHONE_NUMBER_ID_DEFAULT",
+  "accessTokenEnv": "WHATSAPP_ACCESS_TOKEN_DEFAULT",
+  "verifyTokenEnv": "WHATSAPP_VERIFY_TOKEN_DEFAULT",
+  "appSecretEnv": "WHATSAPP_APP_SECRET_DEFAULT",
+  "markRead": true,
+  "retries": 2,
+  "timeoutMs": 15000
+}

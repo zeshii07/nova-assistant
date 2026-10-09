@@ -1,38 +1,31 @@
 /* ============================================================
-   Nova Website Widget SDK — v28.0
-   Drop-in embeddable chat widget for any website.
+   Nova Website Widget SDK — v29.0
+   Agent persona, 4 positions, pre-chat form, proactive greetings.
 
    USAGE (3 lines on any HTML page):
      <script src="https://your-nova.com/widget.js"
              data-tenant="cleaning-demo" async></script>
 
-   The script auto-mounts a floating chat bubble on the bottom-right
-   corner. All HTML/CSS is encapsulated in a Shadow DOM so it never
-   collides with the host page's styles. All user input is rendered
-   via textContent (XSS-safe). Session is persisted in localStorage
-   so users can refresh the page without losing context. If the
-   server has lost state (memory mode + restart), the widget sends
-   a fresh customerId so the conversation gracefully restarts.
+   v29.0 NEW:
+     - Agent avatar (10 pre-built SVG portraits) instead of message icon
+     - Speech-bubble welcome message (visible before chat opens)
+     - 4 positions: bottom-right, bottom-left, bottom-center, side-panel
+     - Optional pre-chat form (name + phone) before chat starts
+     - Proactive greeting (auto-opens after N seconds)
+     - "Online" pulse ring + typing indicator with agent avatar
 
-   SECURITY:
-     - No eval, no innerHTML with user input (only textContent)
-     - Shadow DOM isolation (host page CSS can't leak in, widget CSS can't leak out)
-     - localStorage keys are tenant-scoped (no cross-tenant data leakage)
-     - CustomerId is generated with crypto.randomUUID() (no PII)
-     - All requests include Origin header; server verifies tenant exists
-     - Rate-limited client-side: max 1 in-flight request, queue subsequent messages
-
-   AVAILABILITY:
-     - 3 retries with exponential backoff (1s, 2s, 4s) on network errors
-     - Graceful degradation: shows error bubble if server unreachable
-     - Typing indicator while waiting for response
-     - Never blocks page load (async + defer behavior)
+   v28.0 RETAINED:
+     - Shadow DOM isolation, XSS-safe textContent rendering
+     - CORS preflight, rate limiting (30/min per IP+tenant)
+     - Tenant verification, customerId validation
+     - localStorage session persistence (7-day TTL)
+     - Retry with exponential backoff, message queue
+     - Mobile responsive (fullscreen ≤ 480px)
    ============================================================ */
 
 (function () {
   'use strict';
 
-  // Prevent double-mount if script is included twice on the same page
   if (window.__NOVA_WIDGET_MOUNTED__) return;
   window.__NOVA_WIDGET_MOUNTED__ = true;
 
@@ -42,29 +35,65 @@
   const DATA_COLOR = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-color')) || null;
   const DATA_LANGUAGE = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-language')) || null;
   const DATA_WELCOME = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-welcome')) || null;
+  const DATA_AVATAR = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-avatar')) || null;
 
   if (!TENANT_ID) {
-    console.error('[Nova Widget] data-tenant attribute is required. Example: <script src="/widget.js" data-tenant="cleaning-demo"></script>');
+    console.error('[Nova Widget] data-tenant attribute is required.');
     return;
   }
 
-  // ─── State ────────────────────────────────────────────────────────
   const NOVA_ORIGIN = new URL(SCRIPT_TAG ? SCRIPT_TAG.src : window.location.href).origin;
   const API_CHAT = `${NOVA_ORIGIN}/api/chat`;
   const API_CONFIG = `${NOVA_ORIGIN}/api/widget/config/${encodeURIComponent(TENANT_ID)}`;
+  const AVATARS_URL = `${NOVA_ORIGIN}/avatars.js`;
   const STORAGE_KEY = `nova-widget:${TENANT_ID}`;
-  const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
+  const VISITED_KEY = `nova-widget-visited:${TENANT_ID}`;
+  const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 
   const state = {
     config: null,
     open: false,
     customerId: null,
-    messages: [], // [{role:'user'|'nova'|'system', text, ts}]
+    customerName: null,
+    messages: [],
     inFlight: false,
-    queue: [],     // pending user messages waiting to be sent
+    queue: [],
     typing: false,
-    error: null
+    error: null,
+    preChatCompleted: false,
+    proactiveShown: false,
+    avatars: null
   };
+
+  // ─── Avatars loader ───────────────────────────────────────────────
+  async function loadAvatars() {
+    if (state.avatars) return;
+    try {
+      // Load avatars.js which sets window.NOVA_AVATARS
+      await new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[data-nova-avatars]');
+        if (existing && window.NOVA_AVATARS) { resolve(); return; }
+        const s = document.createElement('script');
+        s.src = AVATARS_URL;
+        s.setAttribute('data-nova-avatars', 'true');
+        s.onload = resolve;
+        s.onerror = () => reject(new Error('Failed to load avatars.js'));
+        document.head.appendChild(s);
+      });
+      state.avatars = window.NOVA_AVATARS || {};
+    } catch {
+      // Fallback: use a simple initial-avatar if avatars.js fails to load
+      state.avatars = {
+        get: (k) => ({ name: 'Nova', title: 'Assistant', svg: '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#2d5bd1"/><text x="50" y="60" text-anchor="middle" fill="#fff" font-size="40" font-weight="bold">N</text></svg>' })
+      };
+    }
+  }
+  function getAvatarSvg() {
+    if (!state.avatars || !state.config) return '';
+    const key = state.config.agent?.avatar || 'marcus';
+    const avatar = state.avatars.get ? state.avatars.get(key) : state.avatars[key];
+    return avatar?.svg || '';
+  }
 
   // ─── localStorage session persistence ──────────────────────────────
   function loadSession() {
@@ -83,25 +112,29 @@
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         customerId: state.customerId,
-        messages: state.messages.slice(-50), // cap to last 50 messages
+        customerName: state.customerName,
+        preChatCompleted: state.preChatCompleted,
+        messages: state.messages.slice(-50),
         savedAt: Date.now()
       }));
-    } catch { /* localStorage full or blocked */ }
+    } catch {}
   }
   function clearSession() {
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
     state.customerId = null;
+    state.customerName = null;
+    state.preChatCompleted = false;
     state.messages = [];
-    renderMessages();
     saveSession();
   }
+  function isReturningVisitor() {
+    return !!localStorage.getItem(VISITED_KEY);
+  }
+  function markVisited() {
+    try { localStorage.setItem(VISITED_KEY, '1'); } catch {}
+  }
   function generateCustomerId() {
-    // crypto.randomUUID() is universally available in modern browsers
-    // (Chrome 92+, Firefox 95+, Safari 15.4+). Fall back to Math.random
-    // for ancient browsers.
-    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-      return `widget-${crypto.randomUUID()}`;
-    }
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return `widget-${crypto.randomUUID()}`;
     return `widget-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   }
 
@@ -117,10 +150,7 @@
         return response;
       } catch (err) {
         lastError = err;
-        // Exponential backoff: 1s, 2s, 4s
-        if (attempt < retries - 1) {
-          await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
-        }
+        if (attempt < retries - 1) await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
       }
     }
     throw lastError;
@@ -130,8 +160,7 @@
     try {
       const r = await fetchWithRetry(API_CONFIG, { method: 'GET' }, 2);
       const data = await r.json();
-      if (!data.ok) throw new Error(data.error || 'Failed to load widget config');
-      // Allow data-* attributes on the script tag to override tenant config
+      if (!data.ok) throw new Error(data.error || 'Config load failed');
       state.config = {
         ...data,
         position: DATA_POSITION || data.position || 'bottom-right',
@@ -140,18 +169,14 @@
         welcomeMessage: DATA_WELCOME || data.welcomeMessage || 'Hi! How can I help?'
       };
     } catch (err) {
-      // Config endpoint unreachable: fall back to safe defaults so the widget still renders
       state.config = {
-        ok: true,
-        tenantId: TENANT_ID,
-        assistantName: 'Nova',
-        welcomeMessage: 'Hi! How can I help you today?',
-        themeColor: DATA_COLOR || '#2d5bd1',
-        position: DATA_POSITION || 'bottom-right',
-        language: DATA_LANGUAGE || 'auto',
-        suggestions: [],
-        businessName: '',
-        enabled: true
+        ok: true, tenantId: TENANT_ID,
+        assistantName: 'Nova', welcomeMessage: 'Hi! How can I help you today?',
+        themeColor: DATA_COLOR || '#2d5bd1', position: DATA_POSITION || 'bottom-right',
+        language: DATA_LANGUAGE || 'auto', suggestions: [], businessName: '', enabled: true,
+        agent: { avatar: DATA_AVATAR || 'marcus', name: 'Nova', title: 'Assistant', online: true },
+        preChatForm: { enabled: false, fields: [] },
+        proactiveGreeting: { enabled: false, delaySeconds: 5, message: null, pageRules: [] }
       };
       state.error = 'Could not reach Nova server. Using defaults.';
     }
@@ -159,11 +184,7 @@
 
   async function sendMessage(text) {
     if (!text || !text.trim()) return;
-    if (state.inFlight) {
-      // Queue: don't send immediately, wait for the previous one to finish
-      state.queue.push(text);
-      return;
-    }
+    if (state.inFlight) { state.queue.push(text); return; }
     if (!state.customerId) {
       const saved = loadSession();
       state.customerId = saved?.customerId || generateCustomerId();
@@ -174,7 +195,6 @@
     state.inFlight = true;
     state.typing = true;
     renderTyping();
-
     try {
       const response = await fetchWithRetry(API_CHAT, {
         method: 'POST',
@@ -183,35 +203,22 @@
           tenantId: TENANT_ID,
           customerId: state.customerId,
           text: text.trim(),
-          channel: 'widget'
+          channel: 'widget',
+          metadata: state.customerName ? { customerName: state.customerName } : {}
         })
       }, 3);
-
       state.typing = false;
       renderTyping();
-
       if (response.status === 429) {
         const data = await response.json().catch(() => ({}));
         const retryAfter = data.retryAfterSeconds || 60;
-        state.messages.push({
-          role: 'system',
-          text: `You're sending messages too quickly. Please wait ${retryAfter}s and try again.`,
-          ts: Date.now()
-        });
-        renderMessages();
-        saveSession();
-        return;
+        state.messages.push({ role: 'system', text: `You're sending too quickly. Please wait ${retryAfter}s.`, ts: Date.now() });
+        renderMessages(); saveSession(); return;
       }
       if (response.status === 404) {
-        // Tenant no longer exists — reset session
         clearSession();
-        state.messages.push({
-          role: 'system',
-          text: 'This assistant is no longer available.',
-          ts: Date.now()
-        });
-        renderMessages();
-        return;
+        state.messages.push({ role: 'system', text: 'This assistant is no longer available.', ts: Date.now() });
+        renderMessages(); return;
       }
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -219,33 +226,20 @@
       }
       const data = await response.json();
       state.messages.push({ role: 'nova', text: data.reply || '(no reply)', ts: Date.now() });
-      renderMessages();
-      saveSession();
+      renderMessages(); saveSession();
     } catch (err) {
       state.typing = false;
       renderTyping();
-      state.messages.push({
-        role: 'system',
-        text: 'Could not reach the assistant. Please check your connection and try again.',
-        ts: Date.now()
-      });
-      renderMessages();
-      saveSession();
+      state.messages.push({ role: 'system', text: 'Could not reach the assistant. Please try again.', ts: Date.now() });
+      renderMessages(); saveSession();
     } finally {
       state.inFlight = false;
-      // Process queue
-      if (state.queue.length > 0) {
-        const next = state.queue.shift();
-        await sendMessage(next);
-      }
+      if (state.queue.length > 0) { const next = state.queue.shift(); await sendMessage(next); }
     }
   }
 
   // ─── Shadow DOM rendering ─────────────────────────────────────────
-  // All HTML/CSS lives in a Shadow DOM so the host page's styles
-  // cannot leak into the widget, and the widget's styles cannot
-  // leak out to the host page.
-  let shadow, bubbleEl, panelEl, messagesEl, inputEl, formEl, headerEl, resetBtn, minimizeBtn;
+  let shadow, bubbleEl, panelEl, messagesEl, inputEl, formEl, preChatEl, welcomeBubbleEl, typingEl;
 
   function mountWidget() {
     const host = document.createElement('div');
@@ -254,72 +248,125 @@
     document.body.appendChild(host);
     shadow = host.attachShadow({ mode: 'open' });
 
-    const position = state.config.position || 'bottom-right';
-    const color = state.config.themeColor || '#2d5bd1';
+    const cfg = state.config;
+    const position = cfg.position || 'bottom-right';
+    const color = cfg.themeColor || '#2d5bd1';
     const isLeft = position === 'bottom-left';
+    const isCenter = position === 'bottom-center';
+    const isSide = position === 'side-panel';
+    const sideHorizontal = isSide ? 'right' : (isLeft ? 'left' : 'right');
+    const sideHorizontalValue = isCenter ? '50%' : '20px';
+    const transformCenter = isCenter ? 'translateX(-50%)' : 'none';
 
     shadow.innerHTML = `
       <style>
         :host, * { box-sizing: border-box; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+
+        /* ─── Agent avatar bubble ─── */
         .nova-bubble {
           position: fixed;
-          ${isLeft ? 'left' : 'right'}: 20px;
-          bottom: 20px;
-          width: 60px; height: 60px;
+          ${sideHorizontal}: ${isSide ? '0px' : (isCenter ? '50%' : '20px')};
+          ${isCenter ? 'transform: translateX(-50%);' : ''}
+          bottom: ${isSide ? '80px' : '20px'};
+          width: 64px; height: 64px;
           border-radius: 50%;
-          background: ${color};
-          color: #fff;
+          background: transparent;
           border: none;
           cursor: pointer;
-          box-shadow: 0 4px 14px rgba(0,0,0,.3);
-          display: flex; align-items: center; justify-content: center;
-          font-size: 24px; font-weight: 700;
-          transition: transform .15s, opacity .15s;
+          padding: 0;
+          box-shadow: 0 4px 20px rgba(0,0,0,.25);
+          transition: transform .15s, opacity .2s;
           z-index: 2147483647;
         }
-        .nova-bubble:hover { transform: scale(1.06); }
-        .nova-bubble.hidden { opacity: 0; pointer-events: none; transform: scale(0.6); }
-        .nova-bubble::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid ${color}; opacity: 0; animation: pulse 2.5s infinite; }
-        @keyframes pulse { 0% { opacity: .6; transform: scale(1); } 100% { opacity: 0; transform: scale(1.4); } }
-        .nova-bubble.has-unread::after { opacity: 1; }
+        .nova-bubble:hover { transform: ${isCenter ? 'translateX(-50%)' : 'none'} scale(1.06); }
+        .nova-bubble.hidden { opacity: 0; pointer-events: none; transform: ${isCenter ? 'translateX(-50%)' : 'none'} scale(0.6); }
+        .nova-bubble svg { width: 100%; height: 100%; border-radius: 50%; display: block; }
+        .nova-bubble .online-dot {
+          position: absolute; bottom: 2px; ${sideHorizontal === 'right' ? 'right' : 'left'}: 2px;
+          width: 14px; height: 14px; border-radius: 50%;
+          background: #3ddc97; border: 2px solid #fff;
+        }
+        .nova-bubble .pulse-ring {
+          position: absolute; inset: 0; border-radius: 50%;
+          border: 2px solid ${color}; opacity: 0;
+          animation: nova-pulse 2.5s infinite;
+        }
+        @keyframes nova-pulse {
+          0% { opacity: .6; transform: scale(1); }
+          100% { opacity: 0; transform: scale(1.5); }
+        }
+        .nova-bubble.show-pulse .pulse-ring { opacity: 1; }
 
+        /* ─── Proactive welcome speech bubble ─── */
+        .nova-welcome-bubble {
+          position: fixed;
+          ${sideHorizontal}: ${isSide ? '80px' : (isCenter ? '50%' : '94px')};
+          ${isCenter ? 'transform: translateX(-50%);' : ''}
+          bottom: ${isSide ? '80px' : '24px'};
+          max-width: 280px;
+          background: #fff; color: #1f2937;
+          padding: 12px 16px; border-radius: 14px;
+          box-shadow: 0 4px 20px rgba(0,0,0,.15);
+          font-size: 13px; line-height: 1.5;
+          z-index: 2147483646;
+          opacity: 0; transform: translateY(8px) ${isCenter ? 'translateX(-50%)' : 'none'};
+          transition: opacity .3s, transform .3s;
+          pointer-events: none;
+        }
+        .nova-welcome-bubble.visible { opacity: 1; transform: translateY(0) ${isCenter ? 'translateX(-50%)' : 'none'}; pointer-events: auto; }
+        .nova-welcome-bubble::before {
+          content: ''; position: absolute;
+          ${sideHorizontal === 'right' ? 'left' : 'right'}: -6px;
+          bottom: 16px; width: 0; height: 0;
+          border-top: 6px solid transparent; border-bottom: 6px solid transparent;
+          ${sideHorizontal === 'right' ? 'border-right' : 'border-left'}: 8px solid #fff;
+        }
+        .nova-welcome-bubble .close-welcome {
+          position: absolute; top: 4px; right: 6px;
+          background: none; border: none; cursor: pointer;
+          color: #9ca3af; font-size: 14px; line-height: 1;
+        }
+        .nova-welcome-bubble .agent-name { font-weight: 600; color: ${color}; }
+
+        /* ─── Chat panel ─── */
         .nova-panel {
           position: fixed;
-          ${isLeft ? 'left' : 'right'}: 20px;
-          bottom: 90px;
-          width: 360px;
-          max-width: calc(100vw - 40px);
-          height: 540px;
-          max-height: calc(100vh - 110px);
-          background: #11182a;
-          color: #e8edf7;
-          border-radius: 16px;
+          ${isSide ? `right: 0;` : `${sideHorizontal}: 20px;`}
+          ${isCenter ? `left: 50%; transform: translateX(-50%);` : ''}
+          bottom: ${isSide ? '0' : '94px'};
+          width: ${isSide ? '380px' : '380px'};
+          max-width: ${isSide ? '380px' : 'calc(100vw - 40px)'};
+          height: ${isSide ? '100vh' : '560px'};
+          max-height: ${isSide ? '100vh' : 'calc(100vh - 114px)'};
+          background: #11182a; color: #e8edf7;
+          border-radius: ${isSide ? '16px 0 0 16px' : '16px'};
           box-shadow: 0 8px 32px rgba(0,0,0,.4);
           display: flex; flex-direction: column;
           overflow: hidden;
-          transform-origin: bottom ${isLeft ? 'left' : 'right'};
-          transition: transform .2s ease, opacity .2s ease;
+          transform-origin: bottom ${sideHorizontal === 'right' ? 'right' : 'left'};
+          transition: transform .25s ease, opacity .25s ease;
           z-index: 2147483647;
         }
-        .nova-panel.hidden { opacity: 0; pointer-events: none; transform: scale(0.9) translateY(8px); }
+        .nova-panel.hidden { opacity: 0; pointer-events: none; transform: ${isCenter ? 'translateX(-50%)' : 'none'} scale(0.92) translateY(8px); }
 
         .nova-header {
-          padding: 14px 16px;
-          background: ${color};
-          color: #fff;
-          display: flex; align-items: center; justify-content: space-between;
-          flex-shrink: 0;
+          padding: 12px 14px; background: ${color}; color: #fff;
+          display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
         }
         .nova-header-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
-        .nova-avatar {
-          width: 36px; height: 36px; border-radius: 50%;
-          background: rgba(255,255,255,.2);
-          display: flex; align-items: center; justify-content: center;
-          font-weight: 700; font-size: 16px; flex-shrink: 0;
+        .nova-header-avatar {
+          width: 38px; height: 38px; border-radius: 50%; overflow: hidden;
+          background: rgba(255,255,255,.15); flex-shrink: 0; position: relative;
+        }
+        .nova-header-avatar svg { width: 100%; height: 100%; display: block; }
+        .nova-header-avatar .status-dot {
+          position: absolute; bottom: 0; right: 0;
+          width: 10px; height: 10px; border-radius: 50%;
+          background: #3ddc97; border: 2px solid ${color};
         }
         .nova-title-block { min-width: 0; }
         .nova-title { font-size: 14px; font-weight: 600; line-height: 1.2; }
-        .nova-subtitle { font-size: 11px; opacity: .85; line-height: 1.2; margin-top: 2px; }
+        .nova-subtitle { font-size: 11px; opacity: .85; margin-top: 2px; }
         .nova-header-actions { display: flex; gap: 4px; }
         .nova-icon-btn {
           background: rgba(255,255,255,.15); border: none; color: #fff;
@@ -334,27 +381,11 @@
           background: #0b1020;
           display: flex; flex-direction: column; gap: 10px;
         }
-        .nova-message {
-          max-width: 80%; padding: 9px 13px;
-          border-radius: 14px; font-size: 13px; line-height: 1.45;
-          white-space: pre-wrap; word-break: break-word;
-        }
-        .nova-message.user {
-          background: ${color}; color: #fff;
-          align-self: flex-end;
-          border-bottom-right-radius: 4px;
-        }
-        .nova-message.nova {
-          background: #1b263e; color: #e8edf7;
-          border: 1px solid #2c3955;
-          align-self: flex-start;
-          border-bottom-left-radius: 4px;
-        }
-        .nova-message.system {
-          background: transparent; color: #91a0bd;
-          font-size: 11px; text-align: center; padding: 6px;
-          align-self: center; max-width: 90%;
-        }
+        .nova-message { max-width: 80%; padding: 9px 13px; border-radius: 14px; font-size: 13px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
+        .nova-message.user { background: ${color}; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .nova-message.nova { background: #1b263e; color: #e8edf7; border: 1px solid #2c3955; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .nova-message.system { background: transparent; color: #91a0bd; font-size: 11px; text-align: center; padding: 6px; align-self: center; max-width: 90%; }
+
         .nova-typing {
           align-self: flex-start; padding: 9px 14px;
           background: #1b263e; border: 1px solid #2c3955;
@@ -362,75 +393,73 @@
           font-size: 12px; color: #91a0bd;
           display: flex; gap: 4px; align-items: center;
         }
-        .nova-typing-dot {
-          width: 6px; height: 6px; background: #91a0bd; border-radius: 50%;
-          animation: nova-bounce 1.4s infinite ease-in-out;
-        }
+        .nova-typing-dot { width: 6px; height: 6px; background: #91a0bd; border-radius: 50%; animation: nova-bounce 1.4s infinite ease-in-out; }
         .nova-typing-dot:nth-child(2) { animation-delay: .2s; }
         .nova-typing-dot:nth-child(3) { animation-delay: .4s; }
-        @keyframes nova-bounce {
-          0%, 60%, 100% { transform: translateY(0); opacity: .4; }
-          30% { transform: translateY(-5px); opacity: 1; }
-        }
+        @keyframes nova-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-5px); opacity: 1; } }
 
-        .nova-suggestions {
-          display: flex; gap: 6px; padding: 8px 14px;
-          overflow-x: auto; flex-wrap: nowrap;
-          background: #0b1020; border-top: 1px solid #28324b;
+        /* ─── Pre-chat form ─── */
+        .nova-prechat {
+          padding: 24px 20px; background: #0b1020; flex: 1; overflow-y: auto;
         }
-        .nova-suggestion-btn {
-          background: #172139; color: #c9d6f0;
-          border: 1px solid #34415f; border-radius: 16px;
-          padding: 6px 12px; font-size: 12px; cursor: pointer;
-          white-space: nowrap; flex-shrink: 0;
-          transition: background .12s;
+        .nova-prechat h3 { margin: 0 0 8px; font-size: 16px; color: #e8edf7; }
+        .nova-prechat p { margin: 0 0 20px; font-size: 13px; color: #91a0bd; line-height: 1.5; }
+        .nova-prechat-field { margin-bottom: 14px; }
+        .nova-prechat-field label { display: block; font-size: 12px; color: #a9b8d4; margin-bottom: 5px; font-weight: 500; }
+        .nova-prechat-field input {
+          width: 100%; background: #172139; color: #e8edf7;
+          border: 1px solid #34415f; border-radius: 8px; padding: 10px 12px;
+          font-size: 14px; font-family: inherit;
         }
+        .nova-prechat-field input:focus { outline: none; border-color: ${color}; }
+        .nova-prechat-submit {
+          width: 100%; background: ${color}; color: #fff;
+          border: none; border-radius: 8px; padding: 12px;
+          font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 6px;
+        }
+        .nova-prechat-submit:hover { filter: brightness(1.1); }
+        .nova-prechat-skip {
+          width: 100%; background: transparent; color: #91a0bd;
+          border: none; cursor: pointer; padding: 10px; font-size: 12px; margin-top: 8px;
+        }
+        .nova-prechat-skip:hover { color: #e8edf7; }
+
+        .nova-suggestions { display: flex; gap: 6px; padding: 8px 14px; overflow-x: auto; flex-wrap: nowrap; background: #0b1020; border-top: 1px solid #28324b; }
+        .nova-suggestion-btn { background: #172139; color: #c9d6f0; border: 1px solid #34415f; border-radius: 16px; padding: 6px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background .12s; }
         .nova-suggestion-btn:hover { background: #223050; }
 
-        .nova-composer {
-          padding: 10px; border-top: 1px solid #28324b;
-          background: #11182a;
-          display: flex; gap: 8px; flex-shrink: 0;
-        }
-        .nova-input {
-          flex: 1; resize: none; min-height: 38px; max-height: 120px;
-          background: #172139; color: #e8edf7;
-          border: 1px solid #34415f; border-radius: 10px;
-          padding: 9px 12px; font-size: 13px; font-family: inherit;
-          line-height: 1.4;
-        }
+        .nova-composer { padding: 10px; border-top: 1px solid #28324b; background: #11182a; display: flex; gap: 8px; flex-shrink: 0; }
+        .nova-input { flex: 1; resize: none; min-height: 38px; max-height: 120px; background: #172139; color: #e8edf7; border: 1px solid #34415f; border-radius: 10px; padding: 9px 12px; font-size: 13px; font-family: inherit; line-height: 1.4; }
         .nova-input::placeholder { color: #7485a8; }
         .nova-input:focus { outline: none; border-color: ${color}; }
-        .nova-send {
-          background: ${color}; color: #fff;
-          border: none; border-radius: 10px;
-          padding: 0 14px; cursor: pointer; font-weight: 600;
-          font-size: 13px; min-width: 44px;
-          transition: background .12s;
-        }
+        .nova-send { background: ${color}; color: #fff; border: none; border-radius: 10px; padding: 0 14px; cursor: pointer; font-weight: 600; font-size: 13px; min-width: 44px; transition: background .12s; }
         .nova-send:hover { filter: brightness(1.1); }
         .nova-send:disabled { opacity: .5; cursor: not-allowed; }
 
         @media (max-width: 480px) {
-          .nova-panel {
-            width: 100vw; height: 100dvh; max-height: 100dvh;
-            bottom: 0; ${isLeft ? 'left' : 'right'}: 0;
-            border-radius: 0;
-          }
-          .nova-bubble { bottom: 16px; ${isLeft ? 'left' : 'right'}: 16px; }
+          .nova-panel { width: 100vw !important; height: 100dvh !important; max-height: 100dvh !important; bottom: 0 !important; ${sideHorizontal}: 0 !important; ${isCenter ? 'transform: none !important;' : ''} border-radius: 0 !important; }
+          .nova-bubble { bottom: 16px !important; ${sideHorizontal === 'right' ? 'right' : 'left'}: ${isCenter ? '50% !important; transform: translateX(-50%) !important;' : '16px !important;'} }
+          .nova-welcome-bubble { display: none !important; }
         }
       </style>
 
       <button class="nova-bubble" aria-label="Open chat" title="Chat with us">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-        </svg>
+        <span class="pulse-ring"></span>
+        <span id="nova-bubble-avatar"></span>
+        <span class="online-dot"></span>
       </button>
+
+      <div class="nova-welcome-bubble" id="nova-welcome-bubble">
+        <button class="close-welcome" aria-label="Dismiss">✕</button>
+        <span class="agent-name"></span><span class="welcome-text"></span>
+      </div>
 
       <div class="nova-panel hidden" role="dialog" aria-label="Chat with assistant">
         <div class="nova-header">
           <div class="nova-header-info">
-            <div class="nova-avatar" id="nova-avatar">N</div>
+            <div class="nova-header-avatar" id="nova-header-avatar">
+              <span class="status-dot"></span>
+            </div>
             <div class="nova-title-block">
               <div class="nova-title" id="nova-title">Nova</div>
               <div class="nova-subtitle" id="nova-subtitle">Online</div>
@@ -441,6 +470,13 @@
             <button class="nova-icon-btn" id="nova-close" title="Close" aria-label="Close chat">✕</button>
           </div>
         </div>
+
+        <div class="nova-prechat" id="nova-prechat" style="display:none">
+          <h3>Hi! I'm <span id="prechat-name"></span> 👋</h3>
+          <p id="prechat-intro">Before we start, please share a few details so I can help you better.</p>
+          <form id="nova-prechat-form"></form>
+        </div>
+
         <div class="nova-messages" id="nova-messages" aria-live="polite"></div>
         <div class="nova-suggestions" id="nova-suggestions"></div>
         <form class="nova-composer" id="nova-form">
@@ -455,27 +491,38 @@
     messagesEl = shadow.querySelector('#nova-messages');
     inputEl = shadow.querySelector('#nova-input');
     formEl = shadow.querySelector('#nova-form');
-    headerEl = shadow.querySelector('.nova-header');
-    resetBtn = shadow.querySelector('#nova-reset');
-    minimizeBtn = shadow.querySelector('#nova-close');
-    const avatarEl = shadow.querySelector('#nova-avatar');
+    preChatEl = shadow.querySelector('#nova-prechat');
+    welcomeBubbleEl = shadow.querySelector('#nova-welcome-bubble');
     const titleEl = shadow.querySelector('#nova-title');
     const subtitleEl = shadow.querySelector('#nova-subtitle');
+    const headerAvatar = shadow.querySelector('#nova-header-avatar');
+    const bubbleAvatar = shadow.querySelector('#nova-bubble-avatar');
+    const prechatName = shadow.querySelector('#prechat-name');
 
-    // Apply config to UI
-    const cfg = state.config;
-    titleEl.textContent = cfg.assistantName || 'Nova';
-    avatarEl.textContent = (cfg.assistantName || 'N').charAt(0).toUpperCase();
-    subtitleEl.textContent = cfg.businessName ? `${cfg.businessName} · Online` : 'Online';
-    inputEl.placeholder = `Message ${cfg.assistantName || 'Nova'}…`;
+    // Apply config (cfg already declared at top of mountWidget)
+    const agent = cfg.agent || {};
+    titleEl.textContent = agent.name || cfg.assistantName || 'Nova';
+    subtitleEl.textContent = `${agent.title || 'Assistant'} · Online`;
+    inputEl.placeholder = `Message ${agent.name || cfg.assistantName || 'Nova'}…`;
+
+    // Set avatars (header + bubble)
+    const avatarSvg = getAvatarSvg();
+    if (avatarSvg) {
+      headerAvatar.insertAdjacentHTML('afterbegin', avatarSvg);
+      bubbleAvatar.innerHTML = avatarSvg;
+    }
+
+    if (prechatName) prechatName.textContent = agent.name || 'Nova';
 
     // Wire events
-    bubbleEl.addEventListener('click', toggleOpen);
+    bubbleEl.addEventListener('click', () => { hideWelcomeBubble(); openPanel(); });
+    minimizeBtn = shadow.querySelector('#nova-close');
+    resetBtn = shadow.querySelector('#nova-reset');
     minimizeBtn.addEventListener('click', closePanel);
     resetBtn.addEventListener('click', () => {
       if (confirm('Start a new conversation? Current messages will be cleared.')) {
         clearSession();
-        showWelcome();
+        showPreChatOrWelcome();
       }
     });
 
@@ -489,18 +536,157 @@
     });
     inputEl.addEventListener('input', autoResize);
     inputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        formEl.dispatchEvent(new Event('submit'));
-      }
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); formEl.dispatchEvent(new Event('submit')); }
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && state.open) closePanel();
     });
 
-    // Initial render
-    showWelcome();
+    // Welcome bubble close button
+    const closeWelcome = shadow.querySelector('.close-welcome');
+    closeWelcome.addEventListener('click', (e) => { e.stopPropagation(); hideWelcomeBubble(); });
+
+    // Initial render — show pre-chat form or welcome messages
+    showPreChatOrWelcome();
     renderSuggestions();
+
+    // Show proactive greeting after delay (if configured + not returning visitor)
+    scheduleProactiveGreeting();
+  }
+
+  function showPreChatOrWelcome() {
+    const saved = loadSession();
+    if (saved) {
+      state.customerId = saved.customerId;
+      state.customerName = saved.customerName;
+      state.preChatCompleted = saved.preChatCompleted;
+      state.messages = saved.messages || [];
+    }
+
+    const preChatForm = state.config.preChatForm || { enabled: false, fields: [] };
+    if (preChatForm.enabled === true && !state.preChatCompleted) {
+      // Show pre-chat form
+      preChatEl.style.display = 'block';
+      messagesEl.style.display = 'none';
+      shadow.querySelector('#nova-suggestions').style.display = 'none';
+      formEl.style.display = 'none';
+      renderPreChatForm(preChatForm);
+    } else {
+      // Show welcome message + chat
+      hidePreChat();
+      showWelcomeMessages();
+    }
+  }
+
+  function renderPreChatForm(preChatForm) {
+    const formContainer = shadow.querySelector('#nova-prechat-form');
+    formContainer.innerHTML = '';
+    for (const field of (preChatForm.fields || [])) {
+      const wrap = document.createElement('div');
+      wrap.className = 'nova-prechat-field';
+      const label = document.createElement('label');
+      label.textContent = field.label || field.id;
+      if (field.required) label.textContent += ' *';
+      const input = document.createElement('input');
+      input.type = field.type || 'text';
+      input.name = field.id;
+      input.placeholder = field.placeholder || '';
+      input.required = !!field.required;
+      wrap.appendChild(label);
+      wrap.appendChild(input);
+      formContainer.appendChild(wrap);
+    }
+    const submitBtn = document.createElement('button');
+    submitBtn.type = 'submit';
+    submitBtn.className = 'nova-prechat-submit';
+    submitBtn.textContent = 'Start chat';
+    formContainer.appendChild(submitBtn);
+
+    const skipBtn = document.createElement('button');
+    skipBtn.type = 'button';
+    skipBtn.className = 'nova-prechat-skip';
+    skipBtn.textContent = 'Skip and chat anonymously';
+    skipBtn.addEventListener('click', () => {
+      state.preChatCompleted = true;
+      state.customerName = 'Guest';
+      hidePreChat();
+      showWelcomeMessages();
+      saveSession();
+    });
+    formContainer.appendChild(skipBtn);
+
+    formContainer.onsubmit = (e) => {
+      e.preventDefault();
+      const formData = new FormData(formContainer);
+      const data = {};
+      for (const [k, v] of formData.entries()) data[k] = v;
+      state.customerName = data.name || 'Guest';
+      state.preChatCompleted = true;
+      // Store customer info in metadata for server
+      state._preChatData = data;
+      hidePreChat();
+      showWelcomeMessages();
+      saveSession();
+    };
+  }
+
+  function hidePreChat() {
+    preChatEl.style.display = 'none';
+    messagesEl.style.display = 'flex';
+    shadow.querySelector('#nova-suggestions').style.display = 'flex';
+    formEl.style.display = 'flex';
+  }
+
+  function showWelcomeMessages() {
+    messagesEl.innerHTML = '';
+    if (state.messages.length === 0 && state.config.welcomeMessage) {
+      const welcome = document.createElement('div');
+      welcome.className = 'nova-message nova';
+      welcome.textContent = state.config.welcomeMessage;
+      messagesEl.appendChild(welcome);
+    } else {
+      for (const msg of state.messages) {
+        appendMessageEl(msg.role, msg.text);
+      }
+    }
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function scheduleProactiveGreeting() {
+    const pg = state.config.proactiveGreeting;
+    if (!pg || pg.enabled !== true) return;
+    if (state.open) return; // already open
+    if (isReturningVisitor() && !pg.alwaysShow) return; // don't bug returning visitors
+    if (state.proactiveShown) return;
+
+    const delay = (pg.delaySeconds || 5) * 1000;
+    setTimeout(() => {
+      if (state.open) return;
+      state.proactiveShown = true;
+      showWelcomeBubble(pg.message);
+      // Auto-open panel after showing the bubble for a few seconds
+      setTimeout(() => {
+        if (!state.open && welcomeBubbleEl.classList.contains('visible')) {
+          openPanel();
+        }
+      }, 3000);
+    }, delay);
+  }
+
+  function showWelcomeBubble(customMessage) {
+    const agent = state.config.agent || {};
+    const message = customMessage || state.config.welcomeMessage || 'Hi! How can I help?';
+    const nameEl = welcomeBubbleEl.querySelector('.agent-name');
+    const textEl = welcomeBubbleEl.querySelector('.welcome-text');
+    nameEl.textContent = `${agent.name || 'Nova'}: `;
+    textEl.textContent = message.length > 100 ? message.slice(0, 100) + '…' : message;
+    welcomeBubbleEl.classList.add('visible');
+    bubbleEl.classList.add('show-pulse');
+  }
+
+  function hideWelcomeBubble() {
+    welcomeBubbleEl.classList.remove('visible');
+    bubbleEl.classList.remove('show-pulse');
   }
 
   function autoResize() {
@@ -516,6 +702,8 @@
     state.open = true;
     panelEl.classList.remove('hidden');
     bubbleEl.classList.add('hidden');
+    hideWelcomeBubble();
+    markVisited();
     setTimeout(() => inputEl.focus(), 100);
   }
   function closePanel() {
@@ -524,44 +712,18 @@
     bubbleEl.classList.remove('hidden');
   }
 
-  function showWelcome() {
-    messagesEl.innerHTML = '';
-    if (state.config.welcomeMessage) {
-      const welcome = document.createElement('div');
-      welcome.className = 'nova-message nova';
-      welcome.textContent = state.config.welcomeMessage; // textContent = XSS-safe
-      messagesEl.appendChild(welcome);
-    }
-    // Restore saved messages if any
-    const saved = loadSession();
-    if (saved && saved.messages && saved.messages.length > 0) {
-      state.customerId = saved.customerId;
-      state.messages = saved.messages;
-      // Don't re-add the welcome — it's already in saved.messages typically.
-      // Re-render all saved messages instead.
-      messagesEl.innerHTML = '';
-      for (const msg of state.messages) {
-        appendMessageEl(msg.role, msg.text);
-      }
-    }
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
   function appendMessageEl(role, text) {
     const el = document.createElement('div');
     el.className = `nova-message ${role}`;
-    el.textContent = text; // textContent = XSS-safe
+    el.textContent = text;
     messagesEl.appendChild(el);
     messagesEl.scrollTop = messagesEl.scrollHeight;
     return el;
   }
-
   function renderMessages() {
-    // Re-render the last message only (optimization)
     const last = state.messages[state.messages.length - 1];
     if (last) appendMessageEl(last.role, last.text);
   }
-
   function renderTyping() {
     const existing = shadow.querySelector('.nova-typing');
     if (state.typing) {
@@ -575,22 +737,16 @@
       existing.remove();
     }
   }
-
   function renderSuggestions() {
     const box = shadow.querySelector('#nova-suggestions');
     const suggestions = state.config.suggestions || [];
     box.innerHTML = '';
-    if (suggestions.length === 0) {
-      box.style.display = 'none';
-      return;
-    }
+    if (suggestions.length === 0) { box.style.display = 'none'; return; }
     for (const suggestion of suggestions.slice(0, 4)) {
       const btn = document.createElement('button');
       btn.className = 'nova-suggestion-btn';
       btn.textContent = suggestion;
-      btn.addEventListener('click', () => {
-        sendMessage(suggestion);
-      });
+      btn.addEventListener('click', () => sendMessage(suggestion));
       box.appendChild(btn);
     }
   }
@@ -602,15 +758,13 @@
       console.info(`[Nova Widget] Widget is disabled for tenant "${TENANT_ID}".`);
       return;
     }
+    await loadAvatars();
     mountWidget();
     if (state.error) {
-      setTimeout(() => {
-        appendMessageEl('system', state.error);
-      }, 500);
+      setTimeout(() => appendMessageEl('system', state.error), 500);
     }
   }
 
-  // Run after DOMContentLoaded so we don't block page load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot);
   } else {

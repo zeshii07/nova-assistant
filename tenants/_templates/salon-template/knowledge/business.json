@@ -1,0 +1,14 @@
+{
+  "name": "{{business_name}}",
+  "description": "A unisex salon offering hair, grooming and beauty services.",
+  "hours": "{{business_hours}}",
+  "location": "{{business_location}}",
+  "contact": "+92 300 7770004",
+  "services": [
+    "Haircut",
+    "Hair styling",
+    "Beard grooming",
+    "Facial",
+    "Hair color"
+  ]
+}

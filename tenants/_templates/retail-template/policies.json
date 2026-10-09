@@ -1,0 +1,6 @@
+{
+  "emojiLevel": "medium",
+  "maxLines": 30,
+  "maxCharacters": 3500,
+  "forbiddenPhrases": ["invalid input", "choose option 1"]
+}

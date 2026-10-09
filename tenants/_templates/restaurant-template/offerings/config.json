@@ -1,0 +1,29 @@
+{
+  "collectionLabel": "menu items",
+  "browseTerms": [
+    "menu",
+    "manue",
+    "food",
+    "foods",
+    "dishes",
+    "what do you serve",
+    "what food do you serve",
+    "eat"
+  ],
+  "interestTerms": [
+    "want",
+    "need",
+    "can i get",
+    "order",
+    "serve"
+  ],
+  "actionMode": "order",
+  "defaultQuantity": 1,
+  "orderTerms": [
+    "order",
+    "buy",
+    "get this",
+    "confirm this item",
+    "place order"
+  ]
+}

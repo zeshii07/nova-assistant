@@ -1,0 +1,100 @@
+{
+  "id": "cleanpro-dubai",
+  "name": "CleanPro Dubai",
+  "status": "active",
+  "defaultLanguage": "english",
+  "capabilities": [
+    "assistant",
+    "crm",
+    "cleaning",
+    "pricing",
+    "availability"
+  ],
+  "domain": "cleaning",
+  "branding": {
+    "assistantName": "CleanPro Dubai Assistant",
+    "welcomeMessage": "Hi! 👋 Welcome to CleanPro Dubai. How can I help you today?",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 CleanPro Dubai mein khush aamdeed. Main aap ki kaise madad kar sakta hoon?"
+  },
+  "business": {
+    "description": "Premium cleaning services in Dubai",
+    "contact": "+971 50 123 4567",
+    "email": "owner@cleanpro.ae",
+    "hours": "Mon-Sat, 8 AM - 8 PM",
+    "location": "Dubai, UAE"
+  },
+  "features": {
+    "llmFallback": true
+  },
+  "permissions": [
+    "knowledge.read",
+    "memory.read:assistant",
+    "memory.write:assistant",
+    "crm.customer.read:assistant",
+    "crm.customer.write:assistant",
+    "crm.activity.write:assistant"
+  ],
+  "widget": {
+    "enabled": true,
+    "position": "bottom-right",
+    "themeColor": "#0ea5e9",
+    "language": "auto",
+    "welcomeMessage": "Hi! 👋 Welcome to CleanPro Dubai. How can I help you today?",
+    "agentAvatar": "sophie",
+    "agentName": "Sarah",
+    "agentTitle": "Assistant",
+    "suggestions": [
+      "What services do you offer?",
+      "Book an appointment",
+      "What are your hours?"
+    ],
+    "preChatForm": {
+      "enabled": true,
+      "fields": [
+        {
+          "id": "name",
+          "label": "Your name",
+          "type": "text",
+          "required": true,
+          "placeholder": "John Doe"
+        },
+        {
+          "id": "phone",
+          "label": "Phone (optional)",
+          "type": "tel",
+          "required": false,
+          "placeholder": "+971 50 123 4567"
+        }
+      ]
+    },
+    "proactiveGreeting": {
+      "enabled": true,
+      "delaySeconds": 5,
+      "message": "Hi! 👋 I'm Sarah. How can I help you today?",
+      "pageRules": []
+    }
+  },
+  "notifications": {
+    "enabled": true,
+    "recipientEmails": [
+      "owner@cleanpro.ae"
+    ],
+    "events": {
+      "booking_confirmed": true,
+      "order_placed": true,
+      "lead_captured": true,
+      "handoff_requested": true,
+      "nova_failed": true
+    },
+    "quietHours": {
+      "enabled": false,
+      "start": "22:00",
+      "end": "07:00",
+      "timezone": "UTC"
+    },
+    "dailyDigest": {
+      "enabled": false,
+      "sendAt": "09:00"
+    }
+  }
+}

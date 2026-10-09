@@ -1,0 +1,12 @@
+{
+  "CATALOG_LIST_VIEWED": {
+    "english": "Certainly! 😊 Here’s what we currently have available:\n\n{{productLines}}\n\nMention any product name and I’ll share its details.",
+    "roman_urdu": "Ji bilkul! 😊 Hamare paas ye products available hain:\n\n{{productLines}}\n\nKisi product ki detail ya order ke liye bas uska naam bata dein.",
+    "urdu": "جی بالکل! 😊 ہمارے پاس یہ مصنوعات دستیاب ہیں:\n\n{{productLines}}\n\nکسی مصنوع کی تفصیل کے لیے اس کا نام بتا دیں۔"
+  },
+  "CATALOG_UNAVAILABLE": {
+    "english": "Sorry 😊 {{requested}} is not available right now.\n\nAvailable right now: {{availableNames}}\n\nIf you tell me the style or type you want, I can help you find the closest match.",
+    "roman_urdu": "Maazrat 😊 {{requested}} hamare current catalog mein nahi hai.\n\nAbhi available hain: {{availableNames}}\n\nAap style ya type bata dein, main closest match dhoond deta hoon.",
+    "urdu": "معذرت 😊 {{requested}} فی الحال دستیاب نہیں ہے۔\n\nہمارے پاس {{categoryNames}} دستیاب ہیں۔ آپ بتائیں کس قسم کی چیز چاہیے، میں قریب ترین آپشن بتا دوں گا۔"
+  }
+}

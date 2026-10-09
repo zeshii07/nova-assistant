@@ -1,0 +1,6 @@
+{
+  "name": "@nova/notification-engine",
+  "version": "30.0.0",
+  "private": true,
+  "main": "src/index.js"
+}

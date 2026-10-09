@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "provider": "local",
+  "timezone": "Asia/Karachi",
+  "defaultDurationMinutes": 60,
+  "slotIntervalMinutes": 15,
+  "holdTtlSeconds": 600,
+  "minLeadMinutes": 0,
+  "maxAdvanceDays": 730,
+  "resourcePools": [
+    { "id": "stylists", "name": "Salon stylists", "capacity": 20, "serviceIds": [], "active": true }
+  ],
+  "serviceRules": []
+}

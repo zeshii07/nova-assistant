@@ -1,0 +1,8 @@
+{
+  "name": "{{business_name}}",
+  "description": "{{business_description}}",
+  "contact": "{{owner_phone}}",
+  "email": "{{owner_email}}",
+  "hours": "{{business_hours}}",
+  "location": "{{business_location}}"
+}

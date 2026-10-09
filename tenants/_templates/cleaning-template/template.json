@@ -1,0 +1,39 @@
+{
+  "id": "cleaning-template",
+  "label": "Cleaning Business",
+  "description": "Residential, commercial, deep, furniture, office, laundry cleaning services with booking",
+  "icon": "🧹",
+  "domain": "cleaning",
+  "capabilities": [
+    "assistant",
+    "crm",
+    "cleaning",
+    "pricing",
+    "availability"
+  ],
+  "defaultServices": [
+    {
+      "name": "Standard Home Cleaning",
+      "priceType": "hourly",
+      "price": 40,
+      "currency": "AED",
+      "unit": "per hour per cleaner"
+    },
+    {
+      "name": "Deep Home Cleaning",
+      "priceType": "fixed",
+      "price": 200,
+      "currency": "AED",
+      "unit": "per visit"
+    },
+    {
+      "name": "Sofa Cleaning",
+      "priceType": "fixed",
+      "price": 120,
+      "currency": "AED",
+      "unit": "per sofa"
+    }
+  ],
+  "sourceTenant": "cleaning-demo",
+  "createdAt": "2026-10-09T04:08:35.949Z"
+}

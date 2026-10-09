@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "28.0.0",
+  "version": "30.1.0",
   "private": true,
-  "description": "Nova v28.0 — Website Widget SDK (drop-in embeddable chat for any website, with CORS, rate limiting, Shadow DOM isolation, session persistence)",
+  "description": "Nova v30.1 — Tenant Templates & Onboarding Wizard (4 pre-built templates + custom template creation, 2-minute business onboarding, tenant management list)",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {
@@ -64,8 +64,9 @@
     "admin:serve": "node apps/api/src/server.js"
   },
   "dependencies": {
+    "nodemailer": "^6.10.1",
+    "pdf-parse": "^2.4.5",
     "pg": "^8.16.3",
-    "redis": "^5.8.1",
-    "pdf-parse": "^2.4.5"
+    "redis": "^5.8.1"
   }
 }

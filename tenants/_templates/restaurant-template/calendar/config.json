@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "provider": "local",
+  "timezone": "Asia/Karachi",
+  "defaultDurationMinutes": 90,
+  "slotIntervalMinutes": 30,
+  "holdTtlSeconds": 600,
+  "minLeadMinutes": 0,
+  "maxAdvanceDays": 365,
+  "resourcePools": [
+    { "id": "dining-seats", "name": "Dining capacity", "capacity": 40, "serviceIds": [], "active": true }
+  ],
+  "serviceRules": []
+}

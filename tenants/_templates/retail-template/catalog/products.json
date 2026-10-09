@@ -1,0 +1,701 @@
+[
+  {
+    "id": "P001",
+    "sku": "TSHIRT-COTTON",
+    "name": "Cotton T-Shirt",
+    "category": "clothing",
+    "price": 1500,
+    "currency": "PKR",
+    "description": "Premium cotton t-shirt, comfortable and stylish",
+    "aliases": [
+      "cotton tshirt",
+      "cotton t shirt",
+      "tshirt",
+      "tee shirt"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "White",
+      "Black",
+      "Navy"
+    ],
+    "tags": [
+      "cotton",
+      "shirt",
+      "casual"
+    ],
+    "inStock": true,
+    "inventory": 50
+  },
+  {
+    "id": "P002",
+    "sku": "JEANS-DENIM",
+    "name": "Denim Jeans",
+    "category": "clothing",
+    "price": 3500,
+    "currency": "PKR",
+    "description": "Classic denim jeans with a comfortable fit",
+    "aliases": [
+      "jeans",
+      "denim pant",
+      "denim trousers"
+    ],
+    "sizes": [
+      "30",
+      "32",
+      "34",
+      "36"
+    ],
+    "colors": [
+      "Blue",
+      "Black"
+    ],
+    "tags": [
+      "denim",
+      "pants",
+      "trousers"
+    ],
+    "inStock": true,
+    "inventory": 35
+  },
+  {
+    "id": "P003",
+    "sku": "EARBUD-WIRELESS",
+    "name": "Wireless Earbuds",
+    "category": "electronics",
+    "price": 4500,
+    "currency": "PKR",
+    "description": "Bluetooth earbuds with long battery life and noise cancellation",
+    "aliases": [
+      "wireless earbud",
+      "wireless airbud",
+      "earbud",
+      "airbud",
+      "bluetooth earbuds"
+    ],
+    "sizes": [],
+    "colors": [
+      "White",
+      "Black"
+    ],
+    "tags": [
+      "audio",
+      "bluetooth",
+      "headphones"
+    ],
+    "inStock": true,
+    "inventory": 40
+  },
+  {
+    "id": "P004",
+    "sku": "WATCH-SMART",
+    "name": "Smart Watch",
+    "category": "electronics",
+    "price": 8000,
+    "currency": "PKR",
+    "description": "Fitness tracking, notifications, and seven-day battery",
+    "aliases": [
+      "smartwatch",
+      "fitness watch"
+    ],
+    "sizes": [],
+    "colors": [
+      "Black",
+      "Silver"
+    ],
+    "tags": [
+      "watch",
+      "fitness",
+      "wearable"
+    ],
+    "inStock": true,
+    "inventory": 20
+  },
+  {
+    "id": "P005",
+    "sku": "WALLET-LEATHER",
+    "name": "Leather Wallet",
+    "category": "accessories",
+    "price": 2500,
+    "currency": "PKR",
+    "description": "Genuine leather wallet with RFID blocking",
+    "aliases": [
+      "wallet",
+      "leather purse"
+    ],
+    "sizes": [],
+    "colors": [
+      "Brown",
+      "Black"
+    ],
+    "tags": [
+      "leather",
+      "rfid"
+    ],
+    "inStock": true,
+    "inventory": 30
+  },
+  {
+    "id": "P006",
+    "sku": "GLASSES-SUN",
+    "name": "Sunglasses",
+    "category": "accessories",
+    "price": 1800,
+    "currency": "PKR",
+    "description": "Polarized sunglasses with UV400 protection",
+    "aliases": [
+      "sun glasses",
+      "shades"
+    ],
+    "sizes": [],
+    "colors": [
+      "Black",
+      "Gold",
+      "Silver"
+    ],
+    "tags": [
+      "eyewear",
+      "polarized",
+      "uv"
+    ],
+    "inStock": true,
+    "inventory": 45
+  },
+  {
+    "id": "P007",
+    "sku": "HOODIE-FLEECE",
+    "name": "Fleece Hoodie",
+    "category": "clothing",
+    "price": 4200,
+    "currency": "PKR",
+    "description": "Warm everyday fleece hoodie with a soft inner lining",
+    "aliases": [
+      "hoodie",
+      "fleece sweatshirt",
+      "hooded sweatshirt"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Black",
+      "Grey",
+      "Maroon"
+    ],
+    "tags": [
+      "winter",
+      "hoodie",
+      "fleece"
+    ],
+    "inStock": true,
+    "inventory": 28
+  },
+  {
+    "id": "P008",
+    "sku": "POLO-PIQUE",
+    "name": "Polo Shirt",
+    "category": "clothing",
+    "price": 2200,
+    "currency": "PKR",
+    "description": "Breathable pique polo shirt for casual and smart-casual wear",
+    "aliases": [
+      "polo",
+      "polo tshirt",
+      "collar shirt"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "White",
+      "Black",
+      "Blue"
+    ],
+    "tags": [
+      "polo",
+      "collar",
+      "casual"
+    ],
+    "inStock": true,
+    "inventory": 33
+  },
+  {
+    "id": "P009",
+    "sku": "POWERBANK-20K",
+    "name": "20000mAh Power Bank",
+    "category": "electronics",
+    "price": 5200,
+    "currency": "PKR",
+    "description": "Fast-charging 20000mAh power bank with dual USB output",
+    "aliases": [
+      "power bank",
+      "powerbank",
+      "portable charger",
+      "20000 mah"
+    ],
+    "sizes": [],
+    "colors": [
+      "Black",
+      "White"
+    ],
+    "tags": [
+      "charger",
+      "battery",
+      "mobile"
+    ],
+    "inStock": true,
+    "inventory": 24
+  },
+  {
+    "id": "P010",
+    "sku": "SPEAKER-BT",
+    "name": "Bluetooth Speaker",
+    "category": "electronics",
+    "price": 3900,
+    "currency": "PKR",
+    "description": "Portable wireless speaker with clear sound and rechargeable battery",
+    "aliases": [
+      "speaker",
+      "wireless speaker",
+      "bluetooth sound box"
+    ],
+    "sizes": [],
+    "colors": [
+      "Black",
+      "Blue",
+      "Red"
+    ],
+    "tags": [
+      "audio",
+      "speaker",
+      "bluetooth"
+    ],
+    "inStock": true,
+    "inventory": 31
+  },
+  {
+    "id": "P011",
+    "sku": "SHOES-RUN",
+    "name": "Running Shoes",
+    "category": "footwear",
+    "price": 6500,
+    "currency": "PKR",
+    "description": "Lightweight running shoes with cushioned sole for everyday training",
+    "aliases": [
+      "running shoe",
+      "runners",
+      "sports shoes",
+      "joggers shoes"
+    ],
+    "sizes": [
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
+    "colors": [
+      "Black",
+      "White",
+      "Grey"
+    ],
+    "tags": [
+      "shoes",
+      "running",
+      "sports"
+    ],
+    "inStock": true,
+    "inventory": 26
+  },
+  {
+    "id": "P012",
+    "sku": "SLIDES-COMFORT",
+    "name": "Comfort Slides",
+    "category": "footwear",
+    "price": 1900,
+    "currency": "PKR",
+    "description": "Soft everyday slides with a lightweight cushioned sole",
+    "aliases": [
+      "slides",
+      "slippers",
+      "flip flops"
+    ],
+    "sizes": [
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
+    "colors": [
+      "Black",
+      "Navy",
+      "Olive"
+    ],
+    "tags": [
+      "slippers",
+      "slides",
+      "casual"
+    ],
+    "inStock": true,
+    "inventory": 38
+  },
+  {
+    "id": "P013",
+    "sku": "LAMP-DESK",
+    "name": "LED Desk Lamp",
+    "category": "home-office",
+    "price": 3200,
+    "currency": "PKR",
+    "description": "Adjustable LED desk lamp with multiple brightness levels",
+    "aliases": [
+      "desk lamp",
+      "table lamp",
+      "study lamp",
+      "led lamp"
+    ],
+    "sizes": [],
+    "colors": [
+      "Black",
+      "White"
+    ],
+    "tags": [
+      "lamp",
+      "study",
+      "office"
+    ],
+    "inStock": true,
+    "inventory": 22
+  },
+  {
+    "id": "P014",
+    "sku": "BOTTLE-STEEL",
+    "name": "Steel Water Bottle",
+    "category": "home-office",
+    "price": 1600,
+    "currency": "PKR",
+    "description": "Reusable stainless steel bottle for hot and cold drinks",
+    "aliases": [
+      "water bottle",
+      "steel bottle",
+      "flask"
+    ],
+    "sizes": [
+      "750ml",
+      "1L"
+    ],
+    "colors": [
+      "Black",
+      "Silver",
+      "Blue"
+    ],
+    "tags": [
+      "bottle",
+      "steel",
+      "drinkware"
+    ],
+    "inStock": true,
+    "inventory": 42
+  },
+  {
+    "id": "P015",
+    "sku": "BACKPACK-URBAN",
+    "name": "Urban Backpack",
+    "category": "bags",
+    "price": 4800,
+    "currency": "PKR",
+    "description": "Spacious everyday backpack with padded laptop compartment",
+    "aliases": [
+      "backpack",
+      "bag",
+      "laptop bag",
+      "school bag"
+    ],
+    "sizes": [],
+    "colors": [
+      "Black",
+      "Grey",
+      "Navy"
+    ],
+    "tags": [
+      "bag",
+      "laptop",
+      "travel"
+    ],
+    "inStock": true,
+    "inventory": 27
+  },
+  {
+    "id": "P016",
+    "sku": "TOTE-CANVAS",
+    "name": "Canvas Tote Bag",
+    "category": "bags",
+    "price": 1400,
+    "currency": "PKR",
+    "description": "Durable reusable canvas tote for shopping and everyday carry",
+    "aliases": [
+      "tote",
+      "tote bag",
+      "canvas bag",
+      "shopping bag"
+    ],
+    "sizes": [],
+    "colors": [
+      "Natural",
+      "Black"
+    ],
+    "tags": [
+      "bag",
+      "canvas",
+      "shopping"
+    ],
+    "inStock": true,
+    "inventory": 55
+  },
+  {
+    "id": "P017",
+    "sku": "NOTEBOOK-PREM",
+    "name": "Premium Notebook Set",
+    "category": "stationery",
+    "price": 1200,
+    "currency": "PKR",
+    "description": "Set of three premium ruled notebooks for work and study",
+    "aliases": [
+      "notebook",
+      "notebooks",
+      "diary set",
+      "writing books"
+    ],
+    "sizes": [],
+    "colors": [
+      "Black",
+      "Blue",
+      "Beige"
+    ],
+    "tags": [
+      "notebook",
+      "stationery",
+      "study"
+    ],
+    "inStock": true,
+    "inventory": 60
+  },
+  {
+    "id": "P018",
+    "sku": "PEN-GEL",
+    "name": "Gel Pen Pack",
+    "category": "stationery",
+    "price": 650,
+    "currency": "PKR",
+    "description": "Smooth-writing gel pen pack with five pens",
+    "aliases": [
+      "gel pens",
+      "pen pack",
+      "pens"
+    ],
+    "sizes": [],
+    "colors": [
+      "Black",
+      "Blue",
+      "Assorted"
+    ],
+    "tags": [
+      "pen",
+      "stationery",
+      "office"
+    ],
+    "inStock": true,
+    "inventory": 80
+  },
+  {
+    "id": "P019",
+    "sku": "FACEWASH-ALOE",
+    "name": "Aloe Vera Face Wash",
+    "category": "personal-care",
+    "price": 950,
+    "currency": "PKR",
+    "description": "Gentle daily face wash with aloe vera for normal skin",
+    "aliases": ["face wash", "aloe facewash", "facial cleanser"],
+    "sizes": ["150ml"],
+    "colors": [],
+    "tags": ["skincare", "cleanser", "aloe"],
+    "inStock": true,
+    "inventory": 44
+  },
+  {
+    "id": "P020",
+    "sku": "LOTION-SHEA",
+    "name": "Shea Body Lotion",
+    "category": "personal-care",
+    "price": 1250,
+    "currency": "PKR",
+    "description": "Moisturising body lotion with shea butter",
+    "aliases": ["body lotion", "moisturizer", "skin lotion"],
+    "sizes": ["250ml"],
+    "colors": [],
+    "tags": ["skincare", "body care", "moisturising"],
+    "inStock": true,
+    "inventory": 36
+  },
+  {
+    "id": "P021",
+    "sku": "KETTLE-ELECTRIC",
+    "name": "Electric Kettle",
+    "category": "kitchen",
+    "price": 4600,
+    "currency": "PKR",
+    "description": "Fast-boil 1.7 litre electric kettle with automatic shutoff",
+    "aliases": ["kettle", "water boiler", "electric water kettle"],
+    "sizes": ["1.7L"],
+    "colors": ["Black", "Silver"],
+    "tags": ["kitchen appliance", "tea", "boiler"],
+    "inStock": true,
+    "inventory": 19
+  },
+  {
+    "id": "P022",
+    "sku": "PAN-NONSTICK",
+    "name": "Non-stick Frying Pan",
+    "category": "kitchen",
+    "price": 2800,
+    "currency": "PKR",
+    "description": "Durable non-stick frying pan with heat-resistant handle",
+    "aliases": ["frying pan", "nonstick pan", "cooking pan"],
+    "sizes": ["24cm", "28cm"],
+    "colors": ["Black"],
+    "tags": ["cookware", "pan", "kitchen"],
+    "inStock": true,
+    "inventory": 25
+  },
+  {
+    "id": "P023",
+    "sku": "YOGAMAT-EVA",
+    "name": "Yoga Mat",
+    "category": "fitness",
+    "price": 2300,
+    "currency": "PKR",
+    "description": "Non-slip exercise mat for yoga, stretching and home workouts",
+    "aliases": ["exercise mat", "gym mat", "workout mat"],
+    "sizes": ["6mm"],
+    "colors": ["Blue", "Purple", "Black"],
+    "tags": ["fitness", "yoga", "exercise"],
+    "inStock": true,
+    "inventory": 32
+  },
+  {
+    "id": "P024",
+    "sku": "BANDS-RESISTANCE",
+    "name": "Resistance Band Set",
+    "category": "fitness",
+    "price": 1800,
+    "currency": "PKR",
+    "description": "Five-level resistance band set for strength and mobility training",
+    "aliases": ["resistance bands", "exercise bands", "fitness bands"],
+    "sizes": [],
+    "colors": ["Assorted"],
+    "tags": ["fitness", "strength", "workout"],
+    "inStock": true,
+    "inventory": 41
+  },
+  {
+    "id": "P025",
+    "sku": "CABLE-USBC",
+    "name": "Braided USB-C Cable",
+    "category": "mobile-accessories",
+    "price": 900,
+    "currency": "PKR",
+    "description": "Durable fast-charging braided USB-C cable",
+    "aliases": ["usb c cable", "charging cable", "phone charging cable"],
+    "sizes": ["1m", "2m"],
+    "colors": ["Black", "White"],
+    "tags": ["mobile", "charging", "cable"],
+    "inStock": true,
+    "inventory": 70
+  },
+  {
+    "id": "P026",
+    "sku": "STAND-PHONE",
+    "name": "Adjustable Phone Stand",
+    "category": "mobile-accessories",
+    "price": 1350,
+    "currency": "PKR",
+    "description": "Foldable desk stand with adjustable viewing angle",
+    "aliases": ["phone stand", "mobile holder", "desk phone holder"],
+    "sizes": [],
+    "colors": ["Black", "Silver"],
+    "tags": ["mobile", "holder", "desk"],
+    "inStock": true,
+    "inventory": 39
+  },
+  {
+    "id": "P027",
+    "sku": "PILLOW-TRAVEL",
+    "name": "Memory Foam Travel Pillow",
+    "category": "travel",
+    "price": 2600,
+    "currency": "PKR",
+    "description": "Supportive memory foam neck pillow for flights and road trips",
+    "aliases": ["travel pillow", "neck pillow", "flight pillow"],
+    "sizes": [],
+    "colors": ["Grey", "Navy"],
+    "tags": ["travel", "comfort", "pillow"],
+    "inStock": true,
+    "inventory": 29
+  },
+  {
+    "id": "P028",
+    "sku": "CUBES-PACKING",
+    "name": "Packing Cube Set",
+    "category": "travel",
+    "price": 2100,
+    "currency": "PKR",
+    "description": "Six-piece packing organiser set for luggage",
+    "aliases": ["packing cubes", "luggage organizers", "travel organizers"],
+    "sizes": [],
+    "colors": ["Black", "Blue", "Beige"],
+    "tags": ["travel", "luggage", "organizer"],
+    "inStock": true,
+    "inventory": 34
+  },
+  {
+    "id": "P029",
+    "sku": "MOUSE-WIRELESS",
+    "name": "Wireless Mouse",
+    "category": "electronics",
+    "price": 2400,
+    "currency": "PKR",
+    "description": "Quiet wireless mouse with adjustable sensitivity",
+    "aliases": ["computer mouse", "cordless mouse", "laptop mouse"],
+    "sizes": [],
+    "colors": ["Black", "Grey"],
+    "tags": ["computer", "office", "wireless"],
+    "inStock": true,
+    "inventory": 37
+  },
+  {
+    "id": "P030",
+    "sku": "CUSHION-COVER",
+    "name": "Decorative Cushion Cover",
+    "category": "home-office",
+    "price": 1100,
+    "currency": "PKR",
+    "description": "Textured decorative cushion cover for sofa and bedroom styling",
+    "aliases": ["cushion cover", "pillow cover", "sofa cushion cover"],
+    "sizes": ["45x45cm"],
+    "colors": ["Beige", "Blue", "Maroon"],
+    "tags": ["home decor", "cushion", "textile"],
+    "inStock": true,
+    "inventory": 48
+  }
+]

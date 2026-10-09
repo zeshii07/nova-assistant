@@ -1,0 +1,9 @@
+{
+  "name": "Friendly Pakistani Store",
+  "tone": "friendly",
+  "emojiLevel": "medium",
+  "verbosity": "medium",
+  "defaultLanguage": "auto",
+  "greetingStyle": "natural",
+  "closingStyle": "warm"
+}

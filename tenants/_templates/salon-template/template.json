@@ -1,0 +1,38 @@
+{
+  "id": "salon-template",
+  "label": "Salon / Spa",
+  "description": "Bookable services: haircuts, treatments, appointments with time slots",
+  "icon": "💇",
+  "domain": "salon",
+  "capabilities": [
+    "assistant",
+    "crm",
+    "offering",
+    "booking"
+  ],
+  "defaultServices": [
+    {
+      "name": "Haircut & Style",
+      "priceType": "fixed",
+      "price": 150,
+      "currency": "AED",
+      "unit": "per service"
+    },
+    {
+      "name": "Hair Color",
+      "priceType": "fixed",
+      "price": 300,
+      "currency": "AED",
+      "unit": "per service"
+    },
+    {
+      "name": "Manicure",
+      "priceType": "fixed",
+      "price": 80,
+      "currency": "AED",
+      "unit": "per service"
+    }
+  ],
+  "sourceTenant": "salon-demo",
+  "createdAt": "2026-10-09T04:08:35.956Z"
+}
