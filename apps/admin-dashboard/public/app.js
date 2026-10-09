@@ -895,7 +895,7 @@ async function renderNotifications() {
     <div class="grid-2">
       <div class="card">
         <h3>Recent notifications ${tenant ? `· ${esc(tenant)}` : ''}</h3>
-        ${notifications.length === 0 ? '<div class="empty"><strong>No notifications yet</strong>Trigger a booking, order, or lead to see notifications appear here.</div>' : `
+        ${notifications.length === 0 ? '<div class="empty"><strong>No notifications yet</strong>Trigger a booking, order, or lead to see notifications appear here.<br><br><button class="primary" id="refreshNotif">⟳ Refresh</button></div>' : `
           <div class="table-wrap">
             <table>
               <thead><tr><th></th><th>Type</th><th>Subject</th><th>Created</th><th>Status</th><th>Email</th></tr></thead>
@@ -955,15 +955,23 @@ async function renderNotifications() {
     });
   });
 
-  $('markAllRead').addEventListener('click', async () => {
-    const r = await api(`/api/admin/notifications/${encodeURIComponent(tenant)}`, { method: 'POST', body: JSON.stringify({}) });
-    if (r.ok) { renderNotifications(); }
-  });
-  $('refreshNotif').addEventListener('click', renderNotifications);
-  $('testSmtp').addEventListener('click', async () => {
-    const r = await api('/api/admin/notifications/email/test');
-    $('smtpTestResult').textContent = json(r);
-  });
+  // Wire buttons only if they exist (empty state doesn't render them)
+  const markAllReadBtn = $('markAllRead');
+  if (markAllReadBtn) {
+    markAllReadBtn.addEventListener('click', async () => {
+      const r = await api(`/api/admin/notifications/${encodeURIComponent(tenant)}`, { method: 'POST', body: JSON.stringify({}) });
+      if (r.ok) { renderNotifications(); }
+    });
+  }
+  const refreshNotifBtn = $('refreshNotif');
+  if (refreshNotifBtn) refreshNotifBtn.addEventListener('click', renderNotifications);
+  const testSmtpBtn = $('testSmtp');
+  if (testSmtpBtn) {
+    testSmtpBtn.addEventListener('click', async () => {
+      const r = await api('/api/admin/notifications/email/test');
+      $('smtpTestResult').textContent = json(r);
+    });
+  }
 
   // Load preferences
   loadNotificationPrefs(tenant);

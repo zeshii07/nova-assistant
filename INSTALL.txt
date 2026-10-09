@@ -1,51 +1,42 @@
 =================================================================
-  Nova Assistant v30.1 — Tenant Templates & Onboarding Wizard
+  Nova Assistant v30.1 (bugfix) — Tenant Templates & Onboarding
 =================================================================
 
-WHAT'S NEW IN v30.1
--------------------
-  • 4 pre-built templates (cleaning, retail, salon, restaurant)
-  • Custom template creation for totally new business types
-  • 2-minute onboarding wizard (pick template → enter details → get snippet)
-  • Tenant management list with search, filter, stats
-  • Each business gets its own isolated data (CRM, bookings, leads)
-  • No more editing JSON files to add a new business!
+BUGFIXES IN THIS RELEASE
+------------------------
+  1. Widget form submit no longer reloads the page
+     - Root cause: minimizeBtn/resetBtn were undeclared variables →
+       ReferenceError in strict mode aborted mountWidget() before
+       the form submit listener was attached
+     - Fix: added minimizeBtn, resetBtn to the let declaration
+     - Fix: Enter key handler now calls sendMessage() directly
+       instead of dispatching a synthetic submit event
+     - Fix: added type="button" to header buttons (prevent accidental
+       form submission)
+
+  2. Close button (✕) now works
+     - Root cause: same as #1 — the close button listener was attached
+       AFTER the ReferenceError, so it never ran
+     - Fix: declaring the variables means the listener attaches correctly
+
+  3. Notifications tab no longer throws "Cannot read properties of null"
+     - Root cause: when notifications list is empty, the "Mark all as read"
+       and "Refresh" buttons don't exist in the DOM, but the code tried
+       to addEventListener on them unconditionally
+     - Fix: null-check before addEventListener
+     - Fix: added Refresh button to empty state
 
 INSTALL
 -------
   cd /path/to/your/nova-assistant
-  unzip -o nova-v30.1-templates.zip
+  unzip -o nova-v30.1-templates-fix.zip
   npm install
 
 RUN
 ---
   node apps/api/src/server.js
 
-  Open http://localhost:3000/admin → "Onboard Business" tab
-
-ONBOARD A NEW BUSINESS (2 minutes)
------------------------------------
-  1. Open /admin → click "Onboard Business"
-  2. Pick a template (Cleaning, Retail, Salon, Restaurant, or Custom)
-  3. Enter business name + owner email + phone + hours + location
-  4. Pick widget color + agent name + avatar
-  5. Click "Create business & get embed snippet"
-  6. Copy the snippet → paste on the business's website
-
-CREATE A CUSTOM TEMPLATE (for new business types)
-------------------------------------------------
-  1. /admin → "Onboard Business" → click "Build from scratch"
-  2. Enter template ID (e.g., "gym-template"), label ("Gym / Fitness")
-  3. Pick icon emoji (💪), domain (fitness), capabilities
-  4. List services (one per line: name | price | currency | unit)
-  5. Click "Create custom template"
-  6. Now you can onboard gyms from this template!
-
-MANAGE TENANTS
---------------
-  /admin → "Tenants" tab
-  - Search by name, filter by template
-  - See stats (leads, notifications) per tenant
-  - Click any tenant to view conversations, leads, notifications
+  Widget: http://localhost:3000/widget-test
+  Admin:  http://localhost:3000/admin
 
 =================================================================

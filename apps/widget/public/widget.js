@@ -239,7 +239,7 @@
   }
 
   // ─── Shadow DOM rendering ─────────────────────────────────────────
-  let shadow, bubbleEl, panelEl, messagesEl, inputEl, formEl, preChatEl, welcomeBubbleEl, typingEl;
+  let shadow, bubbleEl, panelEl, messagesEl, inputEl, formEl, preChatEl, welcomeBubbleEl, typingEl, minimizeBtn, resetBtn;
 
   function mountWidget() {
     const host = document.createElement('div');
@@ -466,8 +466,8 @@
             </div>
           </div>
           <div class="nova-header-actions">
-            <button class="nova-icon-btn" id="nova-reset" title="Start new chat" aria-label="Start new chat">↻</button>
-            <button class="nova-icon-btn" id="nova-close" title="Close" aria-label="Close chat">✕</button>
+            <button type="button" class="nova-icon-btn" id="nova-reset" title="Start new chat" aria-label="Start new chat">↻</button>
+            <button type="button" class="nova-icon-btn" id="nova-close" title="Close" aria-label="Close chat">✕</button>
           </div>
         </div>
 
@@ -536,7 +536,15 @@
     });
     inputEl.addEventListener('input', autoResize);
     inputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); formEl.dispatchEvent(new Event('submit')); }
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const text = inputEl.value;
+        if (text.trim()) {
+          inputEl.value = '';
+          autoResize();
+          sendMessage(text);
+        }
+      }
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && state.open) closePanel();
