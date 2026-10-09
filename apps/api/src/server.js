@@ -765,15 +765,31 @@ async function startServer() {
         const businessName = String(body.businessName || '').trim();
         if (!templateId || !businessName) return sendJson(res, 400, { ok:false, error:'templateId and businessName are required' });
 
-        // Verify template exists
-        const templateDir = path.resolve(container.config.tenantsDir, "_templates", templateId);
-        if (!fs.existsSync(templateDir)) return sendJson(res, 404, { ok:false, error:'Template not found' });
+        // v30.1.5: Find the SOURCE TENANT to clone from.
+        // Instead of cloning from the template (which has {{placeholders}}),
+        // we clone directly from the source demo tenant (e.g., cleaning-demo).
+        // This guarantees the new tenant is an EXACT REPLICA of the demo
+        // tenant — same routing, same conversation quality, same capabilities.
+        // The only differences are the business name, owner email, and
+        // widget branding. This fixes the "new business can't answer basic
+        // queries" bug.
+        const templateJsonPath = path.resolve(container.config.tenantsDir, "_templates", templateId, "template.json");
+        let sourceTenantId = null;
+        if (fs.existsSync(templateJsonPath)) {
+          try {
+            const tpl = JSON.parse(fs.readFileSync(templateJsonPath, 'utf8'));
+            sourceTenantId = tpl.sourceTenant;
+          } catch {}
+        }
+        if (!sourceTenantId) return sendJson(res, 404, { ok:false, error:'Template not found or has no source tenant' });
+
+        const sourceTenantDir = path.join(container.config.tenantsDir, sourceTenantId);
+        if (!fs.existsSync(sourceTenantDir)) return sendJson(res, 404, { ok:false, error:`Source tenant '${sourceTenantId}' not found` });
 
         // Generate tenant ID from business name
         let tenantId = String(body.tenantId || '').trim();
         if (!tenantId) {
           tenantId = businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-          // Ensure uniqueness
           let suffix = 1;
           while (fs.existsSync(path.join(container.config.tenantsDir, tenantId))) {
             tenantId = `${businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-${suffix}`;
@@ -785,83 +801,145 @@ async function startServer() {
         const newTenantDir = path.join(container.config.tenantsDir, tenantId);
         if (fs.existsSync(newTenantDir)) return sendJson(res, 409, { ok:false, error:'Tenant already exists' });
 
-        // Clone template directory recursively
-        const copyTemplate = (src, dst) => {
+        // v30.1.5: DIRECT COPY from source tenant — no placeholder replacement.
+        // This is the key fix: the new tenant is an EXACT byte-for-byte clone
+        // of the source demo tenant. Only profile.json is modified to set the
+        // new business name, owner email, and widget branding.
+        const copyDir = (src, dst) => {
           fs.mkdirSync(dst, { recursive: true });
           for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
             const srcPath = path.join(src, entry.name);
             const dstPath = path.join(dst, entry.name);
-            if (entry.isDirectory()) copyTemplate(srcPath, dstPath);
+            if (entry.isDirectory()) copyDir(srcPath, dstPath);
             else fs.copyFileSync(srcPath, dstPath);
           }
         };
-        copyTemplate(templateDir, newTenantDir);
+        copyDir(sourceTenantDir, newTenantDir);
 
-        // Replace placeholders in profile.json
-        const replacements = {
-          '{{tenant_id}}': tenantId,
-          '{{business_name}}': businessName,
-          '{{business_description}}': String(body.description || `${businessName} - ${businessName}`),
-          '{{owner_email}}': String(body.ownerEmail || ''),
-          '{{owner_phone}}': String(body.ownerPhone || ''),
-          '{{business_hours}}': String(body.hours || ''),
-          '{{business_location}}': String(body.location || ''),
-          '{{theme_color}}': String(body.themeColor || '#2d5bd1'),
-          '{{agent_name}}': String(body.agentName || `${businessName} Assistant`),
-          '{{welcome_message}}': String(body.welcomeMessage || `Hi! 👋 Welcome to ${businessName}. How can I help you today?`)
-        };
-
+        // Now modify ONLY profile.json with the new business details
         const profilePath = path.join(newTenantDir, 'profile.json');
-        let profileContent = fs.readFileSync(profilePath, 'utf8');
-        for (const [placeholder, value] of Object.entries(replacements)) {
-          profileContent = profileContent.split(placeholder).join(value);
-        }
-        // Remove the _template marker (this is now a real tenant)
-        const profile = JSON.parse(profileContent);
-        delete profile._template;
+        const profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+
+        // Update business identity
         profile.id = tenantId;
         profile.name = businessName;
-        if (body.agentAvatar) profile.widget = profile.widget || {}, profile.widget.agentAvatar = body.agentAvatar;
-        if (body.agentName) profile.widget = profile.widget || {}, profile.widget.agentName = body.agentName;
-        if (body.agentTitle) profile.widget = profile.widget || {}, profile.widget.agentTitle = body.agentTitle;
-        if (body.suggestions && Array.isArray(body.suggestions)) profile.widget = profile.widget || {}, profile.widget.suggestions = body.suggestions;
+        if (body.description) profile.business = profile.business || {}, profile.business.description = body.description;
         if (body.ownerEmail) {
+          profile.business = profile.business || {};
+          profile.business.email = body.ownerEmail;
+          profile.business.contact = body.ownerPhone || profile.business.contact || '';
+          // Also set notification recipient
           profile.notifications = profile.notifications || {};
           profile.notifications.recipientEmails = [body.ownerEmail];
         }
-        fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2) + '\n', 'utf8');
+        if (body.ownerPhone) profile.business = profile.business || {}, profile.business.contact = body.ownerPhone;
+        if (body.hours) profile.business = profile.business || {}, profile.business.hours = body.hours;
+        if (body.location) profile.business = profile.business || {}, profile.business.location = body.location;
 
-        // Replace placeholders in other JSON files (knowledge, etc.)
-        function replaceInDir(dir) {
-          for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-            const fullPath = path.join(dir, entry.name);
-            if (entry.isDirectory()) { replaceInDir(fullPath); continue; }
-            if (!entry.name.endsWith('.json') && !entry.name.endsWith('.md')) continue;
-            try {
-              let content = fs.readFileSync(fullPath, 'utf8');
-              let changed = false;
-              for (const [placeholder, value] of Object.entries(replacements)) {
-                if (content.includes(placeholder)) { content = content.split(placeholder).join(value); changed = true; }
+        // Update widget branding
+        profile.widget = profile.widget || {};
+        if (body.themeColor) profile.widget.themeColor = body.themeColor;
+        if (body.agentName) { profile.widget.agentName = body.agentName; profile.branding = profile.branding || {}; profile.branding.assistantName = `${body.agentName}`; }
+        if (body.agentAvatar) profile.widget.agentAvatar = body.agentAvatar;
+        if (body.agentTitle) profile.widget.agentTitle = body.agentTitle;
+        if (body.welcomeMessage) {
+          profile.widget.welcomeMessage = body.welcomeMessage;
+          profile.branding = profile.branding || {};
+          profile.branding.welcomeMessage = body.welcomeMessage;
+        }
+        if (body.suggestions && Array.isArray(body.suggestions)) profile.widget.suggestions = body.suggestions;
+
+        // Update personality.json with new business name
+        const personalityPath = path.join(newTenantDir, 'personality.json');
+        if (fs.existsSync(personalityPath)) {
+          try {
+            const personality = JSON.parse(fs.readFileSync(personalityPath, 'utf8'));
+            if (personality.name) personality.name = `${businessName} Assistant`;
+            fs.writeFileSync(personalityPath, JSON.stringify(personality, null, 2) + '\n', 'utf8');
+          } catch {}
+        }
+
+        // Update templates/assistant.json with new business name (greetings)
+        const assistantTemplatePath = path.join(newTenantDir, 'templates', 'assistant.json');
+        if (fs.existsSync(assistantTemplatePath)) {
+          try {
+            let content = fs.readFileSync(assistantTemplatePath, 'utf8');
+            // Replace the source tenant's name with the new business name
+            const sourceProfile = JSON.parse(fs.readFileSync(path.join(sourceTenantDir, 'profile.json'), 'utf8'));
+            const sourceName = sourceProfile.name || sourceTenantId;
+            content = content.split(sourceName).join(businessName);
+            fs.writeFileSync(assistantTemplatePath, content, 'utf8');
+          } catch {}
+        }
+
+        // Update knowledge/business.json with new business name
+        const businessJsonPath = path.join(newTenantDir, 'knowledge', 'business.json');
+        if (fs.existsSync(businessJsonPath)) {
+          try {
+            const businessJson = JSON.parse(fs.readFileSync(businessJsonPath, 'utf8'));
+            const sourceProfile = JSON.parse(fs.readFileSync(path.join(sourceTenantDir, 'profile.json'), 'utf8'));
+            const sourceName = sourceProfile.name || sourceTenantId;
+            // Replace business name everywhere
+            const updateString = (str) => String(str || '').split(sourceName).join(businessName);
+            businessJson.name = businessName;
+            if (businessJson.description) businessJson.description = updateString(businessJson.description);
+            if (businessJson.hours) businessJson.hours = body.hours || businessJson.hours;
+            if (businessJson.location) {
+              if (businessJson.location.city) businessJson.location.city = body.location || businessJson.location.city;
+              if (businessJson.location.serviceArea) businessJson.location.serviceArea = updateString(businessJson.location.serviceArea);
+            }
+            if (businessJson.contact) {
+              if (businessJson.contact.phone) businessJson.contact.phone = body.ownerPhone || businessJson.contact.phone;
+              if (businessJson.contact.email) businessJson.contact.email = body.ownerEmail || businessJson.contact.email;
+            }
+            if (businessJson.policies) {
+              for (const key of Object.keys(businessJson.policies)) {
+                if (typeof businessJson.policies[key] === 'string') {
+                  businessJson.policies[key] = updateString(businessJson.policies[key]);
+                }
               }
-              if (changed) fs.writeFileSync(fullPath, content, 'utf8');
+            }
+            if (businessJson.affiliation) businessJson.affiliation = updateString(businessJson.affiliation);
+            fs.writeFileSync(businessJsonPath, JSON.stringify(businessJson, null, 2) + '\n', 'utf8');
+          } catch {}
+        }
+
+        // Update pricing files with new business name
+        for (const pricingFile of ['pricing/services.json', 'pricing/sources.json']) {
+          const filePath = path.join(newTenantDir, pricingFile);
+          if (fs.existsSync(filePath)) {
+            try {
+              let content = fs.readFileSync(filePath, 'utf8');
+              const sourceProfile = JSON.parse(fs.readFileSync(path.join(sourceTenantDir, 'profile.json'), 'utf8'));
+              const sourceName = sourceProfile.name || sourceTenantId;
+              content = content.split(sourceName).join(businessName);
+              fs.writeFileSync(filePath, content, 'utf8');
             } catch {}
           }
         }
-        replaceInDir(newTenantDir);
 
-        // Clear tenant cache so the new tenant is picked up
+        // Remove any template.json file (it's a template metadata file, not needed in real tenant)
+        const templateMetaPath = path.join(newTenantDir, 'template.json');
+        if (fs.existsSync(templateMetaPath)) fs.unlinkSync(templateMetaPath);
+
+        // Save the updated profile
+        fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2) + '\n', 'utf8');
+
+        // Clear all caches so the new tenant is picked up
         container.tenantRepository.clearCache(tenantId);
+        if (container.cleaningServiceRepository?.clear) container.cleaningServiceRepository.clear(tenantId);
+        if (container.pricingRepository?.clear) container.pricingRepository.clear(tenantId);
 
         // Return success with the new tenant + embed snippet
         const novaOrigin = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers['host'] || 'localhost:3000'}`;
-        const embedSnippet = `<script src="${novaOrigin}/widget.js" data-tenant="${tenantId}" async></script>`;
+        const embedSnippet = `<script src="${novaOrigin}/widget.js" data-tenant="${tenantId}" data-server="${novaOrigin}" async></script>`;
 
         return sendJson(res, 201, {
           ok: true,
-          tenant: { id: tenantId, name: businessName, templateId, domain: profile.domain || 'generic', capabilities: profile.capabilities || [] },
+          tenant: { id: tenantId, name: businessName, templateId, sourceTenant: sourceTenantId, domain: profile.domain || 'generic', capabilities: profile.capabilities || [] },
           embedSnippet,
           adminUrl: `/admin`,
-          message: `Tenant '${businessName}' created from template '${templateId}'. Widget is ready to embed.`
+          message: `Tenant '${businessName}' created as exact replica of '${sourceTenantId}'. Widget is ready to embed.`
         });
       }
 

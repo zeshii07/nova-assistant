@@ -10,14 +10,14 @@
     "pricing",
     "availability"
   ],
-  "domain": "cleaning",
   "branding": {
-    "assistantName": "Byt Cleaners Dubai Assistant",
-    "welcomeMessage": "Hi! 👋 Welcome to Byt Cleaners Dubai. How can I help you today?",
-    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Byt Cleaners Dubai mein khush aamdeed. Main aap ki kaise madad kar sakta hoon?"
+    "assistantName": "Maya",
+    "welcomeMessage": "Hi! Welcome to Byt Cleaners Dubai. How can I help you today?",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Cleaning chahiye? Bata dein kya clean karwana hai, main suitable service choose karne mein help karta hoon.",
+    "welcomeMessageUrdu": "السلام علیکم! صفائی کے حوالے سے میں آپ کی کیا مدد کر سکتا ہوں؟"
   },
   "business": {
-    "description": "Professional cleaning services in Dubai — residential, commercial, deep cleaning, sofa, carpet, and more",
+    "description": "Professional cleaning services in Dubai",
     "contact": "+971 50 123 4567",
     "email": "owner@bytcleaners.ae",
     "hours": "Mon-Sat, 8 AM - 8 PM",
@@ -30,24 +30,43 @@
     "knowledge.read",
     "memory.read:assistant",
     "memory.write:assistant",
+    "memory.delete:assistant",
     "crm.customer.read:assistant",
     "crm.customer.write:assistant",
-    "crm.activity.write:assistant"
+    "crm.activity.write:assistant",
+    "crm.customer.read:crm",
+    "crm.customer.write:crm",
+    "crm.note.write:crm",
+    "crm.tag.write:crm",
+    "crm.activity.read:crm",
+    "crm.activity.write:crm",
+    "cleaning.read:cleaning",
+    "cleaning.request.create:cleaning",
+    "cleaning.request.update:cleaning",
+    "crm.customer.read:cleaning",
+    "crm.customer.write:cleaning",
+    "crm.activity.write:cleaning",
+    "memory.read:cleaning",
+    "memory.write:cleaning",
+    "offering.read:pricing",
+    "offering.read:availability"
   ],
+  "domain": "cleaning",
   "widget": {
     "enabled": true,
     "position": "bottom-right",
     "themeColor": "#0ea5e9",
     "language": "auto",
-    "welcomeMessage": "Hi! 👋 Welcome to Byt Cleaners Dubai. How can I help you today?",
+    "welcomeMessage": "Hi! Welcome to Byt Cleaners Dubai. How can I help you today?",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Cleaning chahiye? Bata dein kya clean karwana hai, main suitable service choose karne mein help karta hoon.",
+    "suggestions": [
+      "What cleaning services do you offer?",
+      "I need a deep cleaning quote",
+      "Book a cleaning for tomorrow"
+    ],
     "agentAvatar": "aria",
     "agentName": "Maya",
-    "agentTitle": "Assistant",
-    "suggestions": [
-      "What services do you offer?",
-      "Book an appointment",
-      "What are your hours?"
-    ],
+    "agentTitle": "Booking Agent",
     "preChatForm": {
       "enabled": true,
       "fields": [
@@ -70,7 +89,7 @@
     "proactiveGreeting": {
       "enabled": true,
       "delaySeconds": 5,
-      "message": "Hi! 👋 I'm Maya. How can I help you today?",
+      "message": "Hi! 👋 I'm David, your booking agent. Need a cleaning quote or want to schedule a service? I'm here to help.",
       "pageRules": []
     }
   },

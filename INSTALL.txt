@@ -1,76 +1,72 @@
 =================================================================
-  Nova Assistant v30.1.4 — Security + Byt Cleaners + Bugfixes
+  Nova Assistant v30.1.5 — EXACT REPLICA Tenant Creation Fix
 =================================================================
 
-WHAT'S NEW IN v30.1.4
----------------------
-  1. WIDGET API KEY SECURITY (Issue 3: unauthorized use)
-     - Tenants can now require an API key for widget requests
-     - Set widget.apiKey in profile.json to require authorization
-     - Set widget.allowedDomains to whitelist specific websites
-     - Without the key, requests return 403 Forbidden
-     - The widget reads the key from data-api-key attribute:
-       <script src="..."
-         data-tenant="cleaning-demo"
-         data-api-key="sk_your_secret_key"
-         async></script>
-     - Open access (no key) is the default — opt-in security
+CRITICAL BUG FIX
+----------------
+New businesses created from templates now work EXACTLY like the
+demo tenants. Previously, the template extraction + placeholder
+replacement process corrupted the tenant data, causing the
+cleaning adapter to fail routing (new businesses couldn't answer
+basic queries like "i want deep cleaning for my apartment").
 
-  2. BYT CLEANERS DUBAI TENANT (permanent)
-     - Created from cleaning-template
-     - Agent: Maya (aria avatar)
-     - Theme: sky blue (#0ea5e9)
-     - Owner: owner@bytcleaners.ae
-     - Tenant ID: byt-cleaners-dubai
+ROOT CAUSE
+----------
+The old code cloned from the TEMPLATE folder (which had
+{{placeholders}}), then did string replacement on all JSON files.
+This corrupted the data because:
+1. Some placeholders weren't in the replacement map ({{business_website}})
+2. String replacement on JSON files could break valid JSON
+3. The cleaning adapter's routing depended on data that was
+   subtly different after placeholder replacement
 
-  3. TENANT EXPORT FEATURE (Issue 1: tenants disappear on restart)
-     - New endpoint: POST /api/admin/tenants/{id}/export
-     - Returns all tenant files as JSON manifest
-     - Use this to download tenant config from Render and commit to git
-     - This solves the Render ephemeral filesystem issue
+THE FIX (v30.1.5)
+-----------------
+New tenants are now created by DIRECTLY COPYING the entire source
+demo tenant folder (e.g., cleaning-demo). This is a byte-for-byte
+exact clone. Only these files are then modified:
 
-  4. CONNECTION FIX (v30.1.3 included)
-     - Widget now uses data-server attribute to detect Nova URL
-     - Better error messages with detected URL shown
+1. profile.json — business name, owner email, widget branding
+2. personality.json — assistant name
+3. templates/assistant.json — greetings with new business name
+4. knowledge/business.json — business name, hours, contact
+5. pricing/services.json — business name
+6. pricing/sources.json — business name
+
+NO placeholder replacement on any other files. The cleaning
+services, knowledge, FAQs, templates, and all routing-critical
+data are EXACT COPIES of the source demo tenant.
+
+VERIFIED
+--------
+Tested "i want deep cleaning service for my apartment" on both:
+- cleaning-demo: "Deep Apartment Cleaning selected. From AED 200..."
+- byt-cleaners-dubai: "Deep Apartment Cleaning selected. From AED 200..."
+IDENTICAL response! ✅
 
 INSTALL
 -------
   cd /path/to/your/nova-assistant
-  unzip -o nova-v30-1-4-security-byt.zip
+  unzip -o nova-v30-1-5-exact-replica-fix.zip
   npm install
   git add -A
-  git commit -m "v30.1.4: API key security + Byt Cleaners Dubai + export feature"
+  git commit -m "v30.1.5: exact replica tenant creation — new businesses work identically to demo tenants"
   git push
 
-ENABLING API KEY PROTECTION (optional, per-tenant)
----------------------------------------------------
-To protect a tenant's widget from unauthorized embedding:
+BYT CLEANERS DUBAI
+------------------
+This tenant is included in the zip as a permanent tenant.
+It's an exact replica of cleaning-demo with:
+- Business name: Byt Cleaners Dubai
+- Agent: Maya (aria avatar, sky blue #0ea5e9)
+- Owner: owner@bytcleaners.ae
 
-1. Edit tenants/{tenantId}/profile.json
-2. Add to the "widget" block:
-   "apiKey": "sk_your_secret_key_here",
-   "allowedDomains": ["yourwebsite.com", "www.yourwebsite.com"]
-
-3. Update the embed snippet on your website:
-   <script src="https://nova-saas-test.onrender.com/widget.js"
-     data-tenant="cleaning-demo"
-     data-api-key="sk_your_secret_key_here"
-     data-server="https://nova-saas-test.onrender.com"
-     async></script>
-
-4. Now only websites with the correct API key can use your widget.
-   Other websites that try to embed it will get 403 Forbidden.
-
-KEEPING TENANTS ON RENDER (preventing disappearance)
-----------------------------------------------------
-Render's free tier has an ephemeral filesystem. New tenants created
-via the dashboard disappear on restart. To make them permanent:
-
-1. Create the tenant via /admin → Onboard Business
-2. Test it works
-3. Export it: POST /api/admin/tenants/{id}/export
-4. Save the returned files to your local nova-assistant/tenants/{id}/
-5. git add -A && git commit && git push
-6. Render redeploys with the tenant permanently in the repo
+EMBED SNIPPET
+-------------
+  <script
+    src="https://nova-saas-test.onrender.com/widget.js"
+    data-tenant="byt-cleaners-dubai"
+    data-server="https://nova-saas-test.onrender.com"
+    async></script>
 
 =================================================================
