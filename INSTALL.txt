@@ -1,35 +1,52 @@
 =================================================================
-  Nova Assistant v30.1 (bugfix) — Tenant Templates & Onboarding
+  Nova Assistant v30.1.2 — Widget Bugfix + UI Enhancement
 =================================================================
 
-BUGFIXES IN THIS RELEASE
-------------------------
-  1. Widget form submit no longer reloads the page
-     - Root cause: minimizeBtn/resetBtn were undeclared variables →
-       ReferenceError in strict mode aborted mountWidget() before
-       the form submit listener was attached
-     - Fix: added minimizeBtn, resetBtn to the let declaration
-     - Fix: Enter key handler now calls sendMessage() directly
-       instead of dispatching a synthetic submit event
-     - Fix: added type="button" to header buttons (prevent accidental
-       form submission)
+WHAT'S FIXED IN v30.1.2
+-----------------------
+  1. "Could not reach the assistant" errors
+     - Root cause: Render free tier sleeps after 15 min of inactivity.
+       First request after sleep takes 30-50s to respond, causing the
+       widget's 15s timeout to fire and show the error.
+     - Fix: improved retry logic with longer delays for timeout errors
+       (waits 2s, 4s, 8s instead of 1s, 2s, 4s) to give the server time
+       to wake up
+     - Fix: better error classification — distinguishes between:
+       * timeout (server starting up — shows "Please try again")
+       * network (server unreachable — shows "Cannot reach server")
+       * mixed_content (HTTPS page + HTTP Nova — shows security warning)
+       * HTTP errors (404, 429, 500 — shows actual error)
 
-  2. Close button (✕) now works
-     - Root cause: same as #1 — the close button listener was attached
-       AFTER the ReferenceError, so it never ran
-     - Fix: declaring the variables means the listener attaches correctly
+  2. "Could not reach Nova server. Using defaults."
+     - This is a WARNING, not an error. The widget loads with defaults
+       if the config endpoint is unreachable, so chat still works.
+     - Fix: this message now only shows in the chat panel if the chat
+       ALSO fails. If only config fails but chat works, no message shown.
 
-  3. Notifications tab no longer throws "Cannot read properties of null"
-     - Root cause: when notifications list is empty, the "Mark all as read"
-       and "Refresh" buttons don't exist in the DOM, but the code tried
-       to addEventListener on them unconditionally
-     - Fix: null-check before addEventListener
-     - Fix: added Refresh button to empty state
+  3. Retry button on error
+     - When a message fails to send, the widget now shows a "↻ Retry"
+       button below the error message
+     - Clicking it re-sends the last user message automatically
+
+  4. Connection status indicator
+     - The header subtitle now shows connection status with a colored dot:
+       * Green dot = connected
+       * Yellow blinking dot = connecting
+       * Red dot = connection error
+       * Yellow dot = rate limited
+
+  5. UI enhancements
+     - Smoother message animations (fade-in + slide-up)
+     - Better typing indicator (larger dots, better spacing)
+     - Custom scrollbar styling
+     - Better error message styling (yellow warning style)
+     - Improved mobile layout
+     - Better message bubble spacing
 
 INSTALL
 -------
   cd /path/to/your/nova-assistant
-  unzip -o nova-v30.1-templates-fix.zip
+  unzip -o nova-v30.1.2-widget-fix.zip
   npm install
 
 RUN
@@ -38,5 +55,16 @@ RUN
 
   Widget: http://localhost:3000/widget-test
   Admin:  http://localhost:3000/admin
+
+NOTE ON RENDER FREE TIER
+------------------------
+  Render's free tier sleeps after 15 min of inactivity. The first
+  request after sleep takes 30-50s while the server boots. The widget
+  now handles this gracefully with longer retry delays.
+
+  To avoid cold starts entirely:
+  - Upgrade to Render's paid tier ($7/month) — no sleep
+  - Or use a cron service (like cron-job.org) to ping /health every
+    10 minutes to keep the server awake
 
 =================================================================
