@@ -1,94 +1,28 @@
 const { createConversationId } = require("../../shared/src/ids");
-const { createInitialState: createStateSchema, applyStatePatch: applyStatePatchSchema } = require("../../state/src/stateSchema");
+const { createInitialState, applyStatePatch } = require("../../state/src/stateSchema");
 const { createCapabilityContext } = require("../../capability-sdk/src/capabilityContext");
 const { createCapabilityResult } = require("../../capability-sdk/src/capabilityResult");
 const { appendGoalHistory, transitionGoal } = require("../../conversation-intelligence/src/goal-engine");
-// Import the new state machine with deep-merge and validation
-const stateMachine = require("../../state-machine/src/stateMachine");
-// Import the unified entity extraction layer
-const { extractEntities } = require("../../entity-extraction/src/unifiedEntityExtractor");
-// Import the conversation memory engine
-const { ConversationMemoryEngine } = require("../../conversation-memory/src/conversationMemoryEngine");
-// v24.0: Import Message Plan builder
-const { MessagePlanBuilder } = require("../../conversation-intelligence/src/messagePlan");
 
 /** Coordinates tenant, state, conversation intelligence, capability routing, humanization, events, replay and persistence. */
 class ExecutionEngine {
-  constructor({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId, services = {}, humanizationEngine = null, socialIntelligenceEngine = null, conversationIntelligenceEngine = null, replayService = null, feedbackCollector = null, distributedLock = null, optimisticVersioning = null, idempotencyGuard = null }) {
-    Object.assign(this, { tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId, services, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService, feedbackCollector, distributedLock, optimisticVersioning, idempotencyGuard });
-    // Initialize conversation memory engine
-    this.memoryEngine = new ConversationMemoryEngine({ logger });
+  constructor({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId, services = {}, humanizationEngine = null, socialIntelligenceEngine = null, conversationIntelligenceEngine = null, replayService = null }) {
+    Object.assign(this, { tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId, services, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService });
   }
 
   async process(message) {
     const processStarted = performance.now();
-    // v26.0: Generate correlation ID for all logs in this request
-    const requestId = `req_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const tenantId = message.tenantId || this.defaultTenantId;
     const tenant = this.tenantRepository.getById(tenantId);
     const conversationId = createConversationId(tenantId, message.channel, message.customerId);
-
-    // v26.0: Idempotency guard — prevent duplicate processing of retried webhooks
-    if (this.idempotencyGuard && message.messageId) {
-      try {
-        const { isDuplicate } = await this.idempotencyGuard.checkAndMark(message.channel || 'http', message.messageId);
-        if (isDuplicate) {
-          if (this.logger) this.logger.info('idempotency.duplicate_skipped', { tenantId, conversationId, messageId: message.messageId });
-          return { conversationId, reply: '', state: null, capabilityId: null, intelligence: null, replayId: null, duplicate: true };
-        }
-      } catch (error) {
-        if (this.logger) this.logger.warn('idempotency.check_failed', { error: error.message });
-      }
-    }
-
     let state = await this.stateRepository.get(conversationId);
-    if (!state) state = createStateSchema({ tenantId, conversationId, channel: message.channel, customerId: message.customerId, language: tenant.defaultLanguage });
-    // Snapshot state for rollback if a capability handler throws
-    const stateBefore = stateMachine.snapshotState(state);
+    if (!state) state = createInitialState({ tenantId, conversationId, channel: message.channel, customerId: message.customerId, language: tenant.defaultLanguage });
+    const stateBefore = structuredClone(state);
 
-    // v26.0: Create logger with correlation ID for all logs in this request
-    const logger = this.logger.child({ tenantId, conversationId, requestId });
+    const logger = this.logger.child({ tenantId, conversationId });
     let customer = this.services.crmService
       ? await this.services.crmService.ensureCustomer({ tenantId, customerId: message.customerId, channel: message.channel, preferredLanguage: state.language })
       : { id: message.customerId };
-
-    // === Unified Entity Extraction ===
-    // Extract ALL entities from the message in one pass. This canonical
-    // entity model is available to conversation intelligence, capability
-    // adapters, and the execution engine itself. Eliminates duplicate
-    // regex scanning across 6+ extractors.
-    const entities = extractEntities(message.text, { state, services: this.services, tenant });
-    if (logger) logger.debug('entity_extraction.completed', {
-      temporal: entities.temporal,
-      property: entities.property,
-      identity: entities.identity,
-      serviceSupport: entities.serviceSupport,
-      businessIdentity: entities.businessIdentity,
-    });
-
-    // === Conversation Memory ===
-    // Resolve context references using conversation memory (short-term +
-    // CRM-linked). This lets the deterministic core understand:
-    // - "book it again" → repeat last booking
-    // - "same time as last week" → reuse last booking time
-    // - "use the same address" → reuse CRM address
-    const memoryContext = this.memoryEngine.resolve(message.text, {
-      recentTurns: state?.context?.recentTurns || [],
-      sessionSummary: state?.context?.sessionSummary || null,
-      customer,
-      entities,
-    });
-    if (logger && (memoryContext.wantsRepeat || memoryContext.wantsSameTime || memoryContext.wantsSameAddress || memoryContext.wantsChange)) {
-      logger.info('conversation_memory.reference_resolved', {
-        wantsRepeat: memoryContext.wantsRepeat,
-        wantsSameTime: memoryContext.wantsSameTime,
-        wantsSameAddress: memoryContext.wantsSameAddress,
-        wantsChange: memoryContext.wantsChange,
-        lastBookingCapability: memoryContext.lastBookingCapability,
-        lastBookingTime: memoryContext.lastBookingTime,
-        lastAddress: memoryContext.lastAddress ? '(found)' : '(not found)',
-      });
-    }
 
     // Identity capture is cross-cutting, not a competing business workflow.
     // Save only an explicitly declared, centrally validated name, then continue
@@ -98,66 +32,10 @@ class ExecutionEngine {
       customer=await this.services.crmService.updateCustomerProfile({tenantId,customerId:message.customerId,name:declaredName.value});
     }
 
-    // Request-scoped cache: listServices() and listProducts() are called by
-    // multiple adapters for the same message. Cache the results per-request
-    // so file I/O only happens once per service per message.
-    // Note: scope() returns a frozen object, so we can't monkey-patch it.
-    // Instead, we wrap the services object with a proxy that caches results.
-    const requestCache = new Map();
-    const self = this;
-    const cachedServicesProxy = new Proxy(this.services, {
-      get(target, prop) {
-        if (prop === 'cleaningService') {
-          const orig = target.cleaningService;
-          if (!orig) return orig;
-          return {
-            ...orig,
-            scope: (opts) => {
-              const scoped = orig.scope(opts);
-              if (!scoped) return scoped;
-              return {
-                ...scoped,
-                listServices: async () => {
-                  if (requestCache.has('cleaningServices')) return requestCache.get('cleaningServices');
-                  const services = await scoped.listServices();
-                  requestCache.set('cleaningServices', services);
-                  return services;
-                },
-                findService: scoped.findService?.bind(scoped),
-                findServices: scoped.findServices?.bind(scoped),
-                checkAvailability: scoped.checkAvailability?.bind(scoped),
-                listRequests: scoped.listRequests?.bind(scoped),
-                createRequest: scoped.createRequest?.bind(scoped)
-              };
-            }
-          };
-        }
-        if (prop === 'catalogService') {
-          const orig = target.catalogService;
-          if (!orig) return orig;
-          return {
-            ...orig,
-            listProducts: async (tid) => {
-              const key = `products:${tid}`;
-              if (requestCache.has(key)) return requestCache.get(key);
-              const products = await orig.listProducts(tid);
-              requestCache.set(key, products);
-              return products;
-            },
-            search: orig.search?.bind(orig),
-            getProductById: orig.getProductById?.bind(orig),
-            listCategories: orig.listCategories?.bind(orig),
-            validateSelection: orig.validateSelection?.bind(orig)
-          };
-        }
-        return target[prop];
-      }
-    });
-
     let intelligence = null;
     if (this.conversationIntelligenceEngine) {
       try {
-        intelligence = await this.conversationIntelligenceEngine.analyze({ tenant, message, state, services: cachedServicesProxy });
+        intelligence = await this.conversationIntelligenceEngine.analyze({ tenant, message, state, services: this.services });
       } catch (error) {
         logger.error("conversation_intelligence.failed", { error:error.message, stack:error.stack });
         intelligence = null;
@@ -182,59 +60,9 @@ class ExecutionEngine {
 
     await this.eventBus.publish("message.received.v1", { tenantId, conversationId, message }, { source: "execution-engine" });
 
-    // === v24.0: Build Message Plan ===
-    // The Message Plan replaces the old "single winning capability" model.
-    // It can handle:
-    //   - Primary goal (e.g., book deep cleaning)
-    //   - Interruptions (e.g., "do you accept card?" while booking)
-    //   - Corrections (e.g., "actually 3 bedrooms not 4")
-    //   - Global commands (cancel, reset, undo, handoff)
-    //   - Clarification requests
-    const messagePlan = MessagePlanBuilder.build(intelligence, { state, tenant, message });
-    if (logger) {
-      logger.info('message_plan.built', {
-        planId: messagePlan.planId,
-        action: messagePlan.workflowAction,
-        primaryGoal: messagePlan.primaryGoal ? `${messagePlan.primaryGoal.capabilityId}/${messagePlan.primaryGoal.intent}` : 'none',
-        interruptions: messagePlan.interruptions.length,
-        correction: messagePlan.correction ? messagePlan.correction.field : null,
-        requiresClarification: messagePlan.requiresClarification,
-      });
-    }
-
-    // === Process interruptions first (read-only, no state mutation) ===
-    // Interruptions are side questions that can be answered without disrupting
-    // the primary workflow. Example: "book deep cleaning tomorrow at 10 and
-    // also do you accept card?" → answer payment question, then continue booking.
-    let interruptionReplies = [];
-    if (messagePlan.interruptions.length > 0) {
-      for (const interruption of messagePlan.interruptions) {
-        try {
-          const intCapability = this.capabilityRouter.registry.get(interruption.capabilityId);
-          if (intCapability && this.capabilityRouter.permissionService.canUse(tenant, intCapability.manifest)) {
-            const intContext = createCapabilityContext({
-              tenant, message, state, conversationId, customer,
-              services: { ...cachedServicesProxy, events: this.eventBus },
-              logger, intelligence: { selected: { intent: interruption.intent, confidence: interruption.confidence, entities: interruption.entities }, entities: interruption.entities }
-            });
-            const intResult = createCapabilityResult(await intCapability.execute(intContext));
-            if (intResult.reply) {
-              interruptionReplies.push(intResult.reply);
-            }
-          }
-        } catch (error) {
-          logger.warn('message_plan.interruption_failed', { capabilityId: interruption.capabilityId, intent: interruption.intent, error: error.message });
-        }
-      }
-    }
-
     // Highest-priority global commands never enter a business workflow.
     if (intelligence?.globalCommand) {
-      const response = await this.#handleGlobalCommand({ intelligence, tenant, message, state, conversationId, customer, logger, stateBefore, processStarted, entities, memoryContext });
-      // Prepend interruption replies if any
-      if (interruptionReplies.length > 0) {
-        response.reply = `${interruptionReplies.join('\n\n')}\n\n${response.reply}`;
-      }
+      const response = await this.#handleGlobalCommand({ intelligence, tenant, message, state, conversationId, customer, logger, stateBefore, processStarted });
       return response;
     }
 
@@ -246,7 +74,7 @@ class ExecutionEngine {
         workflow:intelligence.workflow?.current,
         reason:intelligence.clarificationReason
       });
-      return this.#finalize({ entities, memoryContext,
+      return this.#finalize({
         tenant,message,conversationId,customer,state,stateBefore,capabilityId:'system',intelligence,logger,processStarted,
         result:createCapabilityResult({handled:true,reply,responseModel:{intent:'CONVERSATION_CLARIFICATION_REQUIRED',payload:{legacyText:reply,reason:intelligence.clarificationReason}},statePatch:{lastIntent:'conversation_clarification_required'}})
       });
@@ -254,7 +82,7 @@ class ExecutionEngine {
 
     const routingContext = createCapabilityContext({
       tenant, message, state, conversationId, customer,
-      services: { ...cachedServicesProxy, events: this.eventBus },
+      services: { ...this.services, events: this.eventBus },
       logger, intelligence
     });
 
@@ -263,7 +91,7 @@ class ExecutionEngine {
       const name=tenant.business?.name||tenant.name||'This business';
       const domain=String(tenant.domain||'business').replace(/_/g,' ');
       const reply = `I may be missing part of what you mean, but I have not changed or submitted anything. ${name} is a ${domain} business; please mention the product, service, business information, booking, order, or change you need, and I’ll route it to the correct tenant capability.`;
-      return this.#finalize({ entities, memoryContext, tenant, message, conversationId, customer, state, stateBefore, capabilityId:null, result:createCapabilityResult({handled:true,reply}), intelligence, logger, processStarted });
+      return this.#finalize({ tenant, message, conversationId, customer, state, stateBefore, capabilityId:null, result:createCapabilityResult({handled:true,reply}), intelligence, logger, processStarted });
     }
 
     const scopedServices = {};
@@ -274,7 +102,7 @@ class ExecutionEngine {
     }
     const executionContext = createCapabilityContext({
       tenant, message, state, conversationId, customer,
-      services: { ...cachedServicesProxy, events: this.eventBus, ...scopedServices },
+      services: { ...this.services, events: this.eventBus, ...scopedServices },
       logger, intelligence
     });
 
@@ -286,11 +114,6 @@ class ExecutionEngine {
       result = createCapabilityResult({ handled: true, reply: "Sorry, I could not complete that request right now.", metadata: { error: "capability_execution_failed" } });
     }
 
-    // v24.0: Prepend interruption replies to the main result
-    if (interruptionReplies.length > 0 && result.reply) {
-      result.reply = `${interruptionReplies.join('\n\n')}\n\n${result.reply}`;
-    }
-
     await this.services.customerDataBridge?.sync({
       tenantId:tenant.id,
       customerId:message.customerId,
@@ -299,10 +122,10 @@ class ExecutionEngine {
       result
     });
 
-    return this.#finalize({ entities, memoryContext, tenant, message, conversationId, customer, state, stateBefore, capabilityId:match.capability.id, result, intelligence, logger, processStarted, executionContext });
+    return this.#finalize({ tenant, message, conversationId, customer, state, stateBefore, capabilityId:match.capability.id, result, intelligence, logger, processStarted, executionContext });
   }
 
-  async #handleGlobalCommand({ intelligence, tenant, message, state, conversationId, customer, logger, stateBefore, processStarted, entities = null, memoryContext = null }) {
+  async #handleGlobalCommand({ intelligence, tenant, message, state, conversationId, customer, logger, stateBefore, processStarted }) {
     const command = intelligence.globalCommand.type;
     let reply;
     let patch = {};
@@ -336,10 +159,10 @@ class ExecutionEngine {
       patch = { lastIntent:"human_handoff_requested", context:{...(state.context||{}),handoff:{id:handoff?.id||null,status:"open"}} };
     }
     const result = createCapabilityResult({ handled:true, reply, statePatch:patch, metadata:{globalCommand:command} });
-    return this.#finalize({ entities, memoryContext, tenant, message, conversationId, customer, state, stateBefore, capabilityId:"system", result, intelligence, logger, processStarted });
+    return this.#finalize({ tenant, message, conversationId, customer, state, stateBefore, capabilityId:"system", result, intelligence, logger, processStarted });
   }
 
-  async #finalize({ tenant, message, conversationId, customer, state, stateBefore, capabilityId, result, intelligence, logger, processStarted, executionContext = null, entities = null, memoryContext = null }) {
+  async #finalize({ tenant, message, conversationId, customer, state, stateBefore, capabilityId, result, intelligence, logger, processStarted, executionContext = null }) {
     let nextGoal = intelligence?.globalCommand ? (result.statePatch?.context?.goal ?? null) : (intelligence?.goal?.nextGoal ?? state.context?.goal ?? null);
     const responseIntent = result.responseModel?.intent || null;
     if (nextGoal && responseIntent === 'COMMERCE_ORDER_CREATED') nextGoal = transitionGoal(nextGoal, { status:'completed', stage:'completed' });
@@ -348,46 +171,22 @@ class ExecutionEngine {
       ? appendGoalHistory(state, { ...intelligence.goal.transition, goalId: nextGoal?.id || intelligence?.goal?.current?.id || null })
       : (state.context?.goalHistory || []);
     const replaceCapabilityState = intelligence?.globalCommand?.type === "reset";
-    // === Conversation Memory Engine ===
-    // Add this turn to conversation memory. The memory engine handles:
-    // - Short-term: last 6 turns with entity snapshot (PII-excluded)
-    // - Medium-term: session summary when threshold exceeded
-    // - Entity sanitization: identity fields (name/phone/email) are stripped
-    const memoryUpdate = this.memoryEngine.addTurn({
-      state,
-      message,
-      capabilityId: capabilityId || null,
-      intent: intelligence?.selected?.intent || null,
-      entities: entities || null,
-      customer,
-    });
-    const recentTurns = memoryUpdate.recentTurns;
-    const sessionSummary = memoryUpdate.sessionSummary;
-    // === State Machine: deep-merge with validation ===
-    // Use the new state machine's deepMerge instead of the old shallow applyStatePatch.
-    // This prevents nested objects (like capabilityState.cleaning) from being
-    // accidentally overwritten by shallow merges.
-    const statePatch = {
+    // Conversation memory window: keep the last 6 customer turns + the
+    // capability/intent that handled each. PII is NOT stored here — only
+    // the customer's message text (already shown to the user) and the
+    // capability/intent label. This lets the remote NLU resolver resolve
+    // pronouns like "book it again" or "the same time as last week" without
+    // leaking customer contact data to the provider.
+    const MAX_RECENT_TURNS = 6;
+    const previousTurns = Array.isArray(state.context?.recentTurns) ? state.context.recentTurns : [];
+    const recentTurns = [...previousTurns, { text: message.text, capabilityId: capabilityId || null, intent: intelligence?.selected?.intent || null, at: new Date().toISOString() }].slice(-MAX_RECENT_TURNS);
+    state = applyStatePatch(state, {
       ...result.statePatch,
       capabilityState: replaceCapabilityState
         ? (result.statePatch.capabilityState || {})
-        : stateMachine.deepMerge(state.capabilityState || {}, result.statePatch.capabilityState || {}),
-      context: stateMachine.deepMerge(state.context || {}, {
-        ...(result.statePatch.context || {}),
-        goal: nextGoal,
-        goalHistory,
-        lastMessage: message.text,
-        lastCapability: capabilityId,
-        conversationIntelligence: summarizeIntelligence(intelligence),
-        recentTurns,
-        sessionSummary,
-        // Store the unified entity model for debugging and future use
-        entities: entities || null,
-        // Store memory context for debugging
-        memoryContext: memoryContext || null,
-      }),
-    };
-    state = stateMachine.applyStatePatch(state, statePatch, logger);
+        : { ...(state.capabilityState || {}), ...(result.statePatch.capabilityState || {}) },
+      context: { ...state.context, ...(result.statePatch.context || {}), goal: nextGoal, goalHistory, lastMessage: message.text, lastCapability: capabilityId, conversationIntelligence: summarizeIntelligence(intelligence), recentTurns }
+    });
     await this.stateRepository.save(state);
 
     for (const event of result.events) await this.eventBus.publish(event.name, event.payload || {}, { tenantId:tenant.id, conversationId, capabilityId });
@@ -401,7 +200,7 @@ class ExecutionEngine {
           result.reply = this.socialIntelligenceEngine.polish(result.reply, { social:intelligence?.social || {}, language:experience.language || state.language, capabilityId, selectedIntent:intelligence?.selected?.intent || null, messageText:message.text, relationship:experience.relationship });
         }
         if (experience.language && state.language !== experience.language) {
-          state = stateMachine.applyStatePatch(state, { language: experience.language });
+          state = applyStatePatch(state, { language: experience.language });
           await this.stateRepository.save(state);
         }
       } catch (error) {
@@ -411,9 +210,14 @@ class ExecutionEngine {
     }
     // When a user temporarily interrupts an active workflow with a business
     // question, preserve the workflow and gently resume it after answering.
+    // v30.1.7: Also deduplicate the reply — if the interruption answer appears
+    // multiple times (because both the interruption handler AND the main
+    // capability produced the same answer), remove the duplicates.
     const activeWorkflow = intelligence?.workflow?.current;
     const resumeSocialConfirmation=intelligence?.interruption?.type==='social'&&['confirm','confirmation'].includes(activeWorkflow?.pendingField);
     const resumeProfileQuestion=capabilityId==='crm'&&intelligence?.selected?.intent==='crm.ask_name';
+    // v30.1.7: Deduplicate repeated paragraphs in the reply
+    result.reply = deduplicateParagraphs(result.reply);
     if ((intelligence?.interruption||resumeProfileQuestion) && activeWorkflow && capabilityId !== activeWorkflow.capabilityId && (intelligence?.interruption?.type !== "social"||resumeSocialConfirmation||resumeProfileQuestion)) {
       const resume = resumePrompt(activeWorkflow, state.language);
       if (resume && !result.reply.includes(resume)) result.reply = `${result.reply}\n\n${resume}`;
@@ -425,12 +229,6 @@ class ExecutionEngine {
     if(this.services.leadService){
       const latestCustomer=await this.services.crmService?.getCustomer?.(tenant.id,message.customerId)||customer;
       await this.services.leadService.observe({tenantId:tenant.id,conversationId,customerId:message.customerId,channel:message.channel,message,customer:latestCustomer,capabilityId,intelligence,result,state});
-    }
-
-    // v21.0: Feedback collection — passive, failure-isolated
-    if(this.feedbackCollector){
-      try{ this.feedbackCollector.observe({ tenantId:tenant.id, conversationId, customerId:message.customerId, message, intelligence, result, stateBefore, stateAfter:state, capabilityId }); }
-      catch(error){ logger.warn('feedback_collector.observe_failed',{error:error.message}); }
     }
 
     await this.eventBus.publish("message.processed.v1", { tenantId:tenant.id, conversationId, capabilityId }, { source:"execution-engine" });
@@ -486,5 +284,24 @@ function resumePrompt(workflow, language) {
   const map = language === "roman_urdu" ? roman : english;
   if (field === "size_or_quantity") return language === "roman_urdu" ? "Product selection continue karne ke liye size ya quantity bata dein." : "To continue the product selection, tell me the size or quantity.";
   return map[field] || null;
+}
+// v30.1.7: Removes duplicate paragraphs from the reply.
+// This fixes the "answer appears twice" bug that occurs when both the
+// interruption handler and the main capability produce the same answer.
+function deduplicateParagraphs(text) {
+  if (!text) return text;
+  const paragraphs = String(text).split(/\n\n+/);
+  const seen = new Set();
+  const unique = [];
+  for (const para of paragraphs) {
+    const trimmed = para.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(trimmed);
+    }
+  }
+  return unique.join('\n\n');
 }
 module.exports = { ExecutionEngine };

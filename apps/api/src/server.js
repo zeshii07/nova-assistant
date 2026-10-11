@@ -864,10 +864,11 @@ async function startServer() {
         if (fs.existsSync(assistantTemplatePath)) {
           try {
             let content = fs.readFileSync(assistantTemplatePath, 'utf8');
-            // Replace the source tenant's name with the new business name
+            // v30.1.6: Replace both full name and short name
             const sourceProfile = JSON.parse(fs.readFileSync(path.join(sourceTenantDir, 'profile.json'), 'utf8'));
             const sourceName = sourceProfile.name || sourceTenantId;
-            content = content.split(sourceName).join(businessName);
+            const sourceShortName = sourceName.split(' ')[0];
+            content = content.split(sourceName).join(businessName).split(sourceShortName).join(businessName);
             fs.writeFileSync(assistantTemplatePath, content, 'utf8');
           } catch {}
         }
@@ -879,28 +880,50 @@ async function startServer() {
             const businessJson = JSON.parse(fs.readFileSync(businessJsonPath, 'utf8'));
             const sourceProfile = JSON.parse(fs.readFileSync(path.join(sourceTenantDir, 'profile.json'), 'utf8'));
             const sourceName = sourceProfile.name || sourceTenantId;
-            // Replace business name everywhere
-            const updateString = (str) => String(str || '').split(sourceName).join(businessName);
-            businessJson.name = businessName;
-            if (businessJson.description) businessJson.description = updateString(businessJson.description);
-            if (businessJson.hours) businessJson.hours = body.hours || businessJson.hours;
-            if (businessJson.location) {
-              if (businessJson.location.city) businessJson.location.city = body.location || businessJson.location.city;
-              if (businessJson.location.serviceArea) businessJson.location.serviceArea = updateString(businessJson.location.serviceArea);
-            }
-            if (businessJson.contact) {
-              if (businessJson.contact.phone) businessJson.contact.phone = body.ownerPhone || businessJson.contact.phone;
-              if (businessJson.contact.email) businessJson.contact.email = body.ownerEmail || businessJson.contact.email;
-            }
-            if (businessJson.policies) {
-              for (const key of Object.keys(businessJson.policies)) {
-                if (typeof businessJson.policies[key] === 'string') {
-                  businessJson.policies[key] = updateString(businessJson.policies[key]);
+            const sourceShortName = sourceName.split(' ')[0];
+            // v30.1.6: Deep recursive replacement — replaces the source name
+            // everywhere in the JSON tree, including nested objects like
+            // pricingBenchmark.affiliation, policies.*, location.serviceArea, etc.
+            // Also replaces the short name (first word) so "SparkleCare" alone
+            // is replaced even when "SparkleCare Cleaning" doesn't appear.
+            const deepReplace = (obj) => {
+              for (const key of Object.keys(obj)) {
+                if (typeof obj[key] === 'string') {
+                  obj[key] = obj[key].split(sourceName).join(businessName).split(sourceShortName).join(businessName);
+                } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                  deepReplace(obj[key]);
                 }
               }
-            }
-            if (businessJson.affiliation) businessJson.affiliation = updateString(businessJson.affiliation);
+            };
+            deepReplace(businessJson);
+            businessJson.name = businessName;
+            if (body.hours) businessJson.hours = body.hours;
+            if (body.location && businessJson.location) businessJson.location.city = body.location;
+            if (body.ownerPhone && businessJson.contact) businessJson.contact.phone = body.ownerPhone;
+            if (body.ownerEmail && businessJson.contact) businessJson.contact.email = body.ownerEmail;
             fs.writeFileSync(businessJsonPath, JSON.stringify(businessJson, null, 2) + '\n', 'utf8');
+          } catch {}
+        }
+
+        // Also deep-replace in knowledge/faqs.json
+        const faqsJsonPath = path.join(newTenantDir, 'knowledge', 'faqs.json');
+        if (fs.existsSync(faqsJsonPath)) {
+          try {
+            const faqs = JSON.parse(fs.readFileSync(faqsJsonPath, 'utf8'));
+            const sourceProfile = JSON.parse(fs.readFileSync(path.join(sourceTenantDir, 'profile.json'), 'utf8'));
+            const sourceName = sourceProfile.name || sourceTenantId;
+            const sourceShortName = sourceName.split(' ')[0];
+            const deepReplace = (obj) => {
+              for (const key of Object.keys(obj)) {
+                if (typeof obj[key] === 'string') {
+                  obj[key] = obj[key].split(sourceName).join(businessName).split(sourceShortName).join(businessName);
+                } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                  deepReplace(obj[key]);
+                }
+              }
+            };
+            deepReplace(faqs);
+            fs.writeFileSync(faqsJsonPath, JSON.stringify(faqs, null, 2) + '\n', 'utf8');
           } catch {}
         }
 
@@ -912,7 +935,9 @@ async function startServer() {
               let content = fs.readFileSync(filePath, 'utf8');
               const sourceProfile = JSON.parse(fs.readFileSync(path.join(sourceTenantDir, 'profile.json'), 'utf8'));
               const sourceName = sourceProfile.name || sourceTenantId;
-              content = content.split(sourceName).join(businessName);
+              const sourceShortName = sourceName.split(' ')[0];
+              // v30.1.6: Replace both full name and short name
+              content = content.split(sourceName).join(businessName).split(sourceShortName).join(businessName);
               fs.writeFileSync(filePath, content, 'utf8');
             } catch {}
           }

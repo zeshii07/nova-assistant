@@ -1,0 +1,117 @@
+{
+  "id": "dubai-cleaners",
+  "name": "dubai cleaners",
+  "status": "active",
+  "defaultLanguage": "english",
+  "capabilities": [
+    "assistant",
+    "crm",
+    "cleaning",
+    "pricing",
+    "availability"
+  ],
+  "branding": {
+    "assistantName": "Cleaning Assistant",
+    "welcomeMessage": "Hi! 👋 I’m the SparkleCare Cleaning Assistant. I can explain our home, deep, furniture, office, laundry and specialised cleaning services, calculate configured prices, and prepare one or more service requests.",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Cleaning chahiye? Bata dein kya clean karwana hai, main suitable service choose karne mein help karta hoon.",
+    "welcomeMessageUrdu": "السلام علیکم! صفائی کے حوالے سے میں آپ کی کیا مدد کر سکتا ہوں؟"
+  },
+  "business": {
+    "description": "A full-service residential, furniture, office and specialised cleaning business serving Dubai and nearby supported UAE areas.",
+    "contact": "+923019299608",
+    "email": "zeeshansultan785@gmail.com"
+  },
+  "features": {
+    "llmFallback": true
+  },
+  "permissions": [
+    "knowledge.read",
+    "memory.read:assistant",
+    "memory.write:assistant",
+    "memory.delete:assistant",
+    "crm.customer.read:assistant",
+    "crm.customer.write:assistant",
+    "crm.activity.write:assistant",
+    "crm.customer.read:crm",
+    "crm.customer.write:crm",
+    "crm.note.write:crm",
+    "crm.tag.write:crm",
+    "crm.activity.read:crm",
+    "crm.activity.write:crm",
+    "cleaning.read:cleaning",
+    "cleaning.request.create:cleaning",
+    "cleaning.request.update:cleaning",
+    "crm.customer.read:cleaning",
+    "crm.customer.write:cleaning",
+    "crm.activity.write:cleaning",
+    "memory.read:cleaning",
+    "memory.write:cleaning",
+    "offering.read:pricing",
+    "offering.read:availability"
+  ],
+  "domain": "cleaning",
+  "widget": {
+    "enabled": true,
+    "position": "bottom-right",
+    "themeColor": "#2d5bd1",
+    "language": "auto",
+    "welcomeMessage": "Hi! 👋 I’m the SparkleCare Cleaning Assistant. I can explain our home, deep, furniture, office, laundry and specialised cleaning services, calculate configured prices, and prepare one or more service requests.",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Cleaning chahiye? Bata dein kya clean karwana hai, main suitable service choose karne mein help karta hoon.",
+    "suggestions": [
+      "What cleaning services do you offer?",
+      "I need a deep cleaning quote",
+      "Book a cleaning for tomorrow"
+    ],
+    "agentAvatar": "marcus",
+    "agentName": "Cleaning Assistant",
+    "agentTitle": "Booking Agent",
+    "preChatForm": {
+      "enabled": true,
+      "fields": [
+        {
+          "id": "name",
+          "label": "Your name",
+          "type": "text",
+          "required": true,
+          "placeholder": "John Doe"
+        },
+        {
+          "id": "phone",
+          "label": "Phone (optional)",
+          "type": "tel",
+          "required": false,
+          "placeholder": "+971 50 123 4567"
+        }
+      ]
+    },
+    "proactiveGreeting": {
+      "enabled": true,
+      "delaySeconds": 5,
+      "message": "Hi! 👋 I'm David, your booking agent. Need a cleaning quote or want to schedule a service? I'm here to help.",
+      "pageRules": []
+    }
+  },
+  "notifications": {
+    "enabled": true,
+    "recipientEmails": [
+      "zeeshansultan785@gmail.com"
+    ],
+    "events": {
+      "booking_confirmed": true,
+      "order_placed": true,
+      "lead_captured": true,
+      "handoff_requested": true,
+      "nova_failed": true
+    },
+    "quietHours": {
+      "enabled": false,
+      "start": "22:00",
+      "end": "07:00",
+      "timezone": "UTC"
+    },
+    "dailyDigest": {
+      "enabled": false,
+      "sendAt": "09:00"
+    }
+  }
+}
