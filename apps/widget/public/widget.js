@@ -301,6 +301,11 @@
       updateConnectionStatus('connected');
       state.retries = 0;
 
+      // v33.1: Speak Nova's reply aloud if voice is enabled
+      if (data.reply && state._speakText) {
+        state._speakText(data.reply);
+      }
+
       // v33.0: If takeover is active, start polling for owner replies
       if (data.takeover?.active) {
         startTakeoverPolling(data.takeover.ownerName);
@@ -562,13 +567,19 @@
         .nova-suggestion-btn { background: #172139; color: #c9d6f0; border: 1px solid #34415f; border-radius: 16px; padding: 6px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background .12s; }
         .nova-suggestion-btn:hover { background: #223050; }
 
-        .nova-composer { padding: 10px; border-top: 1px solid #28324b; background: #11182a; display: flex; gap: 8px; flex-shrink: 0; }
+        .nova-composer { padding: 10px; border-top: 1px solid #28324b; background: #11182a; display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
         .nova-input { flex: 1; resize: none; min-height: 38px; max-height: 120px; background: #172139; color: #e8edf7; border: 1px solid #34415f; border-radius: 10px; padding: 9px 12px; font-size: 13.5px; font-family: inherit; line-height: 1.4; }
         .nova-input::placeholder { color: #7485a8; }
         .nova-input:focus { outline: none; border-color: ${color}; }
         .nova-send { background: ${color}; color: #fff; border: none; border-radius: 10px; padding: 0 14px; cursor: pointer; font-weight: 600; font-size: 13.5px; min-width: 44px; transition: filter .12s; }
         .nova-send:hover { filter: brightness(1.1); }
         .nova-send:disabled { opacity: .5; cursor: not-allowed; }
+        .nova-mic { background: var(--surface-3); color: var(--text-dim); border: 1px solid var(--border-strong); border-radius: 50%; width: 38px; height: 38px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all .12s; flex-shrink: 0; }
+        .nova-mic:hover { background: var(--border); }
+        .nova-mic.recording { background: #ef4444; color: #fff; border-color: #dc2626; animation: nova-mic-pulse 1.5s infinite; }
+        @keyframes nova-mic-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .nova-voice-toggle { background: var(--surface-3); color: var(--text-dim); border: 1px solid var(--border-strong); border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all .12s; flex-shrink: 0; }
+        .nova-voice-toggle.active { background: ${color}; color: #fff; border-color: ${color}; }
 
         @media (max-width: 480px) {
           .nova-panel { width: 100vw !important; height: 100dvh !important; max-height: 100dvh !important; bottom: 0 !important; ${sideHorizontal}: 0 !important; ${isCenter ? 'transform: none !important;' : ''} border-radius: 0 !important; }
@@ -614,7 +625,9 @@
         <div class="nova-messages" id="nova-messages" aria-live="polite"></div>
         <div class="nova-suggestions" id="nova-suggestions"></div>
         <form class="nova-composer" id="nova-form">
+          <button type="button" class="nova-mic" id="nova-mic" title="Speak" aria-label="Voice input">🎤</button>
           <textarea class="nova-input" id="nova-input" placeholder="Type a message…" rows="1" maxlength="4000" aria-label="Message"></textarea>
+          <button type="button" class="nova-voice-toggle" id="nova-voice-toggle" title="Toggle voice replies" aria-label="Toggle voice">🔊</button>
           <button type="submit" class="nova-send" id="nova-send">Send</button>
         </form>
       </div>
@@ -690,6 +703,139 @@
     // Welcome bubble close button
     const closeWelcome = shadow.querySelector('.close-welcome');
     if (closeWelcome) closeWelcome.addEventListener('click', (e) => { e.stopPropagation(); hideWelcomeBubble(); });
+
+    // ─── v33.1: Voice input (speech-to-text) + Voice output (text-to-speech) ───
+    // Uses the browser's built-in Web Speech API — no server changes needed.
+    //
+    // Voice input: customer clicks 🎤 → browser listens → transcribed text
+    // appears in the input → automatically sent.
+    //
+    // Voice output: when Nova replies, the text is spoken aloud using the
+    // browser's Speech Synthesis API. Toggle on/off with the 🔊 button.
+    //
+    // Browser support: Chrome 25+, Firefox 44+, Safari 14.1+, Edge 79+
+    // Falls back gracefully if not supported (mic button hidden, no TTS).
+
+    state.voiceEnabled = localStorage.getItem('nova-voice-enabled') === 'true';
+    state.speechRecognition = null;
+    state.isRecording = false;
+
+    const micBtn = shadow.querySelector('#nova-mic');
+    const voiceToggle = shadow.querySelector('#nova-voice-toggle');
+
+    // Initialize voice toggle state
+    if (voiceToggle) {
+      if (state.voiceEnabled) voiceToggle.classList.add('active');
+      else voiceToggle.classList.remove('active');
+    }
+
+    // Check if speech recognition is supported
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition && micBtn) {
+      state.speechRecognition = new SpeechRecognition();
+      state.speechRecognition.continuous = false;
+      state.speechRecognition.interimResults = true;
+      state.speechRecognition.lang = 'en-US';
+
+      state.speechRecognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        inputEl.value = transcript;
+        autoResize();
+        // If this is a final result, auto-send
+        if (event.results[event.results.length - 1].isFinal) {
+          const text = inputEl.value.trim();
+          if (text) {
+            inputEl.value = '';
+            autoResize();
+            sendMessage(text);
+          }
+        }
+      };
+
+      state.speechRecognition.onerror = (event) => {
+        console.warn('[Nova Widget] Speech recognition error:', event.error);
+        stopRecording();
+        if (event.error === 'not-allowed') {
+          appendMessageEl('system', '🎤 Microphone access denied. Please allow microphone access in your browser settings.');
+        }
+      };
+
+      state.speechRecognition.onend = () => {
+        stopRecording();
+      };
+
+      micBtn.addEventListener('click', () => {
+        if (state.isRecording) {
+          state.speechRecognition.stop();
+        } else {
+          try {
+            state.speechRecognition.start();
+            startRecording();
+          } catch (err) {
+            console.warn('[Nova Widget] Could not start speech recognition:', err);
+          }
+        }
+      });
+    } else if (micBtn) {
+      // Speech recognition not supported — hide the mic button
+      micBtn.style.display = 'none';
+    }
+
+    function startRecording() {
+      state.isRecording = true;
+      micBtn?.classList.add('recording');
+      micBtn.textContent = '⏹';
+      micBtn.title = 'Stop recording';
+    }
+
+    function stopRecording() {
+      state.isRecording = false;
+      if (micBtn) {
+        micBtn.classList.remove('recording');
+        micBtn.textContent = '🎤';
+        micBtn.title = 'Speak';
+      }
+    }
+
+    // Voice output toggle
+    if (voiceToggle) {
+      voiceToggle.addEventListener('click', () => {
+        state.voiceEnabled = !state.voiceEnabled;
+        localStorage.setItem('nova-voice-enabled', state.voiceEnabled ? 'true' : 'false');
+        if (state.voiceEnabled) {
+          voiceToggle.classList.add('active');
+          // Speak a test phrase so the user knows it's on
+          speakText('Voice replies enabled.');
+        } else {
+          voiceToggle.classList.remove('active');
+          // Cancel any ongoing speech
+          if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        }
+      });
+    }
+
+    // Text-to-speech function — speaks Nova's replies aloud
+    function speakText(text) {
+      if (!state.voiceEnabled) return;
+      if (!('speechSynthesis' in window)) return;
+      // Cancel any ongoing speech first
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.volume = 0.8;
+      // Try to use a female voice (more natural for assistant)
+      const voices = window.speechSynthesis.getVoices();
+      const femaleVoice = voices.find(v => /female|samantha|victoria|google us english|zira/i.test(v.name));
+      if (femaleVoice) utterance.voice = femaleVoice;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Make speakText available to the sendMessage function
+    state._speakText = speakText;
 
     // Initial render — show pre-chat form or welcome messages
     showPreChatOrWelcome();

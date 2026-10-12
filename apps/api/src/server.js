@@ -1120,6 +1120,35 @@ async function startServer() {
       }
       // ─── End v30.1 template & tenant creation endpoints ─────────────────────
 
+      // ─── v33.1: Admin owner management endpoints ────────────────────────
+      // List all business owner accounts for a tenant (admin only)
+      if (req.method === "GET" && url.pathname.match(/^\/api\/admin\/owners\/([^/]+)$/)) {
+        const ownerMatch = url.pathname.match(/^\/api\/admin\/owners\/([^/]+)$/);
+        const tenantId = decodeURIComponent(ownerMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const owners = container.businessOwnerAuthService.listOwners({ tenantId });
+        return sendJson(res, 200, { ok:true, tenantId, owners });
+      }
+
+      // Reset a business owner's password (admin only)
+      const resetPasswordMatch = url.pathname.match(/^\/api\/admin\/owners\/([^/]+)\/reset-password$/);
+      if (req.method === "POST" && resetPasswordMatch) {
+        const tenantId = decodeURIComponent(resetPasswordMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const body = await readJson(req);
+        const { email, newPassword } = body;
+        if (!email || !newPassword) return sendJson(res, 400, { ok:false, error:'email and newPassword are required' });
+        try {
+          const result = container.businessOwnerAuthService.resetPassword({ tenantId, email, newPassword });
+          return sendJson(res, 200, { ok:true, ...result, message: `Password reset for ${email}. The owner can now log in with the new password.` });
+        } catch (err) {
+          return sendJson(res, 400, { ok:false, error: err.message });
+        }
+      }
+      // ─── End v33.1 Admin owner management ───────────────────────────────
+
       // ─── v31.0 Google Calendar OAuth & management endpoints ────────────────
       const calendarAuthMatch = url.pathname.match(/^\/api\/admin\/calendar\/auth\/([^/]+)$/);
       if (req.method === "GET" && calendarAuthMatch) {
@@ -1822,6 +1851,23 @@ async function startServer() {
     }
   });
   server.listen(container.config.port, () => container.logger.info("api.started", { port: container.config.port }));
+
+  // v33.1: Self-ping keep-alive — prevents Render free tier from sleeping.
+  // Render sleeps after 15 min of inactivity. This pings /health every 10 min
+  // to keep the server awake. In production with paid tier, this is harmless.
+  // Can be disabled by setting NOVA_KEEP_ALIVE=false env var.
+  if (process.env.NOVA_KEEP_ALIVE !== 'false') {
+    const keepAliveUrl = `http://localhost:${container.config.port}/health`;
+    const keepAlive = () => {
+      const req = http.get(keepAliveUrl, (res) => {
+        container.logger?.info?.('keep_alive.ping', { status: res.statusCode });
+      });
+      req.on('error', () => {}); // silently ignore errors
+      req.setTimeout(5000, () => req.destroy());
+    };
+    setInterval(keepAlive, 10 * 60 * 1000); // every 10 minutes
+    container.logger.info('keep_alive.started', { interval: '10 minutes' });
+  }
   const close=async()=>new Promise((resolve,reject)=>server.close(async(error)=>{
     if(error)return reject(error);
     try{await container.storage?.close?.();resolve();}catch(e){reject(e);}

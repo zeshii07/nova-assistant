@@ -107,9 +107,16 @@ class BusinessOwnerAuthService {
     }
     const owners = this._loadOwners(tenantId);
     const owner = owners.find(o => o.email.toLowerCase() === email.toLowerCase().trim());
-    if (!owner || !bcrypt.compareSync(password, owner.passwordHash)) {
+    
+    // v33.1: Distinguish between "email not found" and "wrong password"
+    // so the business owner knows what went wrong.
+    if (!owner) {
       this._recordFailedAttempt(ip);
-      return { ok: false, error: 'Invalid email or password' };
+      return { ok: false, error: `No account found with email "${email}". Check the email or contact your Nova administrator to create an account.` };
+    }
+    if (!bcrypt.compareSync(password, owner.passwordHash)) {
+      this._recordFailedAttempt(ip);
+      return { ok: false, error: 'Incorrect password. Please try again, or contact your Nova administrator to reset your password.' };
     }
     this._clearFailedAttempts(ip);
     const token = this._issueJWT(owner, tenantId);
@@ -119,6 +126,27 @@ class BusinessOwnerAuthService {
       token,
       owner: { id: owner.id, email: owner.email, name: owner.name, role: owner.role, tenantId }
     };
+  }
+
+  // v33.1: Admin password reset — allows Nova operators to reset
+  // any business owner's password via the admin dashboard.
+  resetPassword({ tenantId, email, newPassword }) {
+    if (!email || !newPassword) throw new Error('Email and new password are required');
+    if (newPassword.length < 6) throw new Error('Password must be at least 6 characters');
+    const owners = this._loadOwners(tenantId);
+    const owner = owners.find(o => o.email.toLowerCase() === email.toLowerCase().trim());
+    if (!owner) throw new Error(`No account found with email "${email}"`);
+    owner.passwordHash = bcrypt.hashSync(newPassword, BCRYPT_ROUNDS);
+    owner.passwordResetAt = new Date().toISOString();
+    this._saveOwners(tenantId, owners);
+    this.logger?.info?.('business_owner.password_reset', { tenantId, ownerId: owner.id, email: owner.email });
+    return { ok: true, ownerId: owner.id, email: owner.email, name: owner.name };
+  }
+
+  // v33.1: List all owners for a tenant (for admin dashboard)
+  listOwners({ tenantId }) {
+    const owners = this._loadOwners(tenantId);
+    return owners.map(o => ({ id: o.id, email: o.email, name: o.name, role: o.role, createdAt: o.createdAt, passwordResetAt: o.passwordResetAt || null }));
   }
 
   // ─── JWT ───────────────────────────────────────────────────────────

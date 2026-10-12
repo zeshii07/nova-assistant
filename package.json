@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "33.0.0",
+  "version": "33.1.0",
   "private": true,
-  "description": "Nova v33.0 — Conversation Takeover (owner takes over from Nova, near-real-time replies, auto-release after 2h)",
+  "description": "Nova v33.1 — Keep-alive, login error clarity, admin password reset, voice input/output",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {

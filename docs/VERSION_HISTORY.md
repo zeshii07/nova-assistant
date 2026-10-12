@@ -380,3 +380,51 @@ See `.env.example` for the complete list. Key ones:
 | `/api/admin/*` | Admin dashboard | Operator endpoints |
 | `/api/business/*` | Business dashboard | Business owner endpoints (v32) |
 | `/webhooks/whatsapp/{tenantId}` | Meta | WhatsApp webhook receiver |
+
+---
+
+## v33.1 — Keep-alive, Login Clarity, Password Reset, Voice (current)
+
+**What was added:**
+
+### 1. Render keep-alive (prevents server sleep)
+- Server self-pings `/health` every 10 minutes
+- Prevents Render free tier from sleeping after 15 min of inactivity
+- First message is no longer delayed by cold-start
+- Can be disabled with `NOVA_KEEP_ALIVE=false` env var
+- Logs: `keep_alive.started` and `keep_alive.ping`
+
+### 2. Login error clarity
+- **Wrong email**: `No account found with email "X". Check the email or contact your Nova administrator to create an account.`
+- **Wrong password**: `Incorrect password. Please try again, or contact your Nova administrator to reset your password.`
+- Previously both returned the same vague "Invalid email or password"
+
+### 3. Admin password reset
+- `GET /api/admin/owners/{tenantId}` — list all business owner accounts
+- `POST /api/admin/owners/{tenantId}/reset-password` — reset any owner's password
+- Admin (Nova operator) uses the dev token to access these endpoints
+- Owner can then log in with the new password immediately
+
+### 4. Voice input + Voice output (widget)
+- **🎤 Microphone button** — customer clicks to speak, browser transcribes via Web Speech API, auto-sends
+- **🔊 Voice toggle** — enables/disables voice replies; when on, Nova's replies are spoken aloud via Speech Synthesis API
+- Falls back gracefully if browser doesn't support speech APIs (mic button hidden, no TTS)
+- Voice preference saved in localStorage (persists across page refreshes)
+- Tries to use a female voice for more natural assistant experience
+
+**Key files:**
+- `apps/api/src/server.js` — keep-alive interval + admin owner management endpoints
+- `packages/auth-engine/src/businessOwnerAuthService.js` — improved login errors + `resetPassword()` + `listOwners()`
+- `apps/widget/public/widget.js` — microphone button, voice toggle, `speakText()`, `SpeechRecognition` integration
+
+**Browser support for voice:**
+- Chrome 25+ ✅ (full support)
+- Edge 79+ ✅
+- Safari 14.1+ ✅
+- Firefox 44+ ✅ (TTS only, no STT in some versions)
+
+**Why these features:**
+1. Render sleep was causing 30-50s delays on first message — unacceptable for customer experience
+2. Generic "invalid email or password" was frustrating for business owners who couldn't tell what was wrong
+3. Admins need to reset passwords for owners who forget them
+4. Voice makes Nova feel like a real assistant, not just a chatbot — customers can talk instead of type
