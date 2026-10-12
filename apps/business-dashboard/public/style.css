@@ -1,0 +1,64 @@
+/* Nova Business Dashboard v32.0 — Styles */
+:root{
+  --bg:#0b1020;--surface:#11182a;--surface-2:#0e1527;--surface-3:#172139;
+  --border:#28324b;--border-strong:#34415f;
+  --text:#e8edf7;--text-dim:#91a0bd;--text-faint:#7485a8;
+  --accent:#2d5bd1;--accent-strong:#4773e5;
+  --ok:#3ddc97;--warn:#f5b54a;--bad:#ff6b6b;--info:#5ec5f5;
+  --radius:10px;--radius-sm:8px;--sidebar-w:240px;
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif;
+  color:var(--text);background:var(--bg);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;max-width:100%;overflow-x:hidden}
+.app-shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100dvh}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100dvh}
+.brand{padding:20px 18px 14px;border-bottom:1px solid var(--border)}
+.brand strong{font-size:18px;display:block}
+.brand span{font-size:11px;color:var(--text-faint);display:block;margin-top:4px;text-transform:uppercase;letter-spacing:.08em}
+.nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.nav-item{background:transparent;border:1px solid transparent;color:var(--text-dim);text-align:left;padding:9px 12px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:500;transition:background .12s,color .12s}
+.nav-item:hover{background:var(--surface-3);color:var(--text)}
+.nav-item.active{background:var(--accent);color:#fff;border-color:var(--accent-strong)}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border)}
+.content{display:flex;flex-direction:column;min-width:0;min-height:100dvh}
+.content-header{padding:14px 24px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.content-header h1{font-size:20px}
+.content-header .muted{margin:4px 0 0;color:var(--text-dim);font-size:12px}
+.view{flex:1;padding:24px;overflow:auto}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.kpi .label{font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.kpi .value{font-size:26px;font-weight:700;line-height:1.1}
+.kpi .delta{font-size:11px;color:var(--text-dim);margin-top:6px}
+.kpi.ok{border-left:3px solid var(--ok)}.kpi.warn{border-left:3px solid var(--warn)}.kpi.bad{border-left:3px solid var(--bad)}.kpi.accent{border-left:3px solid var(--accent)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+.card h3{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--surface-2);color:var(--text-dim);text-align:left;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:10px 14px;border-bottom:1px solid var(--border)}
+tbody td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--surface-2)}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge.ok{background:rgba(61,220,151,.12);color:var(--ok)}
+.badge.warn{background:rgba(245,181,74,.12);color:var(--warn)}
+.badge.bad{background:rgba(255,107,107,.12);color:var(--bad)}
+.badge.info{background:rgba(94,197,245,.12);color:var(--info)}
+.badge.neutral{background:var(--surface-3);color:var(--text-dim)}
+pre{margin:0;white-space:pre-wrap;word-break:break-word;font-size:12px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;max-height:480px;overflow:auto;background:var(--surface-2);padding:14px;border-radius:var(--radius-sm);border:1px solid var(--border)}
+button{background:var(--surface-3);color:var(--text);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:8px 14px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:background .12s}
+button:hover{background:var(--border)}
+button.primary{background:var(--accent);border-color:var(--accent-strong);color:#fff;font-weight:600}
+button.primary:hover{background:var(--accent-strong)}
+button.danger{border-color:var(--bad);color:var(--bad)}
+input,select,textarea{background:var(--surface-3);color:var(--text);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:9px 11px;font-size:13px;font-family:inherit;width:100%}
+.login-container{display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:20px}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;max-width:400px;width:100%}
+.login-card h1{font-size:24px;margin-bottom:8px}
+.login-card p{color:var(--text-dim);font-size:13px;margin-bottom:20px}
+.login-card label{display:block;font-size:12px;color:var(--text-dim);margin:12px 0 4px}
+.login-card button{width:100%;margin-top:16px}
+.empty{text-align:center;padding:48px 24px;color:var(--text-faint);font-size:13px}
+.empty strong{display:block;color:var(--text-dim);font-size:14px;margin-bottom:6px}
+@media(max-width:900px){.app-shell{grid-template-columns:1fr}.sidebar{position:sticky;top:0;height:auto;z-index:30;border-bottom:1px solid var(--border)}.nav{flex-direction:row;overflow-x:auto;padding:8px}.nav-item{flex:0 0 auto;white-space:nowrap}.grid-2{grid-template-columns:1fr}}

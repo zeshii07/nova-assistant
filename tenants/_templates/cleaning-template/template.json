@@ -13,25 +13,84 @@
   ],
   "defaultServices": [
     {
+      "id": "CLN001",
       "name": "Standard Home Cleaning",
       "priceType": "hourly",
       "price": 40,
       "currency": "AED",
-      "unit": "per hour per cleaner"
+      "unit": ""
     },
     {
+      "id": "CLN002",
       "name": "Deep Home Cleaning",
-      "priceType": "fixed",
+      "priceType": "scope_based",
       "price": 200,
       "currency": "AED",
-      "unit": "per visit"
+      "unit": ""
     },
     {
+      "id": "CLN003",
       "name": "Sofa Cleaning",
-      "priceType": "fixed",
-      "price": 120,
+      "priceType": "scope_based",
+      "price": 50,
       "currency": "AED",
-      "unit": "per sofa"
+      "unit": ""
+    },
+    {
+      "id": "CLN004",
+      "name": "Carpet Cleaning",
+      "priceType": "scope_based",
+      "price": 140,
+      "currency": "AED",
+      "unit": ""
+    },
+    {
+      "id": "CLN005",
+      "name": "Office Cleaning",
+      "priceType": "custom_quote",
+      "price": 0,
+      "currency": "AED",
+      "unit": ""
+    },
+    {
+      "id": "CLN006",
+      "name": "Move-in / Move-out Cleaning",
+      "priceType": "scope_based",
+      "price": 701.1,
+      "currency": "AED",
+      "unit": ""
+    },
+    {
+      "id": "CLN-HOURLY",
+      "name": "Hourly Cleaner Hire",
+      "priceType": "hourly",
+      "price": 40,
+      "currency": "AED",
+      "unit": ""
+    },
+    {
+      "id": "CLN007",
+      "name": "Recurring Maid Service",
+      "priceType": "hourly",
+      "price": 40,
+      "currency": "AED",
+      "unit": ""
+    },
+    {
+      "id": "CLN008",
+      "name": "Apartment Cleaning",
+      "priceType": "hourly",
+      "price": 40,
+      "currency": "AED",
+      "unit": ""
+    },
+    {
+      "id": "CLN009",
+      "name": "Villa Cleaning",
+      "priceType": "hourly",
+      "price": 40,
+      "currency": "AED",
+      "unit": ""
     }
   ],
   "sourceTenant": "cleaning-demo",

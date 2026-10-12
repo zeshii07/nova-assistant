@@ -20,6 +20,100 @@ class ExecutionEngine {
     const stateBefore = structuredClone(state);
 
     const logger = this.logger.child({ tenantId, conversationId });
+
+    // ─── v33.0: Conversation Takeover ───────────────────────────────
+    // When a business owner takes over a conversation, Nova stops auto-replying.
+    // Customer messages are stored for the owner to see in their dashboard.
+    // Owner replies are stored in state and delivered to the customer via
+    // polling or on their next message.
+    //
+    // Takeover auto-expires after 2 hours (configurable via
+    // state.context.takeover.expiresAt) so if the owner forgets to release,
+    // Nova resumes auto-replying.
+    //
+    // This check runs BEFORE conversation intelligence so we skip the entire
+    // NLU pipeline when the owner is handling the conversation.
+    const takeover = state.context?.takeover;
+    const isOwnerMessage = message.metadata?.source === 'business_owner';
+    const isCustomerMessage = !isOwnerMessage;
+
+    // Check if takeover has expired
+    if (takeover?.active && takeover.expiresAt) {
+      if (new Date(takeover.expiresAt) < new Date()) {
+        // Takeover expired — resume Nova auto-reply
+        logger.info('takeover.auto_expired', { ownerId: takeover.ownerId, expiredAt: takeover.expiresAt });
+        state = applyStatePatch(state, {
+          context: { ...state.context, takeover: { active: false, ownerId: null, ownerName: null, takenAt: null, expiresAt: null, autoExpired: true } }
+        });
+        await this.stateRepository.save(state);
+      }
+    }
+
+    // If takeover is active and this is a customer message, don't auto-reply.
+    // Store the message for the owner and return a "forwarded" response.
+    if (state.context?.takeover?.active && isCustomerMessage) {
+      // Store the customer's message as pending for the owner
+      const pendingMessages = state.context.takeover.pendingCustomerMessages || [];
+      pendingMessages.push({
+        text: message.text,
+        timestamp: new Date().toISOString(),
+        read: false
+      });
+
+      // Also check for any pending owner replies to deliver to the customer
+      const ownerReplies = state.context.takeover.ownerReplies || [];
+      const unreadReplies = ownerReplies.filter(r => !r.delivered);
+
+      // Mark owner replies as delivered
+      const updatedReplies = ownerReplies.map(r => ({ ...r, delivered: true }));
+
+      // Save state with the new pending message and delivered replies
+      state = applyStatePatch(state, {
+        context: {
+          ...state.context,
+          takeover: {
+            ...state.context.takeover,
+            pendingCustomerMessages: pendingMessages,
+            ownerReplies: updatedReplies
+          }
+        }
+      });
+      await this.stateRepository.save(state);
+
+      // Build the reply: if there are unread owner replies, deliver them
+      // Otherwise, show "forwarded to team" message
+      let reply;
+      if (unreadReplies.length > 0) {
+        reply = unreadReplies.map(r => r.text).join('\n\n');
+      } else {
+        const ownerName = state.context.takeover.ownerName || 'our team';
+        reply = `💬 Your message has been forwarded to ${ownerName}. They will respond shortly.`;
+      }
+
+      // Log for replay
+      const processStarted = performance.now();
+      if (this.replayService) {
+        this.replayService.record({
+          tenantId, conversationId, customerId: message.customerId,
+          message, reply, capabilityId: 'human_takeover',
+          intelligence: { selected: { intent: 'takeover_active', confidence: 1 } },
+          state: stateBefore, timingMs: Number((performance.now() - processStarted).toFixed(3))
+        });
+      }
+
+      await this.eventBus.publish('message.processed.v1', { tenantId, conversationId, capabilityId: 'human_takeover' }, { source: 'execution-engine' });
+      logger.info('takeover.message_stored', { ownerId: state.context.takeover.ownerId, pendingCount: pendingMessages.length });
+
+      return {
+        ok: true,
+        conversationId,
+        reply,
+        capabilityId: 'human_takeover',
+        takeover: { active: true, ownerName: state.context.takeover.ownerName }
+      };
+    }
+    // ─── End v33.0 Takeover check ────────────────────────────────────
+
     let customer = this.services.crmService
       ? await this.services.crmService.ensureCustomer({ tenantId, customerId: message.customerId, channel: message.channel, preferredLanguage: state.language })
       : { id: message.customerId };

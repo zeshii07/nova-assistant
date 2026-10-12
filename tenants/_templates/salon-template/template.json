@@ -12,23 +12,42 @@
   ],
   "defaultServices": [
     {
-      "name": "Haircut & Style",
+      "id": "haircut",
+      "name": "Haircut",
       "priceType": "fixed",
-      "price": 150,
+      "price": 1500,
       "currency": "AED",
       "unit": "per service"
     },
     {
+      "id": "hair-styling",
+      "name": "Hair Styling",
+      "priceType": "fixed",
+      "price": 2500,
+      "currency": "AED",
+      "unit": "per service"
+    },
+    {
+      "id": "beard-grooming",
+      "name": "Beard Grooming",
+      "priceType": "fixed",
+      "price": 1000,
+      "currency": "AED",
+      "unit": "per service"
+    },
+    {
+      "id": "facial",
+      "name": "Facial",
+      "priceType": "fixed",
+      "price": 3000,
+      "currency": "AED",
+      "unit": "per service"
+    },
+    {
+      "id": "hair-color",
       "name": "Hair Color",
       "priceType": "fixed",
-      "price": 300,
-      "currency": "AED",
-      "unit": "per service"
-    },
-    {
-      "name": "Manicure",
-      "priceType": "fixed",
-      "price": 80,
+      "price": 4500,
       "currency": "AED",
       "unit": "per service"
     }

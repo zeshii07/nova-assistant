@@ -10,7 +10,88 @@
     "catalog",
     "commerce"
   ],
-  "defaultServices": [],
+  "defaultServices": [
+    {
+      "id": "P001",
+      "name": "Cotton T-Shirt",
+      "priceType": "fixed",
+      "price": 1500,
+      "currency": "PKR",
+      "unit": "per item"
+    },
+    {
+      "id": "P002",
+      "name": "Denim Jeans",
+      "priceType": "fixed",
+      "price": 3500,
+      "currency": "PKR",
+      "unit": "per item"
+    },
+    {
+      "id": "P003",
+      "name": "Wireless Earbuds",
+      "priceType": "fixed",
+      "price": 4500,
+      "currency": "PKR",
+      "unit": "per item"
+    },
+    {
+      "id": "P004",
+      "name": "Smart Watch",
+      "priceType": "fixed",
+      "price": 8000,
+      "currency": "PKR",
+      "unit": "per item"
+    },
+    {
+      "id": "P005",
+      "name": "Leather Wallet",
+      "priceType": "fixed",
+      "price": 2500,
+      "currency": "PKR",
+      "unit": "per item"
+    },
+    {
+      "id": "P006",
+      "name": "Sunglasses",
+      "priceType": "fixed",
+      "price": 1800,
+      "currency": "PKR",
+      "unit": "per item"
+    },
+    {
+      "id": "P007",
+      "name": "Fleece Hoodie",
+      "priceType": "fixed",
+      "price": 4200,
+      "currency": "PKR",
+      "unit": "per item"
+    },
+    {
+      "id": "P008",
+      "name": "Polo Shirt",
+      "priceType": "fixed",
+      "price": 2200,
+      "currency": "PKR",
+      "unit": "per item"
+    },
+    {
+      "id": "P009",
+      "name": "20000mAh Power Bank",
+      "priceType": "fixed",
+      "price": 5200,
+      "currency": "PKR",
+      "unit": "per item"
+    },
+    {
+      "id": "P010",
+      "name": "Bluetooth Speaker",
+      "priceType": "fixed",
+      "price": 3900,
+      "currency": "PKR",
+      "unit": "per item"
+    }
+  ],
   "sourceTenant": "default",
   "createdAt": "2026-10-09T04:08:35.955Z"
 }

@@ -10,7 +10,40 @@
     "offering",
     "booking"
   ],
-  "defaultServices": [],
+  "defaultServices": [
+    {
+      "id": "chicken-biryani",
+      "name": "Chicken Biryani",
+      "priceType": "fixed",
+      "price": 650,
+      "currency": "AED",
+      "unit": "per service"
+    },
+    {
+      "id": "beef-burger",
+      "name": "Beef Burger",
+      "priceType": "fixed",
+      "price": 850,
+      "currency": "AED",
+      "unit": "per service"
+    },
+    {
+      "id": "alfredo-pasta",
+      "name": "Alfredo Pasta",
+      "priceType": "fixed",
+      "price": 1200,
+      "currency": "AED",
+      "unit": "per service"
+    },
+    {
+      "id": "grilled-chicken",
+      "name": "Grilled Chicken",
+      "priceType": "fixed",
+      "price": 1500,
+      "currency": "AED",
+      "unit": "per service"
+    }
+  ],
   "sourceTenant": "restaurant-demo",
   "createdAt": "2026-10-09T04:08:35.957Z"
 }

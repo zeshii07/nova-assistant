@@ -4,7 +4,7 @@ class HttpChatAdapter {
   normalizeIncoming(payload) {
     if (!payload || !payload.customerId || !payload.text) throw new ValidationError("customerId and text are required");
     return {
-      channel: this.id,
+      channel: payload.channel || this.id,
       customerId: String(payload.customerId),
       tenantId: payload.tenantId ? String(payload.tenantId) : null,
       messageId: payload.messageId ? String(payload.messageId) : null,

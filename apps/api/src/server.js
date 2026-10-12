@@ -6,6 +6,7 @@ const { importBusinessFile } = require("../../../packages/tenant-onboarding/src/
 const { buildContainer } = require("./container");
 const packageJson = require("../../../package.json");
 const { ForbiddenError, ValidationError } = require("../../../packages/shared/src/errors");
+const { applyStatePatch } = require("../../../packages/state/src/stateSchema");
 const { replyToNovaVisitor } = require("./novaMarketingAssistant");
 
 async function startServer() {
@@ -34,6 +35,12 @@ async function startServer() {
       // and the widget auto-mounts on any page. Served with strict CSP + Cache-Control.
       if (req.method === "GET" && (url.pathname === "/widget.js" || url.pathname === "/widget-config.js" || url.pathname === "/avatars.js" || url.pathname === "/widget-test")) {
         return serveWidgetAsset(res, url.pathname);
+      }
+      // v32.0 Business Manager Dashboard — separate dashboard for business owners.
+      // Served by the same process. Owners log in with email+password and see
+      // ONLY their tenant's data (conversations, bookings, leads, customers).
+      if (req.method === "GET" && (url.pathname === "/business" || url.pathname.startsWith("/business/"))) {
+        return serveBusinessAsset(res, url.pathname);
       }
 
       if (req.method === "GET" && url.pathname === "/health") {
@@ -943,6 +950,97 @@ async function startServer() {
           }
         }
 
+        // v30.1.8: Apply services/products override from the onboarding wizard
+        // If the user edited services in Step 4, write them to the appropriate
+        // config files so the assistant uses the new prices/services.
+        if (Array.isArray(body.services) && body.services.length > 0) {
+          const domain = profile.domain || 'generic';
+          const isRetail = domain === 'retail';
+          const isCleaning = domain === 'cleaning';
+          const isOffering = ['salon', 'restaurant', 'education', 'fitness', 'generic'].includes(domain) && profile.capabilities?.includes('offering');
+
+          // For cleaning businesses: update cleaning/services.json + pricing/services.json
+          if (isCleaning && profile.capabilities?.includes('cleaning')) {
+            const cleaningServicesPath = path.join(newTenantDir, 'cleaning', 'services.json');
+            if (fs.existsSync(path.dirname(cleaningServicesPath))) {
+              // Read existing services to preserve structure (aliases, etc.)
+              let existingServices = [];
+              try { existingServices = JSON.parse(fs.readFileSync(cleaningServicesPath, 'utf8')); } catch {}
+              // Build a map of existing services by name (case-insensitive)
+              const existingMap = new Map();
+              existingServices.forEach(s => existingMap.set(String(s.name).toLowerCase(), s));
+              // Merge: for each body.service, if name matches existing, update price; otherwise add new
+              const updatedServices = body.services.map(svc => {
+                const existing = existingMap.get(String(svc.name).toLowerCase());
+                if (existing) {
+                  // Update existing service's price but preserve structure
+                  return { ...existing, name: svc.name, price: svc.price, currency: svc.currency, priceType: svc.priceType, unit: svc.unit || existing.unit };
+                }
+                // New service — create minimal structure
+                return {
+                  id: svc.id,
+                  name: svc.name,
+                  priceType: svc.priceType || 'fixed',
+                  price: svc.price,
+                  currency: svc.currency || 'AED',
+                  unit: svc.unit || '',
+                  description: '',
+                  aliases: []
+                };
+              });
+              fs.writeFileSync(cleaningServicesPath, JSON.stringify(updatedServices, null, 2) + '\n', 'utf8');
+            }
+            // Also update pricing/services.json
+            const pricingServicesPath = path.join(newTenantDir, 'pricing', 'services.json');
+            if (fs.existsSync(pricingServicesPath)) {
+              try {
+                const pricingConfig = JSON.parse(fs.readFileSync(pricingServicesPath, 'utf8'));
+                pricingConfig.services = body.services.map(svc => ({
+                  id: svc.id,
+                  name: svc.name,
+                  priceType: svc.priceType || 'fixed',
+                  price: svc.price,
+                  currency: svc.currency || 'AED',
+                  unit: svc.unit || ''
+                }));
+                pricingConfig.owner = businessName;
+                fs.writeFileSync(pricingServicesPath, JSON.stringify(pricingConfig, null, 2) + '\n', 'utf8');
+              } catch {}
+            }
+          }
+
+          // For retail businesses: update catalog/products.json
+          if (isRetail && profile.capabilities?.includes('catalog')) {
+            const catalogProductsPath = path.join(newTenantDir, 'catalog', 'products.json');
+            const products = body.services.map(svc => ({
+              id: svc.id,
+              name: svc.name,
+              price: svc.price,
+              currency: svc.currency || 'AED',
+              category: 'general',
+              inStock: true,
+              description: '',
+              variants: []
+            }));
+            fs.writeFileSync(catalogProductsPath, JSON.stringify(products, null, 2) + '\n', 'utf8');
+          }
+
+          // For salon/restaurant businesses: update offerings/items.json
+          if (isOffering && profile.capabilities?.includes('offering')) {
+            const offeringsPath = path.join(newTenantDir, 'offerings', 'items.json');
+            const items = body.services.map(svc => ({
+              id: svc.id,
+              name: svc.name,
+              price: svc.price,
+              currency: svc.currency || 'AED',
+              bookable: true,
+              durationMinutes: 60,
+              description: ''
+            }));
+            fs.writeFileSync(offeringsPath, JSON.stringify(items, null, 2) + '\n', 'utf8');
+          }
+        }
+
         // Remove any template.json file (it's a template metadata file, not needed in real tenant)
         const templateMetaPath = path.join(newTenantDir, 'template.json');
         if (fs.existsSync(templateMetaPath)) fs.unlinkSync(templateMetaPath);
@@ -954,6 +1052,9 @@ async function startServer() {
         container.tenantRepository.clearCache(tenantId);
         if (container.cleaningServiceRepository?.clear) container.cleaningServiceRepository.clear(tenantId);
         if (container.pricingRepository?.clear) container.pricingRepository.clear(tenantId);
+        if (container.catalogRepository?.clearCache) container.catalogRepository.clearCache(tenantId);
+        if (container.offeringRepository?.clearCache) container.offeringRepository.clearCache(tenantId);
+        if (container.knowledgeRepository?.clearCache) container.knowledgeRepository.clearCache(tenantId);
 
         // Return success with the new tenant + embed snippet
         const novaOrigin = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers['host'] || 'localhost:3000'}`;
@@ -1018,6 +1119,119 @@ async function startServer() {
         return sendJson(res, 200, { ok:true, tenantId, status: profile.status });
       }
       // ─── End v30.1 template & tenant creation endpoints ─────────────────────
+
+      // ─── v31.0 Google Calendar OAuth & management endpoints ────────────────
+      const calendarAuthMatch = url.pathname.match(/^\/api\/admin\/calendar\/auth\/([^/]+)$/);
+      if (req.method === "GET" && calendarAuthMatch) {
+        const tenantId = decodeURIComponent(calendarAuthMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        if (!container.googleOAuthClient?.isConfigured?.()) {
+          return sendJson(res, 503, { ok:false, error:'Google Calendar is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET env vars.' });
+        }
+        const authUrl = container.googleOAuthClient.getAuthUrl(tenantId);
+        return sendJson(res, 200, { ok:true, tenantId, authUrl });
+      }
+
+      // OAuth callback — Google redirects here after owner grants permission
+      const calendarCallbackMatch = url.pathname === "/api/admin/calendar/callback";
+      if (calendarCallbackMatch) {
+        const code = url.searchParams.get('code');
+        const state = url.searchParams.get('state') || '';
+        const error = url.searchParams.get('error');
+        if (error) {
+          return sendHtml(res, 400, `<h1>Authorization failed</h1><p>Google returned an error: ${escHtml(error)}</p><p><a href="/admin">Back to dashboard</a></p>`);
+        }
+        if (!code) {
+          return sendHtml(res, 400, '<h1>Missing authorization code</h1><p>No code was returned by Google.</p>');
+        }
+        // Extract tenantId from state (format: hash:tenantId)
+        const tenantId = state.includes(':') ? state.split(':').slice(1).join(':') : state;
+        try {
+          const tokens = await container.googleOAuthClient.exchangeCode(code);
+          container.calendarTokenRepository.save(tenantId, tokens);
+          // Update tenant's calendar config to use Google provider
+          const configPath = path.join(container.config.tenantsDir, tenantId, "calendar", "config.json");
+          if (fs.existsSync(configPath)) {
+            const calConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            calConfig.provider = 'google';
+            calConfig.enabled = true;
+            fs.writeFileSync(configPath, JSON.stringify(calConfig, null, 2) + '\n', 'utf8');
+            container.calendarConfigRepository.clear(tenantId);
+          }
+          container.logger.info('google_calendar.connected', { tenantId });
+          return sendHtml(res, 200, `<h1>✅ Google Calendar connected!</h1><p>Tenant <strong>${escHtml(tenantId)}</strong> is now connected. Nova can check real availability and create calendar events.</p><p><a href="/admin">Back to dashboard</a></p>`);
+        } catch (err) {
+          container.logger.error('google_calendar.oauth_failed', { tenantId, error: err.message });
+          return sendHtml(res, 500, `<h1>Connection failed</h1><p>${escHtml(err.message)}</p><p><a href="/admin">Back to dashboard</a></p>`);
+        }
+      }
+
+      // Calendar status — is this tenant connected to Google Calendar?
+      const calendarStatusMatch = url.pathname.match(/^\/api\/admin\/calendar\/status\/([^/]+)$/);
+      if (req.method === "GET" && calendarStatusMatch) {
+        const tenantId = decodeURIComponent(calendarStatusMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const connected = container.calendarTokenRepository.exists(tenantId);
+        const calConfigPath = path.join(container.config.tenantsDir, tenantId, "calendar", "config.json");
+        let provider = 'local';
+        if (fs.existsSync(calConfigPath)) {
+          try { provider = JSON.parse(fs.readFileSync(calConfigPath, 'utf8')).provider || 'local'; } catch {}
+        }
+        return sendJson(res, 200, {
+          ok:true, tenantId, connected, provider,
+          oauthConfigured: container.googleOAuthClient?.isConfigured?.() || false,
+          oauthStatus: container.googleOAuthClient?.getStatus?.() || null
+        });
+      }
+
+      // Disconnect Google Calendar
+      const calendarDisconnectMatch = url.pathname.match(/^\/api\/admin\/calendar\/disconnect\/([^/]+)$/);
+      if (req.method === "POST" && calendarDisconnectMatch) {
+        const tenantId = decodeURIComponent(calendarDisconnectMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        container.calendarTokenRepository.delete(tenantId);
+        // Revert calendar config to local provider
+        const configPath = path.join(container.config.tenantsDir, tenantId, "calendar", "config.json");
+        if (fs.existsSync(configPath)) {
+          const calConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+          calConfig.provider = 'local';
+          fs.writeFileSync(configPath, JSON.stringify(calConfig, null, 2) + '\n', 'utf8');
+          container.calendarConfigRepository.clear(tenantId);
+        }
+        return sendJson(res, 200, { ok:true, tenantId, message:'Google Calendar disconnected.' });
+      }
+
+      // List upcoming calendar events (Nova-created only)
+      const calendarEventsMatch = url.pathname.match(/^\/api\/admin\/calendar\/events\/([^/]+)$/);
+      if (req.method === "GET" && calendarEventsMatch) {
+        const tenantId = decodeURIComponent(calendarEventsMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        if (!container.calendarTokenRepository.exists(tenantId)) {
+          return sendJson(res, 200, { ok:true, connected:false, events:[] });
+        }
+        const limit = Number(url.searchParams.get("limit") || 50);
+        const result = await container.googleCalendarProvider.listEvents({ tenantId, limit }, container.calendarService.getConfig(tenantId));
+        return sendJson(res, 200, { ok:true, connected:true, events: result.events || [], error: result.error || null });
+      }
+
+      // Test calendar connection
+      const calendarTestMatch = url.pathname.match(/^\/api\/admin\/calendar\/test\/([^/]+)$/);
+      if (req.method === "POST" && calendarTestMatch) {
+        const tenantId = decodeURIComponent(calendarTestMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        if (!container.calendarTokenRepository.exists(tenantId)) {
+          return sendJson(res, 200, { ok:false, error:'Google Calendar is not connected for this tenant.' });
+        }
+        const tokens = container.calendarTokenRepository.load(tenantId);
+        const result = await container.googleOAuthClient.verifyTokens(tokens);
+        return sendJson(res, 200, { ok: result.valid, tenantId, ...result });
+      }
+      // ─── End v31.0 Google Calendar endpoints ─────────────────────────────────
 
       const adminLeadsMatch = url.pathname.match(/^\/api\/admin\/leads\/([^/]+)$/);
       if (req.method === "GET" && adminLeadsMatch) {
@@ -1277,6 +1491,330 @@ async function startServer() {
         });
       }
 
+      // ─── v32.0 Business Manager Dashboard endpoints ───────────────────────
+      // All /api/business/* endpoints require a valid JWT (except /login and /register).
+      // The JWT contains the tenantId, so the owner can ONLY see their own tenant's data.
+
+      // Login — no auth required
+      if (req.method === "POST" && url.pathname === "/api/business/login") {
+        const body = await readJson(req);
+        const { tenantId, email, password } = body;
+        if (!tenantId || !email || !password) return sendJson(res, 400, { ok:false, error:'tenantId, email, and password are required' });
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const clientIp = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+        const result = container.businessOwnerAuthService.loginWithPassword({ tenantId, email, password, ip: clientIp });
+        if (!result.ok) return sendJson(res, 401, { ok:false, error: result.error });
+        return sendJson(res, 200, { ok:true, token: result.token, owner: result.owner });
+      }
+
+      // Register — only available if no owners exist yet (first owner setup)
+      // OR if called with an admin dev token (operator creating owner accounts)
+      if (req.method === "POST" && url.pathname === "/api/business/register") {
+        const body = await readJson(req);
+        const { tenantId, email, password, name } = body;
+        if (!tenantId || !email || !password) return sendJson(res, 400, { ok:false, error:'tenantId, email, and password are required' });
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        // Check if this is the first owner (no owners.json exists yet) — allow without auth
+        const ownersFilePath = path.join(container.config.tenantsDir, tenantId, 'owners.json');
+        const isFirstOwner = !fs.existsSync(ownersFilePath);
+        // If not first owner, require admin dev token
+        if (!isFirstOwner && !authorizeDeveloperRequest(req)) {
+          return sendJson(res, 401, { ok:false, error:'Admin token required to add additional owners. Use /api/admin/ to create owner accounts.' });
+        }
+        try {
+          const owner = container.businessOwnerAuthService.createOwner({ tenantId, email, password, name });
+          return sendJson(res, 201, { ok:true, owner });
+        } catch (err) {
+          return sendJson(res, 400, { ok:false, error: err.message });
+        }
+      }
+
+      // All other /api/business/* endpoints require auth
+      if (url.pathname.startsWith("/api/business/") && url.pathname !== "/api/business/login" && url.pathname !== "/api/business/register") {
+        const authPayload = container.businessOwnerAuthService.requireAuth(req);
+        if (!authPayload) return sendJson(res, 401, { ok:false, error:'Authentication required. Please log in.' });
+        req._businessOwner = authPayload; // attach for downstream handlers
+      }
+
+      // Get current owner info
+      if (req.method === "GET" && url.pathname === "/api/business/me") {
+        return sendJson(res, 200, { ok:true, owner: req._businessOwner });
+      }
+
+      // Today overview — conversations, leads, bookings, revenue today
+      if (req.method === "GET" && url.pathname === "/api/business/overview") {
+        const tenantId = req._businessOwner.tenantId;
+        const profile = container.tenantRepository.getById(tenantId);
+        const [leads, notifications, replays] = await Promise.all([
+          container.leadService.summary(tenantId).catch(() => ({})),
+          container.notificationService?.unreadCount?.(tenantId).catch(() => 0) || 0,
+          container.replayService.list({ limit: 1000 }).catch(() => [])
+        ]);
+        const tenantReplays = replays.filter(r => r.tenantId === tenantId);
+        const today = new Date().toISOString().split('T')[0];
+        const todayReplays = tenantReplays.filter(r => r.createdAt?.startsWith(today));
+        const todayBookings = tenantReplays.filter(r => r.createdAt?.startsWith(today) && r.capabilityId === 'cleaning');
+        return sendJson(res, 200, {
+          ok:true,
+          tenant: { id: tenantId, name: profile.name, domain: profile.domain, capabilities: profile.capabilities },
+          stats: {
+            conversationsToday: todayReplays.length,
+            conversationsTotal: tenantReplays.length,
+            leads: leads.total || 0,
+            newLeads: leads.new || 0,
+            convertedLeads: leads.converted || 0,
+            hotLeads: leads.hot || 0,
+            unreadNotifications: notifications,
+            bookingsToday: todayBookings.length
+          }
+        });
+      }
+
+      // Conversations inbox
+      if (req.method === "GET" && url.pathname === "/api/business/conversations") {
+        const tenantId = req._businessOwner.tenantId;
+        const limit = Number(url.searchParams.get("limit") || 100);
+        const replays = await container.replayService.list({ limit });
+        const tenantReplays = replays.filter(r => r.tenantId === tenantId);
+        return sendJson(res, 200, { ok:true, conversations: tenantReplays });
+      }
+
+      // Leads
+      if (req.method === "GET" && url.pathname === "/api/business/leads") {
+        const tenantId = req._businessOwner.tenantId;
+        const [summary, leads] = await Promise.all([
+          container.leadService.summary(tenantId),
+          container.leadService.list(tenantId, { limit: 200 })
+        ]);
+        return sendJson(res, 200, { ok:true, summary, leads });
+      }
+
+      // Bookings (from cleaning service requests)
+      if (req.method === "GET" && url.pathname === "/api/business/bookings") {
+        const tenantId = req._businessOwner.tenantId;
+        const serviceRequests = container.cleaningRequestRepository?.listByTenant?.(tenantId) || [];
+        const bookings = await container.bookingRepository.list(tenantId, null).catch(() => []);
+        return sendJson(res, 200, { ok:true, serviceRequests, bookings });
+      }
+
+      // Customers (CRM)
+      if (req.method === "GET" && url.pathname === "/api/business/customers") {
+        const tenantId = req._businessOwner.tenantId;
+        // CRM repository doesn't have a listAll method, but we can get customers from leads
+        const leads = await container.leadService.list(tenantId, { limit: 500 });
+        const customerMap = new Map();
+        for (const lead of leads) {
+          const id = lead.customerId;
+          if (!customerMap.has(id)) {
+            customerMap.set(id, {
+              id,
+              name: lead.contact?.name || 'Unknown',
+              phone: lead.contact?.phone || null,
+              email: lead.contact?.email || null,
+              leadCount: 0,
+              status: lead.status,
+              score: lead.score,
+              lastActivity: lead.updatedAt || lead.createdAt,
+              interests: lead.interests || []
+            });
+          }
+          const customer = customerMap.get(id);
+          customer.leadCount += 1;
+        }
+        const customers = [...customerMap.values()].sort((a,b) => new Date(b.lastActivity) - new Date(a.lastActivity));
+        return sendJson(res, 200, { ok:true, customers });
+      }
+
+      // Notifications
+      if (req.method === "GET" && url.pathname === "/api/business/notifications") {
+        const tenantId = req._businessOwner.tenantId;
+        const notifications = await container.notificationService.listNotifications(tenantId, { limit: 50 });
+        const unreadCount = await container.notificationService.unreadCount(tenantId);
+        return sendJson(res, 200, { ok:true, notifications, unreadCount });
+      }
+
+      // Send a reply as the business owner (takeover mode)
+      // v33.0: Owner replies are stored in conversation state and delivered
+      // to the customer via polling or on their next message. Nova does NOT
+      // process the owner's text through the execution engine — the owner's
+      // text goes directly to the customer as-is.
+      if (req.method === "POST" && url.pathname === "/api/business/reply") {
+        const body = await readJson(req);
+        const { customerId, text } = body;
+        if (!customerId || !text) return sendJson(res, 400, { ok:false, error:'customerId and text are required' });
+        const tenantId = req._businessOwner.tenantId;
+        const conversationId = `${tenantId}:widget:${customerId}`;
+
+        // Load conversation state
+        let state = await container.stateRepository.get(conversationId);
+        if (!state) return sendJson(res, 404, { ok:false, error:'No conversation found for this customer.' });
+
+        // Ensure takeover is active — if not, start it automatically
+        if (!state.context?.takeover?.active) {
+          state = applyStatePatch(state, {
+            context: { ...state.context, takeover: {
+              active: true,
+              ownerId: req._businessOwner.id,
+              ownerName: req._businessOwner.name,
+              takenAt: new Date().toISOString(),
+              expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours
+              pendingCustomerMessages: [],
+              ownerReplies: []
+            }}
+          });
+        }
+
+        // Store the owner's reply in state for delivery to the customer
+        const ownerReplies = state.context.takeover.ownerReplies || [];
+        ownerReplies.push({
+          text: text.trim(),
+          timestamp: new Date().toISOString(),
+          ownerId: req._businessOwner.id,
+          ownerName: req._businessOwner.name,
+          delivered: false // will be set to true when customer sees it
+        });
+
+        state = applyStatePatch(state, {
+          context: { ...state.context, takeover: { ...state.context.takeover, ownerReplies } }
+        });
+        await container.stateRepository.save(state);
+
+        // Also record in replay for the business dashboard inbox
+        if (container.replayService) {
+          await container.replayService.record({
+            tenantId, conversationId, customerId,
+            message: { text: text.trim(), metadata: { source: 'business_owner', ownerId: req._businessOwner.id } },
+            reply: '(owner reply stored for delivery)',
+            capabilityId: 'human_takeover',
+            intelligence: { selected: { intent: 'owner_reply', confidence: 1 } },
+            state: state,
+            timingMs: 1
+          });
+        }
+
+        return sendJson(res, 200, { ok:true, message: 'Reply stored. Customer will see it on their next message or poll.', takeover: state.context.takeover });
+      }
+
+      // ─── v33.0: Takeover control endpoints ──────────────────────────
+      // Start takeover — Nova stops auto-replying for this conversation
+      if (req.method === "POST" && url.pathname === "/api/business/takeover") {
+        const body = await readJson(req);
+        const { customerId } = body;
+        if (!customerId) return sendJson(res, 400, { ok:false, error:'customerId is required' });
+        const tenantId = req._businessOwner.tenantId;
+        const conversationId = `${tenantId}:widget:${customerId}`;
+        let state = await container.stateRepository.get(conversationId);
+        if (!state) return sendJson(res, 404, { ok:false, error:'No conversation found for this customer.' });
+
+        state = applyStatePatch(state, {
+          context: { ...state.context, takeover: {
+            active: true,
+            ownerId: req._businessOwner.id,
+            ownerName: req._businessOwner.name,
+            takenAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+            pendingCustomerMessages: state.context?.takeover?.pendingCustomerMessages || [],
+            ownerReplies: state.context?.takeover?.ownerReplies || []
+          }}
+        });
+        await container.stateRepository.save(state);
+        return sendJson(res, 200, { ok:true, takeover: state.context.takeover });
+      }
+
+      // Release takeover — Nova resumes auto-replying
+      if (req.method === "POST" && url.pathname === "/api/business/release") {
+        const body = await readJson(req);
+        const { customerId } = body;
+        if (!customerId) return sendJson(res, 400, { ok:false, error:'customerId is required' });
+        const tenantId = req._businessOwner.tenantId;
+        const conversationId = `${tenantId}:widget:${customerId}`;
+        let state = await container.stateRepository.get(conversationId);
+        if (!state) return sendJson(res, 404, { ok:false, error:'No conversation found.' });
+
+        state = applyStatePatch(state, {
+          context: { ...state.context, takeover: {
+            active: false, ownerId: null, ownerName: null,
+            takenAt: null, expiresAt: null,
+            pendingCustomerMessages: [], ownerReplies: [],
+            releasedAt: new Date().toISOString()
+          }}
+        });
+        await container.stateRepository.save(state);
+        return sendJson(res, 200, { ok:true, message: 'Takeover released. Nova will resume auto-replying.' });
+      }
+
+      // Get full conversation detail (for business dashboard inbox)
+      const businessConversationMatch = url.pathname.match(/^\/api\/business\/conversation\/([^/]+)$/);
+      if (req.method === "GET" && businessConversationMatch) {
+        const customerId = decodeURIComponent(businessConversationMatch[1]);
+        const tenantId = req._businessOwner.tenantId;
+        const conversationId = `${tenantId}:widget:${customerId}`;
+        const state = await container.stateRepository.get(conversationId);
+        if (!state) return sendJson(res, 404, { ok:false, error:'No conversation found.' });
+
+        // Get replays for this conversation
+        const replays = await container.replayService.list({ conversationId, limit: 100 });
+        const takeover = state.context?.takeover || { active: false };
+
+        // Get pending customer messages (if takeover active)
+        const pendingMessages = takeover.pendingCustomerMessages || [];
+
+        return sendJson(res, 200, {
+          ok:true,
+          customerId,
+          conversationId,
+          takeover,
+          pendingMessages,
+          messages: replays.map(r => ({
+            text: r.message?.text || '',
+            reply: r.reply || '',
+            capabilityId: r.capabilityId,
+            createdAt: r.createdAt,
+            isOwner: r.message?.metadata?.source === 'business_owner'
+          }))
+        });
+      }
+      // ─── End v33.0 Takeover endpoints ────────────────────────────────
+
+      // ─── v33.0: Customer polling endpoint ────────────────────────────
+      // When takeover is active, the widget polls this endpoint to check
+      // for new owner replies. Returns any undelivered owner replies.
+      if (req.method === "GET" && url.pathname === "/api/chat/poll") {
+        const tenantId = String(url.searchParams.get("tenantId") || container.config.defaultTenantId);
+        const customerId = String(url.searchParams.get("customerId") || '');
+        if (!customerId) return sendJson(res, 400, { ok:false, error:'customerId is required' });
+        const conversationId = `${tenantId}:widget:${customerId}`;
+        const state = await container.stateRepository.get(conversationId);
+        if (!state) return sendJson(res, 200, { ok:true, takeover: { active: false }, replies: [] });
+
+        const takeover = state.context?.takeover || { active: false };
+        if (!takeover.active) return sendJson(res, 200, { ok:true, takeover: { active: false }, replies: [] });
+
+        // Get undelivered owner replies
+        const ownerReplies = takeover.ownerReplies || [];
+        const undelivered = ownerReplies.filter(r => !r.delivered);
+
+        if (undelivered.length > 0) {
+          // Mark as delivered
+          const updatedReplies = ownerReplies.map(r => ({ ...r, delivered: true }));
+          const updatedState = applyStatePatch(state, {
+            context: { ...state.context, takeover: { ...takeover, ownerReplies: updatedReplies } }
+          });
+          await container.stateRepository.save(updatedState);
+        }
+
+        return sendJson(res, 200, {
+          ok:true,
+          takeover: { active: true, ownerName: takeover.ownerName },
+          replies: undelivered.map(r => ({ text: r.text, timestamp: r.timestamp, ownerName: r.ownerName }))
+        });
+      }
+      // ─── End v33.0 Customer polling ──────────────────────────────────
+
+      // ─── End v32.0 Business Manager Dashboard endpoints ───────────────────
+
       return sendJson(res, 404, { ok: false, error: "Not found" });
     } catch (error) {
       container.logger.error("http.request_failed", { error: error.message });
@@ -1315,6 +1853,8 @@ async function readJson(req) {
 }
 function sendJson(res, statusCode, payload) { res.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8" }); res.end(JSON.stringify(payload)); }
 function sendText(res, statusCode, text) { res.writeHead(statusCode, { "Content-Type": "text/plain; charset=utf-8" }); res.end(String(text)); }
+function sendHtml(res, statusCode, html) { res.writeHead(statusCode, { "Content-Type": "text/html; charset=utf-8" }); res.end(String(html)); }
+function escHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function authorizeDeveloperRequest(req) {
   const expected = String(process.env.NOVA_DEV_TOKEN || "");
   // Local development remains zero-config. Public production deployments fail
@@ -1395,6 +1935,16 @@ function servePublicChatAsset(res,pathname){
 function serveAdminAsset(res, pathname) {
   const root = path.resolve(__dirname, "../../admin-dashboard/public");
   const relative = ["/admin","/admin/"].includes(pathname) ? "index.html" : pathname.replace(/^\/admin\//, "");
+  const file = path.resolve(root, relative);
+  const outsideRoot = path.relative(root, file).startsWith("..") || path.isAbsolute(path.relative(root, file));
+  if (outsideRoot || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return sendText(res, 404, "Not found");
+  const ext = path.extname(file); const types = { ".html":"text/html; charset=utf-8", ".js":"application/javascript; charset=utf-8", ".css":"text/css; charset=utf-8" };
+  res.writeHead(200, { "Content-Type":types[ext] || "application/octet-stream", "Cache-Control":"no-store" }); res.end(fs.readFileSync(file));
+}
+// v32.0: Serves the Business Manager Dashboard (separate from admin dashboard)
+function serveBusinessAsset(res, pathname) {
+  const root = path.resolve(__dirname, "../../business-dashboard/public");
+  const relative = ["/business","/business/"].includes(pathname) ? "index.html" : pathname.replace(/^\/business\//, "");
   const file = path.resolve(root, relative);
   const outsideRoot = path.relative(root, file).startsWith("..") || path.isAbsolute(path.relative(root, file));
   if (outsideRoot || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return sendText(res, 404, "Not found");

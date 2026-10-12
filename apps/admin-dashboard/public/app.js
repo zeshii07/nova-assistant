@@ -125,6 +125,7 @@ const ROUTES = {
   capabilities: { title: 'Capabilities', subtitle: 'Registered capability adapters and their manifests.', render: renderCapabilities },
   datasets: { title: 'Test Runner', subtitle: 'Run conversation datasets and view pass/fail.', render: renderDatasets },
   notifications: { title: 'Notifications', subtitle: 'Business owner email alerts and notification log.', render: renderNotifications },
+  calendar: { title: 'Calendar', subtitle: 'Google Calendar integration — real availability check + event creation.', render: renderCalendar },
   inspector: { title: 'Data Inspector', subtitle: 'Inspect live state, CRM, cart, and bookings for any tenant/customer.', render: renderInspector },
   settings: { title: 'Settings', subtitle: 'Admin dashboard configuration and runtime info.', render: renderSettings }
 };
@@ -297,7 +298,12 @@ async function renderOnboard() {
             </div>
           </div>
 
-          <button class="primary" id="ob-create" style="margin-top:8px">🚀 Create business & get embed snippet</button>
+          <h4 style="margin:14px 0 8px;font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em">Step 4 · Services & Prices <span id="services-loading-hint" style="font-size:10px;opacity:.6">(loading from template…)</span></h4>
+          <p class="hint" style="margin-bottom:10px;font-size:12px">Edit the services/products and their prices. These will be used by the assistant when answering customer questions. Add or remove items as needed.</p>
+          <div id="ob-services-list" style="margin-bottom:12px"></div>
+          <button type="button" id="ob-add-service" style="background:var(--surface-3);border:1px dashed var(--border-strong);color:var(--text-dim);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;width:100%">+ Add service/product</button>
+
+          <button class="primary" id="ob-create" style="margin-top:12px">🚀 Create business & get embed snippet</button>
         </div>
 
         <div id="wizard-custom" style="display:none">
@@ -374,10 +380,120 @@ async function renderOnboard() {
         const tpl = templates.find(t => t.id === templateId);
         if (tpl) {
           $('ob-agent-name').value = tpl.label.split(' ')[0] + ' Assistant';
+          // Pre-fill services from template's defaultServices
+          renderServiceEditor(tpl.defaultServices || [], tpl.domain || 'generic');
         }
       }
     });
   });
+
+  // ─── Service editor (Step 4) ─────────────────────────────────────
+  function renderServiceEditor(services, domain) {
+    const list = document.getElementById('ob-services-list');
+    const hint = document.getElementById('services-loading-hint');
+    if (hint) hint.style.display = 'none';
+    list.innerHTML = '';
+    if (!services || services.length === 0) {
+      list.innerHTML = '<div class="hint" style="padding:12px;background:var(--surface-2);border-radius:8px">No services in this template. Click "+ Add service/product" to create them.</div>';
+      return;
+    }
+    services.forEach((svc, i) => list.appendChild(createServiceRow(svc, i, domain)));
+  }
+
+  function createServiceRow(svc = {}, index, domain = 'generic') {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:grid;grid-template-columns:2.5fr 1fr 0.8fr 1fr 1.2fr 0.3fr;gap:8px;align-items:center;margin-bottom:8px;padding:8px;background:var(--surface-2);border-radius:8px';
+    const isRetail = domain === 'retail' || (svc.type === 'product');
+    const isCleaning = domain === 'cleaning';
+    const isSalon = domain === 'salon' || domain === 'restaurant';
+
+    const nameInput = document.createElement('input');
+    nameInput.placeholder = isRetail ? 'Product name (e.g., Running Shoes)' : 'Service name (e.g., Deep Cleaning)';
+    nameInput.value = svc.name || '';
+    nameInput.style.cssText = 'background:var(--surface-3);color:var(--text);border:1px solid var(--border-strong);border-radius:6px;padding:7px;font-size:13px;width:100%';
+    nameInput.dataset.field = 'name';
+    row.appendChild(nameInput);
+
+    const priceInput = document.createElement('input');
+    priceInput.type = 'number';
+    priceInput.placeholder = 'Price';
+    priceInput.value = svc.price ?? '';
+    priceInput.min = '0';
+    priceInput.style.cssText = 'background:var(--surface-3);color:var(--text);border:1px solid var(--border-strong);border-radius:6px;padding:7px;font-size:13px;width:100%';
+    priceInput.dataset.field = 'price';
+    row.appendChild(priceInput);
+
+    const currencyInput = document.createElement('select');
+    currencyInput.style.cssText = 'background:var(--surface-3);color:var(--text);border:1px solid var(--border-strong);border-radius:6px;padding:7px;font-size:13px;width:100%';
+    currencyInput.dataset.field = 'currency';
+    ['AED', 'PKR', 'USD', 'EUR', 'GBP'].forEach(c => {
+      const o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      if (svc.currency === c) o.selected = true;
+      currencyInput.appendChild(o);
+    });
+    row.appendChild(currencyInput);
+
+    const priceTypeInput = document.createElement('select');
+    priceTypeInput.style.cssText = 'background:var(--surface-3);color:var(--text);border:1px solid var(--border-strong);border-radius:6px;padding:7px;font-size:12px;width:100%';
+    priceTypeInput.dataset.field = 'priceType';
+    const types = isRetail
+      ? [['fixed', 'Fixed price']]
+      : isCleaning
+      ? [['hourly', 'Per hour'], ['scope_based', 'Scope-based'], ['fixed', 'Fixed'], ['custom_quote', 'Custom quote']]
+      : [['fixed', 'Fixed price'], ['hourly', 'Per hour']];
+    types.forEach(([v, label]) => {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = label;
+      if (svc.priceType === v) o.selected = true;
+      priceTypeInput.appendChild(o);
+    });
+    row.appendChild(priceTypeInput);
+
+    const unitInput = document.createElement('input');
+    unitInput.placeholder = 'Unit (e.g., per hour, per visit)';
+    unitInput.value = svc.unit || '';
+    unitInput.style.cssText = 'background:var(--surface-3);color:var(--text);border:1px solid var(--border-strong);border-radius:6px;padding:7px;font-size:12px;width:100%';
+    unitInput.dataset.field = 'unit';
+    row.appendChild(unitInput);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.textContent = '✕';
+    removeBtn.style.cssText = 'background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;padding:7px 10px;border-radius:6px;cursor:pointer;font-size:14px';
+    removeBtn.onclick = () => row.remove();
+    row.appendChild(removeBtn);
+
+    row._getService = () => ({
+      id: svc.id || `SVC-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`.toUpperCase(),
+      name: nameInput.value.trim(),
+      price: priceInput.value ? Number(priceInput.value) : 0,
+      currency: currencyInput.value,
+      priceType: priceTypeInput.value,
+      unit: unitInput.value.trim(),
+      type: isRetail ? 'product' : 'service'
+    });
+    return row;
+  }
+
+  function collectServices() {
+    const list = document.getElementById('ob-services-list');
+    if (!list) return [];
+    const rows = list.querySelectorAll('div[style*="grid-template-columns"]');
+    return Array.from(rows).map(r => r._getService()).filter(s => s.name);
+  }
+
+  // Wire "Add service" button
+  setTimeout(() => {
+    const addBtn = document.getElementById('ob-add-service');
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        const list = document.getElementById('ob-services-list');
+        const tpl = window.__selectedTemplate;
+        list.appendChild(createServiceRow({}, list.children.length, tpl?.domain || 'generic'));
+      });
+    }
+  }, 100);
 
   // Wire create tenant button
   if ($('ob-create')) {
@@ -389,6 +505,7 @@ async function renderOnboard() {
       $('ob-create').disabled = true;
       $('ob-create').textContent = 'Creating…';
 
+      const services = collectServices();
       const body = {
         templateId: document.querySelector('.template-card[style*="border-color: var(--accent)"], .template-card[style*="border-color:var(--accent)"]')?.dataset.template,
         businessName: name,
@@ -399,7 +516,8 @@ async function renderOnboard() {
         description: $('ob-description').value.trim(),
         themeColor: $('ob-color').value,
         agentName: $('ob-agent-name').value.trim(),
-        agentAvatar: $('ob-agent-avatar').value
+        agentAvatar: $('ob-agent-avatar').value,
+        services: services
       };
 
       const r = await api('/api/admin/tenants/create', { method: 'POST', body: JSON.stringify(body) });
@@ -1055,6 +1173,164 @@ async function loadNotificationPrefs(tenant) {
     $('prefSaveResult').textContent = json(r);
     if (r.ok) state.notifPrefs = r.preferences;
   });
+}
+
+// ─── Calendar (v31.0) ─────────────────────────────────────────────
+async function renderCalendar() {
+  const tenant = state.tenant;
+  if (!tenant) {
+    return view.innerHTML = `<div class="empty"><strong>Select a tenant</strong>Choose a tenant from the top-right dropdown to manage its Google Calendar connection.</div>`;
+  }
+  loading(`Loading calendar status for ${tenant}…`);
+  const d = await api(`/api/admin/calendar/status/${encodeURIComponent(tenant)}`);
+  if (!d.ok) return showError(d);
+
+  const { connected, provider, oauthConfigured, oauthStatus } = d;
+  const kpis = [
+    { label: 'Connection', value: connected ? 'Connected' : 'Not connected', kind: connected ? 'ok' : 'warn' },
+    { label: 'Provider', value: provider || 'local', kind: provider === 'google' ? 'ok' : '' },
+    { label: 'OAuth app', value: oauthConfigured ? 'Configured' : 'Not set', kind: oauthConfigured ? 'ok' : 'bad' },
+    { label: 'Redirect URI', value: oauthStatus?.redirectUri?.split('//')[1]?.slice(0, 30) || '—', kind: '' }
+  ];
+
+  view.innerHTML = `
+    <div class="kpi-grid">
+      ${kpis.map(k => `<div class="kpi ${k.kind}"><div class="label">${esc(k.label)}</div><div class="value" style="font-size:16px">${esc(k.value)}</div></div>`).join('')}
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Google Calendar Connection</h3>
+        ${!oauthConfigured ? `
+          <div class="error-card"><strong>Google OAuth not configured</strong>To enable Google Calendar integration, set these environment variables on your server:<br><br>
+          <code>GOOGLE_CLIENT_ID</code><br>
+          <code>GOOGLE_CLIENT_SECRET</code><br>
+          <code>GOOGLE_REDIRECT_URI</code><br><br>
+          See <code>.env.example</code> for setup instructions.</div>
+        ` : connected ? `
+          <p style="color:var(--ok);font-size:14px">✅ This tenant is connected to Google Calendar. Nova can check real availability and create calendar events automatically.</p>
+          <div class="toolbar" style="margin-top:12px">
+            <button class="primary" id="calTest">Test connection</button>
+            <button class="danger" id="calDisconnect">Disconnect</button>
+            <button id="calRefresh">⟳ Refresh</button>
+          </div>
+          <pre id="calTestResult" class="tight" style="margin-top:10px"></pre>
+        ` : `
+          <p style="color:var(--text-dim);font-size:13px">Connect this tenant to a Google Calendar account so Nova can:
+            <ul style="margin:8px 0;padding-left:20px;font-size:12px;color:var(--text-dim)">
+              <li>Check real availability before confirming bookings</li>
+              <li>Create calendar events with customer details</li>
+              <li>Send Google Calendar invites to customers (if email provided)</li>
+              <li>Prevent double-booking</li>
+            </ul>
+          </p>
+          <div class="toolbar" style="margin-top:12px">
+            <button class="primary" id="calConnect">🔗 Connect Google Calendar</button>
+          </div>
+          <pre id="calConnectResult" class="tight" style="margin-top:10px"></pre>
+        `}
+      </div>
+
+      <div class="card">
+        <h3>Upcoming Events ${connected ? '· last 50' : ''}</h3>
+        ${connected ? `
+          <div id="calEvents">Loading…</div>
+        ` : `
+          <div class="empty">Connect Google Calendar to see upcoming bookings.</div>
+        `}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Setup instructions</h3>
+      <p class="hint" style="line-height:1.6">
+        <strong>1.</strong> Go to <a href="https://console.cloud.google.com/" target="_blank" style="color:var(--accent-strong)">Google Cloud Console</a> and create/select a project.<br>
+        <strong>2.</strong> Enable <strong>Google Calendar API</strong>:
+        <a href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank" style="color:var(--accent-strong)">Enable API</a><br>
+        <strong>3.</strong> Create <strong>OAuth 2.0 credentials</strong> (Web application):
+        <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--accent-strong)">Create credentials</a><br>
+        <strong>4.</strong> Add this <strong>Authorized redirect URI</strong>:<br>
+        <code style="display:block;margin:8px 0;padding:8px;background:var(--surface-2);border-radius:6px">${esc(oauthStatus?.redirectUri || 'https://your-nova.com/api/admin/calendar/callback')}</code>
+        <strong>5.</strong> Configure the <strong>OAuth consent screen</strong>:
+        <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" style="color:var(--accent-strong)">Consent screen</a><br>
+        <strong>6.</strong> Set env vars: <code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code>, <code>GOOGLE_REDIRECT_URI</code><br>
+        <strong>7.</strong> Restart Nova, then click "Connect Google Calendar" above.
+      </p>
+    </div>
+  `;
+
+  // Wire buttons
+  const connectBtn = $('calConnect');
+  if (connectBtn) {
+    connectBtn.addEventListener('click', async () => {
+      connectBtn.disabled = true;
+      connectBtn.textContent = 'Getting auth URL…';
+      const r = await api(`/api/admin/calendar/auth/${encodeURIComponent(tenant)}`);
+      connectBtn.disabled = false;
+      connectBtn.textContent = '🔗 Connect Google Calendar';
+      if (r.ok) {
+        $('calConnectResult').textContent = 'Redirecting to Google…';
+        window.open(r.authUrl, '_blank');
+      } else {
+        $('calConnectResult').textContent = json(r);
+      }
+    });
+  }
+
+  const testBtn = $('calTest');
+  if (testBtn) {
+    testBtn.addEventListener('click', async () => {
+      testBtn.disabled = true;
+      testBtn.textContent = 'Testing…';
+      const r = await api(`/api/admin/calendar/test/${encodeURIComponent(tenant)}`, { method: 'POST' });
+      testBtn.disabled = false;
+      testBtn.textContent = 'Test connection';
+      $('calTestResult').textContent = json(r);
+    });
+  }
+
+  const disconnectBtn = $('calDisconnect');
+  if (disconnectBtn) {
+    disconnectBtn.addEventListener('click', async () => {
+      if (!confirm('Disconnect Google Calendar? Nova will no longer check real availability or create calendar events.')) return;
+      const r = await api(`/api/admin/calendar/disconnect/${encodeURIComponent(tenant)}`, { method: 'POST' });
+      if (r.ok) renderCalendar();
+    });
+  }
+
+  const refreshBtn = $('calRefresh');
+  if (refreshBtn) refreshBtn.addEventListener('click', renderCalendar);
+
+  // Load events if connected
+  if (connected) {
+    loadCalendarEvents(tenant);
+  }
+}
+
+async function loadCalendarEvents(tenant) {
+  const target = document.querySelector('#calEvents');
+  if (!target) return;
+  target.textContent = 'Loading events…';
+  const r = await api(`/api/admin/calendar/events/${encodeURIComponent(tenant)}?limit=50`);
+  if (!r.ok || !r.connected) { target.innerHTML = '<div class="empty">No events or not connected.</div>'; return; }
+  const events = r.events || [];
+  if (events.length === 0) { target.innerHTML = '<div class="empty"><strong>No upcoming events</strong>Bookings will appear here once customers start booking.</div>'; return; }
+  const rows = events.map(e => `
+    <tr>
+      <td>${e.isHold ? badge('hold', 'warn') : e.isConfirmed ? badge('confirmed', 'ok') : badge(e.status, 'neutral')}</td>
+      <td>${esc(e.summary || '—')}</td>
+      <td class="muted">${esc(fmtDate(e.start))}</td>
+      <td class="muted">${esc(e.start ? new Date(e.start).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '—')}</td>
+      <td class="muted">${e.attendees?.length ? esc(e.attendees.join(', ')) : '—'}</td>
+      <td>${e.htmlLink ? `<a href="${esc(e.htmlLink)}" target="_blank" style="color:var(--accent-strong)">View ↗</a>` : '—'}</td>
+    </tr>`).join('');
+  target.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Status</th><th>Summary</th><th>Date</th><th>Time</th><th>Attendees</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 }
 
 async function renderInspector() {

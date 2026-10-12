@@ -172,7 +172,29 @@ async function buildContainer() {
   const availabilityRuleRepository = new FileServiceAvailabilityRepository({ tenantsDir: config.tenantsDir });
   const businessHoursProvider = new StaticBusinessHoursProvider({ knowledgeRepository, controlPlaneRepository });
   const calendarRepository = storage.calendarRepository;
-  const calendarService = new CalendarService({ configRepository:calendarConfigRepository, repository:calendarRepository, hoursProvider:businessHoursProvider, eventBus });
+  // v31.0: Google Calendar integration — register the GoogleCalendarProvider
+  // so tenants with provider='google' in their calendar/config.json use real
+  // Google Calendar availability + event creation instead of the local calendar.
+  const { GoogleOAuthClient } = require("../../../packages/calendar-engine/src/googleOAuthClient");
+  const { FileCalendarTokenRepository } = require("../../../packages/calendar-engine/src/fileCalendarTokenRepository");
+  const { GoogleCalendarProvider } = require("../../../packages/calendar-engine/src/googleCalendarProvider");
+  const googleOAuthClient = new GoogleOAuthClient({ logger });
+  const calendarTokenRepository = new FileCalendarTokenRepository({
+    storageDir: path.resolve(__dirname, "../../../.nova-calendar-tokens"),
+    logger
+  });
+  const googleCalendarProvider = new GoogleCalendarProvider({
+    oauthClient: googleOAuthClient,
+    tokenRepository: calendarTokenRepository,
+    logger
+  });
+  const calendarService = new CalendarService({
+    configRepository: calendarConfigRepository,
+    repository: calendarRepository,
+    hoursProvider: businessHoursProvider,
+    eventBus,
+    providers: googleOAuthClient.isConfigured() ? { google: googleCalendarProvider } : {}
+  });
   bookingService.calendarService = calendarService;
   cleaningService.calendarService = calendarService;
   const availabilityService = new ServiceAvailabilityEngine({
@@ -331,6 +353,11 @@ async function buildContainer() {
   const replayRepository = new InMemoryReplayRepository();
   const replayService = new ReplayService({ repository: replayRepository });
 
+  // v32.0: Business Owner Authentication — per-tenant email+password auth
+  // for the Business Manager Dashboard. Owners see ONLY their tenant's data.
+  const { BusinessOwnerAuthService } = require("../../../packages/auth-engine/src/businessOwnerAuthService");
+  const businessOwnerAuthService = new BusinessOwnerAuthService({ tenantsDir: config.tenantsDir, logger });
+
   // v21.0: Online Learning & Feedback Loop
   const feedbackCollector = new FeedbackCollector({ logger, storageDir: path.resolve(__dirname, "../../../.nova-feedback") });
   const onlineLearner = new OnlineLearner({ feedbackCollector, mlIntentClassifier, logger });
@@ -380,6 +407,6 @@ async function buildContainer() {
     executionEngine,
     logger
   });
-  return { config, logger, storage, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, leadRepository, leadService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService, mlIntentClassifier, hybridRouter, productEmbeddingMatcher, transformerEmbeddingService, feedbackCollector, onlineLearner, emailService, notificationService, notificationLogRepository };
+  return { config, logger, storage, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, googleOAuthClient, calendarTokenRepository, googleCalendarProvider, businessOwnerAuthService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, leadRepository, leadService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService, mlIntentClassifier, hybridRouter, productEmbeddingMatcher, transformerEmbeddingService, feedbackCollector, onlineLearner, emailService, notificationService, notificationLogRepository };
 }
 module.exports = { buildContainer };

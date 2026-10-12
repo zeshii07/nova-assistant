@@ -300,6 +300,13 @@
       renderMessages(); saveSession();
       updateConnectionStatus('connected');
       state.retries = 0;
+
+      // v33.0: If takeover is active, start polling for owner replies
+      if (data.takeover?.active) {
+        startTakeoverPolling(data.takeover.ownerName);
+      } else {
+        stopTakeoverPolling();
+      }
     } catch (err) {
       state.typing = false;
       renderTyping();
@@ -939,6 +946,72 @@
       btn.textContent = suggestion;
       btn.addEventListener('click', () => sendMessage(suggestion));
       box.appendChild(btn);
+    }
+  }
+
+  // ─── v33.0: Takeover polling ──────────────────────────────────────
+  // When a business owner takes over the conversation, the widget polls
+  // /api/chat/poll every 5 seconds to check for new owner replies.
+  // This gives near-real-time delivery without WebSockets.
+  let _takeoverPollTimer = null;
+
+  function startTakeoverPolling(ownerName) {
+    // Don't start if already polling
+    if (_takeoverPollTimer) return;
+    console.info('[Nova Widget] Takeover active — started polling for owner replies from:', ownerName);
+
+    // Update header to show human agent
+    if (connectionStatusEl) {
+      connectionStatusEl.innerHTML = `<span class="conn-dot" style="background:#f5b54a"></span> 👤 ${ownerName || 'Agent'}`;
+    }
+
+    const poll = async () => {
+      try {
+        const url = `${NOVA_ORIGIN}/api/chat/poll?tenantId=${encodeURIComponent(TENANT_ID)}&customerId=${encodeURIComponent(state.customerId)}`;
+        const r = await fetch(url, { method: 'GET', headers: { 'content-type': 'application/json' } });
+        const data = await r.json();
+        if (data.ok && data.takeover?.active) {
+          // Check for new owner replies
+          if (data.replies && data.replies.length > 0) {
+            for (const reply of data.replies) {
+              state.messages.push({ role: 'nova', text: `👤 ${reply.ownerName}: ${reply.text}`, ts: Date.now() });
+            }
+            renderMessages();
+            saveSession();
+            // Play a subtle notification (visual only, no sound)
+            if (bubbleEl && !state.open) {
+              bubbleEl.classList.add('show-pulse');
+            }
+          }
+        } else {
+          // Takeover no longer active — stop polling and resume normal mode
+          console.info('[Nova Widget] Takeover ended — resuming normal mode');
+          stopTakeoverPolling();
+          // Restore header
+          if (connectionStatusEl && state.config) {
+            const agent = state.config.agent || {};
+            connectionStatusEl.innerHTML = `<span class="conn-dot"></span> ${agent.title || 'Assistant'}`;
+          }
+        }
+      } catch (err) {
+        // Silently ignore polling errors — will retry next interval
+      }
+    };
+
+    // Poll immediately, then every 5 seconds
+    poll();
+    _takeoverPollTimer = setInterval(poll, 5000);
+  }
+
+  function stopTakeoverPolling() {
+    if (_takeoverPollTimer) {
+      clearInterval(_takeoverPollTimer);
+      _takeoverPollTimer = null;
+    }
+    // Restore header if config is loaded
+    if (connectionStatusEl && state.config) {
+      const agent = state.config.agent || {};
+      connectionStatusEl.innerHTML = `<span class="conn-dot"></span> ${agent.title || 'Assistant'}`;
     }
   }
 
