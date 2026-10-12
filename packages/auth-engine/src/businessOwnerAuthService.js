@@ -13,7 +13,7 @@
  *   5. Server validates JWT on every /api/business/* request
  *
  * Security:
- *   - Passwords hashed with bcrypt (10 rounds)
+ *   - Passwords hashed with bcryptjs (10 rounds)
  *   - JWT signed with NOVA_JWT_SECRET env var (or random per-process in dev)
  *   - JWT expires after 7 days
  *   - Failed login attempts rate-limited (5 per minute per IP)
@@ -21,9 +21,13 @@
  * Storage:
  *   tenants/{tenantId}/owners.json — array of owner accounts
  *   Each account: { id, email, passwordHash, name, role, createdAt }
+ *
+ * Note: We use bcryptjs (pure JavaScript) instead of bcrypt (native C++ addon)
+ * because bcrypt's native binding fails on Render's deployment environment
+ * due to platform differences between build and run environments.
  */
 const crypto = require('crypto');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');  // v33.0.1: switched from bcrypt to bcryptjs for Render compatibility
 const fs = require('fs');
 const path = require('path');
 
