@@ -568,18 +568,54 @@
         .nova-suggestion-btn:hover { background: #223050; }
 
         .nova-composer { padding: 10px; border-top: 1px solid #28324b; background: #11182a; display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
-        .nova-input { flex: 1; resize: none; min-height: 38px; max-height: 120px; background: #172139; color: #e8edf7; border: 1px solid #34415f; border-radius: 10px; padding: 9px 12px; font-size: 13.5px; font-family: inherit; line-height: 1.4; }
+        .nova-input { flex: 1; resize: none; min-height: 40px; max-height: 120px; background: #172139; color: #e8edf7; border: 1px solid #34415f; border-radius: 20px; padding: 10px 16px; font-size: 14px; font-family: inherit; line-height: 1.4; }
         .nova-input::placeholder { color: #7485a8; }
         .nova-input:focus { outline: none; border-color: ${color}; }
-        .nova-send { background: ${color}; color: #fff; border: none; border-radius: 10px; padding: 0 14px; cursor: pointer; font-weight: 600; font-size: 13.5px; min-width: 44px; transition: filter .12s; }
-        .nova-send:hover { filter: brightness(1.1); }
-        .nova-send:disabled { opacity: .5; cursor: not-allowed; }
-        .nova-mic { background: var(--surface-3); color: var(--text-dim); border: 1px solid var(--border-strong); border-radius: 50%; width: 38px; height: 38px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all .12s; flex-shrink: 0; }
-        .nova-mic:hover { background: var(--border); }
-        .nova-mic.recording { background: #ef4444; color: #fff; border-color: #dc2626; animation: nova-mic-pulse 1.5s infinite; }
-        @keyframes nova-mic-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        .nova-voice-toggle { background: var(--surface-3); color: var(--text-dim); border: 1px solid var(--border-strong); border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all .12s; flex-shrink: 0; }
-        .nova-voice-toggle.active { background: ${color}; color: #fff; border-color: ${color}; }
+        .nova-send { background: ${color}; color: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .15s; }
+        .nova-send:hover { filter: brightness(1.15); transform: scale(1.05); }
+        .nova-send:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+        /* v33.2: WhatsApp/Instagram-style mic button */
+        .nova-mic-btn {
+          width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
+          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+          transition: all .2s; position: relative;
+          background: ${color}; color: #fff;
+        }
+        .nova-mic-btn:hover { filter: brightness(1.15); transform: scale(1.05); }
+        .nova-mic-btn.recording {
+          background: #ef4444; animation: nova-mic-pulse 1.2s infinite;
+        }
+        @keyframes nova-mic-pulse {
+          0% { box-shadow: 0 0 0 0 rgba(239,68,68,.5); }
+          70% { box-shadow: 0 0 0 12px rgba(239,68,68,0); }
+          100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+        }
+        .nova-mic-btn svg { width: 20px; height: 20px; }
+        .nova-mic-btn.recording svg { display: none; }
+        .nova-mic-btn .recording-icon { display: none; font-size: 18px; }
+        .nova-mic-btn.recording .recording-icon { display: block; }
+
+        /* Recording overlay (slide to cancel) */
+        .nova-recording-overlay {
+          position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%);
+          background: rgba(0,0,0,.85); color: #fff; padding: 10px 20px; border-radius: 20px;
+          font-size: 12px; display: none; align-items: center; gap: 8px;
+          z-index: 2147483646; white-space: nowrap;
+        }
+        .nova-recording-overlay.visible { display: flex; }
+        .nova-recording-overlay .timer { font-variant-numeric: tabular-nums; font-weight: 600; }
+        .nova-recording-overlay .wave { display: inline-block; width: 4px; height: 14px; background: #ef4444; border-radius: 2px; animation: nova-wave .6s infinite; }
+        @keyframes nova-wave { 0%,100% { height: 6px; } 50% { height: 16px; } }
+
+        /* Voice toggle (auto-activated, small) */
+        .nova-voice-toggle {
+          background: transparent; border: none; cursor: pointer; width: 28px; height: 28px;
+          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+          color: var(--text-faint); font-size: 16px; transition: color .15s; border-radius: 50%; padding: 0;
+        }
+        .nova-voice-toggle.active { color: ${color}; }
+        .nova-voice-toggle:hover { color: var(--text-dim); }
 
         @media (max-width: 480px) {
           .nova-panel { width: 100vw !important; height: 100dvh !important; max-height: 100dvh !important; bottom: 0 !important; ${sideHorizontal}: 0 !important; ${isCenter ? 'transform: none !important;' : ''} border-radius: 0 !important; }
@@ -625,11 +661,21 @@
         <div class="nova-messages" id="nova-messages" aria-live="polite"></div>
         <div class="nova-suggestions" id="nova-suggestions"></div>
         <form class="nova-composer" id="nova-form">
-          <button type="button" class="nova-mic" id="nova-mic" title="Speak" aria-label="Voice input">🎤</button>
-          <textarea class="nova-input" id="nova-input" placeholder="Type a message…" rows="1" maxlength="4000" aria-label="Message"></textarea>
-          <button type="button" class="nova-voice-toggle" id="nova-voice-toggle" title="Toggle voice replies" aria-label="Toggle voice">🔊</button>
-          <button type="submit" class="nova-send" id="nova-send">Send</button>
+          <button type="button" class="nova-mic-btn" id="nova-mic" title="Tap to speak" aria-label="Voice input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            <span class="recording-icon">⏹</span>
+          </button>
+          <textarea class="nova-input" id="nova-input" placeholder="Type or tap mic to speak…" rows="1" maxlength="4000" aria-label="Message"></textarea>
+          <button type="button" class="nova-voice-toggle" id="nova-voice-toggle" title="Voice replies" aria-label="Toggle voice replies">🔊</button>
+          <button type="submit" class="nova-send" id="nova-send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
         </form>
+        <div class="nova-recording-overlay" id="nova-recording-overlay">
+          <span class="wave"></span>
+          <span class="timer" id="nova-recording-timer">0:00</span>
+          <span style="opacity:.7">Listening…</span>
+        </div>
       </div>
     `;
 
@@ -704,29 +750,33 @@
     const closeWelcome = shadow.querySelector('.close-welcome');
     if (closeWelcome) closeWelcome.addEventListener('click', (e) => { e.stopPropagation(); hideWelcomeBubble(); });
 
-    // ─── v33.1: Voice input (speech-to-text) + Voice output (text-to-speech) ───
-    // Uses the browser's built-in Web Speech API — no server changes needed.
+    // ─── v33.2: Voice input + output (WhatsApp-style) ──────────────────
     //
-    // Voice input: customer clicks 🎤 → browser listens → transcribed text
-    // appears in the input → automatically sent.
+    // Voice input: tap mic → browser listens → transcribed → auto-sent.
+    // Voice output: auto-enabled when customer first uses mic.
+    // TTS strips emojis, special chars, and markdown before speaking.
     //
-    // Voice output: when Nova replies, the text is spoken aloud using the
-    // browser's Speech Synthesis API. Toggle on/off with the 🔊 button.
-    //
-    // Browser support: Chrome 25+, Firefox 44+, Safari 14.1+, Edge 79+
-    // Falls back gracefully if not supported (mic button hidden, no TTS).
+    // Mic UI: WhatsApp/Instagram-style circular button with:
+    // - Mic icon when idle (SVG, not emoji)
+    // - Red pulsing animation when recording
+    // - Recording overlay with timer + wave animation
+    // - Stop icon (⏹) when recording
 
     state.voiceEnabled = localStorage.getItem('nova-voice-enabled') === 'true';
     state.speechRecognition = null;
     state.isRecording = false;
+    state.recordingTimer = null;
+    state.recordingSeconds = 0;
 
     const micBtn = shadow.querySelector('#nova-mic');
     const voiceToggle = shadow.querySelector('#nova-voice-toggle');
+    const recordingOverlay = shadow.querySelector('#nova-recording-overlay');
+    const recordingTimerEl = shadow.querySelector('#nova-recording-timer');
 
     // Initialize voice toggle state
     if (voiceToggle) {
+      voiceToggle.textContent = state.voiceEnabled ? '🔊' : '🔈';
       if (state.voiceEnabled) voiceToggle.classList.add('active');
-      else voiceToggle.classList.remove('active');
     }
 
     // Check if speech recognition is supported
@@ -735,17 +785,19 @@
       state.speechRecognition = new SpeechRecognition();
       state.speechRecognition.continuous = false;
       state.speechRecognition.interimResults = true;
-      state.speechRecognition.lang = 'en-US';
+      state.speechRecognition.lang = state.config?.language === 'roman_urdu' ? 'ur-PK' : 'en-US';
 
       state.speechRecognition.onresult = (event) => {
         let transcript = '';
+        let isFinal = false;
         for (let i = 0; i < event.results.length; i++) {
           transcript += event.results[i][0].transcript;
+          if (event.results[i].isFinal) isFinal = true;
         }
         inputEl.value = transcript;
         autoResize();
-        // If this is a final result, auto-send
-        if (event.results[event.results.length - 1].isFinal) {
+        // Auto-send when speech is final
+        if (isFinal) {
           const text = inputEl.value.trim();
           if (text) {
             inputEl.value = '';
@@ -767,6 +819,7 @@
         stopRecording();
       };
 
+      // Tap to start/stop recording (WhatsApp-style)
       micBtn.addEventListener('click', () => {
         if (state.isRecording) {
           state.speechRecognition.stop();
@@ -774,67 +827,130 @@
           try {
             state.speechRecognition.start();
             startRecording();
+
+            // v33.2: Auto-enable voice output when customer uses mic for the first time.
+            // If voice is not already enabled, enable it automatically so Nova
+            // replies in voice — the customer doesn't need to press the 🔊 button.
+            if (!state.voiceEnabled) {
+              state.voiceEnabled = true;
+              localStorage.setItem('nova-voice-enabled', 'true');
+              if (voiceToggle) {
+                voiceToggle.textContent = '🔊';
+                voiceToggle.classList.add('active');
+              }
+              console.info('[Nova Widget] Voice output auto-enabled (customer used mic)');
+            }
           } catch (err) {
             console.warn('[Nova Widget] Could not start speech recognition:', err);
           }
         }
       });
     } else if (micBtn) {
-      // Speech recognition not supported — hide the mic button
       micBtn.style.display = 'none';
     }
 
     function startRecording() {
       state.isRecording = true;
+      state.recordingSeconds = 0;
       micBtn?.classList.add('recording');
-      micBtn.textContent = '⏹';
-      micBtn.title = 'Stop recording';
+      if (recordingOverlay) recordingOverlay.classList.add('visible');
+      // Start timer
+      state.recordingTimer = setInterval(() => {
+        state.recordingSeconds++;
+        const mins = Math.floor(state.recordingSeconds / 60);
+        const secs = state.recordingSeconds % 60;
+        if (recordingTimerEl) recordingTimerEl.textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+      }, 1000);
     }
 
     function stopRecording() {
       state.isRecording = false;
-      if (micBtn) {
-        micBtn.classList.remove('recording');
-        micBtn.textContent = '🎤';
-        micBtn.title = 'Speak';
+      micBtn?.classList.remove('recording');
+      if (recordingOverlay) recordingOverlay.classList.remove('visible');
+      if (state.recordingTimer) {
+        clearInterval(state.recordingTimer);
+        state.recordingTimer = null;
       }
     }
 
-    // Voice output toggle
+    // Voice output toggle — allows user to turn off voice if they want
     if (voiceToggle) {
       voiceToggle.addEventListener('click', () => {
         state.voiceEnabled = !state.voiceEnabled;
         localStorage.setItem('nova-voice-enabled', state.voiceEnabled ? 'true' : 'false');
         if (state.voiceEnabled) {
+          voiceToggle.textContent = '🔊';
           voiceToggle.classList.add('active');
-          // Speak a test phrase so the user knows it's on
-          speakText('Voice replies enabled.');
+          speakText('Voice replies are now on.');
         } else {
+          voiceToggle.textContent = '🔈';
           voiceToggle.classList.remove('active');
-          // Cancel any ongoing speech
           if ('speechSynthesis' in window) window.speechSynthesis.cancel();
         }
       });
     }
 
-    // Text-to-speech function — speaks Nova's replies aloud
+    // v33.2: Text-to-speech with emoji stripping.
+    // Strips emojis, special characters, markdown, and excessive whitespace
+    // before speaking. This prevents the TTS engine from reading "smiling
+    // face" or "heavy plus sign" aloud, which sounds awkward.
     function speakText(text) {
       if (!state.voiceEnabled) return;
       if (!('speechSynthesis' in window)) return;
+
+      // Strip emojis and special Unicode characters
+      let cleanText = text
+        // Remove emojis (most common ranges)
+        .replace(/[\u{1F600}-\u{1F64F}]/gu, '')  // emoticons
+        .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')     // symbols & pictographs
+        .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')     // transport & map
+        .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '')     // flags
+        .replace(/[\u{2600}-\u{26FF}]/gu, '')       // misc symbols
+        .replace(/[\u{2700}-\u{27BF}]/gu, '')       // dingbats
+        .replace(/[\u{FE00}-\u{FE0F}]/gu, '')       // variation selectors
+        .replace(/[\u{1F900}-\u{1F9FF}]/gu, '')     // supplemental symbols
+        .replace(/[\u{2B00}-\u{2BFF}]/gu, '')       // misc symbols & arrows
+        .replace(/[\u{200D}]/gu, '')                 // zero width joiner
+        .replace(/[\u{2190}-\u{21FF}]/gu, '')        // arrows
+        // Remove markdown formatting
+        .replace(/\*\*(.*?)\*\*/g, '$1')             // bold
+        .replace(/\*(.*?)\*/g, '$1')                  // italic
+        .replace(/__(.*?)__/g, '$1')                 // underline
+        .replace(/~~(.*?)~~/g, '$1')                  // strikethrough
+        .replace(/`(.*?)`/g, '$1')                   // code
+        // Remove bullet points and numbering
+        .replace(/^[•·▪▫◦‣⁃]\s*/gm, '')
+        .replace(/^\d+\.\s*/gm, '')
+        // Remove special characters that TTS reads awkwardly
+        .replace(/[→←↑↓↔]/g, ' ')
+        .replace(/[✓✗✔✘]/g, ' ')
+        .replace(/[©®™]/g, ' ')
+        // Clean up multiple spaces and newlines
+        .replace(/[ \t]+/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .replace(/^\s+|\s+$/g, '')
+        .trim();
+
+      if (!cleanText) return;
+
       // Cancel any ongoing speech first
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
+      const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
       utterance.volume = 0.8;
-      // Try to use a female voice (more natural for assistant)
+
+      // Try to use a natural female voice
       const voices = window.speechSynthesis.getVoices();
-      const femaleVoice = voices.find(v => /female|samantha|victoria|google us english|zira/i.test(v.name));
-      if (femaleVoice) utterance.voice = femaleVoice;
+      const preferredVoice = voices.find(v =>
+        /samantha|victoria|google us english|zira|aria|jenny|female/i.test(v.name)
+      ) || voices.find(v => /en-US/i.test(v.lang) && v.localService);
+      if (preferredVoice) utterance.voice = preferredVoice;
+
       window.speechSynthesis.speak(utterance);
     }
 
-    // Make speakText available to the sendMessage function
+    // Make speakText available to sendMessage
     state._speakText = speakText;
 
     // Initial render — show pre-chat form or welcome messages

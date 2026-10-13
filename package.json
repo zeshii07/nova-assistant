@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "33.1.0",
+  "version": "33.2.0",
   "private": true,
-  "description": "Nova v33.1 — Keep-alive, login error clarity, admin password reset, voice input/output",
+  "description": "Nova v33.2 — WhatsApp-style mic, auto-enable voice, emoji stripping from TTS — Keep-alive, login error clarity, admin password reset, voice input/output",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {
