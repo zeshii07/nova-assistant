@@ -1852,9 +1852,22 @@ async function startServer() {
   });
   server.listen(container.config.port, () => container.logger.info("api.started", { port: container.config.port }));
 
-  // v33.1: Self-ping keep-alive — prevents Render free tier from sleeping.
-  // Render sleeps after 15 min of inactivity. This pings /health every 10 min
-  // to keep the server awake. In production with paid tier, this is harmless.
+  // v33.3: Self-ping keep-alive — prevents Render free tier from sleeping.
+  // Render sleeps after 15 min of no EXTERNAL traffic. Self-pinging localhost
+  // doesn't count as external traffic, so we also need an external cron job.
+  //
+  // TWO-LAYER KEEP-ALIVE:
+  // 1. Self-ping (below) — pings /health every 10 min (helps on some platforms)
+  // 2. External cron — user sets up a free cron-job.org task to ping
+  //    https://nova-saas-test.onrender.com/health every 10 minutes
+  //    This is the reliable method for Render free tier.
+  //
+  // To set up external cron:
+  //   1. Go to https://cron-job.org (free)
+  //   2. Create a job: URL = https://your-nova.onrender.com/health
+  //   3. Schedule: every 10 minutes
+  //   4. That's it — Render will never sleep
+  //
   // Can be disabled by setting NOVA_KEEP_ALIVE=false env var.
   if (process.env.NOVA_KEEP_ALIVE !== 'false') {
     const keepAliveUrl = `http://localhost:${container.config.port}/health`;
@@ -1862,11 +1875,11 @@ async function startServer() {
       const req = http.get(keepAliveUrl, (res) => {
         container.logger?.info?.('keep_alive.ping', { status: res.statusCode });
       });
-      req.on('error', () => {}); // silently ignore errors
+      req.on('error', () => {});
       req.setTimeout(5000, () => req.destroy());
     };
-    setInterval(keepAlive, 10 * 60 * 1000); // every 10 minutes
-    container.logger.info('keep_alive.started', { interval: '10 minutes' });
+    setInterval(keepAlive, 10 * 60 * 1000);
+    container.logger.info('keep_alive.started', { interval: '10 minutes', note: 'Also set up external cron at cron-job.org for Render free tier' });
   }
   const close=async()=>new Promise((resolve,reject)=>server.close(async(error)=>{
     if(error)return reject(error);

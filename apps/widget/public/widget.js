@@ -478,9 +478,17 @@
 
         .nova-messages {
           flex: 1; overflow-y: auto; padding: 14px;
-          background: #0b1020;
+          background: linear-gradient(135deg, #0a0e1a 0%, #0d1228 40%, #0f1530 70%, #0a0f1e 100%);
           display: flex; flex-direction: column; gap: 12px;
           scroll-behavior: smooth;
+          position: relative;
+        }
+        .nova-messages::before {
+          content: ''; position: absolute; inset: 0; pointer-events: none;
+          background-image:
+            radial-gradient(circle at 15% 20%, rgba(45,91,209,.06) 0%, transparent 40%),
+            radial-gradient(circle at 85% 80%, rgba(16,185,129,.05) 0%, transparent 40%),
+            radial-gradient(circle at 50% 50%, rgba(139,92,246,.03) 0%, transparent 60%);
         }
         .nova-messages::-webkit-scrollbar { width: 6px; }
         .nova-messages::-webkit-scrollbar-track { background: transparent; }
@@ -491,21 +499,27 @@
           border-radius: 16px; font-size: 13.5px; line-height: 1.5;
           white-space: pre-wrap; word-break: break-word;
           animation: nova-msg-in .2s ease;
+          position: relative; z-index: 1;
+          backdrop-filter: blur(8px);
         }
         @keyframes nova-msg-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .nova-message.user {
-          background: ${color}; color: #fff;
+          background: linear-gradient(135deg, ${color} 0%, ${color}cc 100%);
+          color: #fff;
           align-self: flex-end;
           border-bottom-right-radius: 4px;
+          box-shadow: 0 2px 12px ${color}33;
         }
         .nova-message.nova {
-          background: #1b263e; color: #e8edf7;
-          border: 1px solid #2c3955;
+          background: rgba(27, 38, 62, 0.85);
+          color: #e8edf7;
+          border: 1px solid rgba(44, 57, 85, 0.8);
           align-self: flex-start;
           border-bottom-left-radius: 4px;
+          box-shadow: 0 2px 8px rgba(0,0,0,.2);
         }
         .nova-message.system {
-          background: rgba(245,181,74,.1); color: #f5b54a;
+          background: rgba(245,181,74,.08); color: #f5b54a;
           font-size: 12px; text-align: center; padding: 8px 14px;
           align-self: center; max-width: 90%;
           border: 1px solid rgba(245,181,74,.2);
@@ -567,23 +581,21 @@
         .nova-suggestion-btn { background: #172139; color: #c9d6f0; border: 1px solid #34415f; border-radius: 16px; padding: 6px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background .12s; }
         .nova-suggestion-btn:hover { background: #223050; }
 
-        .nova-composer { padding: 10px; border-top: 1px solid #28324b; background: #11182a; display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
-        .nova-input { flex: 1; resize: none; min-height: 40px; max-height: 120px; background: #172139; color: #e8edf7; border: 1px solid #34415f; border-radius: 20px; padding: 10px 16px; font-size: 14px; font-family: inherit; line-height: 1.4; }
+        .nova-composer { padding: 10px; border-top: 1px solid #28324b; background: rgba(17,24,42,0.9); backdrop-filter: blur(10px); display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
+        .nova-input { flex: 1; resize: none; min-height: 40px; max-height: 120px; background: #172139; color: #e8edf7; border: 1px solid #34415f; border-radius: 20px; padding: 10px 16px; font-size: 14px; font-family: inherit; line-height: 1.4; transition: border-color .15s; }
         .nova-input::placeholder { color: #7485a8; }
         .nova-input:focus { outline: none; border-color: ${color}; }
-        .nova-send { background: ${color}; color: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .15s; }
-        .nova-send:hover { filter: brightness(1.15); transform: scale(1.05); }
-        .nova-send:disabled { opacity: .4; cursor: not-allowed; transform: none; }
 
-        /* v33.2: WhatsApp/Instagram-style mic button */
-        .nova-mic-btn {
-          width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
+        /* v33.3: Single action button — toggles between mic/send/stop */
+        .nova-action-btn {
+          width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer;
           display: flex; align-items: center; justify-content: center; flex-shrink: 0;
           transition: all .2s; position: relative;
           background: ${color}; color: #fff;
         }
-        .nova-mic-btn:hover { filter: brightness(1.15); transform: scale(1.05); }
-        .nova-mic-btn.recording {
+        .nova-action-btn:hover { filter: brightness(1.15); transform: scale(1.05); }
+        .nova-action-btn svg { width: 20px; height: 20px; }
+        .nova-action-btn.recording {
           background: #ef4444; animation: nova-mic-pulse 1.2s infinite;
         }
         @keyframes nova-mic-pulse {
@@ -591,10 +603,6 @@
           70% { box-shadow: 0 0 0 12px rgba(239,68,68,0); }
           100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
         }
-        .nova-mic-btn svg { width: 20px; height: 20px; }
-        .nova-mic-btn.recording svg { display: none; }
-        .nova-mic-btn .recording-icon { display: none; font-size: 18px; }
-        .nova-mic-btn.recording .recording-icon { display: block; }
 
         /* Recording overlay (slide to cancel) */
         .nova-recording-overlay {
@@ -607,15 +615,6 @@
         .nova-recording-overlay .timer { font-variant-numeric: tabular-nums; font-weight: 600; }
         .nova-recording-overlay .wave { display: inline-block; width: 4px; height: 14px; background: #ef4444; border-radius: 2px; animation: nova-wave .6s infinite; }
         @keyframes nova-wave { 0%,100% { height: 6px; } 50% { height: 16px; } }
-
-        /* Voice toggle (auto-activated, small) */
-        .nova-voice-toggle {
-          background: transparent; border: none; cursor: pointer; width: 28px; height: 28px;
-          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-          color: var(--text-faint); font-size: 16px; transition: color .15s; border-radius: 50%; padding: 0;
-        }
-        .nova-voice-toggle.active { color: ${color}; }
-        .nova-voice-toggle:hover { color: var(--text-dim); }
 
         @media (max-width: 480px) {
           .nova-panel { width: 100vw !important; height: 100dvh !important; max-height: 100dvh !important; bottom: 0 !important; ${sideHorizontal}: 0 !important; ${isCenter ? 'transform: none !important;' : ''} border-radius: 0 !important; }
@@ -661,14 +660,11 @@
         <div class="nova-messages" id="nova-messages" aria-live="polite"></div>
         <div class="nova-suggestions" id="nova-suggestions"></div>
         <form class="nova-composer" id="nova-form">
-          <button type="button" class="nova-mic-btn" id="nova-mic" title="Tap to speak" aria-label="Voice input">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-            <span class="recording-icon">⏹</span>
-          </button>
-          <textarea class="nova-input" id="nova-input" placeholder="Type or tap mic to speak…" rows="1" maxlength="4000" aria-label="Message"></textarea>
-          <button type="button" class="nova-voice-toggle" id="nova-voice-toggle" title="Voice replies" aria-label="Toggle voice replies">🔊</button>
-          <button type="submit" class="nova-send" id="nova-send">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <textarea class="nova-input" id="nova-input" placeholder="Type a message…" rows="1" maxlength="4000" aria-label="Message"></textarea>
+          <button type="button" class="nova-action-btn" id="nova-action-btn" title="Tap to speak" aria-label="Voice input or send">
+            <svg class="icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            <svg class="icon-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
           </button>
         </form>
         <div class="nova-recording-overlay" id="nova-recording-overlay">
@@ -750,17 +746,15 @@
     const closeWelcome = shadow.querySelector('.close-welcome');
     if (closeWelcome) closeWelcome.addEventListener('click', (e) => { e.stopPropagation(); hideWelcomeBubble(); });
 
-    // ─── v33.2: Voice input + output (WhatsApp-style) ──────────────────
+    // ─── v33.3: Single action button (mic ↔ send ↔ stop) ──────────────
     //
-    // Voice input: tap mic → browser listens → transcribed → auto-sent.
-    // Voice output: auto-enabled when customer first uses mic.
-    // TTS strips emojis, special chars, and markdown before speaking.
+    // The composer has ONE button that adapts based on context:
+    // - Input empty → button = 🎤 mic (tap to speak)
+    // - Input has text → button = ➤ send (tap to send)
+    // - Recording → button = ⏹ stop (tap to stop)
     //
-    // Mic UI: WhatsApp/Instagram-style circular button with:
-    // - Mic icon when idle (SVG, not emoji)
-    // - Red pulsing animation when recording
-    // - Recording overlay with timer + wave animation
-    // - Stop icon (⏹) when recording
+    // No separate sound toggle — voice output auto-enables when mic is used.
+    // User can long-press the panel header title to toggle voice off/on.
 
     state.voiceEnabled = localStorage.getItem('nova-voice-enabled') === 'true';
     state.speechRecognition = null;
@@ -768,20 +762,45 @@
     state.recordingTimer = null;
     state.recordingSeconds = 0;
 
-    const micBtn = shadow.querySelector('#nova-mic');
-    const voiceToggle = shadow.querySelector('#nova-voice-toggle');
+    const actionBtn = shadow.querySelector('#nova-action-btn');
+    const iconMic = shadow.querySelector('.icon-mic');
+    const iconSend = shadow.querySelector('.icon-send');
+    const iconStop = shadow.querySelector('.icon-stop');
     const recordingOverlay = shadow.querySelector('#nova-recording-overlay');
     const recordingTimerEl = shadow.querySelector('#nova-recording-timer');
 
-    // Initialize voice toggle state
-    if (voiceToggle) {
-      voiceToggle.textContent = state.voiceEnabled ? '🔊' : '🔈';
-      if (state.voiceEnabled) voiceToggle.classList.add('active');
+    // Update button state based on input content
+    function updateActionButton() {
+      if (state.isRecording) {
+        iconMic.style.display = 'none';
+        iconSend.style.display = 'none';
+        iconStop.style.display = 'block';
+        actionBtn.classList.add('recording');
+        actionBtn.title = 'Stop recording';
+      } else if (inputEl.value.trim()) {
+        iconMic.style.display = 'none';
+        iconSend.style.display = 'block';
+        iconStop.style.display = 'none';
+        actionBtn.classList.remove('recording');
+        actionBtn.title = 'Send message';
+      } else {
+        iconMic.style.display = 'block';
+        iconSend.style.display = 'none';
+        iconStop.style.display = 'none';
+        actionBtn.classList.remove('recording');
+        actionBtn.title = 'Tap to speak';
+      }
     }
+
+    // Listen for input changes to toggle mic/send
+    inputEl.addEventListener('input', () => {
+      autoResize();
+      updateActionButton();
+    });
 
     // Check if speech recognition is supported
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition && micBtn) {
+    if (SpeechRecognition) {
       state.speechRecognition = new SpeechRecognition();
       state.speechRecognition.continuous = false;
       state.speechRecognition.interimResults = true;
@@ -796,12 +815,13 @@
         }
         inputEl.value = transcript;
         autoResize();
-        // Auto-send when speech is final
+        updateActionButton();
         if (isFinal) {
           const text = inputEl.value.trim();
           if (text) {
             inputEl.value = '';
             autoResize();
+            updateActionButton();
             sendMessage(text);
           }
         }
@@ -811,50 +831,65 @@
         console.warn('[Nova Widget] Speech recognition error:', event.error);
         stopRecording();
         if (event.error === 'not-allowed') {
-          appendMessageEl('system', '🎤 Microphone access denied. Please allow microphone access in your browser settings.');
+          appendMessageEl('system', 'Microphone access denied. Please allow microphone access in your browser settings.');
         }
       };
 
       state.speechRecognition.onend = () => {
         stopRecording();
       };
-
-      // Tap to start/stop recording (WhatsApp-style)
-      micBtn.addEventListener('click', () => {
-        if (state.isRecording) {
-          state.speechRecognition.stop();
-        } else {
-          try {
-            state.speechRecognition.start();
-            startRecording();
-
-            // v33.2: Auto-enable voice output when customer uses mic for the first time.
-            // If voice is not already enabled, enable it automatically so Nova
-            // replies in voice — the customer doesn't need to press the 🔊 button.
-            if (!state.voiceEnabled) {
-              state.voiceEnabled = true;
-              localStorage.setItem('nova-voice-enabled', 'true');
-              if (voiceToggle) {
-                voiceToggle.textContent = '🔊';
-                voiceToggle.classList.add('active');
-              }
-              console.info('[Nova Widget] Voice output auto-enabled (customer used mic)');
-            }
-          } catch (err) {
-            console.warn('[Nova Widget] Could not start speech recognition:', err);
-          }
-        }
-      });
-    } else if (micBtn) {
-      micBtn.style.display = 'none';
     }
+
+    // Action button click handler — behaves based on current state
+    actionBtn.addEventListener('click', () => {
+      if (state.isRecording) {
+        // Stop recording
+        state.speechRecognition?.stop();
+      } else if (inputEl.value.trim()) {
+        // Send message
+        const text = inputEl.value;
+        inputEl.value = '';
+        autoResize();
+        updateActionButton();
+        sendMessage(text);
+      } else {
+        // Start recording
+        if (!state.speechRecognition) {
+          console.warn('[Nova Widget] Speech recognition not supported');
+          return;
+        }
+        try {
+          state.speechRecognition.start();
+          startRecording();
+
+          // Auto-enable voice output when customer uses mic for the first time
+          if (!state.voiceEnabled) {
+            state.voiceEnabled = true;
+            localStorage.setItem('nova-voice-enabled', 'true');
+            console.info('[Nova Widget] Voice output auto-enabled');
+          }
+        } catch (err) {
+          console.warn('[Nova Widget] Could not start speech recognition:', err);
+        }
+      }
+    });
+
+    // Form submit also sends (for Enter key)
+    formEl.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = inputEl.value;
+      if (!text.trim()) return;
+      inputEl.value = '';
+      autoResize();
+      updateActionButton();
+      sendMessage(text);
+    });
 
     function startRecording() {
       state.isRecording = true;
       state.recordingSeconds = 0;
-      micBtn?.classList.add('recording');
+      updateActionButton();
       if (recordingOverlay) recordingOverlay.classList.add('visible');
-      // Start timer
       state.recordingTimer = setInterval(() => {
         state.recordingSeconds++;
         const mins = Math.floor(state.recordingSeconds / 60);
@@ -865,7 +900,7 @@
 
     function stopRecording() {
       state.isRecording = false;
-      micBtn?.classList.remove('recording');
+      updateActionButton();
       if (recordingOverlay) recordingOverlay.classList.remove('visible');
       if (state.recordingTimer) {
         clearInterval(state.recordingTimer);
@@ -873,74 +908,74 @@
       }
     }
 
-    // Voice output toggle — allows user to turn off voice if they want
-    if (voiceToggle) {
-      voiceToggle.addEventListener('click', () => {
-        state.voiceEnabled = !state.voiceEnabled;
-        localStorage.setItem('nova-voice-enabled', state.voiceEnabled ? 'true' : 'false');
-        if (state.voiceEnabled) {
-          voiceToggle.textContent = '🔊';
-          voiceToggle.classList.add('active');
-          speakText('Voice replies are now on.');
-        } else {
-          voiceToggle.textContent = '🔈';
-          voiceToggle.classList.remove('active');
-          if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        }
+    // v33.3: Long-press the header title to toggle voice output on/off
+    // (replaces the removed 🔊 button)
+    // titleEl is already declared above (line 686), reuse it
+    if (titleEl) {
+      let pressTimer = null;
+      titleEl.addEventListener('mousedown', () => {
+        pressTimer = setTimeout(() => {
+          toggleVoice();
+        }, 800);
       });
+      titleEl.addEventListener('mouseup', () => { if (pressTimer) clearTimeout(pressTimer); });
+      titleEl.addEventListener('mouseleave', () => { if (pressTimer) clearTimeout(pressTimer); });
+      titleEl.addEventListener('touchstart', () => {
+        pressTimer = setTimeout(() => { toggleVoice(); }, 800);
+      });
+      titleEl.addEventListener('touchend', () => { if (pressTimer) clearTimeout(pressTimer); });
     }
 
-    // v33.2: Text-to-speech with emoji stripping.
-    // Strips emojis, special characters, markdown, and excessive whitespace
-    // before speaking. This prevents the TTS engine from reading "smiling
-    // face" or "heavy plus sign" aloud, which sounds awkward.
+    function toggleVoice() {
+      state.voiceEnabled = !state.voiceEnabled;
+      localStorage.setItem('nova-voice-enabled', state.voiceEnabled ? 'true' : 'false');
+      if (state.voiceEnabled) {
+        speakText('Voice replies on.');
+      } else {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        appendMessageEl('system', 'Voice replies turned off. Long-press the agent name to turn them back on.');
+      }
+    }
+
+    // v33.3: Text-to-speech with emoji stripping
     function speakText(text) {
       if (!state.voiceEnabled) return;
       if (!('speechSynthesis' in window)) return;
 
-      // Strip emojis and special Unicode characters
       let cleanText = text
-        // Remove emojis (most common ranges)
-        .replace(/[\u{1F600}-\u{1F64F}]/gu, '')  // emoticons
-        .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')     // symbols & pictographs
-        .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')     // transport & map
-        .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '')     // flags
-        .replace(/[\u{2600}-\u{26FF}]/gu, '')       // misc symbols
-        .replace(/[\u{2700}-\u{27BF}]/gu, '')       // dingbats
-        .replace(/[\u{FE00}-\u{FE0F}]/gu, '')       // variation selectors
-        .replace(/[\u{1F900}-\u{1F9FF}]/gu, '')     // supplemental symbols
-        .replace(/[\u{2B00}-\u{2BFF}]/gu, '')       // misc symbols & arrows
-        .replace(/[\u{200D}]/gu, '')                 // zero width joiner
-        .replace(/[\u{2190}-\u{21FF}]/gu, '')        // arrows
-        // Remove markdown formatting
-        .replace(/\*\*(.*?)\*\*/g, '$1')             // bold
-        .replace(/\*(.*?)\*/g, '$1')                  // italic
-        .replace(/__(.*?)__/g, '$1')                 // underline
-        .replace(/~~(.*?)~~/g, '$1')                  // strikethrough
-        .replace(/`(.*?)`/g, '$1')                   // code
-        // Remove bullet points and numbering
+        .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+        .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
+        .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
+        .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '')
+        .replace(/[\u{2600}-\u{26FF}]/gu, '')
+        .replace(/[\u{2700}-\u{27BF}]/gu, '')
+        .replace(/[\u{FE00}-\u{FE0F}]/gu, '')
+        .replace(/[\u{1F900}-\u{1F9FF}]/gu, '')
+        .replace(/[\u{2B00}-\u{2BFF}]/gu, '')
+        .replace(/[\u{200D}]/gu, '')
+        .replace(/[\u{2190}-\u{21FF}]/gu, '')
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/__(.*?)__/g, '$1')
+        .replace(/~~(.*?)~~/g, '$1')
+        .replace(/`(.*?)`/g, '$1')
         .replace(/^[•·▪▫◦‣⁃]\s*/gm, '')
         .replace(/^\d+\.\s*/gm, '')
-        // Remove special characters that TTS reads awkwardly
         .replace(/[→←↑↓↔]/g, ' ')
         .replace(/[✓✗✔✘]/g, ' ')
         .replace(/[©®™]/g, ' ')
-        // Clean up multiple spaces and newlines
         .replace(/[ \t]+/g, ' ')
         .replace(/\n{3,}/g, '\n\n')
-        .replace(/^\s+|\s+$/g, '')
         .trim();
 
       if (!cleanText) return;
 
-      // Cancel any ongoing speech first
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
       utterance.volume = 0.8;
 
-      // Try to use a natural female voice
       const voices = window.speechSynthesis.getVoices();
       const preferredVoice = voices.find(v =>
         /samantha|victoria|google us english|zira|aria|jenny|female/i.test(v.name)
@@ -950,8 +985,10 @@
       window.speechSynthesis.speak(utterance);
     }
 
-    // Make speakText available to sendMessage
     state._speakText = speakText;
+
+    // Initial button state
+    updateActionButton();
 
     // Initial render — show pre-chat form or welcome messages
     showPreChatOrWelcome();
