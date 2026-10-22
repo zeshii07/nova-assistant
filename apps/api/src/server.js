@@ -30,6 +30,10 @@ async function startServer() {
       if (req.method === "GET" && (url.pathname === "/admin" || url.pathname.startsWith("/admin/"))) {
         return serveAdminAsset(res, url.pathname);
       }
+      // v34.1: PWA manifest and service worker served from admin dashboard
+      if (req.method === "GET" && (url.pathname === "/manifest.json" || url.pathname === "/sw.js" || url.pathname === "/favicon.ico")) {
+        return serveAdminAsset(res, "/admin" + url.pathname);
+      }
       // v28.0 Website Widget SDK — drop-in embeddable script.
       // Customers include <script src="https://your-nova.com/widget.js" data-tenant="cleaning-demo"></script>
       // and the widget auto-mounts on any page. Served with strict CSP + Cache-Control.
@@ -1149,6 +1153,140 @@ async function startServer() {
       }
       // ─── End v33.1 Admin owner management ───────────────────────────────
 
+      // ─── v34.1: Voice Profile endpoints (voice cloning prep) ────────────
+      // GET: retrieve voice profile for a tenant
+      // POST: save voice profile (voice name, rate, pitch from browser TTS settings)
+      const voiceProfileMatch = url.pathname.match(/^\/api\/admin\/voice-profile\/([^/]+)$/);
+      if (req.method === "GET" && voiceProfileMatch) {
+        const tenantId = decodeURIComponent(voiceProfileMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const profilePath = path.join(container.config.tenantsDir, tenantId, 'voice-profile.json');
+        let profile = { enabled: false, voiceName: null, rate: 0.95, pitch: 1.0, volume: 0.85 };
+        if (fs.existsSync(profilePath)) {
+          try { profile = { ...profile, ...JSON.parse(fs.readFileSync(profilePath, 'utf8')) }; } catch {}
+        }
+        return sendJson(res, 200, { ok:true, tenantId, profile });
+      }
+      if (req.method === "POST" && voiceProfileMatch) {
+        const tenantId = decodeURIComponent(voiceProfileMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const body = await readJson(req);
+        const profilePath = path.join(container.config.tenantsDir, tenantId, 'voice-profile.json');
+        const profile = {
+          enabled: body.enabled !== false,
+          voiceName: body.voiceName || null,
+          rate: body.rate || 0.95,
+          pitch: body.pitch || 1.0,
+          volume: body.volume || 0.85,
+          customVoiceURI: body.customVoiceURI || null,
+          savedAt: new Date().toISOString()
+        };
+        fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2) + '\n', 'utf8');
+        return sendJson(res, 200, { ok:true, tenantId, profile, message: 'Voice profile saved. Widget will use this voice for TTS.' });
+      }
+
+      // Voice profile is also returned in widget config (public, no auth)
+      // so the widget can apply it without login
+      // (handled in the /api/widget/config endpoint above — add voiceProfile to response)
+
+      // ─── v34.1: Product Image endpoints ────────────────────────────────
+      // Upload product image (admin only)
+      const productImageMatch = url.pathname.match(/^\/api\/admin\/catalog\/([^/]+)\/products\/([^/]+)\/image$/);
+      if (req.method === "POST" && productImageMatch) {
+        const tenantId = decodeURIComponent(productImageMatch[1]);
+        const productId = decodeURIComponent(productImageMatch[2]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const body = await readJson(req);
+        const { contentBase64, filename } = body;
+        if (!contentBase64) return sendJson(res, 400, { ok:false, error:'contentBase64 is required' });
+        // Save image to tenant's catalog/images/ directory
+        const imagesDir = path.join(container.config.tenantsDir, tenantId, 'catalog', 'images');
+        fs.mkdirSync(imagesDir, { recursive: true });
+        const ext = path.extname(filename || '').toLowerCase() || '.png';
+        const imagePath = path.join(imagesDir, `${productId}${ext}`);
+        try {
+          fs.writeFileSync(imagePath, Buffer.from(contentBase64, 'base64'));
+          // Update product's imageUrl in products.json
+          const productsPath = path.join(container.config.tenantsDir, tenantId, 'catalog', 'products.json');
+          if (fs.existsSync(productsPath)) {
+            const products = JSON.parse(fs.readFileSync(productsPath, 'utf8'));
+            const product = products.find(p => p.id === productId || String(p.id).toLowerCase() === String(productId).toLowerCase());
+            if (product) {
+              product.imageUrl = `/api/catalog/images/${tenantId}/${productId}${ext}`;
+              fs.writeFileSync(productsPath, JSON.stringify(products, null, 2) + '\n', 'utf8');
+              container.catalogRepository?.clearCache?.(tenantId);
+            }
+          }
+          return sendJson(res, 200, { ok:true, imageUrl: `/api/catalog/images/${tenantId}/${productId}${ext}` });
+        } catch (err) {
+          return sendJson(res, 500, { ok:false, error: err.message });
+        }
+      }
+
+      // Serve product image (public, no auth)
+      const catalogImageMatch = url.pathname.match(/^\/api\/catalog\/images\/([^/]+)\/([^/]+)$/);
+      if (req.method === "GET" && catalogImageMatch) {
+        const tenantId = decodeURIComponent(catalogImageMatch[1]);
+        const productId = decodeURIComponent(catalogImageMatch[2]);
+        const imagesDir = path.join(container.config.tenantsDir, tenantId, 'catalog', 'images');
+        // Try common extensions
+        for (const ext of ['.png', '.jpg', '.jpeg', '.webp', '.gif']) {
+          const filePath = path.join(imagesDir, `${productId}${ext}`);
+          if (fs.existsSync(filePath)) {
+            const mimeTypes = { '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp', '.gif':'image/gif' };
+            const data = fs.readFileSync(filePath);
+            res.writeHead(200, { 'Content-Type': mimeTypes[ext], 'Cache-Control': 'public, max-age=86400' });
+            res.end(data);
+            return;
+          }
+        }
+        return sendText(res, 404, 'Image not found');
+      }
+
+      // ─── v34.1: Kiosk mode route ──────────────────────────────────────
+      // /kiosk/{tenantId} serves a full-screen customer-facing chat
+      if (req.method === "GET" && url.pathname.startsWith("/kiosk/")) {
+        const kioskPath = path.resolve(__dirname, "../../widget/public/kiosk.html");
+        if (fs.existsSync(kioskPath)) {
+          const html = fs.readFileSync(kioskPath, 'utf8');
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+          res.end(html);
+          return;
+        }
+        return sendText(res, 404, 'Kiosk page not found');
+      }
+
+      // ─── v34.1: QR Code generation ────────────────────────────────────
+      // Returns a QR code that links to the kiosk URL for this tenant
+      const qrCodeMatch = url.pathname.match(/^\/api\/admin\/tenants\/([^/]+)\/qr-code$/);
+      if (req.method === "GET" && qrCodeMatch) {
+        const tenantId = decodeURIComponent(qrCodeMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const novaOrigin = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers['host'] || 'localhost:3000'}`;
+        const kioskUrl = `${novaOrigin}/kiosk/${tenantId}`;
+        const widgetUrl = `${novaOrigin}/widget.js?data-tenant=${tenantId}&data-server=${encodeURIComponent(novaOrigin)}`;
+        // Return QR code data (URL that can be embedded in an <img> tag)
+        // Using the QR Server API (free, no key needed) as a fallback
+        // Or generate a simple SVG QR code pattern
+        return sendJson(res, 200, {
+          ok: true,
+          tenantId,
+          kioskUrl,
+          widgetUrl,
+          // QR code image URL (using goqr.me API — free, no auth)
+          qrCodeImageUrl: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(kioskUrl)}`,
+          // Also provide a downloadable SVG
+          qrCodeSvgUrl: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=svg&data=${encodeURIComponent(kioskUrl)}`,
+          embedCode: `<img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(kioskUrl)}" alt="Scan to chat with Nova" />`
+        });
+      }
+
+      // ─── End v34.1 endpoints ───────────────────────────────────────────
+
       // ─── v31.0 Google Calendar OAuth & management endpoints ────────────────
       const calendarAuthMatch = url.pathname.match(/^\/api\/admin\/calendar\/auth\/([^/]+)$/);
       if (req.method === "GET" && calendarAuthMatch) {
@@ -1506,6 +1644,14 @@ async function startServer() {
           // v30.1.4: Security status (does NOT expose the actual key)
           requiresApiKey: !!widget.apiKey,
           allowedDomains: widget.allowedDomains || [],
+          // v34.1: Voice profile for TTS (voice cloning)
+          voiceProfile: (() => {
+            const vpPath = path.join(container.config.tenantsDir, tenantId, 'voice-profile.json');
+            if (fs.existsSync(vpPath)) {
+              try { return JSON.parse(fs.readFileSync(vpPath, 'utf8')); } catch { return null; }
+            }
+            return null;
+          })(),
           // v29 agent persona
           agent: {
             avatar: widget.agentAvatar || 'marcus',

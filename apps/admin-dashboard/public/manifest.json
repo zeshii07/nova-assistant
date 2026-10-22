@@ -1,0 +1,42 @@
+{
+  "name": "Nova Assistant",
+  "short_name": "Nova",
+  "description": "Multi-tenant SaaS engagement engine for automated customer conversations",
+  "start_url": "/admin",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1020",
+  "theme_color": "#2d5bd1",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%232d5bd1'/%3E%3Ctext x='96' y='130' font-family='Arial' font-size='100' font-weight='bold' fill='white' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%232d5bd1'/%3E%3Ctext x='256' y='340' font-family='Arial' font-size='260' font-weight='bold' fill='white' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Admin Dashboard",
+      "url": "/admin",
+      "description": "Manage tenants and system"
+    },
+    {
+      "name": "Business Dashboard",
+      "url": "/business",
+      "description": "Business owner portal"
+    },
+    {
+      "name": "Widget Test",
+      "url": "/widget-test",
+      "description": "Test the chat widget"
+    }
+  ]
+}

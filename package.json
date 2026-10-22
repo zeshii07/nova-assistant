@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "33.3.0",
+  "version": "34.1.0",
   "private": true,
-  "description": "Nova v33.3 - WhatsApp-style mic/send toggle, futuristic chat background, external cron keep-alive",
+  "description": "Nova v34.0 - Core engine bug fixes (routing, language drift, time formatting) - WhatsApp-style mic/send toggle, futuristic chat background, external cron keep-alive",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {

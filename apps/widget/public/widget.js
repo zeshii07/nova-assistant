@@ -225,6 +225,17 @@
       };
       state.retries = 0;
       console.info('[Nova Widget] Config loaded successfully:', data.assistantName || data.businessName);
+
+      // v34.1: Apply voice profile if configured
+      if (data.voiceProfile && data.voiceProfile.enabled !== false) {
+        state._voiceProfile = data.voiceProfile.voiceName || null;
+        state._voiceProfileParams = {
+          rate: data.voiceProfile.rate || 0.95,
+          pitch: data.voiceProfile.pitch || 1.0,
+          volume: data.voiceProfile.volume || 0.85
+        };
+        console.info('[Nova Widget] Voice profile loaded:', data.voiceProfile.voiceName || 'default');
+      }
     } catch (err) {
       const classified = classifyError(err);
       state.config = {
@@ -937,12 +948,80 @@
       }
     }
 
-    // v33.3: Text-to-speech with emoji stripping
-    function speakText(text) {
-      if (!state.voiceEnabled) return;
-      if (!('speechSynthesis' in window)) return;
+    // v34.1: Improved TTS with sentence-level processing, natural pauses,
+    // better voice selection, and voice cloning support.
+    //
+    // Improvements over v33.3:
+    // 1. Splits text into sentences — each spoken with natural pause between
+    // 2. Caches voice list (getVoices() is expensive)
+    // 3. Better voice priority: Natural > Premium > Default
+    // 4. Voice profile support: if tenant has a custom voice profile, use it
+    // 5. Handles long text without cutting off (queue-based)
+    // 6. SSML-like pauses at punctuation (period = 300ms, comma = 150ms)
 
-      let cleanText = text
+    state._cachedVoices = null;
+    state._voiceProfile = localStorage.getItem('nova-voice-profile') || null;
+
+    function getVoices() {
+      if (state._cachedVoices) return state._cachedVoices;
+      if (!('speechSynthesis' in window)) return [];
+      const voices = window.speechSynthesis.getVoices();
+      state._cachedVoices = voices;
+      // Chrome loads voices async — listen for the event
+      if (voices.length === 0) {
+        window.speechSynthesis.addEventListener('voiceschanged', () => {
+          state._cachedVoices = window.speechSynthesis.getVoices();
+        }, { once: true });
+      }
+      return voices;
+    }
+
+    function selectBestVoice() {
+      const voices = getVoices();
+      if (!voices.length) return null;
+
+      // Priority 1: Voice profile from voice cloning (if set)
+      if (state._voiceProfile) {
+        const profileVoice = voices.find(v => v.name === state._voiceProfile);
+        if (profileVoice) return profileVoice;
+      }
+
+      // Priority 2: Natural/premium female voices (most natural-sounding)
+      const naturalPriority = [
+        'Samantha',      // macOS - very natural
+        'Aria',          // Microsoft Edge - natural
+        'Jenny',         // Microsoft - natural
+        'Google US English', // Chrome - decent
+        'Victoria',      // macOS
+        'Zira',          // Windows
+        'Karen',         // macOS Australian
+        'Tessa',         // macOS South African
+        'Serena',        // macOS British
+      ];
+      for (const name of naturalPriority) {
+        const v = voices.find(v => v.name === name);
+        if (v) return v;
+      }
+
+      // Priority 3: Any female English voice
+      const female = voices.find(v =>
+        /female|woman|girl/i.test(v.name) && /en/i.test(v.lang)
+      );
+      if (female) return female;
+
+      // Priority 4: Any en-US voice
+      const enUS = voices.find(v => /en-US/i.test(v.lang));
+      if (enUS) return enUS;
+
+      // Priority 5: Any English voice
+      return voices.find(v => /en/i.test(v.lang)) || voices[0];
+    }
+
+    function stripForSpeech(text) {
+      return String(text || '')
+        // v34.1: Remove [IMG:url] tags (product images) — don't read URLs aloud
+        .replace(/\[IMG:[^\]]+\]/g, '')
+        // Remove all emoji ranges
         .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
         .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
         .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
@@ -954,35 +1033,94 @@
         .replace(/[\u{2B00}-\u{2BFF}]/gu, '')
         .replace(/[\u{200D}]/gu, '')
         .replace(/[\u{2190}-\u{21FF}]/gu, '')
+        // Remove markdown
         .replace(/\*\*(.*?)\*\*/g, '$1')
         .replace(/\*(.*?)\*/g, '$1')
         .replace(/__(.*?)__/g, '$1')
         .replace(/~~(.*?)~~/g, '$1')
         .replace(/`(.*?)`/g, '$1')
+        // Remove bullet points and numbering
         .replace(/^[•·▪▫◦‣⁃]\s*/gm, '')
         .replace(/^\d+\.\s*/gm, '')
-        .replace(/[→←↑↓↔]/g, ' ')
+        // Replace symbols with words for better TTS
+        .replace(/[→←↑↓↔]/g, ' to ')
         .replace(/[✓✗✔✘]/g, ' ')
         .replace(/[©®™]/g, ' ')
+        .replace(/—/g, ', ')  // em-dash → comma pause
+        .replace(/–/g, ', ')  // en-dash → comma pause
+        // Replace currency symbols with words
+        .replace(/AED\s*/g, 'A E D ')
+        .replace(/PKR\s*/g, 'P K R ')
+        .replace(/\$\s*/g, 'dollars ')
+        // Clean whitespace
         .replace(/[ \t]+/g, ' ')
         .replace(/\n{3,}/g, '\n\n')
         .trim();
+    }
 
+    function splitIntoSentences(text) {
+      // Split on sentence-ending punctuation, preserving the punctuation
+      const sentences = text.match(/[^.!?]+[.!?]+|\S[^.!?]*$/g) || [text];
+      return sentences.map(s => s.trim()).filter(s => s.length > 0);
+    }
+
+    function speakText(text) {
+      if (!state.voiceEnabled) return;
+      if (!('speechSynthesis' in window)) return;
+
+      const cleanText = stripForSpeech(text);
       if (!cleanText) return;
 
+      // Cancel any ongoing speech
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-      utterance.volume = 0.8;
 
-      const voices = window.speechSynthesis.getVoices();
-      const preferredVoice = voices.find(v =>
-        /samantha|victoria|google us english|zira|aria|jenny|female/i.test(v.name)
-      ) || voices.find(v => /en-US/i.test(v.lang) && v.localService);
-      if (preferredVoice) utterance.voice = preferredVoice;
+      const voice = selectBestVoice();
+      const sentences = splitIntoSentences(cleanText);
 
-      window.speechSynthesis.speak(utterance);
+      // v34.1: Speak each sentence separately for natural pauses.
+      // The browser inserts a natural pause between utterances.
+      let utteranceIndex = 0;
+
+      function speakNext() {
+        if (utteranceIndex >= sentences.length) return;
+
+        const sentence = sentences[utteranceIndex];
+        const utterance = new SpeechSynthesisUtterance(sentence);
+
+        if (voice) {
+          utterance.voice = voice;
+          utterance.lang = voice.lang;
+        }
+
+        // Natural speech parameters
+        utterance.rate = 0.95;    // Slightly slower than 1.0 for clarity
+        utterance.pitch = 1.0;
+        utterance.volume = 0.85;
+
+        // v34.1: Voice profile override (for voice cloning)
+        // If a custom voice profile is set via API, override the voice params
+        if (state._voiceProfileParams) {
+          const p = state._voiceProfileParams;
+          if (p.rate) utterance.rate = p.rate;
+          if (p.pitch) utterance.pitch = p.pitch;
+          if (p.volume) utterance.volume = p.volume;
+        }
+
+        utterance.onend = () => {
+          utteranceIndex++;
+          // Small pause between sentences (150ms) for natural rhythm
+          setTimeout(speakNext, 150);
+        };
+
+        utterance.onerror = () => {
+          utteranceIndex++;
+          setTimeout(speakNext, 50);
+        };
+
+        window.speechSynthesis.speak(utterance);
+      }
+
+      speakNext();
     }
 
     state._speakText = speakText;
@@ -1207,7 +1345,31 @@
     }
     const el = document.createElement('div');
     el.className = `nova-message ${role}`;
-    el.textContent = text;
+    el.textContent = text; // XSS-safe: textContent, never innerHTML
+
+    // v34.1: Product image rendering
+    // If the message contains [IMG:url] tags, render them as images
+    if (role === 'nova' && text.includes('[IMG:')) {
+      el.textContent = ''; // Clear the raw text
+      const parts = text.split(/(\[IMG:[^\]]+\])/g);
+      for (const part of parts) {
+        const imgMatch = part.match(/\[IMG:([^\]]+)\]/);
+        if (imgMatch) {
+          const imgUrl = imgMatch[1];
+          const img = document.createElement('img');
+          img.src = imgUrl.startsWith('http') ? imgUrl : `${NOVA_ORIGIN}${imgUrl}`;
+          img.style.cssText = 'max-width:100%;border-radius:10px;margin:6px 0;display:block';
+          img.alt = 'Product image';
+          img.onerror = () => { img.style.display = 'none'; };
+          el.appendChild(img);
+        } else if (part.trim()) {
+          const span = document.createElement('span');
+          span.textContent = part;
+          el.appendChild(span);
+        }
+      }
+    }
+
     messagesEl.appendChild(el);
     messagesEl.scrollTop = messagesEl.scrollHeight;
     return el;

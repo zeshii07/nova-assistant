@@ -1438,6 +1438,25 @@ async function renderSettings() {
 }
 
 // ─── Boot ──────────────────────────────────────────────────────────
+// v34.1: PWA Service Worker registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/admin/sw.js').then(() => {
+      console.info('[Nova] PWA service worker registered');
+    }).catch(err => console.warn('[Nova] SW registration failed:', err));
+  });
+}
+
+// v34.1: PWA install prompt
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install button if present
+  const installBtn = document.getElementById('pwa-install');
+  if (installBtn) installBtn.style.display = 'block';
+});
+
 async function boot() {
   // Initial parallel loads
   await loadTenants().catch(() => {});
