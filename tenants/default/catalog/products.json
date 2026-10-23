@@ -526,10 +526,20 @@
     "price": 950,
     "currency": "PKR",
     "description": "Gentle daily face wash with aloe vera for normal skin",
-    "aliases": ["face wash", "aloe facewash", "facial cleanser"],
-    "sizes": ["150ml"],
+    "aliases": [
+      "face wash",
+      "aloe facewash",
+      "facial cleanser"
+    ],
+    "sizes": [
+      "150ml"
+    ],
     "colors": [],
-    "tags": ["skincare", "cleanser", "aloe"],
+    "tags": [
+      "skincare",
+      "cleanser",
+      "aloe"
+    ],
     "inStock": true,
     "inventory": 44
   },
@@ -541,10 +551,20 @@
     "price": 1250,
     "currency": "PKR",
     "description": "Moisturising body lotion with shea butter",
-    "aliases": ["body lotion", "moisturizer", "skin lotion"],
-    "sizes": ["250ml"],
+    "aliases": [
+      "body lotion",
+      "moisturizer",
+      "skin lotion"
+    ],
+    "sizes": [
+      "250ml"
+    ],
     "colors": [],
-    "tags": ["skincare", "body care", "moisturising"],
+    "tags": [
+      "skincare",
+      "body care",
+      "moisturising"
+    ],
     "inStock": true,
     "inventory": 36
   },
@@ -556,10 +576,23 @@
     "price": 4600,
     "currency": "PKR",
     "description": "Fast-boil 1.7 litre electric kettle with automatic shutoff",
-    "aliases": ["kettle", "water boiler", "electric water kettle"],
-    "sizes": ["1.7L"],
-    "colors": ["Black", "Silver"],
-    "tags": ["kitchen appliance", "tea", "boiler"],
+    "aliases": [
+      "kettle",
+      "water boiler",
+      "electric water kettle"
+    ],
+    "sizes": [
+      "1.7L"
+    ],
+    "colors": [
+      "Black",
+      "Silver"
+    ],
+    "tags": [
+      "kitchen appliance",
+      "tea",
+      "boiler"
+    ],
     "inStock": true,
     "inventory": 19
   },
@@ -571,10 +604,23 @@
     "price": 2800,
     "currency": "PKR",
     "description": "Durable non-stick frying pan with heat-resistant handle",
-    "aliases": ["frying pan", "nonstick pan", "cooking pan"],
-    "sizes": ["24cm", "28cm"],
-    "colors": ["Black"],
-    "tags": ["cookware", "pan", "kitchen"],
+    "aliases": [
+      "frying pan",
+      "nonstick pan",
+      "cooking pan"
+    ],
+    "sizes": [
+      "24cm",
+      "28cm"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "tags": [
+      "cookware",
+      "pan",
+      "kitchen"
+    ],
     "inStock": true,
     "inventory": 25
   },
@@ -586,10 +632,24 @@
     "price": 2300,
     "currency": "PKR",
     "description": "Non-slip exercise mat for yoga, stretching and home workouts",
-    "aliases": ["exercise mat", "gym mat", "workout mat"],
-    "sizes": ["6mm"],
-    "colors": ["Blue", "Purple", "Black"],
-    "tags": ["fitness", "yoga", "exercise"],
+    "aliases": [
+      "exercise mat",
+      "gym mat",
+      "workout mat"
+    ],
+    "sizes": [
+      "6mm"
+    ],
+    "colors": [
+      "Blue",
+      "Purple",
+      "Black"
+    ],
+    "tags": [
+      "fitness",
+      "yoga",
+      "exercise"
+    ],
     "inStock": true,
     "inventory": 32
   },
@@ -601,10 +661,20 @@
     "price": 1800,
     "currency": "PKR",
     "description": "Five-level resistance band set for strength and mobility training",
-    "aliases": ["resistance bands", "exercise bands", "fitness bands"],
+    "aliases": [
+      "resistance bands",
+      "exercise bands",
+      "fitness bands"
+    ],
     "sizes": [],
-    "colors": ["Assorted"],
-    "tags": ["fitness", "strength", "workout"],
+    "colors": [
+      "Assorted"
+    ],
+    "tags": [
+      "fitness",
+      "strength",
+      "workout"
+    ],
     "inStock": true,
     "inventory": 41
   },
@@ -616,10 +686,24 @@
     "price": 900,
     "currency": "PKR",
     "description": "Durable fast-charging braided USB-C cable",
-    "aliases": ["usb c cable", "charging cable", "phone charging cable"],
-    "sizes": ["1m", "2m"],
-    "colors": ["Black", "White"],
-    "tags": ["mobile", "charging", "cable"],
+    "aliases": [
+      "usb c cable",
+      "charging cable",
+      "phone charging cable"
+    ],
+    "sizes": [
+      "1m",
+      "2m"
+    ],
+    "colors": [
+      "Black",
+      "White"
+    ],
+    "tags": [
+      "mobile",
+      "charging",
+      "cable"
+    ],
     "inStock": true,
     "inventory": 70
   },
@@ -631,10 +715,21 @@
     "price": 1350,
     "currency": "PKR",
     "description": "Foldable desk stand with adjustable viewing angle",
-    "aliases": ["phone stand", "mobile holder", "desk phone holder"],
+    "aliases": [
+      "phone stand",
+      "mobile holder",
+      "desk phone holder"
+    ],
     "sizes": [],
-    "colors": ["Black", "Silver"],
-    "tags": ["mobile", "holder", "desk"],
+    "colors": [
+      "Black",
+      "Silver"
+    ],
+    "tags": [
+      "mobile",
+      "holder",
+      "desk"
+    ],
     "inStock": true,
     "inventory": 39
   },
@@ -646,10 +741,21 @@
     "price": 2600,
     "currency": "PKR",
     "description": "Supportive memory foam neck pillow for flights and road trips",
-    "aliases": ["travel pillow", "neck pillow", "flight pillow"],
+    "aliases": [
+      "travel pillow",
+      "neck pillow",
+      "flight pillow"
+    ],
     "sizes": [],
-    "colors": ["Grey", "Navy"],
-    "tags": ["travel", "comfort", "pillow"],
+    "colors": [
+      "Grey",
+      "Navy"
+    ],
+    "tags": [
+      "travel",
+      "comfort",
+      "pillow"
+    ],
     "inStock": true,
     "inventory": 29
   },
@@ -661,10 +767,22 @@
     "price": 2100,
     "currency": "PKR",
     "description": "Six-piece packing organiser set for luggage",
-    "aliases": ["packing cubes", "luggage organizers", "travel organizers"],
+    "aliases": [
+      "packing cubes",
+      "luggage organizers",
+      "travel organizers"
+    ],
     "sizes": [],
-    "colors": ["Black", "Blue", "Beige"],
-    "tags": ["travel", "luggage", "organizer"],
+    "colors": [
+      "Black",
+      "Blue",
+      "Beige"
+    ],
+    "tags": [
+      "travel",
+      "luggage",
+      "organizer"
+    ],
     "inStock": true,
     "inventory": 34
   },
@@ -676,10 +794,21 @@
     "price": 2400,
     "currency": "PKR",
     "description": "Quiet wireless mouse with adjustable sensitivity",
-    "aliases": ["computer mouse", "cordless mouse", "laptop mouse"],
+    "aliases": [
+      "computer mouse",
+      "cordless mouse",
+      "laptop mouse"
+    ],
     "sizes": [],
-    "colors": ["Black", "Grey"],
-    "tags": ["computer", "office", "wireless"],
+    "colors": [
+      "Black",
+      "Grey"
+    ],
+    "tags": [
+      "computer",
+      "office",
+      "wireless"
+    ],
     "inStock": true,
     "inventory": 37
   },
@@ -691,10 +820,24 @@
     "price": 1100,
     "currency": "PKR",
     "description": "Textured decorative cushion cover for sofa and bedroom styling",
-    "aliases": ["cushion cover", "pillow cover", "sofa cushion cover"],
-    "sizes": ["45x45cm"],
-    "colors": ["Beige", "Blue", "Maroon"],
-    "tags": ["home decor", "cushion", "textile"],
+    "aliases": [
+      "cushion cover",
+      "pillow cover",
+      "sofa cushion cover"
+    ],
+    "sizes": [
+      "45x45cm"
+    ],
+    "colors": [
+      "Beige",
+      "Blue",
+      "Maroon"
+    ],
+    "tags": [
+      "home decor",
+      "cushion",
+      "textile"
+    ],
     "inStock": true,
     "inventory": 48
   }

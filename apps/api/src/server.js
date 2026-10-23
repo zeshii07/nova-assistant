@@ -40,6 +40,27 @@ async function startServer() {
       if (req.method === "GET" && (url.pathname === "/widget.js" || url.pathname === "/widget-config.js" || url.pathname === "/avatars.js" || url.pathname === "/widget-test")) {
         return serveWidgetAsset(res, url.pathname);
       }
+      // v35.0: PWA assets for kiosk (manifest + service worker)
+      if (req.method === "GET" && url.pathname === "/kiosk-manifest.json") {
+        const p = path.resolve(__dirname, "../../widget/public/kiosk-manifest.json");
+        if (fs.existsSync(p)) {
+          const data = fs.readFileSync(p);
+          res.writeHead(200, { 'Content-Type': 'application/manifest+json', 'Cache-Control': 'no-store' });
+          res.end(data);
+          return;
+        }
+        return sendText(res, 404, 'Manifest not found');
+      }
+      if (req.method === "GET" && url.pathname === "/kiosk-sw.js") {
+        const p = path.resolve(__dirname, "../../widget/public/kiosk-sw.js");
+        if (fs.existsSync(p)) {
+          const data = fs.readFileSync(p);
+          res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8', 'Cache-Control': 'no-store', 'Service-Worker-Allowed': '/kiosk/' });
+          res.end(data);
+          return;
+        }
+        return sendText(res, 404, 'Service worker not found');
+      }
       // v32.0 Business Manager Dashboard — separate dashboard for business owners.
       // Served by the same process. Owners log in with email+password and see
       // ONLY their tenant's data (conversations, bookings, leads, customers).
@@ -1192,6 +1213,103 @@ async function startServer() {
       // (handled in the /api/widget/config endpoint above — add voiceProfile to response)
 
       // ─── v34.1: Product Image endpoints ────────────────────────────────
+      // ─── v35.0: Catalog (Product) Management endpoints ───────────────────
+      // GET /api/admin/catalog/{tenantId}/products — list all products
+      // POST /api/admin/catalog/{tenantId}/products — add new product
+      // PUT /api/admin/catalog/{tenantId}/products/{productId} — update product
+      // DELETE /api/admin/catalog/{tenantId}/products/{productId} — delete product
+      const catalogListMatch = url.pathname.match(/^\/api\/admin\/catalog\/([^/]+)\/products$/);
+      if (req.method === "GET" && catalogListMatch) {
+        const tenantId = decodeURIComponent(catalogListMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        try {
+          const products = await container.catalogService.listProducts(tenantId);
+          return sendJson(res, 200, { ok:true, tenantId, products: products || [] });
+        } catch (err) {
+          // Tenant may not have a catalog (e.g. cleaning tenant) — return empty
+          return sendJson(res, 200, { ok:true, tenantId, products: [] });
+        }
+      }
+      if (req.method === "POST" && catalogListMatch) {
+        const tenantId = decodeURIComponent(catalogListMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const body = await readJson(req);
+        if (!body.name) return sendJson(res, 400, { ok:false, error:'Product name is required' });
+        const productsPath = path.join(container.config.tenantsDir, tenantId, 'catalog', 'products.json');
+        fs.mkdirSync(path.dirname(productsPath), { recursive: true });
+        let products = [];
+        if (fs.existsSync(productsPath)) {
+          try { products = JSON.parse(fs.readFileSync(productsPath, 'utf8')); } catch { products = []; }
+        }
+        // Generate a unique product ID
+        let maxNum = 0;
+        for (const p of products) {
+          const m = String(p.id || '').match(/^P(\d+)$/);
+          if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10));
+        }
+        const newId = `P${String(maxNum + 1).padStart(3, '0')}`;
+        const product = {
+          id: newId,
+          sku: body.sku || newId,
+          name: body.name,
+          category: body.category || 'general',
+          price: Number(body.price) || 0,
+          currency: body.currency || 'PKR',
+          description: body.description || '',
+          aliases: body.aliases || [],
+          tags: body.tags || [],
+          inStock: body.inStock !== false,
+          inventory: Number(body.inventory) || 0,
+          imageUrl: null
+        };
+        if (body.sizes) product.sizes = body.sizes;
+        if (body.colors) product.colors = body.colors;
+        products.push(product);
+        fs.writeFileSync(productsPath, JSON.stringify(products, null, 2) + '\n', 'utf8');
+        container.catalogRepository?.clearCache?.(tenantId);
+        return sendJson(res, 200, { ok:true, product, message: 'Product added' });
+      }
+
+      const catalogProductMatch = url.pathname.match(/^\/api\/admin\/catalog\/([^/]+)\/products\/([^/]+)$/);
+      if (catalogProductMatch && !url.pathname.endsWith('/image')) {
+        const tenantId = decodeURIComponent(catalogProductMatch[1]);
+        const productId = decodeURIComponent(catalogProductMatch[2]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const productsPath = path.join(container.config.tenantsDir, tenantId, 'catalog', 'products.json');
+        if (!fs.existsSync(productsPath)) return sendJson(res, 404, { ok:false, error:'No catalog for this tenant' });
+        let products = [];
+        try { products = JSON.parse(fs.readFileSync(productsPath, 'utf8')); }
+        catch { return sendJson(res, 500, { ok:false, error:'Failed to parse products.json' }); }
+        const idx = products.findIndex(p => String(p.id) === String(productId) || String(p.id).toLowerCase() === String(productId).toLowerCase());
+        if (idx === -1) return sendJson(res, 404, { ok:false, error:'Product not found' });
+
+        if (req.method === "PUT") {
+          const body = await readJson(req);
+          const updated = { ...products[idx], ...body, id: products[idx].id }; // don't allow ID change
+          products[idx] = updated;
+          fs.writeFileSync(productsPath, JSON.stringify(products, null, 2) + '\n', 'utf8');
+          container.catalogRepository?.clearCache?.(tenantId);
+          return sendJson(res, 200, { ok:true, product: updated, message: 'Product updated' });
+        }
+        if (req.method === "DELETE") {
+          const removed = products.splice(idx, 1)[0];
+          fs.writeFileSync(productsPath, JSON.stringify(products, null, 2) + '\n', 'utf8');
+          container.catalogRepository?.clearCache?.(tenantId);
+          // Also delete the image if any
+          const imagesDir = path.join(container.config.tenantsDir, tenantId, 'catalog', 'images');
+          for (const ext of ['.png', '.jpg', '.jpeg', '.webp', '.gif']) {
+            const p = path.join(imagesDir, productId + ext);
+            if (fs.existsSync(p)) { try { fs.unlinkSync(p); } catch {} }
+          }
+          return sendJson(res, 200, { ok:true, product: removed, message: 'Product deleted' });
+        }
+      }
+
+      // ─── End v35.0 Catalog endpoints ─────────────────────────────────
+
       // Upload product image (admin only)
       const productImageMatch = url.pathname.match(/^\/api\/admin\/catalog\/([^/]+)\/products\/([^/]+)\/image$/);
       if (req.method === "POST" && productImageMatch) {
@@ -1246,12 +1364,22 @@ async function startServer() {
         return sendText(res, 404, 'Image not found');
       }
 
-      // ─── v34.1: Kiosk mode route ──────────────────────────────────────
-      // /kiosk/{tenantId} serves a full-screen customer-facing chat
-      if (req.method === "GET" && url.pathname.startsWith("/kiosk/")) {
-        const kioskPath = path.resolve(__dirname, "../../widget/public/kiosk.html");
-        if (fs.existsSync(kioskPath)) {
-          const html = fs.readFileSync(kioskPath, 'utf8');
+      // ─── v34.2: Kiosk mode route ──────────────────────────────────────
+      // /kiosk/{tenantId} serves a single full-screen modern chat interface.
+      // Mobile-first, glassmorphism, no popup widget — direct conversation.
+      // Skips pre-chat form (anonymous kiosk session).
+      if (req.method === "GET" && url.pathname.startsWith("/kiosk")) {
+        // Extract tenantId from path: /kiosk/{tenantId} or /kiosk/{tenantId}/{anything}
+        const kioskPathParts = url.pathname.split('/').filter(Boolean);
+        const kioskTenantId = kioskPathParts[1] || container.config.defaultTenantId;
+        // Validate tenant exists — show a friendly error page if not
+        try { container.tenantRepository.getById(kioskTenantId); }
+        catch {
+          return sendHtml(res, 404, `<!doctype html><html><body style="font-family:Inter,sans-serif;background:#0a0e1a;color:#e8edf7;text-align:center;padding:60px"><h1 style="color:#ff6b6b">Business not found</h1><p style="color:#91a0bd;margin-top:12px">We couldn't find the business <code style="background:#172139;padding:2px 8px;border-radius:4px">${escHtml(kioskTenantId)}</code>.</p><p style="margin-top:20px"><a href="/" style="color:#4773e5">Go to Nova Assistant</a></p></body></html>`);
+        }
+        const kioskHtmlPath = path.resolve(__dirname, "../../widget/public/kiosk.html");
+        if (fs.existsSync(kioskHtmlPath)) {
+          const html = fs.readFileSync(kioskHtmlPath, 'utf8');
           res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
           res.end(html);
           return;
@@ -1625,6 +1753,7 @@ async function startServer() {
         const widget = profile.widget || {};
         const business = profile.business || {};
         const origin = String(req.headers['origin'] || '*');
+        const novaOrigin = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers['host'] || 'localhost:3000'}`;
         res.setHeader('Access-Control-Allow-Origin', origin);
         res.setHeader('Cache-Control', 'public, max-age=300');
         return sendJson(res, 200, {
@@ -1649,6 +1778,20 @@ async function startServer() {
             const vpPath = path.join(container.config.tenantsDir, tenantId, 'voice-profile.json');
             if (fs.existsSync(vpPath)) {
               try { return JSON.parse(fs.readFileSync(vpPath, 'utf8')); } catch { return null; }
+            }
+            return null;
+          })(),
+          // v34.2: Cloned voice sample URL (if owner uploaded a recorded clip)
+          // Public so the kiosk/widget can fetch without auth.
+          voiceSampleUrl: (() => {
+            const samplesDir = path.join(container.config.tenantsDir, tenantId, 'voice-samples');
+            if (fs.existsSync(samplesDir)) {
+              for (const ext of ['.webm', '.mp3', '.wav', '.m4a', '.ogg']) {
+                const p = path.join(samplesDir, 'sample' + ext);
+                if (fs.existsSync(p)) {
+                  return `${novaOrigin}/api/voice/sample/${encodeURIComponent(tenantId)}`;
+                }
+              }
             }
             return null;
           })(),
@@ -1952,6 +2095,179 @@ async function startServer() {
         });
       }
       // ─── End v33.0 Takeover endpoints ────────────────────────────────
+
+      // ─── v34.2: Voice Cloning — voice sample upload/serve/delete ───────
+      // POST /api/business/voice/upload — owner uploads a recorded voice clip
+      //   body: { contentBase64, mimeType, filename? }
+      //   Saves to tenants/{tenantId}/voice-samples/sample.{ext}
+      //   Returns voiceSampleUrl that widget will fetch.
+      if (req.method === "POST" && url.pathname === "/api/business/voice/upload") {
+        const tenantId = req._businessOwner.tenantId;
+        const body = await readJson(req);
+        const { contentBase64, mimeType, filename } = body;
+        if (!contentBase64) return sendJson(res, 400, { ok:false, error:'contentBase64 is required' });
+        if (!mimeType) return sendJson(res, 400, { ok:false, error:'mimeType is required (audio/webm, audio/mp3, audio/wav, audio/m4a, audio/ogg)' });
+
+        const extMap = {
+          'audio/webm': '.webm',
+          'audio/mp3': '.mp3',
+          'audio/mpeg': '.mp3',
+          'audio/wav': '.wav',
+          'audio/x-wav': '.wav',
+          'audio/m4a': '.m4a',
+          'audio/x-m4a': '.m4a',
+          'audio/mp4': '.m4a',
+          'audio/ogg': '.ogg'
+        };
+        const ext = extMap[mimeType.toLowerCase()];
+        if (!ext) return sendJson(res, 400, { ok:false, error:`Unsupported audio format: ${mimeType}. Supported: webm, mp3, wav, m4a, ogg` });
+
+        // Cap base64 payload at 5MB (≈6.7MB base64) to protect the server.
+        if (contentBase64.length > 7_000_000) {
+          return sendJson(res, 413, { ok:false, error:'Audio clip is too large. Please keep it under 5 MB.' });
+        }
+
+        const samplesDir = path.join(container.config.tenantsDir, tenantId, 'voice-samples');
+        fs.mkdirSync(samplesDir, { recursive: true });
+        // Clear any previous samples (only one active sample at a time)
+        for (const oldExt of ['.webm', '.mp3', '.wav', '.m4a', '.ogg']) {
+          const oldP = path.join(samplesDir, 'sample' + oldExt);
+          if (fs.existsSync(oldP)) {
+            try { fs.unlinkSync(oldP); } catch {}
+          }
+        }
+        const samplePath = path.join(samplesDir, 'sample' + ext);
+        try {
+          fs.writeFileSync(samplePath, Buffer.from(contentBase64, 'base64'));
+        } catch (err) {
+          return sendJson(res, 500, { ok:false, error: 'Failed to save audio: ' + err.message });
+        }
+
+        // Write metadata sidecar (duration, recordedAt, mimeType, size)
+        const meta = {
+          tenantId,
+          mimeType,
+          filename: filename || ('sample' + ext),
+          size: fs.statSync(samplePath).size,
+          uploadedAt: new Date().toISOString(),
+          uploadedBy: req._businessOwner.email
+        };
+        fs.writeFileSync(path.join(samplesDir, 'meta.json'), JSON.stringify(meta, null, 2) + '\n', 'utf8');
+
+        const novaOrigin = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers['host'] || 'localhost:3000'}`;
+        container.logger?.info?.('voice_sample.uploaded', { tenantId, mimeType, size: meta.size });
+
+        return sendJson(res, 200, {
+          ok:true,
+          tenantId,
+          voiceSampleUrl: `${novaOrigin}/api/voice/sample/${encodeURIComponent(tenantId)}`,
+          meta,
+          message: 'Voice sample uploaded. The kiosk and widget will use this audio for reply playback.'
+        });
+      }
+
+      // GET /api/business/voice/sample — fetch current voice sample metadata
+      if (req.method === "GET" && url.pathname === "/api/business/voice/sample") {
+        const tenantId = req._businessOwner.tenantId;
+        const samplesDir = path.join(container.config.tenantsDir, tenantId, 'voice-samples');
+        const metaPath = path.join(samplesDir, 'meta.json');
+        if (!fs.existsSync(metaPath)) {
+          return sendJson(res, 200, { ok:true, tenantId, hasSample: false, meta: null });
+        }
+        try {
+          const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+          // Also fetch voice profile (TTS settings)
+          const vpPath = path.join(container.config.tenantsDir, tenantId, 'voice-profile.json');
+          let voiceProfile = null;
+          if (fs.existsSync(vpPath)) {
+            try { voiceProfile = JSON.parse(fs.readFileSync(vpPath, 'utf8')); } catch {}
+          }
+          const novaOrigin = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers['host'] || 'localhost:3000'}`;
+          return sendJson(res, 200, {
+            ok:true,
+            tenantId,
+            hasSample: true,
+            meta,
+            voiceSampleUrl: `${novaOrigin}/api/voice/sample/${encodeURIComponent(tenantId)}`,
+            voiceProfile
+          });
+        } catch (err) {
+          return sendJson(res, 500, { ok:false, error: 'Failed to read sample metadata: ' + err.message });
+        }
+      }
+
+      // PUT /api/business/voice/profile — update TTS voice profile (rate/pitch/volume/name)
+      if (req.method === "PUT" && url.pathname === "/api/business/voice/profile") {
+        const tenantId = req._businessOwner.tenantId;
+        const body = await readJson(req);
+        const profilePath = path.join(container.config.tenantsDir, tenantId, 'voice-profile.json');
+        const profile = {
+          enabled: body.enabled !== false,
+          voiceName: body.voiceName || null,
+          rate: body.rate ?? 0.95,
+          pitch: body.pitch ?? 1.0,
+          volume: body.volume ?? 0.85,
+          customVoiceURI: body.customVoiceURI || null,
+          savedAt: new Date().toISOString()
+        };
+        fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2) + '\n', 'utf8');
+        return sendJson(res, 200, { ok:true, tenantId, profile, message: 'Voice profile updated.' });
+      }
+
+      // DELETE /api/business/voice/sample — remove uploaded voice sample
+      if (req.method === "DELETE" && url.pathname === "/api/business/voice/sample") {
+        const tenantId = req._businessOwner.tenantId;
+        const samplesDir = path.join(container.config.tenantsDir, tenantId, 'voice-samples');
+        if (fs.existsSync(samplesDir)) {
+          for (const ext of ['.webm', '.mp3', '.wav', '.m4a', '.ogg']) {
+            const p = path.join(samplesDir, 'sample' + ext);
+            if (fs.existsSync(p)) {
+              try { fs.unlinkSync(p); } catch {}
+            }
+          }
+          const metaPath = path.join(samplesDir, 'meta.json');
+          if (fs.existsSync(metaPath)) {
+            try { fs.unlinkSync(metaPath); } catch {}
+          }
+        }
+        return sendJson(res, 200, { ok:true, message: 'Voice sample removed. Widget will fall back to browser TTS.' });
+      }
+      // ─── End v34.2 Voice Cloning (authenticated) ───────────────────────
+
+      // ─── Public voice sample serve — NO auth, used by kiosk/widget ─────
+      // GET /api/voice/sample/{tenantId} → audio stream (webm/mp3/wav/m4a/ogg)
+      const publicVoiceSampleMatch = url.pathname.match(/^\/api\/voice\/sample\/([^/]+)$/);
+      if (req.method === "GET" && publicVoiceSampleMatch) {
+        const tenantId = decodeURIComponent(publicVoiceSampleMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const samplesDir = path.join(container.config.tenantsDir, tenantId, 'voice-samples');
+        if (!fs.existsSync(samplesDir)) return sendText(res, 404, 'No voice sample uploaded');
+
+        const mimeMap = {
+          '.webm': 'audio/webm',
+          '.mp3': 'audio/mpeg',
+          '.wav': 'audio/wav',
+          '.m4a': 'audio/mp4',
+          '.ogg': 'audio/ogg'
+        };
+        for (const ext of ['.webm', '.mp3', '.wav', '.m4a', '.ogg']) {
+          const p = path.join(samplesDir, 'sample' + ext);
+          if (fs.existsSync(p)) {
+            const data = fs.readFileSync(p);
+            res.writeHead(200, {
+              'Content-Type': mimeMap[ext],
+              'Cache-Control': 'public, max-age=300',
+              'Content-Length': data.length,
+              'Accept-Ranges': 'bytes'
+            });
+            res.end(data);
+            return;
+          }
+        }
+        return sendText(res, 404, 'No voice sample uploaded');
+      }
+      // ─── End v34.2 Voice Sample serve ─────────────────────────────────
 
       // ─── v33.0: Customer polling endpoint ────────────────────────────
       // When takeover is active, the widget polls this endpoint to check

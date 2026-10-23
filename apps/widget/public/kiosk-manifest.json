@@ -1,0 +1,26 @@
+{
+  "name": "Nova Kiosk",
+  "short_name": "Nova",
+  "description": "Customer-facing chat kiosk for service businesses",
+  "start_url": "/kiosk",
+  "scope": "/kiosk",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#060912",
+  "theme_color": "#0a0e1a",
+  "categories": ["business", "productivity", "communication"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='192'%20height='192'%20viewBox='0%200%20192%20192'%3E%3Crect%20width='192'%20height='192'%20rx='40'%20fill='%230a0e1a'/%3E%3Crect%20x='46'%20y='46'%20width='100'%20height='100'%20rx='24'%20fill='%232d5bd1'/%3E%3Ctext%20x='96'%20y='118'%20font-family='Arial'%20font-size='56'%20font-weight='bold'%20fill='white'%20text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='512'%20height='512'%20viewBox='0%200%20512%20512'%3E%3Crect%20width='512'%20height='512'%20rx='108'%20fill='%230a0e1a'/%3E%3Crect%20x='122'%20y='122'%20width='268'%20height='268'%20rx='64'%20fill='%232d5bd1'/%3E%3Ctext%20x='256'%20y='316'%20font-family='Arial'%20font-size='150'%20font-weight='bold'%20fill='white'%20text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -24,6 +24,8 @@ function createProductRecord(input) {
     inStock: input.inStock !== false,
     inventory: finiteNumber(input.inventory) ? Number(input.inventory) : null,
     variants,
+    // v35.0: Preserve imageUrl for inline rendering in widget/kiosk
+    imageUrl: input.imageUrl ? String(input.imageUrl).trim() : null,
     metadata: Object.freeze({ ...(input.metadata || {}) })
   });
 }

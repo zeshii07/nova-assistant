@@ -2018,7 +2018,7 @@ function validationMessage(field,language,fallback){
 }
 function updateFlow(context, next, intent, payload, language, english, roman) { return result(language === "roman_urdu" ? roman : english, language, next, intent.toLowerCase(), { intent, payload }); }
 function normalize(value) { return String(value || "").toLowerCase().replace(/[?.!,]/g, " ").replace(/\s+/g, " ").trim(); }
-function detectLanguage(text, fallback) { if (/[\u0600-\u06ff]/.test(text)) return "urdu"; if (/\b(aap|ap|mujhe|chahiye|hai|kia|kya|safai|karwana|karwani|ghar|ka|ki|mein)\b/i.test(text)) return "roman_urdu"; return fallback || "english"; }
+function detectLanguage(text, fallback) { if (/[\u0600-\u06ff]/.test(text)) return "urdu"; if (/\b(aap|ap|mujhe|chahiye|hai|kia|kya|safai|karwana|karwani|krani|ghar)\b/i.test(text)) return "roman_urdu"; /* v34.0: Don't switch to Roman Urdu for English addresses containing "main" */ if (/\b(street|road|avenue|building|block|sector|apartment|villa|floor|tower|highway|lane|drive)\b/i.test(text)) return "english"; return fallback || "english"; }
 function isListRequest(text) { return /\b(services|service list|what do you offer|what services|which services|show services|list services|do you have services|do you provide services|kia services|kya services|cleaning services|صفائی کی سروس)\b/.test(text) && !/\b(?:i want|i need|i'd like|book|schedule|arrange|mujhe|mujhy|chahiye|chahiyy|karwani|krani|karani)\b/i.test(text); }
 function isConfirm(text) { return isConfirmation(text) || /\b(yes|haan|han|theek|book it|kar dein|kardo|done|keep (?:all )?(?:the )?(?:details )?(?:the )?same|use (?:all |my |the )?(?:saved|previous|existing)?\s*details|اوکے|ہاں)\b/.test(text); }
 function isCancel(text) { return /\b(cancel|no|nahi|nahin|never mind|rehne dein|نہیں|کینسل)\b/.test(text); }
@@ -2287,7 +2287,12 @@ function formatRequestHistoryLine(request){
   const price=request.total!=null&&request.currency?`\nEstimate: ${currencyAmount(request.total,request.currency)}`:'';
   return `• ${request.serviceName}${scope?` — ${scope}`:''}\nRequest ID: ${request.id}\nStatus: ${request.status||'requested'}${request.revision>1?`\nRevision: ${request.revision}`:''}\nDate: ${request.preferredDate||'Not set'}\nTime: ${displayTime(request)}${request.address?`\nAddress: ${request.address}`:''}${price}`;
 }
-function displayTime(state={}){return state.timeFlexible||state.timePreference==='any_available'?'Any available team time':state.preferredTime||state.startTime||'Not set';}
+function displayTime(state={}){if(state.timeFlexible||state.timePreference==='any_available')return 'Any available team time';const raw=state.preferredTime||state.startTime||'';if(!raw)return 'Not set';// v34.0 Bugfix: format time consistently as "HH:MM AM/PM"
+// "11 am" → "11:00 AM", "14:30" → "2:30 PM", "9:00 AM" → "9:00 AM"
+const m=String(raw).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i);if(!m)return raw;
+let h=parseInt(m[1],10);const min=m[2]||'00';let period=m[3];
+if(!period){period=h>=12?'PM':'AM';}
+h=h%12||12;return `${h}:${min} ${period.toUpperCase()}`;}
 function isAnyAvailableTime(value){
   const text=normalize(value);
   const available='(?:available|avaialable|avaiable|availble|avialable)';

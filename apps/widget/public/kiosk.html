@@ -2,128 +2,1314 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0b1020">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#0a0e1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nova">
+  <link rel="manifest" href="/kiosk-manifest.json">
   <title>Nova Kiosk</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; overflow: hidden; background: linear-gradient(135deg, #0a0e1a, #0d1228, #0f1530); font-family: Inter, system-ui, sans-serif; }
-    #kiosk-app { height: 100dvh; display: flex; flex-direction: column; }
-    .kiosk-header { padding: 20px; text-align: center; background: rgba(17,24,42,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid #28324b; }
-    .kiosk-header h1 { color: #e8edf7; font-size: 22px; }
-    .kiosk-header p { color: #91a0bd; font-size: 13px; margin-top: 4px; }
-    .kiosk-chat { flex: 1; overflow: hidden; }
-    .kiosk-footer { padding: 12px; text-align: center; color: #7485a8; font-size: 11px; }
-    .kiosk-footer a { color: #5ec5f5; text-decoration: none; }
-    .idle-overlay { position: fixed; inset: 0; background: rgba(10,14,26,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; cursor: pointer; }
-    .idle-overlay h2 { color: #e8edf7; font-size: 28px; margin-bottom: 8px; }
-    .idle-overlay p { color: #91a0bd; font-size: 16px; }
-    .idle-overlay .tap-hint { margin-top: 30px; padding: 16px 32px; background: #2d5bd1; color: #fff; border-radius: 30px; font-size: 18px; font-weight: 600; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: #060912;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      color: #e8edf7;
+      overscroll-behavior: none;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    :root {
+      --accent: #2d5bd1;
+      --accent-strong: #4773e5;
+      --bg: #060912;
+      --surface: rgba(17, 24, 42, 0.7);
+      --surface-2: rgba(23, 33, 57, 0.6);
+      --surface-3: rgba(35, 48, 78, 0.5);
+      --border: rgba(60, 78, 120, 0.35);
+      --border-strong: rgba(80, 100, 150, 0.5);
+      --text: #e8edf7;
+      --text-dim: #91a0bd;
+      --text-faint: #6b7a99;
+      --ok: #3ddc97;
+      --warn: #f5b54a;
+      --bad: #ff6b6b;
+      --bubble-cust: linear-gradient(135deg, #2d5bd1, #4773e5);
+      --bubble-bot: rgba(23, 33, 57, 0.85);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
+    }
+
+    /* Animated ambient background — modern aurora feel */
+    .aurora {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .aurora::before, .aurora::after {
+      content: "";
+      position: absolute;
+      width: 70vmax;
+      height: 70vmax;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    .aurora::before {
+      background: radial-gradient(circle, #2d5bd1, transparent 60%);
+      top: -25vmax; left: -20vmax;
+    }
+    .aurora::after {
+      background: radial-gradient(circle, #6d28d9, transparent 60%);
+      bottom: -25vmax; right: -20vmax;
+      animation-delay: -6s;
+    }
+    @keyframes drift {
+      0%   { transform: translate(0, 0) scale(1); }
+      50%  { transform: translate(8vmax, -5vmax) scale(1.1); }
+      100% { transform: translate(-6vmax, 6vmax) scale(0.95); }
+    }
+
+    /* Idle / welcome splash */
+    .splash {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      cursor: pointer;
+      background: radial-gradient(circle at 50% 30%, rgba(45, 91, 209, 0.18), transparent 60%), var(--bg);
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+    .splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .splash .ring {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 0 0 rgba(45, 91, 209, 0.45),
+        0 20px 60px rgba(45, 91, 209, 0.4);
+      animation: pulse 2.4s ease-out infinite;
+      position: relative;
+    }
+    .splash .ring::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid rgba(94, 197, 245, 0.3);
+      animation: ringExpand 2.4s ease-out infinite;
+    }
+    @keyframes ringExpand {
+      0% { transform: scale(1); opacity: 0.7; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    .splash .ring svg { width: 70px; height: 70px; color: #fff; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+    .splash h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-align: center;
+      padding: 0 24px;
+    }
+    .splash p {
+      font-size: 15px;
+      color: var(--text-dim);
+      text-align: center;
+      max-width: 320px;
+      line-height: 1.5;
+    }
+    .splash .tap {
+      margin-top: 12px;
+      padding: 16px 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: #fff;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      box-shadow: 0 10px 30px rgba(45, 91, 209, 0.4);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .splash .lang {
+      position: absolute;
+      bottom: calc(24px + var(--safe-bottom));
+      display: flex;
+      gap: 8px;
+    }
+    .splash .lang button {
+      background: var(--surface);
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .splash .lang button.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Main app layout */
+    .app {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      padding-left: var(--safe-left);
+      padding-right: var(--safe-right);
+    }
+
+    /* Header */
+    .header {
+      padding: calc(14px + var(--safe-top)) 16px 12px;
+      background: var(--surface);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      z-index: 5;
+    }
+    .agent-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .agent-avatar svg { width: 28px; height: 28px; color: #fff; }
+    .agent-avatar .online {
+      position: absolute;
+      bottom: 1px;
+      right: 1px;
+      width: 12px;
+      height: 12px;
+      background: var(--ok);
+      border-radius: 50%;
+      border: 2px solid #11182a;
+    }
+    .agent-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .agent-info h2 {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .agent-info p {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .agent-info .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--ok);
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .header-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+      flex-shrink: 0;
+    }
+    .icon-btn:active { transform: scale(0.92); }
+    .icon-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .icon-btn svg { width: 18px; height: 18px; }
+
+    /* Messages area */
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 16px 12px 8px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+    .messages::-webkit-scrollbar { width: 0; }
+    .msg {
+      max-width: min(82%, 540px);
+      margin: 0 4px 14px;
+      animation: rise 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    .msg.bot .msg-row { justify-content: flex-start; }
+    .msg.user .msg-row { justify-content: flex-end; }
+    .msg-bubble {
+      padding: 11px 15px;
+      border-radius: 18px;
+      font-size: 14.5px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .msg.bot .msg-bubble {
+      background: var(--bubble-bot);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 6px;
+      backdrop-filter: blur(8px);
+    }
+    .msg.user .msg-bubble {
+      background: var(--bubble-cust);
+      color: #fff;
+      border-bottom-right-radius: 6px;
+      box-shadow: 0 4px 14px rgba(45, 91, 209, 0.25);
+    }
+    .msg-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .msg-avatar svg { width: 14px; height: 14px; color: #fff; }
+    .msg-time {
+      font-size: 10px;
+      color: var(--text-faint);
+      margin: 4px 8px 0;
+      opacity: 0.8;
+    }
+    .msg.bot .msg-time { text-align: left; }
+    .msg.user .msg-time { text-align: right; }
+
+    /* Product image inside message */
+    .msg-bubble img.product-img {
+      max-width: 100%;
+      max-height: 240px;
+      border-radius: 10px;
+      margin: 8px 0;
+      display: block;
+    }
+
+    /* Typing indicator */
+    .typing {
+      display: inline-flex;
+      gap: 4px;
+      padding: 14px 16px;
+      background: var(--bubble-bot);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      border-bottom-left-radius: 6px;
+    }
+    .typing span {
+      width: 7px;
+      height: 7px;
+      background: var(--text-dim);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+    }
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-6px); opacity: 1; }
+    }
+
+    /* Suggestions */
+    .suggestions {
+      display: flex;
+      gap: 8px;
+      padding: 6px 12px 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .suggestions::-webkit-scrollbar { display: none; }
+    .suggestion {
+      flex: 0 0 auto;
+      background: var(--surface-3);
+      border: 1px solid var(--border-strong);
+      color: var(--text);
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .suggestion:active { transform: scale(0.96); }
+    .suggestion:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* Input bar */
+    .composer {
+      padding: 10px 12px calc(12px + var(--safe-bottom));
+      background: var(--surface);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      position: relative;
+      z-index: 5;
+    }
+    .composer textarea {
+      flex: 1;
+      background: var(--surface-3);
+      border: 1px solid var(--border-strong);
+      color: var(--text);
+      border-radius: 22px;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-family: inherit;
+      resize: none;
+      max-height: 120px;
+      min-height: 44px;
+      line-height: 1.4;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .composer textarea:focus {
+      border-color: var(--accent);
+      background: rgba(45, 91, 209, 0.08);
+    }
+    .composer textarea::placeholder { color: var(--text-faint); }
+
+    .action-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      position: relative;
+    }
+    .action-btn:active { transform: scale(0.92); }
+    .action-btn svg { width: 22px; height: 22px; color: #fff; }
+    .action-btn.mic {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 4px 14px rgba(45, 91, 209, 0.3);
+    }
+    .action-btn.mic.recording {
+      background: linear-gradient(135deg, #ff6b6b, #d33b3b);
+      animation: pulseRec 1s ease-in-out infinite;
+    }
+    .action-btn.mic.recording::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid #ff6b6b;
+      animation: ringExpand2 1.2s ease-out infinite;
+    }
+    @keyframes ringExpand2 {
+      0% { transform: scale(1); opacity: 0.7; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+    @keyframes pulseRec { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    .action-btn.send {
+      background: linear-gradient(135deg, var(--ok), #2bb380);
+      box-shadow: 0 4px 14px rgba(61, 220, 151, 0.3);
+    }
+    .action-btn.stop {
+      background: linear-gradient(135deg, var(--warn), #d4943a);
+      box-shadow: 0 4px 14px rgba(245, 181, 74, 0.3);
+    }
+
+    /* Connection banner */
+    .banner {
+      padding: 6px 14px;
+      background: rgba(245, 181, 74, 0.12);
+      color: var(--warn);
+      font-size: 11px;
+      text-align: center;
+      border-bottom: 1px solid rgba(245, 181, 74, 0.3);
+    }
+    .banner.error { background: rgba(255, 107, 107, 0.12); color: var(--bad); border-color: rgba(255, 107, 107, 0.3); }
+    .banner.ok { background: rgba(61, 220, 151, 0.1); color: var(--ok); border-color: rgba(61, 220, 151, 0.3); }
+
+    /* Footer */
+    .footer-mini {
+      text-align: center;
+      padding: 4px 0 6px;
+      font-size: 10px;
+      color: var(--text-faint);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    .footer-mini a { color: var(--accent-strong); text-decoration: none; }
+
+    /* Idle dim overlay (after inactivity) */
+    .idle-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgba(6, 9, 18, 0.92);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .idle-overlay.show { opacity: 1; visibility: visible; }
+    .idle-overlay .ring {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 40px rgba(45, 91, 209, 0.4);
+    }
+    .idle-overlay .ring svg { width: 44px; height: 44px; color: #fff; }
+    .idle-overlay h2 { font-size: 22px; font-weight: 600; }
+    .idle-overlay p { color: var(--text-dim); font-size: 14px; max-width: 280px; text-align: center; line-height: 1.5; }
+    .idle-overlay .tap-btn {
+      margin-top: 8px;
+      padding: 14px 28px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 8px 24px rgba(45, 91, 209, 0.4);
+    }
+
+    /* Mobile tweaks — make composer always visible above keyboard */
+    @media (max-width: 480px) {
+      .msg-bubble { font-size: 14px; }
+      .composer textarea { font-size: 16px; } /* prevent iOS zoom */
+    }
+
+    /* Loading initial splash */
+    .boot {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg);
+    }
+    .boot .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--surface-3);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .boot.hidden { display: none; }
   </style>
 </head>
 <body>
-  <div id="kiosk-app">
-    <div class="kiosk-header">
-      <h1 id="biz-name">Nova Assistant</h1>
-      <p id="biz-desc">Tap to start chatting</p>
+  <div class="aurora"></div>
+
+  <!-- Boot spinner -->
+  <div class="boot" id="boot"><div class="spinner"></div></div>
+
+  <!-- Splash (initial welcome) -->
+  <div class="splash" id="splash">
+    <div class="ring">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
     </div>
-    <div class="kiosk-chat" id="kiosk-chat"></div>
-    <div class="kiosk-footer">Powered by <a href="/admin">Nova Assistant</a></div>
+    <h1 id="splashName">Nova Assistant</h1>
+    <p id="splashDesc">Tap below to start chatting — no sign-up needed.</p>
+    <div class="tap">Start Conversation</div>
+    <div class="lang">
+      <button class="active" data-lang="en">English</button>
+      <button data-lang="ur">اردو</button>
+      <button data-lang="roman-urdu">Roman Urdu</button>
+    </div>
+    <button id="installBtn" style="display:none;position:absolute;top:calc(16px + env(safe-area-inset-top));right:16px;background:rgba(45,91,209,.9);color:#fff;border:none;padding:10px 16px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(45,91,209,.4)">📱 Install App</button>
   </div>
-  <div class="idle-overlay" id="idle-overlay" style="display:none">
-    <h2>Welcome</h2>
-    <p>Tap anywhere to start</p>
-    <div class="tap-hint">TAP TO CHAT</div>
+
+  <!-- Idle overlay (after 5 min inactivity) -->
+  <div class="idle-overlay" id="idleOverlay">
+    <div class="ring">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+    </div>
+    <h2>Are you still there?</h2>
+    <p>Your session will reset in a moment. Tap to continue chatting with us.</p>
+    <button class="tap-btn" id="resumeBtn">Continue Chat</button>
   </div>
+
+  <!-- Main app -->
+  <div class="app" id="app" style="display:none">
+    <header class="header">
+      <div class="agent-avatar" id="agentAvatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+        <span class="online"></span>
+      </div>
+      <div class="agent-info">
+        <h2 id="agentName">Nova</h2>
+        <p><span class="dot"></span> <span id="agentStatus">Online · Tap to chat</span></p>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="voiceToggle" title="Toggle voice replies">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="resetBtn" title="Start new conversation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"/>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+    <div class="banner" id="banner" style="display:none"></div>
+    <div class="messages" id="messages"></div>
+    <div class="suggestions" id="suggestions"></div>
+    <div class="composer">
+      <textarea id="input" rows="1" placeholder="Type your message…" autocomplete="off" autocapitalize="sentences"></textarea>
+      <button class="action-btn mic" id="actionBtn" title="Tap to speak">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+    </div>
+    <div class="footer-mini">Powered by <a href="/">Nova Assistant</a></div>
+  </div>
+
   <script>
-    // v34.1: Kiosk Mode — full-screen customer-facing chat
-    // Extracts tenantId from URL path
-    const pathParts = window.location.pathname.split('/');
-    const tenantId = pathParts[2] || 'cleaning-demo';
-    const novaOrigin = window.location.origin;
+  /* ============================================================
+     Nova Kiosk — v34.2 Standalone Chat Client
+     - Single full-screen interface (no popup widget)
+     - Mobile-first, glassmorphism, aurora background
+     - Skips pre-chat form (anonymous kiosk session)
+     - Voice I/O with Web Speech API
+     - Plays uploaded voice clone sample when available
+     - Idle reset after 5 min inactivity
+     ============================================================ */
+  (function() {
+    'use strict';
 
-    // Load widget config for branding
-    fetch(`${novaOrigin}/api/widget/config/${tenantId}`)
-      .then(r => r.json())
-      .then(config => {
-        if (config.ok) {
-          document.getElementById('biz-name').textContent = config.businessName || config.assistantName || 'Nova';
-          document.getElementById('biz-desc').textContent = config.businessDescription || 'Tap to start chatting';
-          document.title = config.businessName || 'Nova Kiosk';
-          // Update theme color
-          if (config.themeColor) {
-            const meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) meta.content = config.themeColor;
-          }
-        }
-      })
-      .catch(() => {});
+    // ─── Tenant + origin detection ────────────────────────────
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    // /kiosk/{tenantId} OR /kiosk/{tenantId}/{anything}
+    const tenantId = pathParts[1] || 'cleaning-demo';
+    const NOVA_ORIGIN = window.location.origin;
+    const API_CHAT = `${NOVA_ORIGIN}/api/chat`;
+    const API_CONFIG = `${NOVA_ORIGIN}/api/widget/config/${encodeURIComponent(tenantId)}`;
 
-    // Inject the widget script with kiosk settings
-    const script = document.createElement('script');
-    script.src = `${novaOrigin}/widget.js`;
-    script.setAttribute('data-tenant', tenantId);
-    script.setAttribute('data-server', novaOrigin);
-    script.setAttribute('data-position', 'bottom-center');
-    script.async = true;
-    document.head.appendChild(script);
+    // ─── State ─────────────────────────────────────────────────
+    const state = {
+      config: null,
+      customerId: localStorage.getItem('nova-kiosk-cid:' + tenantId) || ('kiosk-' + uuid()),
+      customerName: 'Kiosk Guest',
+      messages: [],
+      inFlight: false,
+      voiceEnabled: localStorage.getItem('nova-kiosk-voice') === 'true',
+      voiceProfile: null,
+      voiceSampleUrl: null,
+      voiceSampleAudio: null,
+      lang: localStorage.getItem('nova-kiosk-lang') || 'en',
+      recognition: null,
+      isRecording: false,
+      idleTimer: null,
+      bannerTimer: null,
+      pendingText: '',
+    };
+    localStorage.setItem('nova-kiosk-cid:' + tenantId, state.customerId);
 
-    // Auto-open the widget after it loads
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        // Wait for widget to be ready, then auto-open
-        const checkReady = setInterval(() => {
-          if (window.__NOVA_WIDGET_MOUNTED__) {
-            clearInterval(checkReady);
-            // Click the bubble to open
-            const bubble = document.querySelector('#nova-widget-host')?.shadowRoot?.querySelector('.nova-bubble');
-            if (bubble) bubble.click();
-            // Enable voice by default in kiosk mode
-            localStorage.setItem('nova-voice-enabled', 'true');
-          }
-        }, 200);
-      }, 1000);
-    });
-
-    // Idle timeout: show overlay after 5 minutes of inactivity
-    let idleTimer = null;
-    const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-
-    function resetIdleTimer() {
-      if (idleTimer) clearTimeout(idleTimer);
-      idleTimer = setTimeout(showIdleOverlay, IDLE_TIMEOUT);
+    function uuid() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
     }
 
-    function showIdleOverlay() {
-      const overlay = document.getElementById('idle-overlay');
-      overlay.style.display = 'flex';
-      // Reset conversation
-      localStorage.removeItem(`nova-widget:${tenantId}`);
-      // Close widget if open
-      const panel = document.querySelector('#nova-widget-host')?.shadowRoot?.querySelector('.nova-panel');
-      if (panel && !panel.classList.contains('hidden')) {
-        const closeBtn = document.querySelector('#nova-widget-host')?.shadowRoot?.querySelector('#nova-close');
-        if (closeBtn) closeBtn.click();
+    // ─── DOM refs ──────────────────────────────────────────────
+    const $ = id => document.getElementById(id);
+    const boot = $('boot');
+    const splash = $('splash');
+    const app = $('app');
+    const agentName = $('agentName');
+    const agentStatus = $('agentStatus');
+    const agentAvatar = $('agentAvatar');
+    const messagesEl = $('messages');
+    const inputEl = $('input');
+    const actionBtn = $('actionBtn');
+    const voiceToggle = $('voiceToggle');
+    const resetBtn = $('resetBtn');
+    const suggestionsEl = $('suggestions');
+    const banner = $('banner');
+    const idleOverlay = $('idleOverlay');
+    const splashName = $('splashName');
+    const splashDesc = $('splashDesc');
+    const resumeBtn = $('resumeBtn');
+
+    // ─── Helpers ──────────────────────────────────────────────
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function fmtTime() {
+      try { return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+      catch { return ''; }
+    }
+    function showBanner(text, kind) {
+      banner.textContent = text;
+      banner.className = 'banner ' + (kind || '');
+      banner.style.display = 'block';
+      clearTimeout(state.bannerTimer);
+      state.bannerTimer = setTimeout(() => { banner.style.display = 'none'; }, 4000);
+    }
+
+    // ─── Initial config fetch ─────────────────────────────────
+    async function loadConfig() {
+      try {
+        const r = await fetch(API_CONFIG);
+        const data = await r.json();
+        if (!data.ok) throw new Error(data.error || 'Config fetch failed');
+        state.config = data;
+        applyBranding(data);
+        // Voice profile + voice sample
+        if (data.voiceProfile) {
+          state.voiceProfile = data.voiceProfile;
+        }
+        if (data.voiceSampleUrl) {
+          state.voiceSampleUrl = data.voiceSampleUrl;
+          // Preload audio
+          try {
+            state.voiceSampleAudio = new Audio(data.voiceSampleUrl);
+            state.voiceSampleAudio.preload = 'auto';
+          } catch {}
+        }
+        boot.classList.add('hidden');
+        splash.style.display = 'flex';
+      } catch (err) {
+        console.error('[Nova Kiosk] Config fetch failed:', err);
+        boot.classList.add('hidden');
+        splash.style.display = 'flex';
+        splashName.textContent = 'Nova Assistant';
+        splashDesc.textContent = 'Tap below to start chatting.';
       }
     }
 
-    document.getElementById('idle-overlay').addEventListener('click', () => {
-      document.getElementById('idle-overlay').style.display = 'none';
-      resetIdleTimer();
-      // Re-open widget
-      setTimeout(() => {
-        const bubble = document.querySelector('#nova-widget-host')?.shadowRoot?.querySelector('.nova-bubble');
-        if (bubble) bubble.click();
-      }, 300);
+    function applyBranding(c) {
+      const biz = c.businessName || c.assistantName || 'Nova';
+      splashName.textContent = biz;
+      splashDesc.textContent = c.businessDescription || 'Tap below to start chatting — no sign-up needed.';
+      document.title = biz + ' · Nova Kiosk';
+      agentName.textContent = c.agent?.name || c.assistantName || biz;
+      agentStatus.textContent = c.agent?.title || 'Online · Tap to chat';
+      // Theme color
+      const color = c.themeColor || '#2d5bd1';
+      document.documentElement.style.setProperty('--accent', color);
+      document.documentElement.style.setProperty('--accent-strong', lighten(color, 15));
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.content = '#0a0e1a';
+      // Update agent avatar background
+      if (agentAvatar) {
+        agentAvatar.style.background = `linear-gradient(135deg, ${color}, ${lighten(color, 15)})`;
+      }
+      // Render suggestions
+      renderSuggestions(c.suggestions || []);
+      // Voice toggle initial state
+      updateVoiceToggle();
+    }
+
+    function lighten(hex, percent) {
+      try {
+        const h = hex.replace('#', '');
+        const r = parseInt(h.substr(0, 2), 16);
+        const g = parseInt(h.substr(2, 2), 16);
+        const b = parseInt(h.substr(4, 2), 16);
+        const lr = Math.min(255, Math.floor(r + (255 - r) * percent / 100));
+        const lg = Math.min(255, Math.floor(g + (255 - g) * percent / 100));
+        const lb = Math.min(255, Math.floor(b + (255 - b) * percent / 100));
+        return `rgb(${lr},${lg},${lb})`;
+      } catch { return hex; }
+    }
+
+    function renderSuggestions(items) {
+      suggestionsEl.innerHTML = '';
+      if (!items || items.length === 0) { suggestionsEl.style.display = 'none'; return; }
+      suggestionsEl.style.display = 'flex';
+      items.slice(0, 4).forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'suggestion';
+        btn.textContent = s;
+        btn.addEventListener('click', () => {
+          inputEl.value = s;
+          sendMessage();
+        });
+        suggestionsEl.appendChild(btn);
+      });
+    }
+
+    // ─── Messaging ────────────────────────────────────────────
+    function appendMessage(role, text) {
+      state.messages.push({ role, text, t: Date.now() });
+      const wrap = document.createElement('div');
+      wrap.className = 'msg ' + role;
+      const isBot = role === 'bot';
+      const row = document.createElement('div');
+      row.className = 'msg-row';
+      if (isBot) {
+        const av = document.createElement('div');
+        av.className = 'msg-avatar';
+        av.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>`;
+        row.appendChild(av);
+      }
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-bubble';
+      bubble.innerHTML = renderMessageContent(text);
+      row.appendChild(bubble);
+      wrap.appendChild(row);
+      const t = document.createElement('div');
+      t.className = 'msg-time';
+      t.textContent = fmtTime();
+      wrap.appendChild(t);
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return wrap;
+    }
+
+    function renderMessageContent(text) {
+      // Process [IMG:url] tags → render product image
+      // Strip [IMG:...] for now from text content; render image below
+      let html = esc(text);
+      const imgRegex = /\[IMG:(https?:\/\/[^\]]+)\]/g;
+      const images = [];
+      let m;
+      while ((m = imgRegex.exec(text)) !== null) {
+        images.push(m[1]);
+      }
+      html = html.replace(imgRegex, '');
+      if (images.length > 0) {
+        html += images.map(url => `<img class="product-img" src="${esc(url)}" alt="Product image" />`).join('');
+      }
+      return html;
+    }
+
+    function showTyping() {
+      const wrap = document.createElement('div');
+      wrap.className = 'msg bot';
+      wrap.id = 'typing-msg';
+      const row = document.createElement('div');
+      row.className = 'msg-row';
+      const av = document.createElement('div');
+      av.className = 'msg-avatar';
+      av.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>`;
+      const typing = document.createElement('div');
+      typing.className = 'typing';
+      typing.innerHTML = '<span></span><span></span><span></span>';
+      row.appendChild(av);
+      row.appendChild(typing);
+      wrap.appendChild(row);
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    function hideTyping() {
+      const el = $('typing-msg');
+      if (el) el.remove();
+    }
+
+    async function sendMessage(text, attempt = 0) {
+      text = (text ?? inputEl.value ?? '').trim();
+      if (!text) return;
+      if (state.inFlight) return;
+      inputEl.value = '';
+      autoResize();
+      updateActionButton();
+      // Only append the user bubble once (not on retries)
+      if (attempt === 0) appendMessage('user', text);
+      state.inFlight = true;
+      showTyping();
+      agentStatus.textContent = attempt > 0 ? 'retrying…' : 'typing…';
+      try {
+        const r = await fetch(API_CHAT, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            tenantId,
+            customerId: state.customerId,
+            customerName: state.customerName,
+            text,
+            channel: 'kiosk',
+            metadata: { source: 'kiosk', lang: state.lang }
+          })
+        });
+        const data = await r.json();
+        hideTyping();
+        // v35.0: If SW queued the message (offline), show queue notice
+        if (data.queued) {
+          showBanner('📱 You\'re offline. Your message will be delivered when reconnected.', 'warn');
+          agentStatus.textContent = 'Offline · queued';
+          return;
+        }
+        if (!r.ok || !data.ok) {
+          const errText = data.error || `Server returned ${r.status}`;
+          // Retry on 5xx errors up to 2 times with backoff
+          if (r.status >= 500 && attempt < 2) {
+            const delay = 800 * Math.pow(2, attempt);
+            agentStatus.textContent = `retrying in ${delay/1000}s…`;
+            showBanner(`Server issue — retry ${attempt + 1}/2 in ${delay/1000}s…`, 'warn');
+            setTimeout(() => sendMessage(text, attempt + 1), delay);
+            return;
+          }
+          appendMessage('bot', '⚠️ ' + errText);
+          showBanner(errText, 'error');
+        } else {
+          const replyText = data.reply || data.text || data.message || '';
+          appendMessage('bot', replyText);
+          speakReply(replyText);
+          if (attempt > 0) showBanner('✓ Replied after retry.', 'ok');
+        }
+        agentStatus.textContent = 'Online · Tap to chat';
+      } catch (err) {
+        hideTyping();
+        // v35.0: Retry on network errors (Render cold start, brief outages)
+        if (attempt < 2) {
+          const delay = 1000 * Math.pow(2, attempt);
+          agentStatus.textContent = `retrying in ${delay/1000}s…`;
+          showBanner(`Connection issue — retry ${attempt + 1}/2 in ${delay/1000}s…`, 'warn');
+          setTimeout(() => sendMessage(text, attempt + 1), delay);
+          return;
+        }
+        const msg = 'Could not reach Nova server. The message has been queued if you\'re offline — try again in a moment.';
+        appendMessage('bot', '⚠️ ' + msg);
+        showBanner('Connection issue — please check your internet and try again.', 'error');
+        agentStatus.textContent = 'Connection issue';
+      } finally {
+        state.inFlight = false;
+        updateActionButton();
+        resetIdle();
+      }
+    }
+
+    // ─── Voice output (TTS or cloned sample) ──────────────────
+    function speakReply(text) {
+      if (!state.voiceEnabled) return;
+      // Strip emoji/markdown for speech
+      const clean = stripForSpeech(text);
+      if (!clean) return;
+
+      // v34.2: If a cloned voice sample was uploaded, play it as a "voice tag"
+      // before speaking the reply with TTS. A single short clip can't speak
+      // arbitrary text, but it gives a recognizable voice signature so customers
+      // hear the business owner's voice with each reply. The clip plays once,
+      // then TTS continues with the actual message text.
+      if (state.voiceSampleUrl && state.voiceSampleAudio) {
+        try {
+          state.voiceSampleAudio.currentTime = 0;
+          state.voiceSampleAudio.play().catch(() => {});
+        } catch {}
+      }
+
+      // Browser TTS with voice profile
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const voice = selectBestVoice();
+      const sentences = splitIntoSentences(clean);
+      let idx = 0;
+      function speakNext() {
+        if (idx >= sentences.length) return;
+        const utt = new SpeechSynthesisUtterance(sentences[idx]);
+        if (voice) { utt.voice = voice; utt.lang = voice.lang; }
+        utt.rate = state.voiceProfile?.rate || 0.95;
+        utt.pitch = state.voiceProfile?.pitch || 1.0;
+        utt.volume = state.voiceProfile?.volume || 0.85;
+        utt.onend = () => { idx++; setTimeout(speakNext, 150); };
+        utt.onerror = () => { idx++; setTimeout(speakNext, 50); };
+        window.speechSynthesis.speak(utt);
+      }
+      speakNext();
+    }
+
+    function stripForSpeech(text) {
+      return String(text || '')
+        .replace(/\[IMG:[^\]]+\]/g, '')
+        .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+        .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
+        .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
+        .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '')
+        .replace(/[\u{2600}-\u{26FF}]/gu, '')
+        .replace(/[\u{2700}-\u{27BF}]/gu, '')
+        .replace(/[\u{FE00}-\u{FE0F}]/gu, '')
+        .replace(/[\u{1F900}-\u{1F9FF}]/gu, '')
+        .replace(/[\u{2B00}-\u{2BFF}]/gu, '')
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/^[•·▪▫◦‣⁃]\s*/gm, '')
+        .replace(/^\d+\.\s*/gm, '')
+        .replace(/[→←↑↓↔]/g, ' to ')
+        .replace(/AED\s*/g, 'A E D ')
+        .replace(/PKR\s*/g, 'P K R ')
+        .replace(/[ \t]+/g, ' ')
+        .trim();
+    }
+    function splitIntoSentences(text) {
+      const s = text.match(/[^.!?]+[.!?]+|\S[^.!?]*$/g) || [text];
+      return s.map(x => x.trim()).filter(x => x);
+    }
+    function selectBestVoice() {
+      if (!('speechSynthesis' in window)) return null;
+      const voices = window.speechSynthesis.getVoices();
+      if (!voices.length) return null;
+      // If voice profile names a voice, prefer it
+      if (state.voiceProfile?.voiceName) {
+        const v = voices.find(v => v.name === state.voiceProfile.voiceName);
+        if (v) return v;
+      }
+      // Natural voices priority
+      const prefer = ['Samantha','Aria','Jenny','Google US English','Victoria','Zira','Karen','Tessa','Serena'];
+      for (const name of prefer) {
+        const v = voices.find(v => v.name === name);
+        if (v) return v;
+      }
+      return voices.find(v => /en/i.test(v.lang)) || voices[0];
+    }
+
+    // ─── Voice input (Speech Recognition) ─────────────────────
+    function initSpeechRecognition() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) return null;
+      const rec = new SR();
+      rec.lang = state.lang === 'ur' ? 'ur-PK' : (state.lang === 'roman-urdu' ? 'en-US' : 'en-US');
+      rec.interimResults = false;
+      rec.maxAlternatives = 1;
+      rec.continuous = false;
+      rec.onresult = (e) => {
+        const t = e.results[0][0].transcript;
+        inputEl.value = t;
+        autoResize();
+        updateActionButton();
+        // Auto-send after a brief delay so user sees what was transcribed
+        setTimeout(() => sendMessage(), 350);
+      };
+      rec.onerror = (e) => {
+        console.warn('[Nova Kiosk] Speech recognition error:', e.error);
+        state.isRecording = false;
+        updateActionButton();
+        if (e.error === 'not-allowed') {
+          showBanner('Microphone permission denied. Please allow mic access in browser settings.', 'error');
+        }
+      };
+      rec.onend = () => {
+        state.isRecording = false;
+        updateActionButton();
+      };
+      return rec;
+    }
+
+    function toggleMic() {
+      if (state.inFlight) return;
+      // If there's text, send it
+      if (inputEl.value.trim()) {
+        sendMessage();
+        return;
+      }
+      // Otherwise toggle mic
+      if (!state.recognition) state.recognition = initSpeechRecognition();
+      if (!state.recognition) {
+        showBanner('Voice input is not supported in this browser. Try Chrome or Safari.', 'error');
+        return;
+      }
+      if (state.isRecording) {
+        state.recognition.stop();
+        state.isRecording = false;
+      } else {
+        try {
+          state.recognition.start();
+          state.isRecording = true;
+          // Auto-enable voice output the first time customer uses mic
+          if (!state.voiceEnabled) {
+            state.voiceEnabled = true;
+            localStorage.setItem('nova-kiosk-voice', 'true');
+            updateVoiceToggle();
+          }
+        } catch (err) {
+          console.warn('[Nova Kiosk] Mic start failed:', err);
+        }
+      }
+      updateActionButton();
+    }
+
+    function updateActionButton() {
+      actionBtn.className = 'action-btn';
+      const svgMic = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`;
+      const svgSend = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`;
+      const svgStop = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`;
+      if (state.isRecording) {
+        actionBtn.classList.add('stop');
+        actionBtn.innerHTML = svgStop;
+        actionBtn.title = 'Stop recording';
+      } else if (inputEl.value.trim()) {
+        actionBtn.classList.add('send');
+        actionBtn.innerHTML = svgSend;
+        actionBtn.title = 'Send message';
+      } else {
+        actionBtn.classList.add('mic');
+        actionBtn.innerHTML = svgMic;
+        actionBtn.title = 'Tap to speak';
+      }
+    }
+
+    function updateVoiceToggle() {
+      if (state.voiceEnabled) voiceToggle.classList.add('active');
+      else voiceToggle.classList.remove('active');
+    }
+
+    function toggleVoiceOutput() {
+      state.voiceEnabled = !state.voiceEnabled;
+      localStorage.setItem('nova-kiosk-voice', state.voiceEnabled ? 'true' : 'false');
+      updateVoiceToggle();
+      if (state.voiceEnabled) {
+        speakReply('Voice replies on.');
+        showBanner('Voice replies enabled', 'ok');
+      } else {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        showBanner('Voice replies disabled', 'ok');
+      }
+    }
+
+    // ─── Text input handling ──────────────────────────────────
+    function autoResize() {
+      inputEl.style.height = 'auto';
+      inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+    }
+    inputEl.addEventListener('input', () => {
+      autoResize();
+      updateActionButton();
+      resetIdle();
     });
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    actionBtn.addEventListener('click', toggleMic);
+    voiceToggle.addEventListener('click', toggleVoiceOutput);
+    resetBtn.addEventListener('click', () => {
+      if (!confirm('Start a new conversation? This will clear your current chat.')) return;
+      resetConversation();
+    });
+
+    // ─── Reset / start conversation ───────────────────────────
+    function resetConversation() {
+      state.messages = [];
+      state.customerId = 'kiosk-' + uuid();
+      localStorage.setItem('nova-kiosk-cid:' + tenantId, state.customerId);
+      messagesEl.innerHTML = '';
+      // Send a fresh greeting request
+      const welcome = state.config?.welcomeMessage || `Hi! I'm your ${state.config?.businessName || 'Nova'} assistant. How can I help you today?`;
+      appendMessage('bot', welcome);
+      if (state.voiceEnabled) speakReply(welcome);
+    }
+
+    // ─── Idle timeout (5 min) ─────────────────────────────────
+    const IDLE_MS = 5 * 60 * 1000;
+    function resetIdle() {
+      if (state.idleTimer) clearTimeout(state.idleTimer);
+      state.idleTimer = setTimeout(showIdle, IDLE_MS);
+    }
+    function showIdle() {
+      // Only show if user has started chat
+      if (app.style.display === 'none') return;
+      idleOverlay.classList.add('show');
+      // Stop any ongoing speech
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      if (state.isRecording && state.recognition) {
+        try { state.recognition.stop(); } catch {}
+      }
+    }
+    function resumeFromIdle() {
+      idleOverlay.classList.remove('show');
+      resetConversation();
+      resetIdle();
+    }
+    resumeBtn.addEventListener('click', resumeFromIdle);
+    idleOverlay.addEventListener('click', resumeFromIdle);
 
     // Reset timer on any interaction
-    ['click', 'touchstart', 'keydown', 'mousemove'].forEach(evt => {
-      document.addEventListener(evt, resetIdleTimer, { passive: true });
+    ['click', 'touchstart', 'keydown', 'input'].forEach(evt => {
+      document.addEventListener(evt, resetIdle, { passive: true });
     });
 
-    resetIdleTimer();
+    // ─── Splash interaction ──────────────────────────────────
+    function startChat() {
+      splash.classList.add('hidden');
+      setTimeout(() => { splash.style.display = 'none'; }, 600);
+      app.style.display = 'flex';
+      // Show initial greeting from Nova
+      const welcome = state.config?.welcomeMessage || `Hi! I'm your ${state.config?.businessName || 'Nova'} assistant. How can I help you today?`;
+      // Skip pre-chat form — go straight to chat
+      appendMessage('bot', welcome);
+      // Speak the welcome if voice enabled
+      if (state.voiceEnabled) {
+        setTimeout(() => speakReply(welcome), 400);
+      }
+      // Focus input on desktop, but not mobile (avoid keyboard popup)
+      if (window.matchMedia('(min-width: 768px)').matches) {
+        inputEl.focus();
+      }
+      resetIdle();
+    }
+    splash.addEventListener('click', startChat);
+
+    // Language selector
+    document.querySelectorAll('.splash .lang button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.splash .lang button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.lang = btn.dataset.lang;
+        localStorage.setItem('nova-kiosk-lang', state.lang);
+        // Update recognition language on next use
+        if (state.recognition) {
+          state.recognition.lang = state.lang === 'ur' ? 'ur-PK' : 'en-US';
+        }
+      });
+    });
+
+    // ─── Boot ─────────────────────────────────────────────────
+    // Preload voices
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.addEventListener('voiceschanged', () => {
+        window.speechSynthesis.getVoices();
+      }, { once: true });
+    }
+
+    // v35.0: Register service worker for PWA + offline message queue
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/kiosk-sw.js', { scope: '/kiosk/' })
+        .then((reg) => { console.info('[Nova Kiosk] Service Worker registered:', reg.scope); })
+        .catch((err) => { console.warn('[Nova Kiosk] SW registration failed:', err); });
+
+      // Listen for queued/delivered messages from SW
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        const msg = event.data;
+        if (!msg) return;
+        if (msg.type === 'QUEUED') {
+          showBanner(`📱 You're offline. Message queued (${msg.count}). Will send when reconnected.`, 'warn');
+        } else if (msg.type === 'DELIVERED') {
+          showBanner('✓ Queued message delivered.', 'ok');
+        }
+      });
+    }
+
+    // v35.0: PWA install prompt
+    let deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const btn = $('installBtn');
+      if (btn) btn.style.display = 'block';
+    });
+    $('installBtn')?.addEventListener('click', async () => {
+      if (!deferredInstallPrompt) {
+        showBanner('Use your browser menu → "Add to Home Screen" to install.', 'ok');
+        return;
+      }
+      deferredInstallPrompt.prompt();
+      const { outcome } = await deferredInstallPrompt.userChoice;
+      if (outcome === 'accepted') {
+        $('installBtn').style.display = 'none';
+        showBanner('App installed! Find it on your home screen.', 'ok');
+      }
+      deferredInstallPrompt = null;
+    });
+    window.addEventListener('appinstalled', () => {
+      $('installBtn').style.display = 'none';
+      console.info('[Nova Kiosk] Installed as PWA');
+    });
+
+    // v35.0: Online/offline indicator
+    window.addEventListener('online', () => {
+      showBanner('✓ Back online. Resuming.', 'ok');
+      // Tell SW to flush any queued messages
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'FLUSH_QUEUE' });
+      }
+    });
+    window.addEventListener('offline', () => {
+      showBanner('📱 You appear to be offline. Messages will be queued.', 'warn');
+    });
+
+    loadConfig();
+  })();
   </script>
 </body>
 </html>

@@ -213,6 +213,11 @@ function formatProduct(product, selected, language, options={}) {
           : `Yes 😊 We have ${product.name} available.`)
     : null;
   const lines = [intro, `📦 *${product.name}*`, product.description, `💰 ${formatMoney(product.price, product.currency)}`].filter(Boolean);
+  // v35.0: Append product image as [IMG:url] tag — widget/kiosk will render it inline
+  if (product.imageUrl) {
+    const fullUrl = product.imageUrl.startsWith('http') ? product.imageUrl : (product.imageUrl);
+    lines.push(`[IMG:${fullUrl}]`);
+  }
   if (product.sizes.length) lines.push(`📏 ${label(language, "sizes")}: ${product.sizes.join(", ")}`);
   if (product.colors.length) lines.push(`🎨 ${label(language, "colors")}: ${product.colors.join(", ")}`);
   lines.push(`✅ ${product.inStock ? label(language, "inStock") : label(language, "outOfStock")}`);

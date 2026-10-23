@@ -4,11 +4,6 @@ const { TemporalSemanticExtractor, parseClock } = require('../../../packages/con
 const { extractQueryFacets } = require('../../../packages/conversation-intelligence/src/queryFacetExtractor');
 const { extractFieldAmendment } = require('../../../packages/conversation-intelligence/src/fieldAmendmentExtractor');
 const { hasAcquisitionCue } = require('../../../packages/conversation-intelligence/src/acquisitionIntent');
-// v22.4: Import ServiceResolver for attribute-based service lookup
-// This replaces ALL hardcoded CLN IDs with dynamic attribute matching.
-// The control plane is now the single source of truth — code never
-// assumes which ID maps to which service.
-const { findServiceByType, ServiceResolver } = require('../src');
 const temporalExtractor=new TemporalSemanticExtractor();
 class CleaningConversationAdapter {
   constructor(){this.capabilityId='cleaning';this.priority=85;}
@@ -18,9 +13,7 @@ class CleaningConversationAdapter {
     const step=state.capabilityState?.cleaning?.step; const candidates=[]; let entities={}; const matches=[];
     const previous=state.capabilityState?.cleaning||{};
     const timeEntities={...extractTimeEntities(primaryText,temporal),...extractCleaningContext(message.text)};
-    let pricingRequested=/\b(charg(?:e|es|ing)|price|prices|pricing|cost|costs|rate|rates|quote|quotation|estimate|how much|kitna|kitni|kitne|kitny|kitnay|charges kya|charges kia)\b|(?:قیمت|چارجز|کتنے|قیمتیں)/.test(normalizedText)
-      || /\b(?:kitna|kitni|kitne|kitny|kitnay)\b/i.test(message.text)
-      || /(?:قیمت|چارجز|کتنے|قیمتیں|دینا ہوگا|کرنا ہوگا|ہوگا|ہوگی)/.test(message.text);
+    let pricingRequested=/\b(charg(?:e|es|ing)|price|prices|pricing|cost|costs|rate|rates|quote|quotation|estimate|how much|kitna|kitni|kitne|kitny|kitnay|charges kya|charges kia)\b|(?:قیمت|چارجز|کتنے|قیمتیں)/.test(normalizedText);
     const explicitBookingAction=/\b(book|schedule|reserve|arrange|place (?:a )?request|start (?:a )?(?:booking|request)|confirm (?:the )?(?:booking|service))\b/.test(normalizedText);
     const explicitTransactionLanguage=/\b(i want|i need|book|schedule|arrange|add|change|switch|replace|start (?:a )?(?:booking|request))\b/.test(normalizedText);
     const priceFollowUp=Boolean(previous.priceEnquiry?.serviceId)&&!explicitBookingAction&&!explicitTransactionLanguage&&(
@@ -44,7 +37,7 @@ class CleaningConversationAdapter {
     // When the customer explicitly accepts the last quote, route that exact
     // priced scope back into the deterministic booking workflow. Prefer the
     // latest interrupt quote over an older quote attached to the draft.
-    const quoteAcceptance=/\b(?:add this service|book this|book it|book (?:these|both|the) services?|book this (?:quote|quotation|service)|make (?:a )?booking for this (?:quote|quotation|service)|confirm this service|confirm (?:my|the) booking for this service|i want this service|go ahead|proceed|ok book|yes book|book now|stat booking|start booking|yes stat booking|yes start booking)\b/i.test(normalizedText);
+    const quoteAcceptance=/\b(?:add this service|book this|book it|book (?:these|both) services|book this (?:quote|quotation)|make (?:a )?booking for this (?:quote|quotation|service)|confirm this service|confirm (?:my|the) booking for this service|i want this service|go ahead|proceed)\b/.test(normalizedText);
     const latestQuotedService=previous.priceEnquiry?.quote||previous.quotedService||null;
     if(quoteAcceptance&&Array.isArray(previous.quotedServices)&&previous.quotedServices.length>1){
       entities={quotedServices:previous.quotedServices,quotedServiceRequirements:previous.quotedServiceRequirements||{},preserveWorkflow:Boolean(step)};
@@ -80,61 +73,13 @@ class CleaningConversationAdapter {
       candidates.push({intent:'cleaning.booking_type_clarification',confidence:1,priority:198,entities,reason:'property_cleaning_booking_type_still_missing'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_type_required',score:1}]};
     }
-    // v22.1: If pendingPriceClarification exists (user was asked Standard vs Deep
-    // for a pricing question) and the user provides a non-cleaning-type answer
-    // (like "4" or a random number), re-ask the Standard vs Deep question
-    // instead of letting the answer fall through to another capability.
-    if(previous.pendingPriceClarification?.propertyType && !resolvedCleaningType && !interruption && !pricingRequested){
-      const isShortAnswer=/^\d+$|^(?:one|two|three|four|five|six|seven|eight|nine|ten|yes|no|ok|okay|sure)\b/i.test(normalizedText.trim());
-      if(isShortAnswer || (normalizedText.split(' ').length<=3 && !cleaningDomain)){
-        entities={...previous.pendingPriceClarification.scope,...timeEntities,pendingCleaningType:true,propertyType:previous.pendingPriceClarification.propertyType,bedrooms:previous.pendingPriceClarification.bedrooms};
-        candidates.push({intent:'cleaning.price_type_clarification',confidence:1,priority:195,entities,reason:'price_type_clarification_re_ask'});
-        return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_type_required',score:1}]};
-      }
-    }
 
     // A customer can answer a quote-only cleaning-type clarification with a
     // short phrase such as "deep cleaning". Resume the pricing comparison,
     // not a booking workflow.
     const pendingPriceClarification=previous.pendingPriceClarification;
-    // v20.1: If we're in a pending multi-item price clarification and the user
-    // provides the missing variant (e.g., "mattress is king size"), re-enter
-    // the multi-service quote flow with the completed items.
-    if(pendingPriceClarification?.items?.length){
-      // v20.1: Inline variant extraction (extractServiceVariant is in the
-      // capability, not the conversation adapter, so we inline it here).
-      const inlineVariant=/\bextra[ -]?large\b|\bxl\b/i.test(normalizedText)?'extra-large':
-        ['king','queen','crib','single','medium','large','small'].find(v=>new RegExp(`\\b${v}\\b`,'i').test(normalizedText))||null;
-      const providedVariant=timeEntities.serviceVariant || inlineVariant;
-      const providedUnits=timeEntities.units || scalarPendingNumber(normalizedText);
-      if(providedVariant || providedUnits){
-        const allItems=[
-          ...(pendingPriceClarification.knownQuotes||[]).map(q=>({
-            serviceId:q.operationalServiceId,
-            serviceName:q.serviceName,
-            score:100,
-            quantity:q.quantity||1,
-            variant:q.serviceVariant||null,
-          })),
-          ...pendingPriceClarification.items.map(item=>({
-            serviceId:item.serviceId,
-            serviceName:item.serviceName,
-            score:100,
-            quantity:item.quantity,
-            variant:providedVariant || (item.missing?.includes('units')?providedUnits:null),
-          })),
-        ];
-        entities={...pendingPriceClarification.requirements,...timeEntities,serviceItems:allItems,pricingRequested:true,multiItemFurniture:true};
-        candidates.push({intent:'cleaning.multi_service_quote_request',confidence:1,priority:200,entities,reason:'multi_item_price_clarification_completed'});
-        return {priority:this.priority,candidates,entities,vocabularyMatches:allItems.map(item=>({type:'service',value:item.serviceName,canonical:item.serviceId,score:1,quantity:item.quantity,variant:item.variant}))};
-      }
-    }
     if(pendingPriceClarification?.selectedCleaningType==='standard'&&timeEntities.durationHours&&timeEntities.cleanerCount){
-      // v22.4: Look up standard service by name pattern instead of hardcoded ID
-      const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
-      const allServices=await scoped?.listServices?.()||[];
-      const stdService=findServiceByType(allServices,'standard',pendingPriceClarification.propertyType);
-      const propertyServiceId=stdService?.id||(pendingPriceClarification.propertyType==='villa'?'CLN009':'CLN008');
+      const propertyServiceId=pendingPriceClarification.propertyType==='villa'?'CLN009':'CLN008';
       entities={...pendingPriceClarification.scope,...timeEntities,propertyServiceId,otherServiceItems:pendingPriceClarification.otherServiceItems||[],pricingRequested:true};
       candidates.push({intent:'cleaning.standard_multi_service_quote',confidence:1,priority:190,entities,reason:'standard_cleaning_workforce_price_complete'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'pricing',value:'standard_cleaning_total',score:1}]};
@@ -143,13 +88,11 @@ class CleaningConversationAdapter {
       const deep=resolvedCleaningType==='deep';
       const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
       const allServices=await scoped?.listServices?.()||[];
-      // v22.4: Use findServiceByType instead of hardcoded IDs
-      const chosen=findServiceByType(allServices,deep?'deep':'standard',pendingPriceClarification.propertyType);
-      const chosenId=chosen?.id||(deep
+      const chosenId=deep
         ? pendingPriceClarification.propertyType==='villa'?'CLN011':'CLN010'
-        : pendingPriceClarification.propertyType==='villa'?'CLN009':'CLN008');
-      const chosenService=chosen||allServices.find(service=>service.id===chosenId);
-      const serviceItems=[...(chosenService?[{serviceId:chosenService.id,serviceName:chosenService.name,score:110}]:[]),...(pendingPriceClarification.otherServiceItems||[])];
+        : pendingPriceClarification.propertyType==='villa'?'CLN009':'CLN008';
+      const chosen=allServices.find(service=>service.id===chosenId);
+      const serviceItems=[...(chosen?[{serviceId:chosen.id,serviceName:chosen.name,score:110}]:[]),...(pendingPriceClarification.otherServiceItems||[])];
       entities={...pendingPriceClarification.scope,...timeEntities,serviceItems,selectedCleaningType:deep?'deep':'standard',pricingRequested:true};
       const intent=deep
         ? 'cleaning.multi_service_quote_request'
@@ -265,83 +208,6 @@ class CleaningConversationAdapter {
       entities={pendingField:'time',...timeEntities,preserveWorkflow:true};
       candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:205,entities,reason:'active_cleaning_time_value'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'time',score:1}]};
-    }
-
-    // v20.1 fix: When the workflow is actively asking for a scalar value
-    // (bedrooms, cleanerCount, durationHours, units, serviceVariant) and the
-    // user's message contains that value, route directly to workflow_input
-    // BEFORE any pricing question blocks. Without this, "i have 3 bedrooms"
-    // (when step='bedrooms') gets hijacked by the standalone_quote /
-    // active_quote_question pricing paths and loses the Deep Cleaning selection.
-    if(step==='bedrooms' && (timeEntities.bedrooms != null || scalarPendingNumber(normalizedText) != null)){
-      entities={pendingField:'bedrooms',...timeEntities,preserveWorkflow:true};
-      if(!entities.bedrooms && scalarPendingNumber(normalizedText)!=null) entities.bedrooms=scalarPendingNumber(normalizedText);
-      candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:212,entities,reason:'active_cleaning_bedrooms_value'});
-      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'bedrooms',score:1}]};
-    }
-    if(step==='cleanerCount' && (timeEntities.cleanerCount != null || scalarPendingNumber(normalizedText) != null)){
-      entities={pendingField:'cleanerCount',...timeEntities,preserveWorkflow:true};
-      if(!entities.cleanerCount && scalarPendingNumber(normalizedText)!=null) entities.cleanerCount=scalarPendingNumber(normalizedText);
-      candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:212,entities,reason:'active_cleaning_cleaner_count_value'});
-      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'cleanerCount',score:1}]};
-    }
-    if(step==='duration' && (timeEntities.durationHours != null || scalarPendingNumber(normalizedText) != null)){
-      entities={pendingField:'duration',...timeEntities,preserveWorkflow:true};
-      if(!entities.durationHours && scalarPendingNumber(normalizedText)!=null) entities.durationHours=scalarPendingNumber(normalizedText);
-      candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:212,entities,reason:'active_cleaning_duration_value'});
-      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'duration',score:1}]};
-    }
-    if(step==='units' && (timeEntities.units != null || scalarPendingNumber(normalizedText) != null)){
-      entities={pendingField:'units',...timeEntities,preserveWorkflow:true};
-      if(!entities.units && scalarPendingNumber(normalizedText)!=null) entities.units=scalarPendingNumber(normalizedText);
-      candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:212,entities,reason:'active_cleaning_units_value'});
-      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'units',score:1}]};
-    }
-    if(step==='serviceVariant' && timeEntities.serviceVariant != null){
-      entities={pendingField:'serviceVariant',...timeEntities,preserveWorkflow:true};
-      candidates.push({intent:'cleaning.workflow_input',confidence:1,priority:212,entities,reason:'active_cleaning_service_variant_value'});
-      return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow_field',value:'serviceVariant',score:1}]};
-    }
-
-    // v20.1: Multi-item furniture detection when step==='serviceChoice'.
-    // When the system asked "Which type of furniture?" and the user responds
-    // with multiple items (e.g., "2 sofa 3 seater and 1 king mattress"),
-    // detect all items and route to multi_service_quote_request or
-    // multi_service_request instead of letting the capability pick a single service.
-    if(step==='serviceChoice'){
-      const hasFurnVocab=/\b(?:sofa|couch|carpet|rug|mattress|chair|table|curtain|drape)\b/i.test(normalizedText);
-      if(hasFurnVocab){
-        const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
-        const furnitureItems=await detectMultiItemFurniture(primaryText,scoped);
-        if(furnitureItems.length>=2){
-          const serviceItems=furnitureItems.map(item=>({
-            serviceId:item.serviceId,
-            serviceName:item.serviceName,
-            score:100,
-            quantity:item.quantity,
-            variant:item.variant,
-          }));
-          const primary=serviceItems[0];
-          const primaryVariantSize = primary.variant && /\d+/.test(primary.variant) ? Number(primary.variant.match(/\d+/)[0]) : null;
-          entities={
-            ...timeEntities,
-            serviceId:primary.serviceId,
-            serviceName:primary.serviceName,
-            units: primaryVariantSize || timeEntities.units || 1,
-            serviceVariant:primary.variant,
-            serviceItems,
-            text:normalizedText,
-            pricingRequested:pricingRequested||structuredRequest,
-            multiItemFurniture:true,
-          };
-          // v20.1: When answering serviceChoice, always show a quote (pricing)
-          // because the user is telling us WHAT to clean, not booking yet.
-          // The quote will include "Would you like me to book these services?"
-          const intent='cleaning.multi_service_quote_request';
-          candidates.push({intent,confidence:1,priority:200,entities,reason:'multi_item_furniture_service_choice'});
-          return {priority:this.priority,candidates,entities,vocabularyMatches:serviceItems.map(item=>({type:'service',value:item.serviceName,canonical:item.serviceId,score:1,quantity:item.quantity,variant:item.variant}))};
-        }
-      }
     }
     const expectedScalarPresent=(step==='cleanerCount'&&Boolean(timeEntities.cleanerCount||scalarPendingNumber(normalizedText)))
       ||(step==='duration'&&Boolean(timeEntities.durationHours||scalarPendingNumber(normalizedText)))
@@ -507,18 +373,7 @@ class CleaningConversationAdapter {
         const genericRecurrenceOnly=/\b(recurring|monthly|weekly|every (?:week|month))\b/.test(normalizedText)
           && !/\b(maid|cleaner|housekeeping|home|house|apartment|villa|office|sofa|carpet|deep|move[ -]?(?:in|out))\b/.test(normalizedText);
         if(found?.service && !found.service.hidden && (found.score||0)>20 && !genericRecurrenceOnly){entities.serviceId=found.service.id;entities.serviceName=found.service.name;}
-        else if(genericCleaner){
-          // v22.4: Look up the hourly cleaner service by attribute (priceType)
-          // with hardcoded 'CLN-HOURLY' as fallback for file-based config.
-          const _hourlyAllServices = await scoped?.listServices?.() || [];
-          const _hourlyService = _hourlyAllServices.find(s=>s.priceType==='hourly' && s.pricingServiceId==='hourly-cleaner')
-            || _hourlyAllServices.find(s=>s.id==='CLN-HOURLY');
-          entities.serviceId=_hourlyService?.id||'CLN-HOURLY';
-          entities.serviceName=_hourlyService?.name||'Hourly Cleaner Hire';
-          entities.priceType='hourly';
-          entities.pricingServiceId='hourly-cleaner';
-          entities.cleanerCount=entities.cleanerCount||1;
-        }
+        else if(genericCleaner){entities.serviceId='CLN-HOURLY';entities.serviceName='Hourly Cleaner Hire';entities.cleanerCount=entities.cleanerCount||1;}
         candidates.push({intent:quote?'cleaning.recurring_quote':'cleaning.recurring_request',confidence:1,entities,reason:quote?'recurring_cleaning_quote':'recurring_cleaning_booking'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'constraint',value:'recurrence',score:1}]};
       }
@@ -602,13 +457,7 @@ class CleaningConversationAdapter {
     // Price/quote questions about the currently selected service outrank a pending
     // date/time/name slot. Scope terms such as floor/shops/rooms make this a
     // quotation question, not a date value.
-    // v20.1 fix: Do NOT treat the message as a pricing question when it is
-    // actually answering the pending step (e.g., step='bedrooms' and the user
-    // says "i have 3 bedrooms"). The expectedScalarPresent check (computed
-    // above at line ~214) detects this case. Without this guard, the
-    // active_quote_question path hijacks the workflow input and re-quotes
-    // based on a stale priceEnquiry, losing the Deep Cleaning selection.
-    if(step && pricingRequested && !expectedScalarPresent){
+    if(step && pricingRequested){
       const scoped=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
       const explicit=await scoped?.findService?.(cleaningServiceSubjectText(primaryText));
       let explicitService=explicit?.service&&(explicit.score||0)>=60?explicit.service:null;
@@ -616,17 +465,9 @@ class CleaningConversationAdapter {
       // A generic "deep cleaning" price interruption must not silently widen
       // an active Deep Apartment/Villa request back to Deep Home Cleaning.
       // Only an explicit property change is allowed to replace that scope.
-      // v22.4: Use attribute-based check (ServiceResolver) for the deep-scope
-      // detection, with hardcoded CLN IDs as fallback for file-based config.
       const activeService=allServices.find(service=>service.id===previous.serviceId)||null;
       const explicitPropertyChange=/\b(?:villa|vila|house|apartment|flat|studio)\b/.test(normalizedText);
-      const _convResolver=new ServiceResolver(allServices);
-      const _explicitIsDeepHome = explicitService && (
-        explicitService.id==='CLN002' ||
-        (_convResolver.isDeepScopeService(explicitService) && /deep/i.test(explicitService.name||'') && /home/i.test(explicitService.name||'') && !/(apartment|villa)/i.test(explicitService.name||''))
-      );
-      const _activeIsDeepScope = activeService && (_convResolver.isDeepScopeService(activeService) || ['CLN010','CLN011'].includes(activeService.id));
-      if(_explicitIsDeepHome && _activeIsDeepScope && !explicitPropertyChange){
+      if(explicitService?.id==='CLN002'&&['CLN010','CLN011'].includes(activeService?.id)&&!explicitPropertyChange){
         explicitService=activeService;
       }
       const inheritedPriceService=!explicitService&&previous.priceEnquiry?.serviceId
@@ -718,46 +559,6 @@ class CleaningConversationAdapter {
         candidates.push({intent:'cleaning.multi_service_request',confidence:1,priority:132,entities,reason:'explicit_multi_service_cleaning_request'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:entities.serviceItems.map((item)=>({type:'service',value:item.serviceName,canonical:item.serviceId,score:item.score/100}))};
       }
-      // v20.0: Multi-item furniture detection.
-      // Handles compound furniture requests like "2 sofa 3 seater and 1 king
-      // mattress" that the generic multi-service detector misses (because
-      // segment-based findService matches the umbrella "Furniture Cleaning"
-      // service instead of the specific "Sofa Cleaning" service).
-      // This detector parses quantities (2 sofas) and variants (3-seater, king)
-      // per item, and routes to a multi_service_quote_request with per-item
-      // quantities + variants.
-      const hasFurnitureVocabulary=/\b(?:sofa|couch|carpet|rug|mattress|chair|table|curtain|drape)\b/i.test(normalizedText);
-      if(hasFurnitureVocabulary && (pricingRequested||structuredRequest||quote)){
-        const furnitureItems=await detectMultiItemFurniture(primaryText,scopedService);
-        if(furnitureItems.length>=2){
-          // Build serviceItems with per-item quantity and variant
-          const serviceItems=furnitureItems.map(item=>({
-            serviceId:item.serviceId,
-            serviceName:item.serviceName,
-            score:100,
-            quantity:item.quantity,
-            variant:item.variant,
-          }));
-          // Also populate top-level units/serviceVariant from the FIRST item
-          // so the quote engine can price it. The remaining items are priced
-          // as additional services.
-          const primary=serviceItems[0];
-          const primaryUnits=primary.quantity>1?primary.quantity:(primary.variant&&/\d+/.test(primary.variant)?Number(primary.variant.match(/\d+/)[0]):1);
-          entities={
-            ...timeEntities,
-            serviceId:primary.serviceId,
-            serviceName:primary.serviceName,
-            units:primaryUnits,
-            serviceVariant:primary.variant,
-            serviceItems,
-            text:normalizedText,
-            pricingRequested:true,
-            multiItemFurniture:true,
-          };
-          candidates.push({intent:'cleaning.multi_service_quote_request',confidence:1,priority:200,entities,reason:'multi_item_furniture_quote'});
-          return {priority:this.priority,candidates,entities,vocabularyMatches:serviceItems.map(item=>({type:'service',value:item.serviceName,canonical:item.serviceId,score:1,quantity:item.quantity,variant:item.variant}))};
-        }
-      }
       let explicitService=scopedService?await scopedService.findService(cleaningServiceSubjectText(primaryText)):null;
       if((!explicitService?.service||(explicitService.score||0)<60)&&previous.priceEnquiry?.serviceId){
         const servicesList=await scopedService?.listServices?.();
@@ -770,64 +571,17 @@ class CleaningConversationAdapter {
       }
       let m=normalizedText.match(/\b(\d+)\s*(?:bedrooms?|bed|bhk|bdrooms?|bd|bdrm)\b/);if(m)timeEntities.bedrooms=Number(m[1]);
       if(/\b(villa|vila|vill)\b/.test(normalizedText)||closestKeywordToken(normalizedText,['villa'],{maxDistance:2,minLength:4}))timeEntities.propertyType='villa';else if(/\b(apartment|flat|studio)\b/.test(normalizedText)||closestKeywordToken(normalizedText,['apartment'],{maxDistance:2,minLength:6}))timeEntities.propertyType='apartment';
-      const propertyCleaningType=resolveCleaningType(normalizedText);
-      const propertyCleaningTypeSpecified=Boolean(propertyCleaningType);
+      const propertyCleaningTypeSpecified=Boolean(resolveCleaningType(normalizedText));
       const namesOnlyPropertyCleaning=!/\b(?:office|sofa|couch|carpet|rug|mattress|chair|curtain|laundry|ac|duct|pest|disinfection|kitchen|bathroom|window|balcony|floor|move[ -]?(?:in|out)|post[ -]?(?:renovation|construction))\b/.test(normalizedText);
       const discussedSpecificService=Boolean(state.capabilityState?.availability?.lastDiscussedServiceId);
-      // v20.0: Multi-item furniture detection (runs BEFORE the standalone quote
-      // path so compound furniture requests get a multi-service quote instead
-      // of being reduced to a single service).
-      // Handles: "2 sofa 3 seater and 1 king mattress", "2 sofas and 1 carpet", etc.
-      const hasFurnitureVocab=/\b(?:sofa|couch|carpet|rug|mattress|chair|table|curtain|drape)\b/i.test(normalizedText);
-      if(hasFurnitureVocab && (pricingRequested||structuredRequest||quote) && !explicitBookingAction){
-        const furnitureItems=await detectMultiItemFurniture(primaryText,scopedService);
-        if(furnitureItems.length>=2){
-          const serviceItems=furnitureItems.map(item=>({
-            serviceId:item.serviceId,
-            serviceName:item.serviceName,
-            score:100,
-            quantity:item.quantity,
-            variant:item.variant,
-          }));
-          const primary=serviceItems[0];
-          const primaryUnits=primary.quantity>1?primary.quantity:(primary.variant&&/\d+/.test(primary.variant)?Number(primary.variant.match(/\d+/)[0]):1);
-          entities={
-            ...timeEntities,
-            serviceId:primary.serviceId,
-            serviceName:primary.serviceName,
-            units:primaryUnits,
-            serviceVariant:primary.variant,
-            serviceItems,
-            text:normalizedText,
-            pricingRequested:true,
-            multiItemFurniture:true,
-          };
-          candidates.push({intent:'cleaning.multi_service_quote_request',confidence:1,priority:200,entities,reason:'multi_item_furniture_quote'});
-          return {priority:this.priority,candidates,entities,vocabularyMatches:serviceItems.map(item=>({type:'service',value:item.serviceName,canonical:item.serviceId,score:1,quantity:item.quantity,variant:item.variant}))};
-        }
-      }
       // Pricing question: "what are you charging for deep cleaning a 3 bedroom
       // apartment" — the user is asking for the CHARGE, not starting a booking.
       // Route to quote-only so Nova shows the estimate and asks whether to
       // book. This must fire BEFORE the booking_type_clarification block.
       if(pricingRequested && !structuredRequest && !explicitBookingAction && (timeEntities.propertyType||timeEntities.bedrooms||propertyCleaningTypeSpecified)){
-        // v22.4: Use findServiceByType for attribute-based lookup, with
-        // hardcoded CLN IDs as fallback for file-based config backward compat.
-        let explicitServiceForQuote;
-        if(explicitService?.service && isGenericPropertyCleaningService(explicitService.service) && propertyCleaningTypeSpecified){
-          const _cleaningType = propertyCleaningType || 'standard';
-          const _allServicesForQuote = await scopedService?.listServices?.() || [];
-          explicitServiceForQuote = findServiceByType(_allServicesForQuote, _cleaningType, timeEntities.propertyType);
-          if(!explicitServiceForQuote){
-            // Fallback: hardcoded IDs
-            const _fallbackId = _cleaningType==='deep'
-              ? (timeEntities.propertyType==='apartment'?'CLN010':timeEntities.propertyType==='villa'?'CLN011':'CLN002')
-              : (timeEntities.propertyType==='apartment'?'CLN008':timeEntities.propertyType==='villa'?'CLN009':'CLN001');
-            explicitServiceForQuote = _allServicesForQuote.find(s=>s.id===_fallbackId);
-          }
-        } else {
-          explicitServiceForQuote = explicitService?.service;
-        }
+        const explicitServiceForQuote=explicitService?.service&&isGenericPropertyCleaningService(explicitService.service)&&propertyCleaningTypeSpecified
+          ? (await scopedService?.listServices?.()||[]).find(s=>propertyCleaningTypeSpecified==='deep'?(timeEntities.propertyType==='apartment'?'CLN010':timeEntities.propertyType==='villa'?'CLN011':'CLN002'):(timeEntities.propertyType==='apartment'?'CLN008':timeEntities.propertyType==='villa'?'CLN009':'CLN001'))
+          : explicitService?.service;
         entities={...timeEntities,serviceId:explicitServiceForQuote?.id||null,serviceName:explicitServiceForQuote?.name||null,pricingRequested:true,quoteOnly:true,text:normalizedText};
         candidates.push({intent:'cleaning.standalone_quote',confidence:1,priority:175,entities,reason:'explicit_structured_price_question'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'pricing',value:'structured_service_quote',score:1}]};
@@ -887,44 +641,6 @@ class CleaningConversationAdapter {
       let m=normalizedText.match(/\b(\d+)\s*(?:bedrooms?|bed|bhk|bdrooms?|bd|bdrm)\b/);if(m)timeEntities.bedrooms=Number(m[1]);
       if(/\b(villa|vila)\b/.test(normalizedText))timeEntities.propertyType='villa';else if(/\b(apartment|flat)\b/.test(normalizedText))timeEntities.propertyType='apartment';
       const scopedService=services.cleaningService?.scope({tenant,capabilityId:'cleaning',customerId:message.customerId,conversationId:`${tenant.id}:${message.channel}:${message.customerId}`});
-
-      // v20.0: Multi-item furniture detection for pricing queries.
-      // Handles "2 sofa 3 seater and 1 king mattress" → multi_service_quote_request
-      // with per-item quantity and variant. Runs BEFORE the segment-based
-      // detection because segment-based findService matches the umbrella
-      // "Furniture Cleaning" service instead of specific "Sofa Cleaning".
-      const hasFurnVocab=/\b(?:sofa|couch|carpet|rug|mattress|chair|table|curtain|drape)\b/i.test(normalizedText);
-      if(hasFurnVocab){
-        const furnitureItems=await detectMultiItemFurniture(primaryText,scopedService);
-        if(furnitureItems.length>=2){
-          const serviceItems=furnitureItems.map(item=>({
-            serviceId:item.serviceId,
-            serviceName:item.serviceName,
-            score:100,
-            quantity:item.quantity,
-            variant:item.variant,
-          }));
-          const primary=serviceItems[0];
-          // v20.0: For the top-level entities, extract the SIZE from the
-          // primary item's variant (e.g., "3-seater" → units=3), NOT the
-          // quantity. The quantity is used by the quote handler to multiply
-          // the per-item price.
-          const primaryVariantSize = primary.variant && /\d+/.test(primary.variant) ? Number(primary.variant.match(/\d+/)[0]) : null;
-          entities={
-            ...timeEntities,
-            serviceId:primary.serviceId,
-            serviceName:primary.serviceName,
-            units: primaryVariantSize || timeEntities.units || 1,
-            serviceVariant:primary.variant,
-            serviceItems,
-            text:normalizedText,
-            pricingRequested:true,
-            multiItemFurniture:true,
-          };
-          candidates.push({intent:'cleaning.multi_service_quote_request',confidence:1,priority:200,entities,reason:'multi_item_furniture_quote'});
-          return {priority:this.priority,candidates,entities,vocabularyMatches:serviceItems.map(item=>({type:'service',value:item.serviceName,canonical:item.serviceId,score:1,quantity:item.quantity,variant:item.variant}))};
-        }
-      }
 
       // Price each explicitly mentioned service independently. A compound
       // question must never be reduced to the single highest-scoring match.
@@ -986,7 +702,7 @@ class CleaningConversationAdapter {
           return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'pricing',value:'multi_variant_quote',score:1}]};
         }
         entities={...timeEntities,text:normalizedText,pricingRequested:true};
-        candidates.push({intent:discountRequested?'cleaning.discount_request':'cleaning.structured_quote_request',confidence:1,priority:160,entities,reason:discountRequested?'cleaning_discount_request':'cleaning_structured_quote'});
+        candidates.push({intent:discountRequested?'cleaning.discount_request':'cleaning.structured_quote_request',confidence:.99995,entities,reason:discountRequested?'cleaning_discount_request':'cleaning_structured_quote'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'pricing',value:'structured_service_quote',score:1}]};
       }
       // A named service remains the pricing subject even when it has no
@@ -1000,7 +716,7 @@ class CleaningConversationAdapter {
           scopeText:message.text,
           pricingRequested:true
         };
-        candidates.push({intent:'cleaning.standalone_service_quote',confidence:1,priority:160,entities,reason:'explicit_cleaning_service_price_question'});
+        candidates.push({intent:'cleaning.standalone_service_quote',confidence:1,priority:150,entities,reason:'explicit_cleaning_service_price_question'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'pricing',value:'explicit_service_quote',canonical:explicitService.service.id,score:1}]};
       }
     }
@@ -1044,10 +760,7 @@ class CleaningConversationAdapter {
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaner_count',score:1}]};
       }
     }
-    // v22.4: Use attribute-based check (priceType/pricingServiceId) with
-    // hardcoded 'CLN-HOURLY' as fallback for file-based config backward compat.
-    const _prevIsHourly = previous.serviceId==='CLN-HOURLY' || previous.priceType==='hourly' || previous.pricingServiceId==='hourly-cleaner';
-    if(step && _prevIsHourly && explicitCleanerCount && timeEntities.cleanerCount && !timeEntities.durationHours && /\b(actually|instead|only|just|i want|i need|mujhy|mujhe|chahiye|chahiyy|cleaners?|maids?)\b/.test(normalizedText)){
+    if(step && previous.serviceId==='CLN-HOURLY' && explicitCleanerCount && timeEntities.cleanerCount && !timeEntities.durationHours && /\b(actually|instead|only|just|i want|i need|mujhy|mujhe|chahiye|chahiyy|cleaners?|maids?)\b/.test(normalizedText)){
       entities={pendingField:step,cleanerCount:timeEntities.cleanerCount,preserveWorkflow:true};
       candidates.push({intent:'cleaning.cleaner_count_update',confidence:1,entities,reason:'active_hourly_cleaner_count_update'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaner_count_update',score:1}]};
@@ -1095,7 +808,7 @@ class CleaningConversationAdapter {
     }
     if (cleaningDomain && timeEntities.durationHours && (pricingRequested || genericCleaner) && step!=='multi_service_clarify') {
       entities={...timeEntities,policyFacets, pricingRequested:true, pricingModel:'hourly_cleaner'};
-      candidates.push({intent:'cleaning.pricing_request',confidence:1,priority:160,entities,reason:'cleaning_duration_pricing'});
+      candidates.push({intent:'cleaning.pricing_request',confidence:.9993,entities,reason:'cleaning_duration_pricing'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'semantic_role',value:'duration',score:.9993},{type:'domain',value:'cleaning',score:.99}]};
     }
     if (/\b(what|which|show|list|tell me|do you have|do you offer|provide)\b[\s\S]{0,35}\b(cleaning )?services\b|\b(what cleaning services|cleaning services do you|services do you offer|kia cleaning services|kya cleaning services)\b|\b(?:ap|aap)\s+log\b[\s\S]{0,25}\b(?:kis kis|kon kon|kya kya|kia kia)\b[\s\S]{0,30}\b(?:cleaning|clening|safai)\b/.test(normalizedText)
@@ -1123,7 +836,11 @@ class CleaningConversationAdapter {
       candidates.push({intent:'cleaning.service_explore',confidence:1,priority:205,entities:{},reason:'ungrounded_referential_cleaning_booking'});
       return {priority:this.priority,candidates,entities:{},vocabularyMatches:[{type:'clarification',value:'cleaning_service_required',score:1}]};
     }
-    const found=scoped?await scoped.findService(primaryText):null;
+    // v34.0 Bugfix: Only call findService if cleaningDomain is true.
+    // Previously, findService was called on ALL messages (including
+    // "what are your business hours"), which caused false matches and
+    // prevented business questions from routing to the assistant.
+    const found=(cleaningDomain||previous.priceEnquiry?.serviceId)?(scoped?await scoped.findService(primaryText):null):null;
     if(found?.service){
       // Pricing question: "what are you charging for deep cleaning a 3 bedroom
       // apartment" — the user is asking for the CHARGE, not starting a booking.
@@ -1140,12 +857,8 @@ class CleaningConversationAdapter {
       // EXCEPTION: "do you provide/offer X" is a SERVICE SUPPORT question
       // that belongs to the availability adapter (which lists matching
       // services). Do NOT hijack it with a single-service quote.
-      const isServiceSupportQuestion=/\b(?:do you|can you|are you able to|will you)\b[\s\S]{0,20}\b(?:provide|offer|have|do|give|clean|wash)\b/i.test(message.text);
-      // Business identity questions (name, hours, contact, location, payment,
-      // return policy, delivery, FAQ) belong to the assistant, not cleaning.
-      const isBusinessIdentityQuestion=/\b(?:business name|company name|your name|what are you|who are you|opening hours|business hours|working hours|phone number|contact number|email address|where are you|where.*located|your address|payment method|return policy|refund policy|delivery|takeaway)\b/i.test(message.text)
-        || /\b(?:اوقات|فون|ای میل|پتہ|ادائیگی|واپسی|ڈیلیوری)\b/.test(message.text);
-      if(!structuredRequest && !explicitBookingAction && step!=='multi_service_clarify' && !step && !hasDateConstraint && !isServiceSupportQuestion && !isBusinessIdentityQuestion){
+      const isServiceSupportQuestion=/\b(?:do you|can you|are you able to|will you)\b[\s\S]{0,20}\b(?:provide|offer|have|do|give)\b/i.test(message.text);
+      if(!structuredRequest && !explicitBookingAction && step!=='multi_service_clarify' && !step && !hasDateConstraint && !isServiceSupportQuestion){
         entities={...timeEntities,serviceId:found.service.id,serviceName:found.service.name,pricingRequested:true,quoteOnly:true,text:normalizedText};
         candidates.push({intent:'cleaning.standalone_quote',confidence:1,priority:175,entities,reason:'bare_service_mention_or_price_question'});
         matches.push({type:'pricing',value:'explicit_service_quote',canonical:found.service.id,score:1});
@@ -1255,107 +968,6 @@ async function detectMultiServiceMatches(text, scopedService) {
   return matches;
 }
 
-/**
- * v20.0: Detect multiple furniture items in a single message.
- *
- * Handles compound furniture requests like:
- *   - "2 sofa 3 seater and 1 king size mattress"
- *   - "3 seater sofa and a queen mattress"
- *   - "2 sofas and 1 carpet"
- *   - "cleaning of my 2 sofas and one mattress"
- *
- * Returns an array of furniture items, each with:
- *   { service, serviceName, quantity, variant }
- *
- * The variant field captures "3-seater", "king", "queen", "single", "5 metre", etc.
- * The quantity field captures the NUMBER of items (2 sofas, 1 mattress).
- *
- * Returns an empty array if fewer than 2 distinct furniture types are found.
- */
-async function detectMultiItemFurniture(text, scopedService) {
-  if (!scopedService?.findService) return [];
-  const n = normalizeText(text);
-  if (!n) return [];
-
-  // Define furniture item patterns: (regex, catalogServiceName)
-  // Each pattern captures the item head (sofa/mattress/carpet/etc.) and
-  // optionally a quantity and variant.
-  // v22.5: The serviceId values below are HINTS used for deduplication (so
-  // "sofa" and "couch" don't create two entries for the same service). The
-  // actual service lookup in the capability uses findService() which respects
-  // the control plane. So even if CLN003 is remapped, findService() resolves
-  // the correct service by name/alias match.
-  const FURNITURE_PATTERNS = [
-    { head: 'sofa', serviceId: 'CLN003', variantRe: /(\d+)\s*(?:seaters?|seats?|setas?|seates?|sitr|sitar)\b/i, variantLabel: (m) => `${m[1]}-seater` },
-    { head: 'couch', serviceId: 'CLN003', variantRe: /(\d+)\s*(?:seaters?|seats?|setas?|seates?)\b/i, variantLabel: (m) => `${m[1]}-seater` },
-    { head: 'carpet', serviceId: 'CLN004', variantRe: /(\d+)\s*(?:metres?|meters?|m2|sqm|mtrs?)\b/i, variantLabel: (m) => `${m[1]} metre` },
-    { head: 'rug', serviceId: 'CLN004', variantRe: /(\d+)\s*(?:metres?|meters?|m2|sqm|mtrs?)\b/i, variantLabel: (m) => `${m[1]} metre` },
-    { head: 'mattress', serviceId: 'CLN020', variantRe: /\b(crib|single|queen|king)\s*(?:size)?\b/i, variantLabel: (m) => m[1] },
-    { head: 'curtain', serviceId: 'CLN022', variantRe: /\b(small|medium|large|extra[ -]?large|xl)\b/i, variantLabel: (m) => m[1] },
-    { head: 'drape', serviceId: 'CLN022', variantRe: /\b(small|medium|large|extra[ -]?large|xl)\b/i, variantLabel: (m) => m[1] },
-    { head: 'chair', serviceId: 'CLN021', variantRe: null, variantLabel: null },
-    { head: 'table', serviceId: 'CLN033', variantRe: null, variantLabel: null },
-  ];
-
-  const items = [];
-  const seenServices = new Set();
-
-  for (const { head, serviceId, variantRe, variantLabel } of FURNITURE_PATTERNS) {
-    // Match the furniture head word with an optional preceding quantity.
-    const pluralSuffix = head.endsWith('s') ? '(?:es)?' : '(?:es|s)?';
-    const headRe = new RegExp(
-      `(?:\\b(\\d+|one|two|three|four|five|six|seven|eight|nine|ten|ek|aik|do|teen|char|chaar|panch)\\s+)?(?:a|an|the)?\\s*${head}${pluralSuffix}\\b`,
-      'i'
-    );
-    const headMatch = n.match(headRe);
-    if (!headMatch) continue;
-    if (seenServices.has(serviceId)) continue;
-
-    // Parse variant first (before quantity, because the quantity may be
-    // BEFORE the variant, e.g., "2 3-seater sofa" where 2=quantity, 3-seater=variant)
-    let variant = null;
-    let variantMatch = null;
-    if (variantRe) {
-      variantMatch = n.match(variantRe);
-      if (variantMatch) variant = variantLabel(variantMatch);
-    }
-
-    // v20.1: Parse quantity. If the head regex captured a quantity (immediately
-    // before the head word), use it. Otherwise, look for a quantity BEFORE the
-    // variant pattern (e.g., "2 3-seater sofa" → quantity=2, variant=3-seater).
-    let quantity = 1;
-    if (headMatch[1]) {
-      const wordMap = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, ek: 1, aik: 1, do: 2, teen: 3, char: 4, chaar: 4, panch: 5 };
-      const w = headMatch[1].toLowerCase();
-      if (/^\d+$/.test(w)) quantity = Number(w);
-      else if (wordMap[w]) quantity = wordMap[w];
-    } else if (variantMatch) {
-      // Look for a number BEFORE the variant match in the text.
-      // e.g., "2 3 seater sofa" → variantMatch.index points to "3 seater"
-      // We look for a number in the 20 chars before the variant.
-      const beforeVariant = n.substring(Math.max(0, variantMatch.index - 20), variantMatch.index);
-      const qtyBefore = beforeVariant.match(/(\d+|one|two|three|four|five|six|seven|eight|nine|ten|ek|aik|do|teen|char|chaar|panch)\s*$/i);
-      if (qtyBefore) {
-        const wordMap = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, ek: 1, aik: 1, do: 2, teen: 3, char: 4, chaar: 4, panch: 5 };
-        const w = qtyBefore[1].toLowerCase();
-        if (/^\d+$/.test(w)) quantity = Number(w);
-        else if (wordMap[w]) quantity = wordMap[w];
-      }
-    }
-
-    items.push({
-      serviceId,
-      serviceName: head.charAt(0).toUpperCase() + head.slice(1) + ' Cleaning',
-      quantity,
-      variant,
-      head,
-    });
-    seenServices.add(serviceId);
-  }
-
-  return items;
-}
-
 
 // Detects two-or-more distinct mattress/curtain/sofa size variants in a
 // pricing-information request. Used to render a multi-variant price list
@@ -1419,22 +1031,8 @@ function extractWeekdayOptions(value){
 }
 
 function isGenericPropertyCleaningService(service){
-  // v22.4: Use priceType instead of hardcoded IDs.
-  // A "generic property cleaning service" is an hourly cleaning service
-  // (standard) that applies to apartments/villas/homes — NOT deep, NOT
-  // furniture, NOT laundry.
-  if(!service) return false;
-  const name = String(service.name || '').toLowerCase();
-  const isHourly = service.priceType === 'hourly' || service.pricingServiceId === 'hourly-cleaner';
-  const isProperty = /\b(?:apartment|villa|home|house|standard)\b/i.test(service.name || '') ||
-                     /\b(?:apartment|villa|home|house)\b/i.test((service.aliases || []).join(' '));
-  const isNotDeep = !name.includes('deep');
-  const isNotLaundry = !name.includes('laundry');
-  const isNotFurniture = !name.includes('furniture') && !name.includes('sofa') && !name.includes('carpet');
-  // Check priceType first (attribute-based), then fallback to ID (backward compat)
-  return (isHourly && isNotDeep && isNotLaundry && isNotFurniture) ||
-         ['CLN008','CLN009'].includes(service?.id) ||
-         (/\b(?:apartment|villa|home) cleaning\b/i.test(service?.name||'')&&!/^Deep\b/i.test(service?.name||''));
+  return ['CLN008','CLN009'].includes(service?.id)
+    || (/\b(?:apartment|villa|home) cleaning\b/i.test(service?.name||'')&&!/^Deep\b/i.test(service?.name||''));
 }
 function resolveCleaningType(value){
   const text=normalizeText(value);

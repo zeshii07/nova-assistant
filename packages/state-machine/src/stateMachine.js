@@ -57,6 +57,14 @@ function deepMerge(target, source) {
   if (Array.isArray(target)) return source; // Replace array with object
 
   const result = { ...target };
+  if (process.env.NOVA_DEBUG_DEEPMERGE && source && source.cleaning) {
+    console.error('DEEPMERGE called for cleaning:', {
+      target_recurrence: target?.cleaning?.recurrence,
+      target_businessProvidesSupplies: target?.cleaning?.businessProvidesSupplies,
+      source_recurrence: source.cleaning.recurrence,
+      source_businessProvidesSupplies: source.cleaning.businessProvidesSupplies,
+    });
+  }
   for (const key of Object.keys(source)) {
     const sourceVal = source[key];
     if (sourceVal === null || sourceVal === undefined) continue; // Skip null/undefined
@@ -65,6 +73,12 @@ function deepMerge(target, source) {
     } else {
       result[key] = sourceVal;
     }
+  }
+  if (process.env.NOVA_DEBUG_DEEPMERGE && source && source.cleaning) {
+    console.error('DEEPMERGE result for cleaning:', {
+      result_recurrence: result?.cleaning?.recurrence,
+      result_businessProvidesSupplies: result?.cleaning?.businessProvidesSupplies,
+    });
   }
   return result;
 }

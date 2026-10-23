@@ -126,6 +126,7 @@ const ROUTES = {
   datasets: { title: 'Test Runner', subtitle: 'Run conversation datasets and view pass/fail.', render: renderDatasets },
   notifications: { title: 'Notifications', subtitle: 'Business owner email alerts and notification log.', render: renderNotifications },
   calendar: { title: 'Calendar', subtitle: 'Google Calendar integration — real availability check + event creation.', render: renderCalendar },
+  catalog: { title: 'Catalog', subtitle: 'Manage products, prices, and images for retail tenants.', render: renderCatalog },
   inspector: { title: 'Data Inspector', subtitle: 'Inspect live state, CRM, cart, and bookings for any tenant/customer.', render: renderInspector },
   settings: { title: 'Settings', subtitle: 'Admin dashboard configuration and runtime info.', render: renderSettings }
 };
@@ -1331,6 +1332,243 @@ async function loadCalendarEvents(tenant) {
         <tbody>${rows}</tbody>
       </table>
     </div>`;
+}
+
+// ─── Catalog (v35.0) ────────────────────────────────────────────────
+// Manage products, prices, and images for retail/catalog tenants.
+// Supports: list products, add new, edit existing, upload image, delete.
+async function renderCatalog() {
+  const view = $('view');
+  const tenant = state.tenant || (state.tenants[0]?.id || '');
+  if (!tenant) {
+    view.innerHTML = `<div class="card"><p>Select a tenant from the picker above to manage its catalog.</p></div>`;
+    return;
+  }
+
+  view.innerHTML = `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
+        <div>
+          <h3 style="margin:0">Catalog for ${esc(tenant)}</h3>
+          <p class="hint" style="margin-top:4px">Manage products, prices, and images. Changes apply instantly to the assistant.</p>
+        </div>
+        <button class="primary" id="addProductBtn">+ Add Product</button>
+      </div>
+      <div id="productsList" style="margin-top:14px">Loading products…</div>
+    </div>
+    <div id="productModal" style="display:none"></div>
+  `;
+
+  $('addProductBtn').addEventListener('click', () => showProductModal(tenant, null));
+  await loadProductsList(tenant);
+}
+
+async function loadProductsList(tenant) {
+  const list = $('productsList');
+  if (!list) return;
+  try {
+    const r = await api(`/api/admin/catalog/${encodeURIComponent(tenant)}/products`);
+    if (!r.ok) {
+      list.innerHTML = `<p style="color:var(--bad)">${esc(r.error || 'Failed to load')}</p>`;
+      return;
+    }
+    const products = r.products || [];
+    if (products.length === 0) {
+      list.innerHTML = `
+        <div class="empty">
+          <strong>No products yet</strong>
+          This tenant doesn't have a catalog yet. Click "+ Add Product" to create one.
+          Catalogs are useful for retail tenants where Nova shows product details and images in chat.
+        </div>`;
+      return;
+    }
+    list.innerHTML = `
+      <table>
+        <thead>
+          <tr><th>Image</th><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          ${products.map(p => `
+            <tr>
+              <td>${p.imageUrl ? `<img src="${esc(p.imageUrl)}" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:6px">` : `<div style="width:48px;height:48px;background:var(--surface-3);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--text-faint)">—</div>`}</td>
+              <td class="muted">${esc(p.id || '—')}</td>
+              <td><strong>${esc(p.name || '—')}</strong><div class="muted" style="font-size:11px">${esc(p.sku || '')}</div></td>
+              <td>${esc(p.category || '—')}</td>
+              <td>${esc(p.currency || '')} ${esc(p.price || 0)}</td>
+              <td>${p.inStock !== false ? badge(`${p.inventory || 0} in stock`, 'ok') : badge('out of stock', 'bad')}</td>
+              <td>
+                <button class="small" onclick="window.__editProduct('${esc(p.id)}')">Edit</button>
+                <button class="small danger" onclick="window.__deleteProduct('${esc(p.id)}')">Delete</button>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    `;
+    // Stash for inline edit/delete
+    window.__catalogProducts = products;
+    window.__catalogTenant = tenant;
+  } catch (err) {
+    list.innerHTML = `<p style="color:var(--bad)">${esc(err.message)}</p>`;
+  }
+}
+
+window.__editProduct = function(id) {
+  const p = (window.__catalogProducts || []).find(x => String(x.id) === String(id));
+  if (p) showProductModal(window.__catalogTenant, p);
+};
+
+window.__deleteProduct = async function(id) {
+  if (!confirm('Delete this product? This cannot be undone.')) return;
+  const r = await api(`/api/admin/catalog/${encodeURIComponent(window.__catalogTenant)}/products/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  if (r.ok) {
+    await loadProductsList(window.__catalogTenant);
+  } else {
+    alert(r.error || 'Delete failed');
+  }
+};
+
+function showProductModal(tenant, product) {
+  const modal = $('productModal');
+  const isEdit = !!product;
+  const p = product || { id: '', name: '', sku: '', category: '', price: 0, currency: 'PKR', description: '', inventory: 0, inStock: true, sizes: [], colors: [], tags: [], imageUrl: null };
+
+  modal.style.display = 'block';
+  modal.innerHTML = `
+    <div class="card" style="position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px" id="modalBackdrop">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto" id="modalCard">
+        <h3 style="margin:0 0 16px">${isEdit ? 'Edit Product' : 'Add New Product'}</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label class="hint">Name *</label><input id="pName" value="${esc(p.name || '')}" placeholder="Cotton T-Shirt"></div>
+          <div><label class="hint">SKU</label><input id="pSku" value="${esc(p.sku || '')}" placeholder="TSHIRT-001"></div>
+          <div><label class="hint">Category</label><input id="pCategory" value="${esc(p.category || '')}" placeholder="clothing"></div>
+          <div><label class="hint">Currency</label><input id="pCurrency" value="${esc(p.currency || 'PKR')}" placeholder="PKR / AED / USD"></div>
+          <div><label class="hint">Price (number)</label><input id="pPrice" type="number" value="${esc(p.price || 0)}"></div>
+          <div><label class="hint">Inventory count</label><input id="pInventory" type="number" value="${esc(p.inventory || 0)}"></div>
+        </div>
+        <div style="margin-top:12px"><label class="hint">Description</label><textarea id="pDesc" rows="2" style="width:100%">${esc(p.description || '')}</textarea></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div><label class="hint">Sizes (comma-separated)</label><input id="pSizes" value="${esc((p.sizes || []).join(', '))}" placeholder="S, M, L, XL"></div>
+          <div><label class="hint">Colors (comma-separated)</label><input id="pColors" value="${esc((p.colors || []).join(', '))}" placeholder="White, Black, Navy"></div>
+        </div>
+        <div style="margin-top:12px"><label class="hint">Tags / Aliases (comma-separated — helps Nova match this product in customer questions)</label><input id="pTags" value="${esc((p.tags || []).concat(p.aliases || []).join(', '))}" placeholder="cotton, shirt, casual"></div>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:14px;cursor:pointer"><input id="pInStock" type="checkbox" ${p.inStock !== false ? 'checked' : ''} style="width:auto"> In stock</label>
+
+        ${isEdit && p.imageUrl ? `
+          <div style="margin-top:14px">
+            <label class="hint">Current image</label>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+              <img src="${esc(p.imageUrl)}" style="width:80px;height:80px;object-fit:cover;border-radius:6px">
+              <button class="small danger" id="removeImageBtn">Remove image</button>
+            </div>
+          </div>` : ''}
+
+        <div style="margin-top:14px">
+          <label class="hint">Upload product image (PNG/JPG/WebP, max 2 MB)</label>
+          <input type="file" id="pImage" accept="image/png,image/jpeg,image/webp,image/gif" style="margin-top:6px">
+          <div id="imagePreview" style="margin-top:6px"></div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end">
+          <button id="cancelProductBtn">Cancel</button>
+          <button class="primary" id="saveProductBtn">${isEdit ? 'Save Changes' : 'Add Product'}</button>
+        </div>
+        <div id="productFormStatus" style="margin-top:10px;font-size:12px"></div>
+      </div>
+    </div>
+  `;
+
+  let selectedImage = null;
+
+  $('pImage').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      $('imagePreview').innerHTML = `<span style="color:var(--bad);font-size:11px">Image is too large. Max 2 MB (yours is ${Math.round(file.size/1024/1024)} MB).</span>`;
+      e.target.value = '';
+      return;
+    }
+    selectedImage = file;
+    const url = URL.createObjectURL(file);
+    $('imagePreview').innerHTML = `<img src="${url}" style="max-width:120px;max-height:120px;border-radius:6px">`;
+  });
+
+  $('removeImageBtn')?.addEventListener('click', async () => {
+    if (!confirm('Remove this product image?')) return;
+    // Set imageUrl to null via PUT
+    const r = await api(`/api/admin/catalog/${encodeURIComponent(tenant)}/products/${encodeURIComponent(p.id)}`, {
+      method: 'PUT', body: JSON.stringify({ imageUrl: null })
+    });
+    if (r.ok) {
+      showProductModal(tenant, r.product);
+      loadProductsList(tenant);
+    }
+  });
+
+  $('cancelProductBtn').addEventListener('click', () => { modal.style.display = 'none'; });
+  // Close modal when clicking the backdrop (not the inner card)
+  $('modalBackdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'modalBackdrop') modal.style.display = 'none';
+  });
+
+  $('saveProductBtn').addEventListener('click', async () => {
+    const btn = $('saveProductBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    const payload = {
+      name: $('pName').value.trim(),
+      sku: $('pSku').value.trim(),
+      category: $('pCategory').value.trim(),
+      currency: $('pCurrency').value.trim() || 'PKR',
+      price: parseFloat($('pPrice').value) || 0,
+      inventory: parseInt($('pInventory').value) || 0,
+      description: $('pDesc').value.trim(),
+      sizes: $('pSizes').value.split(',').map(s => s.trim()).filter(Boolean),
+      colors: $('pColors').value.split(',').map(s => s.trim()).filter(Boolean),
+      tags: $('pTags').value.split(',').map(s => s.trim()).filter(Boolean),
+      aliases: $('pTags').value.split(',').map(s => s.trim()).filter(Boolean),
+      inStock: $('pInStock').checked
+    };
+    if (!payload.name) {
+      $('productFormStatus').innerHTML = `<span style="color:var(--bad)">Name is required.</span>`;
+      btn.disabled = false;
+      btn.textContent = isEdit ? 'Save Changes' : 'Add Product';
+      return;
+    }
+    try {
+      let savedProduct;
+      if (isEdit) {
+        const r = await api(`/api/admin/catalog/${encodeURIComponent(tenant)}/products/${encodeURIComponent(p.id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+        if (!r.ok) throw new Error(r.error || 'Update failed');
+        savedProduct = r.product;
+      } else {
+        const r = await api(`/api/admin/catalog/${encodeURIComponent(tenant)}/products`, { method: 'POST', body: JSON.stringify(payload) });
+        if (!r.ok) throw new Error(r.error || 'Add failed');
+        savedProduct = r.product;
+      }
+      // Upload image if selected
+      if (selectedImage) {
+        const reader = new FileReader();
+        await new Promise((resolve) => {
+          reader.onloadend = async () => {
+            const base64 = reader.result.split(',')[1];
+            const up = await api(`/api/admin/catalog/${encodeURIComponent(tenant)}/products/${encodeURIComponent(savedProduct.id)}/image`, {
+              method: 'POST',
+              body: JSON.stringify({ contentBase64: base64, filename: selectedImage.name })
+            });
+            if (!up.ok) $('productFormStatus').innerHTML += `<span style="color:var(--warn)">Product saved but image upload failed: ${up.error}</span>`;
+            resolve();
+          };
+          reader.readAsDataURL(selectedImage);
+        });
+      }
+      modal.style.display = 'none';
+      await loadProductsList(tenant);
+    } catch (err) {
+      $('productFormStatus').innerHTML = `<span style="color:var(--bad)">${esc(err.message)}</span>`;
+      btn.disabled = false;
+      btn.textContent = isEdit ? 'Save Changes' : 'Add Product';
+    }
+  });
 }
 
 async function renderInspector() {

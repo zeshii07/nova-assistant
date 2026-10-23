@@ -122,6 +122,8 @@ const ROUTES = {
   bookings: { title: 'Bookings', render: renderBookings },
   leads: { title: 'Leads', render: renderLeads },
   customers: { title: 'Customers', render: renderCustomers },
+  voice: { title: 'Voice Studio', render: renderVoiceStudio },
+  kiosk: { title: 'Kiosk & QR', render: renderKiosk },
   notifications: { title: 'Notifications', render: renderNotifications },
   settings: { title: 'Settings', render: renderSettings }
 };
@@ -476,6 +478,520 @@ async function renderNotifications() {
         </table>`}
     </div>
   `;
+}
+
+// ─── Voice Studio (v34.2: Voice Cloning UI) ───────────────
+// Business owners can:
+//   1. Record a voice sample directly in the browser (MediaRecorder API)
+//   2. Upload an audio file (.webm/.mp3/.wav/.m4a/.ogg)
+//   3. Configure browser TTS voice (rate, pitch, volume, voice name)
+//   4. Preview the kiosk interface where the voice will be used
+async function renderVoiceStudio() {
+  const view = $('view');
+  view.innerHTML = `
+    <div class="card">
+      <h3>Voice Cloning — How It Works</h3>
+      <p style="font-size:13px;color:var(--text-dim);line-height:1.6">
+        Upload or record a short voice sample (10–30 seconds works best).
+        When customers chat through your <a href="${window.location.origin}/kiosk/${esc(state.owner?.tenantId || '')}" target="_blank" style="color:var(--accent-strong)">kiosk page</a>
+        or website widget with voice replies on, they'll hear your voice signature at the start of each Nova reply.
+        The actual reply text is spoken by the browser's text-to-speech engine — but your sample plays first as a recognizable voice tag.
+      </p>
+      <p style="font-size:12px;color:var(--text-faint);margin-top:8px">
+        Tip: record yourself saying something like "Hi, this is John from CleanPro. Thanks for reaching out — I'll help you with that right away."
+      </p>
+    </div>
+
+    <div class="card" id="voiceStatusCard">
+      <h3>Current Voice Sample</h3>
+      <div id="voiceStatus">Loading…</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Option 1 — Record in Browser</h3>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px">Use your microphone to record a clip directly. Chrome or Edge recommended.</p>
+        <div id="recordControls" style="display:flex;flex-direction:column;gap:10px;align-items:center;padding:14px;background:var(--surface-2);border-radius:10px">
+          <button class="primary" id="recordBtn" style="width:auto;padding:14px 28px;font-size:14px;border-radius:999px">🎤 Start Recording</button>
+          <div id="recordTimer" style="font-family:ui-monospace,Consolas,monospace;font-size:24px;color:var(--text-dim)">00:00</div>
+          <div id="recordHint" style="font-size:11px;color:var(--text-faint);text-align:center">Tap start, speak naturally, then tap stop. Mic permission will be requested.</div>
+          <audio id="recordPreview" controls style="display:none;width:100%;margin-top:6px"></audio>
+          <button class="primary" id="saveRecordedBtn" style="display:none;width:auto;padding:10px 20px">Save Recording</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Option 2 — Upload Audio File</h3>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px">Drag &amp; drop or browse. Formats: .webm, .mp3, .wav, .m4a, .ogg (max 5 MB).</p>
+        <div id="dropZone" style="border:2px dashed var(--border-strong);border-radius:10px;padding:30px;text-align:center;cursor:pointer;transition:background .15s,border-color .15s">
+          <div style="font-size:32px;color:var(--text-faint)">📁</div>
+          <div style="margin-top:8px;font-size:13px;color:var(--text-dim)">Click to browse or drop file here</div>
+          <input type="file" id="fileInput" accept="audio/webm,audio/mp3,audio/mpeg,audio/wav,audio/m4a,audio/mp4,audio/ogg" style="display:none">
+        </div>
+        <div id="filePreview" style="display:none;margin-top:10px"></div>
+        <button class="primary" id="uploadFileBtn" style="display:none;margin-top:10px">Upload File</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Browser TTS Voice Settings</h3>
+      <p style="font-size:12px;color:var(--text-dim);margin-bottom:14px">
+        Configure how Nova speaks reply text in the kiosk/widget when voice replies are turned on.
+        These settings are applied on top of your uploaded voice sample.
+      </p>
+      <div class="grid-2">
+        <div>
+          <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:6px">Voice name (from browser's available voices)</label>
+          <input id="vpVoiceName" placeholder="e.g. Samantha, Aria, Jenny, Google US English">
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:6px">Speaking rate (0.5 = slow, 1.0 = normal, 1.5 = fast)</label>
+          <input id="vpRate" type="number" step="0.05" min="0.5" max="1.5" value="0.95">
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:6px">Pitch (0.0 = low, 1.0 = normal, 2.0 = high)</label>
+          <input id="vpPitch" type="number" step="0.1" min="0" max="2" value="1.0">
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:6px">Volume (0.0 to 1.0)</label>
+          <input id="vpVolume" type="number" step="0.05" min="0" max="1" value="0.85">
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;color:var(--text-dim);cursor:pointer">
+        <input id="vpEnabled" type="checkbox" checked style="width:auto"> Voice profile enabled (apply these settings in kiosk/widget)
+      </label>
+      <button class="primary" id="saveVoiceProfileBtn" style="margin-top:14px">Save Voice Profile</button>
+      <div id="voiceProfileStatus" style="margin-top:10px;font-size:12px"></div>
+    </div>
+
+    <div class="card">
+      <h3>Preview &amp; Test</h3>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px">Open your kiosk page to test how customers will experience the voice replies.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <a class="primary" href="${window.location.origin}/kiosk/${esc(state.owner?.tenantId || '')}" target="_blank" style="padding:10px 18px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none;display:inline-block">Open Kiosk Page ↗</a>
+        <a href="${window.location.origin}/widget-test" target="_blank" style="padding:10px 18px;border-radius:8px;background:var(--surface-3);color:var(--text);text-decoration:none;display:inline-block;border:1px solid var(--border-strong)">Open Widget Test ↗</a>
+        <button id="previewSampleBtn" style="padding:10px 18px">▶ Play Uploaded Sample</button>
+      </div>
+      <audio id="previewAudio" controls style="display:none;width:100%;margin-top:14px"></audio>
+    </div>
+  `;
+
+  // Wire up controls
+  voiceStudio_loadStatus();
+  voiceStudio_wireRecord();
+  voiceStudio_wireUpload();
+  voiceStudio_wireProfile();
+  voiceStudio_wirePreview();
+}
+
+// Load current voice sample status
+async function voiceStudio_loadStatus() {
+  const statusEl = $('voiceStatus');
+  try {
+    const r = await api('/api/business/voice/sample');
+    if (!r.ok) {
+      statusEl.innerHTML = `<p style="color:var(--bad);font-size:13px">${esc(r.error || 'Failed to load voice sample')}</p>`;
+      return;
+    }
+    if (!r.hasSample) {
+      statusEl.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(245,181,74,.1);border-radius:8px;border:1px solid rgba(245,181,74,.3)">
+          <span style="font-size:20px">⚠️</span>
+          <div>
+            <strong style="font-size:13px;color:var(--warn)">No voice sample uploaded yet</strong>
+            <p style="font-size:12px;color:var(--text-dim);margin-top:2px">Record or upload a clip below to add your voice signature to kiosk replies.</p>
+          </div>
+        </div>`;
+      return;
+    }
+    const meta = r.meta || {};
+    const sizeKb = Math.round((meta.size || 0) / 1024);
+    const date = meta.uploadedAt ? new Date(meta.uploadedAt).toLocaleString() : '—';
+    statusEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(61,220,151,.08);border-radius:8px;border:1px solid rgba(61,220,151,.3);margin-bottom:12px">
+        <span style="font-size:20px">✅</span>
+        <div style="flex:1">
+          <strong style="font-size:13px;color:var(--ok)">Voice sample active</strong>
+          <p style="font-size:12px;color:var(--text-dim);margin-top:2px">
+            ${esc(meta.mimeType || 'audio')} · ${sizeKb} KB · uploaded ${esc(date)} by ${esc(meta.uploadedBy || '—')}
+          </p>
+        </div>
+      </div>
+      <audio controls src="${esc(r.voiceSampleUrl)}" style="width:100%;margin-bottom:10px"></audio>
+      <button class="danger" id="deleteSampleBtn">Delete Sample</button>
+    `;
+    // Populate voice profile fields if present
+    if (r.voiceProfile) {
+      const vp = r.voiceProfile;
+      if ($('vpVoiceName')) $('vpVoiceName').value = vp.voiceName || '';
+      if ($('vpRate')) $('vpRate').value = vp.rate ?? 0.95;
+      if ($('vpPitch')) $('vpPitch').value = vp.pitch ?? 1.0;
+      if ($('vpVolume')) $('vpVolume').value = vp.volume ?? 0.85;
+      if ($('vpEnabled')) $('vpEnabled').checked = vp.enabled !== false;
+    }
+    $('deleteSampleBtn')?.addEventListener('click', async () => {
+      if (!confirm('Delete this voice sample? The kiosk/widget will fall back to browser TTS only.')) return;
+      const del = await api('/api/business/voice/sample', { method: 'DELETE' });
+      if (del.ok) {
+        voiceStudio_loadStatus();
+        showVoiceProfileStatus('Sample deleted.', 'ok');
+      } else {
+        showVoiceProfileStatus(del.error || 'Delete failed', 'bad');
+      }
+    });
+  } catch (err) {
+    statusEl.innerHTML = `<p style="color:var(--bad);font-size:13px">${esc(err.message)}</p>`;
+  }
+}
+
+function showVoiceProfileStatus(text, kind) {
+  const el = $('voiceProfileStatus');
+  if (!el) return;
+  const color = kind === 'ok' ? 'var(--ok)' : (kind === 'bad' ? 'var(--bad)' : 'var(--text-dim)');
+  el.innerHTML = `<span style="color:${color};font-size:12px">${esc(text)}</span>`;
+}
+
+// In-browser recording via MediaRecorder API
+let voiceStudio_mediaRecorder = null;
+let voiceStudio_chunks = [];
+let voiceStudio_timer = null;
+let voiceStudio_startTime = 0;
+let voiceStudio_recordedBlob = null;
+let voiceStudio_recordedMimeType = null;
+
+function voiceStudio_wireRecord() {
+  const btn = $('recordBtn');
+  const timerEl = $('recordTimer');
+  const preview = $('recordPreview');
+  const saveBtn = $('saveRecordedBtn');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    if (voiceStudio_mediaRecorder && voiceStudio_mediaRecorder.state === 'recording') {
+      // Stop recording
+      voiceStudio_mediaRecorder.stop();
+      return;
+    }
+    // Start recording
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      voiceStudio_chunks = [];
+      // Pick a supported mime type
+      const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
+      voiceStudio_recordedMimeType = candidates.find(t => MediaRecorder.isTypeSupported(t)) || '';
+      voiceStudio_mediaRecorder = new MediaRecorder(stream, voiceStudio_recordedMimeType ? { mimeType: voiceStudio_recordedMimeType } : undefined);
+      voiceStudio_mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) voiceStudio_chunks.push(e.data);
+      };
+      voiceStudio_mediaRecorder.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        voiceStudio_recordedBlob = new Blob(voiceStudio_chunks, { type: voiceStudio_recordedMimeType || 'audio/webm' });
+        const url = URL.createObjectURL(voiceStudio_recordedBlob);
+        preview.src = url;
+        preview.style.display = 'block';
+        saveBtn.style.display = 'inline-block';
+        btn.textContent = '🎤 Record Again';
+        btn.classList.remove('danger');
+        btn.classList.add('primary');
+        clearInterval(voiceStudio_timer);
+        $('recordHint').textContent = 'Recorded ' + Math.round(voiceStudio_recordedBlob.size / 1024) + ' KB. Save to use as voice sample.';
+      };
+      voiceStudio_mediaRecorder.start();
+      btn.textContent = '⏹ Stop Recording';
+      btn.classList.remove('primary');
+      btn.classList.add('danger');
+      $('recordHint').textContent = 'Recording… speak now. Tap stop when done.';
+      voiceStudio_startTime = Date.now();
+      voiceStudio_timer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - voiceStudio_startTime) / 1000);
+        const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        const ss = String(elapsed % 60).padStart(2, '0');
+        timerEl.textContent = `${mm}:${ss}`;
+      }, 250);
+    } catch (err) {
+      $('recordHint').innerHTML = `<span style="color:var(--bad)">Microphone access failed: ${esc(err.message)}</span>`;
+    }
+  });
+
+  saveBtn.addEventListener('click', async () => {
+    if (!voiceStudio_recordedBlob) return;
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    // Convert blob to base64
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64 = reader.result.split(',')[1];
+      try {
+        const r = await api('/api/business/voice/upload', {
+          method: 'POST',
+          body: JSON.stringify({
+            contentBase64: base64,
+            mimeType: voiceStudio_recordedMimeType || 'audio/webm',
+            filename: 'recorded-sample' + (voiceStudio_recordedMimeType ? '.' + voiceStudio_recordedMimeType.split('/')[1].split(';')[0] : '.webm')
+          })
+        });
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Recording';
+        if (r.ok) {
+          saveBtn.style.display = 'none';
+          voiceStudio_loadStatus();
+          showVoiceProfileStatus('Recording saved! Kiosk will use this clip.', 'ok');
+        } else {
+          showVoiceProfileStatus(r.error || 'Save failed', 'bad');
+        }
+      } catch (err) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Recording';
+        showVoiceProfileStatus(err.message, 'bad');
+      }
+    };
+    reader.readAsDataURL(voiceStudio_recordedBlob);
+  });
+}
+
+// File upload (drag-drop + click to browse)
+function voiceStudio_wireUpload() {
+  const dropZone = $('dropZone');
+  const fileInput = $('fileInput');
+  const preview = $('filePreview');
+  const uploadBtn = $('uploadFileBtn');
+  if (!dropZone) return;
+
+  let selectedFile = null;
+
+  dropZone.addEventListener('click', () => fileInput.click());
+  ['dragenter', 'dragover'].forEach(evt => {
+    dropZone.addEventListener(evt, e => {
+      e.preventDefault();
+      dropZone.style.background = 'rgba(45, 91, 209, 0.08)';
+      dropZone.style.borderColor = 'var(--accent)';
+    });
+  });
+  ['dragleave', 'drop'].forEach(evt => {
+    dropZone.addEventListener(evt, e => {
+      e.preventDefault();
+      dropZone.style.background = '';
+      dropZone.style.borderColor = '';
+    });
+  });
+  dropZone.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileSelect(file);
+  });
+  fileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) handleFileSelect(file);
+  });
+
+  function handleFileSelect(file) {
+    if (!file.type.startsWith('audio/')) {
+      preview.innerHTML = `<p style="color:var(--bad);font-size:12px">Please select an audio file (.webm, .mp3, .wav, .m4a, .ogg)</p>`;
+      preview.style.display = 'block';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      preview.innerHTML = `<p style="color:var(--bad);font-size:12px">File is too large. Max 5 MB (yours is ${Math.round(file.size / 1024 / 1024)} MB).</p>`;
+      preview.style.display = 'block';
+      uploadBtn.style.display = 'none';
+      return;
+    }
+    selectedFile = file;
+    const url = URL.createObjectURL(file);
+    preview.innerHTML = `
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px">${esc(file.name)} · ${Math.round(file.size / 1024)} KB · ${esc(file.type)}</div>
+      <audio controls src="${url}" style="width:100%"></audio>
+    `;
+    preview.style.display = 'block';
+    uploadBtn.style.display = 'inline-block';
+  }
+
+  uploadBtn.addEventListener('click', async () => {
+    if (!selectedFile) return;
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = 'Uploading…';
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64 = reader.result.split(',')[1];
+      try {
+        const r = await api('/api/business/voice/upload', {
+          method: 'POST',
+          body: JSON.stringify({
+            contentBase64: base64,
+            mimeType: selectedFile.type,
+            filename: selectedFile.name
+          })
+        });
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = 'Upload File';
+        if (r.ok) {
+          voiceStudio_loadStatus();
+          showVoiceProfileStatus('File uploaded! Kiosk will use this clip.', 'ok');
+          // Reset drop zone
+          preview.style.display = 'none';
+          uploadBtn.style.display = 'none';
+          fileInput.value = '';
+          selectedFile = null;
+        } else {
+          showVoiceProfileStatus(r.error || 'Upload failed', 'bad');
+        }
+      } catch (err) {
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = 'Upload File';
+        showVoiceProfileStatus(err.message, 'bad');
+      }
+    };
+    reader.readAsDataURL(selectedFile);
+  });
+}
+
+// Voice profile (TTS settings) save
+function voiceStudio_wireProfile() {
+  const btn = $('saveVoiceProfileBtn');
+  if (!btn) return;
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    const payload = {
+      enabled: $('vpEnabled').checked,
+      voiceName: $('vpVoiceName').value.trim() || null,
+      rate: parseFloat($('vpRate').value) || 0.95,
+      pitch: parseFloat($('vpPitch').value) || 1.0,
+      volume: parseFloat($('vpVolume').value) || 0.85
+    };
+    try {
+      const r = await api('/api/business/voice/profile', { method: 'PUT', body: JSON.stringify(payload) });
+      btn.disabled = false;
+      btn.textContent = 'Save Voice Profile';
+      if (r.ok) {
+        showVoiceProfileStatus('Voice profile saved. Open the kiosk to test.', 'ok');
+      } else {
+        showVoiceProfileStatus(r.error || 'Save failed', 'bad');
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Save Voice Profile';
+      showVoiceProfileStatus(err.message, 'bad');
+    }
+  });
+}
+
+// Preview play button
+function voiceStudio_wirePreview() {
+  const btn = $('previewSampleBtn');
+  const audio = $('previewAudio');
+  if (!btn) return;
+  btn.addEventListener('click', async () => {
+    try {
+      const r = await api('/api/business/voice/sample');
+      if (!r.ok || !r.hasSample) {
+        showVoiceProfileStatus('No sample uploaded yet. Record or upload one first.', 'bad');
+        return;
+      }
+      audio.src = r.voiceSampleUrl;
+      audio.style.display = 'block';
+      audio.play();
+    } catch (err) {
+      showVoiceProfileStatus(err.message, 'bad');
+    }
+  });
+}
+
+// ─── Kiosk & QR (v34.2) ────────────────────────────────────
+// Business owners can:
+//   - See their kiosk URL (full-screen chat, no popup, mobile-first)
+//   - Download / display QR code linking to the kiosk
+//   - Embed the kiosk in an iframe
+async function renderKiosk() {
+  const view = $('view');
+  const tid = state.owner?.tenantId || '';
+  const kioskUrl = `${window.location.origin}/kiosk/${encodeURIComponent(tid)}`;
+  // QR code via goqr.me (free, no auth required)
+  const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(kioskUrl)}`;
+  const qrSvgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&format=svg&data=${encodeURIComponent(kioskUrl)}`;
+
+  view.innerHTML = `
+    <div class="card">
+      <h3>Your Kiosk Page</h3>
+      <p style="font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:12px">
+        The kiosk page is a single full-screen chat interface designed for tablets and phones mounted at your front desk,
+        storefront, or reception. Customers walk up, tap "Start Conversation", and chat with Nova directly — no name or phone number required.
+        Idle for 5 minutes? It auto-resets for the next visitor.
+      </p>
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:12px">
+        <div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Kiosk URL</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <code style="font-size:13px;color:var(--text);word-break:break-all;flex:1">${esc(kioskUrl)}</code>
+          <button id="copyKioskUrl" style="width:auto">Copy</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="primary" href="${esc(kioskUrl)}" target="_blank" style="padding:10px 18px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none;display:inline-block">Open Kiosk ↗</a>
+        <button id="downloadQrBtn" style="width:auto">Download QR Code (PNG)</button>
+        <button id="downloadQrSvgBtn" style="width:auto">Download QR Code (SVG)</button>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="text-align:center">
+        <h3>QR Code</h3>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:14px">Print this and place it on your counter or shop window. Customers scan with their phone camera to open your kiosk chat.</p>
+        <div style="background:#fff;padding:20px;border-radius:12px;display:inline-block">
+          <img src="${esc(qrImgUrl)}" alt="QR code for ${esc(tid)} kiosk" style="width:240px;height:240px;display:block">
+        </div>
+        <p style="font-size:11px;color:var(--text-faint);margin-top:10px;word-break:break-all">Links to: ${esc(kioskUrl)}</p>
+      </div>
+
+      <div class="card">
+        <h3>Embed Options</h3>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:8px">Embed the kiosk in an iframe on any page:</p>
+        <pre style="font-size:11px">&lt;iframe
+  src="${esc(kioskUrl)}"
+  style="width:100%;height:600px;border:0"
+  title="Nova Kiosk"&gt;&lt;/iframe&gt;</pre>
+
+        <p style="font-size:12px;color:var(--text-dim);margin:18px 0 8px">Or open in a new tab as a progressive web app:</p>
+        <pre style="font-size:11px">On mobile: open ${esc(kioskUrl)}
+→ browser menu → "Add to Home Screen"
+→ launches full-screen like a native app</pre>
+
+        <p style="font-size:12px;color:var(--text-dim);margin:18px 0 8px">Embed the standard widget (popup bubble) instead:</p>
+        <pre style="font-size:11px">&lt;script
+  src="${window.location.origin}/widget.js"
+  data-tenant="${esc(tid)}"
+  data-server="${window.location.origin}"
+  async&gt;&lt;/script&gt;</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Kiosk Best Practices</h3>
+      <ul style="padding-left:18px;color:var(--text-dim);font-size:13px;line-height:1.7">
+        <li>Mount a tablet at customer-eye level near the entrance.</li>
+        <li>Keep device plugged in — kiosk stays awake while browser is open.</li>
+        <li>Use Chrome or Edge for best voice input/output support.</li>
+        <li>Turn on the device's "kiosk mode" or full-screen browser to hide the URL bar.</li>
+        <li>Pair with a Voice Studio sample (see Voice Studio tab) so customers hear your voice when Nova replies.</li>
+        <li>5-minute idle auto-reset keeps the next customer's chat private.</li>
+      </ul>
+    </div>
+  `;
+
+  // Wire copy / download
+  $('copyKioskUrl')?.addEventListener('click', () => {
+    navigator.clipboard.writeText(kioskUrl).then(() => {
+      $('copyKioskUrl').textContent = 'Copied!';
+      setTimeout(() => { $('copyKioskUrl').textContent = 'Copy'; }, 1800);
+    }).catch(() => {
+      $('copyKioskUrl').textContent = 'Press Ctrl+C';
+      setTimeout(() => { $('copyKioskUrl').textContent = 'Copy'; }, 1800);
+    });
+  });
+  $('downloadQrBtn')?.addEventListener('click', () => {
+    window.open(qrImgUrl + '&download=1', '_blank');
+  });
+  $('downloadQrSvgBtn')?.addEventListener('click', () => {
+    window.open(qrSvgUrl, '_blank');
+  });
 }
 
 // ─── Settings ─────────────────────────────────────────────

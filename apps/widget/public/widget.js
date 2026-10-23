@@ -236,6 +236,17 @@
         };
         console.info('[Nova Widget] Voice profile loaded:', data.voiceProfile.voiceName || 'default');
       }
+      // v34.2: Preload voice sample (if business owner uploaded a recorded clip)
+      if (data.voiceSampleUrl) {
+        state._voiceSampleUrl = data.voiceSampleUrl;
+        try {
+          state._voiceSampleAudio = new Audio(data.voiceSampleUrl);
+          state._voiceSampleAudio.preload = 'auto';
+          console.info('[Nova Widget] Voice sample loaded:', data.voiceSampleUrl);
+        } catch (e) {
+          console.warn('[Nova Widget] Voice sample preload failed:', e);
+        }
+      }
     } catch (err) {
       const classified = classifyError(err);
       state.config = {
@@ -1070,6 +1081,16 @@
 
       const cleanText = stripForSpeech(text);
       if (!cleanText) return;
+
+      // v34.2: Play uploaded voice sample as a recognizable voice tag
+      // (the actual reply text is still spoken via TTS afterwards)
+      if (state._voiceSampleAudio) {
+        try {
+          state._voiceSampleAudio.currentTime = 0;
+          const playPromise = state._voiceSampleAudio.play();
+          if (playPromise && playPromise.catch) playPromise.catch(() => {});
+        } catch (e) {}
+      }
 
       // Cancel any ongoing speech
       window.speechSynthesis.cancel();

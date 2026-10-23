@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "34.1.0",
+  "version": "35.0.0",
   "private": true,
-  "description": "Nova v34.0 - Core engine bug fixes (routing, language drift, time formatting) - WhatsApp-style mic/send toggle, futuristic chat background, external cron keep-alive",
+  "description": "Nova v35.0 - PWA support (kiosk installable + offline message queue), product catalog management UI with image upload, inline product images in chat",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {
