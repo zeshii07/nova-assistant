@@ -1374,12 +1374,16 @@ async function loadProductsList(tenant) {
     }
     const products = r.products || [];
     if (products.length === 0) {
-      list.innerHTML = `
-        <div class="empty">
-          <strong>No products yet</strong>
-          This tenant doesn't have a catalog yet. Click "+ Add Product" to create one.
-          Catalogs are useful for retail tenants where Nova shows product details and images in chat.
-        </div>`;
+      // v35.2: Smarter empty state — distinguish service-based tenants (cleaning,
+      // salon, restaurant) which don't use a product catalog from retail tenants
+      // where adding products makes sense.
+      const tenantInfo = (state.tenants || []).find(t => t.id === tenant) || {};
+      const tenantDomain = tenantInfo.domain || '';
+      const isServiceTenant = ['cleaning', 'salon', 'restaurant', 'driving-school', 'tutor', 'education'].includes(tenantDomain);
+      const message = isServiceTenant
+        ? `<strong>This is a service-based business</strong>This tenant operates on services (${esc(tenantDomain)}), not a product catalog. Use the <a href="/business" target="_blank" style="color:var(--accent-strong)">Business Dashboard → Settings</a> to manage service configurations instead.`
+        : `<strong>No products yet</strong>This tenant doesn't have a catalog yet. Click "+ Add Product" above to create one. Catalogs are useful for retail tenants where Nova shows product details and images in chat.`;
+      list.innerHTML = `<div class="empty">${message}</div>`;
       return;
     }
     list.innerHTML = `

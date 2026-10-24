@@ -1422,6 +1422,21 @@ class CleaningCapability extends BaseCapability {
     }
 
     if (!previous.step && context.intelligence?.selected?.intent === "cleaning.service_explore") {
+      // v35.2 BUG FIX: If customer said "book"/"schedule" with a date/time,
+      // ask what TYPE of cleaning instead of dumping the full service list.
+      const wantsBooking = /\b(?:book|schedule|reserve|arrange|i want|i need|i'?d like|karwana|krwana|karwani|krani|chahiye|chaheye|mujhe|mujhy|mujy)\b/i.test(text);
+      const hasDate = /\b(?:today|tomorrow|day after tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next week|kal|parson|parso)\b/i.test(text);
+      const hasTime = /\b(?:\d{1,2}\s*(?:am|pm)|\d{1,2}:\d{2}|morning|afternoon|evening|night|subah|shaam)\b/i.test(text);
+      if (wantsBooking && (hasDate || hasTime)) {
+        const reply = localized(language,
+          `I'd love to help you book a cleaning. Which type would you like — Home Cleaning, Deep Cleaning, Sofa Cleaning, Carpet Cleaning, or Office Cleaning?`,
+          `Cleaning book karne ke liye batayein kaunsi service chahiye — Home Cleaning, Deep Cleaning, Sofa Cleaning, Carpet Cleaning, ya Office Cleaning?`,
+          `صفائی بک کرنے کے لیے بتائیں کون سی سروس چاہیے — ہوم کلیننگ، ڈیپ کلیننگ، صوفہ کلیننگ، کارپٹ کلیننگ، یا آفس کلیننگ؟`);
+        return result(reply, language, { ...previous, step: 'service_selection', pendingDate: hasDate ? extractDateFromText(text) : null, pendingTime: hasTime ? extractTimeFromText(text) : null }, "cleaning_booking_type_clarification", {
+          intent: "CLEANING_BOOKING_TYPE_NEEDED",
+          payload: { legacyText: reply, preferLegacyText: true }
+        });
+      }
       const services = await cleaning.listServices();
       const durationHours = context.intelligence?.entities?.durationHours || null;
       await context.services.crm?.recordActivity("cleaning.services_viewed", { count: services.length, durationHours });
@@ -1673,6 +1688,24 @@ class CleaningCapability extends BaseCapability {
 
     const found = await cleaning.findService(text);
     if (!found.service) {
+      // v35.2 BUG FIX: When customer explicitly says "book"/"schedule"/"i need"
+      // with a date/time but no specific service type, ask them what type of
+      // cleaning instead of dumping the full service list. Previous behavior
+      // returned a 30-line service list which was overwhelming and ignored the
+      // customer's "book" intent.
+      const wantsBooking = /\b(?:book|schedule|reserve|arrange|i want|i need|i'?d like|karwana|krwana|karwani|krani|chahiye|chaheye|mujhe|mujhy|mujy)\b/i.test(text);
+      const hasDate = /\b(?:today|tomorrow|day after tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next week|kal|parson|parso)\b/i.test(text);
+      const hasTime = /\b(?:\d{1,2}\s*(?:am|pm)|\d{1,2}:\d{2}|morning|afternoon|evening|night|subah|shaam)\b/i.test(text);
+      if (wantsBooking && (hasDate || hasTime)) {
+        const reply = localized(language,
+          `I'd love to help you book a cleaning. Which type would you like — Home Cleaning, Deep Cleaning, Sofa Cleaning, Carpet Cleaning, or Office Cleaning?`,
+          `Cleaning book karne ke liye batayein kaunsi service chahiye — Home Cleaning, Deep Cleaning, Sofa Cleaning, Carpet Cleaning, ya Office Cleaning?`,
+          `صفائی بک کرنے کے لیے بتائیں کون سی سروس چاہیے — ہوم کلیننگ، ڈیپ کلیننگ، صوفہ کلیننگ، کارپٹ کلیننگ، یا آفس کلیننگ؟`);
+        return result(reply, language, { ...previous, step: 'service_selection', pendingDate: hasDate ? extractDateFromText(text) : null, pendingTime: hasTime ? extractTimeFromText(text) : null }, "cleaning_booking_type_clarification", {
+          intent: "CLEANING_BOOKING_TYPE_NEEDED",
+          payload: { legacyText: reply, preferLegacyText: true }
+        });
+      }
       const services = await cleaning.listServices();
       const durationHours=context.intelligence?.entities?.durationHours || previous.durationHours || null;
       return result(durationHours ? formatServicesWithDuration(services,language,durationHours) : formatServices(services, language), language, durationHours?{durationHours}:{}, "cleaning_services_listed", {
@@ -1742,6 +1775,35 @@ function result(reply, language, cleaningState, lastIntent, responseModel = null
   return createCapabilityResult({ handled: true, reply, confidence: 0.99, responseModel, statePatch: { language, activePlugin: "cleaning", lastIntent, capabilityState: { cleaning: cleaningState } }, events });
 }
 function localized(language,english,roman,urdu){ return language==="urdu"?urdu:language==="roman_urdu"?roman:english; }
+// v35.2: Lightweight date/time extractors for the booking-type clarification flow.
+// These are intentionally simple — full semantic extraction happens later in the
+// booking workflow once a service is selected.
+function extractDateFromText(text){
+  const t=String(text||'').toLowerCase();
+  if(/\bday after tomorrow\b/.test(t))return 'day_after_tomorrow';
+  if(/\btomorrow\b/.test(t))return 'tomorrow';
+  if(/\btoday\b/.test(t))return 'today';
+  const dayMatch=t.match(/\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/);
+  if(dayMatch)return dayMatch[1];
+  return null;
+}
+function extractTimeFromText(text){
+  const t=String(text||'');
+  const m=t.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i);
+  if(m){
+    const hh=parseInt(m[1],10);
+    const mm=m[2]?parseInt(m[2],10):0;
+    const ap=(m[3]||'').toLowerCase();
+    return `${hh}:${String(mm).padStart(2,'0')} ${ap}`;
+  }
+  const m2=t.match(/\b(\d{1,2}):(\d{2})\b/);
+  if(m2)return `${m2[1]}:${m2[2]}`;
+  if(/\bmorning\b|subah|subha/i.test(t))return 'morning';
+  if(/\bafternoon\b|dopahar/i.test(t))return 'afternoon';
+  if(/\bevening\b|shaam|sham/i.test(t))return 'evening';
+  if(/\bnight\b|raat/i.test(t))return 'night';
+  return null;
+}
 function capitalize(value){const s=String(value||'');return s.charAt(0).toUpperCase()+s.slice(1);}
 function describeScope(e={}){
   const parts=[];

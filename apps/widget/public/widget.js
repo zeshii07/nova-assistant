@@ -28,6 +28,10 @@
   const DATA_WELCOME = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-welcome')) || null;
   const DATA_AVATAR = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-avatar')) || null;
   const DATA_API_KEY = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-api-key')) || null;
+  // v35.2: data-kiosk skips the pre-chat form even if the tenant has it enabled.
+  // Useful for embedding in kiosk contexts where the customer shouldn't have to
+  // type a name/phone before chatting.
+  const DATA_KIOSK = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-kiosk')) === 'true';
 
   if (!TENANT_ID) {
     console.error('[Nova Widget] data-tenant attribute is required. Example: <script src="/widget.js" data-tenant="cleaning-demo"></script>');
@@ -289,8 +293,8 @@
           tenantId: TENANT_ID,
           customerId: state.customerId,
           text: text.trim(),
-          channel: 'widget',
-          metadata: state.customerName ? { customerName: state.customerName } : {}
+          channel: DATA_KIOSK ? 'kiosk' : 'widget',  // v35.2: send 'kiosk' channel when in kiosk mode
+          metadata: state.customerName ? { customerName: state.customerName, source: DATA_KIOSK ? 'kiosk' : 'widget' } : (DATA_KIOSK ? { source: 'kiosk' } : {})
         })
       }, 3);
 
@@ -876,6 +880,15 @@
         sendMessage(text);
       } else {
         // Start recording
+        // v35.1: If Nova is currently speaking, STOP it immediately when the
+        // customer taps the mic — overlapping audio confuses the recognition
+        // engine and the customer.
+        if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+        }
+        if (state._voiceSampleAudio && !state._voiceSampleAudio.paused) {
+          try { state._voiceSampleAudio.pause(); state._voiceSampleAudio.currentTime = 0; } catch {}
+        }
         if (!state.speechRecognition) {
           console.warn('[Nova Widget] Speech recognition not supported');
           return;
@@ -1176,7 +1189,7 @@
     }
 
     const preChatForm = state.config.preChatForm || { enabled: false, fields: [] };
-    if (preChatForm.enabled === true && !state.preChatCompleted) {
+    if (preChatForm.enabled === true && !state.preChatCompleted && !DATA_KIOSK) {
       preChatEl.style.display = 'block';
       messagesEl.style.display = 'none';
       shadow.querySelector('#nova-suggestions').style.display = 'none';

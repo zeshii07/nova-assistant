@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "35.0.0",
+  "version": "35.2.0",
   "private": true,
-  "description": "Nova v35.0 - PWA support (kiosk installable + offline message queue), product catalog management UI with image upload, inline product images in chat",
+  "description": "Nova v35.2 - Bug fixes: offering order quantity recognition ('I'll take 2 of those'), order confirmation broadening, offering→booking transition (date/time after viewing), cleaning booking type clarification, widget data-kiosk mode, mobile responsive admin/business dashboards",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {

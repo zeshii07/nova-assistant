@@ -181,3 +181,187 @@ Stage Summary:
   • package.json (v34.2.0 → v35.0.0)
 - Kiosk PWA install flow: open /kiosk/{tenantId} → tap "📱 Install App" → confirm prompt → app icon added to home screen → launches standalone.
 - Catalog image flow: Admin uploads image → /api/admin/catalog/{tenant}/products/{id}/image → saved to tenants/{id}/catalog/images/{productId}.png → product.imageUrl set in products.json → catalog capability emits [IMG:url] in reply → widget/kiosk renders inline image.
+
+---
+Task ID: v35.0-zip
+Agent: Super Z (main)
+Task: Package Nova v35.0 as a downloadable zip for the user, including all source code + tenant data + docs + tests + release notes.
+
+Work Log:
+- Cleaned transient test-generated files (owners.json, voice-profile.json, voice-samples/) from cleaning-demo and byt-cleaners-dubai tenants so the zip starts fresh.
+- Wrote comprehensive RELEASE_NOTES_V35.md (16.9KB) covering:
+  • Live demo URLs (Render deployment)
+  • All v35.0 new features (PWA support, Catalog management UI, inline product images)
+  • Recap of v34.2 (kiosk redesign, voice cloning UI), v34.1 (TTS), v34.0 (bug fixes)
+  • Full feature timeline from v9 to v35
+  • Complete architecture tree
+  • Tech stack summary
+  • All API endpoints grouped by auth level (public / admin / business owner)
+  • Local dev + Render deployment setup instructions
+  • Tenant templates table
+  • Voice cloning flow + Kiosk PWA flow + Catalog image flow walkthroughs
+  • Security controls
+  • Test commands
+  • Documentation index
+- Built download/nova-v35.0.zip (1.4 MB, 1137 files) excluding:
+  • node_modules/ (npm install recreates it)
+  • .git/ (history not needed)
+  • .nova-data/ (runtime data — preserves user's actual conversations)
+  • .nova-notifications/, .nova-feedback/, .nova-calendar-tokens/ (runtime state)
+  • *.log files
+  • .env (secrets)
+- Verified zip contents:
+  • apps/widget/public/kiosk-sw.js (5.9KB, v35.0 service worker)
+  • apps/widget/public/kiosk-manifest.json (1.5KB, v35.0 PWA manifest)
+  • apps/widget/public/kiosk.html (48.6KB, v34.2 modern kiosk + v35.0 SW registration)
+  • apps/api/src/server.js (154KB, includes catalog + PWA + voice cloning endpoints)
+  • apps/business-dashboard/public/app.js (49.2KB, includes Voice Studio + Kiosk & QR tabs)
+  • apps/admin-dashboard/public/app.js (88.2KB, includes Catalog tab)
+  • capabilities/catalog/src/index.js (includes [IMG:url] emission in formatProduct)
+  • packages/catalog-sdk/src/productRecord.js (includes imageUrl preservation)
+  • RELEASE_NOTES_V35.md (16.9KB release notes)
+  • 9 tenant profiles (cleaning-demo, byt-cleaners-dubai, default, salon-demo, restaurant-demo, healthcare-demo, education-demo, tutor-demo, driving-school-demo)
+  • 5 templates (cleaning, retail, salon, restaurant, gym)
+- Boot-tested from extracted zip:
+  • npm install completed (~30s)
+  • Server booted on PORT=4250
+  • GET /kiosk/cleaning-demo → 200
+  • GET /kiosk-manifest.json → 200 application/manifest+json
+  • GET /kiosk-sw.js → 200 application/javascript
+  • GET /api/widget/config/cleaning-demo → ok, businessName=SparkleCare Cleaning
+  • GET /api/admin/catalog/default/products → ok, 30 products
+  • POST /api/chat (cleaning-demo, "hi") → ok, reply from SparkleCare Cleaning Assistant
+- All tests pass after extraction + npm install.
+
+Stage Summary:
+- Nova v35.0 zip delivered at /home/z/my-project/download/nova-v35.0.zip (1.4 MB, 1137 files).
+- Zip contains full source code + tenant data + tests + docs + RELEASE_NOTES_V35.md.
+- User extracts → npm install → npm start → ready to go.
+- Verified end-to-end boot from extracted zip: kiosk, manifest, SW, widget config, catalog list, chat all working.
+
+---
+Task ID: v35.1
+Agent: Super Z (main)
+Task: 4 kiosk fixes from user feedback — (1) agent should welcome customer by saying "Welcome to {businessName}", (2) stop TTS when customer taps mic, (3) show real agent avatar picture instead of mic icon, (4) provide restaurant-demo kiosk link for mobile testing.
+
+Work Log:
+- v35.1 fix #1 + #3: Real agent avatar in kiosk (was mic icon before)
+  • Added `loadAvatars()` function in kiosk.html — fetches `/avatars.js` which defines `window.NOVA_AVATARS` (10 pre-built SVG portraits: aria, marcus, sophie, david, emma, liam, natalie, james, olivia, noah)
+  • Added `getAvatarSvg(key)` and `renderAvatar(targetEl, key)` helpers
+  • Added `<div class="agent-portrait" id="splashPortrait">` inside `.splash .ring` (splash screen)
+  • Added `<div class="agent-portrait" id="headerPortrait">` inside `.agent-avatar` (header)
+  • CSS: `.agent-portrait { width:100%; height:100%; border-radius:50%; overflow:hidden }` and `.agent-portrait svg { width:100%; height:100%; display:block }`
+  • `loadConfig()` now loads `/avatars.js` in parallel with the config fetch, then calls `renderAvatar(splashPortrait, avatarKey)` and `renderAvatar(headerPortrait, avatarKey)` using the tenant's configured `agent.avatar` key (e.g. `natalie` for restaurant-demo, `david` for cleaning-demo)
+  • Falls back to the existing mic icon SVG if avatars.js fails to load or the avatar key is unknown
+  • `.agent-avatar .online` indicator now has `z-index: 2` so it stays visible above the portrait
+- v35.1 fix #2: Speak "Welcome to {businessName}" on startChat
+  • Rewrote `startChat()` to build a clean spoken greeting: `Welcome to {businessName}. I'm {agentName}, your assistant. How can I help you today?`
+  • The chat BUBBLE still shows the tenant's configured welcomeMessage (preserves emoji, marketing tone, multilingual content)
+  • The SPOKEN greeting is always the clean welcome line — easier to hear and understand
+  • Auto-enables voice on first chat (`state.voiceEnabled = true`) — even if the customer never touched the voice toggle. Mobile browsers require a user gesture (the splash tap counts) for TTS to start
+  • `setTimeout(() => speakReply(spokenWelcome), 300)` — small delay lets the panel render first
+- v35.1 fix #3: Stop TTS when customer taps mic
+  • Added at the top of `toggleMic()` (before mic-recording logic):
+    ```js
+    if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+    if (state.voiceSampleAudio && !state.voiceSampleAudio.paused) {
+      state.voiceSampleAudio.pause();
+      state.voiceSampleAudio.currentTime = 0;
+    }
+    ```
+  • Also applied the same fix to `widget.js` actionBtn click handler — when customer taps mic in the standard widget, Nova stops talking immediately
+  • Reason: overlapping audio (Nova speaking + customer speaking into mic) was confusing and prevented the speech recognition engine from hearing clearly
+- v35.1 fix #4: Restaurant-demo kiosk link
+  • Confirmed restaurant-demo tenant config:
+    - Business: Nova Bistro
+    - Agent: Natalie (Reservation Desk) — avatar key `natalie` (orange-themed portrait)
+    - Theme color: #f97316 (warm orange)
+    - Welcome: "Hi! 👋 I'm the Nova Bistro Assistant. I can help with the menu, dining options, takeaway information, food orders, and table reservations."
+    - Suggestions: "Show me the menu", "Book a table for 2", "What are today's specials?"
+    - 4 menu items (Chicken Biryani Rs650, Beef Burger Rs850, Alfredo Pasta Rs1200, Grilled Chicken Rs1500)
+  • Kiosk URL on Render deployment: https://nova-saas-test.onrender.com/kiosk/restaurant-demo
+  • Local dev URL: http://localhost:3000/kiosk/restaurant-demo
+- Smoke tested end-to-end on PORT=4310:
+  • GET /kiosk/restaurant-demo → 200, 52KB ✓
+  • GET /avatars.js → 200, 10KB ✓
+  • GET /kiosk-manifest.json → 200 ✓
+  • GET /kiosk-sw.js → 200 ✓
+  • Kiosk HTML contains 18 references to v35.1 features (spokenWelcome, loadAvatars, renderAvatar, speechSynthesis.cancel, agent-portrait) ✓
+  • POST /api/chat (restaurant-demo, "Show me the menu") → 200, returns menu with 4 items ✓
+  • Regression tests: sprint97.v220-persistence.integration.test.js — 13/13 pass ✓
+
+Stage Summary:
+- Nova v35.1 kiosk UX fixes complete.
+- Agent avatar now renders in both splash + header (was mic icon before). Loads from /avatars.js with 10 pre-built SVG portraits. Falls back to mic icon if avatars.js fails to load.
+- On tapping "Start Conversation", Nova speaks "Welcome to {businessName}. I'm {agentName}, your assistant. How can I help you today?" — auto-enables voice on first visit (mobile-friendly user gesture).
+- Tapping the mic immediately cancels any ongoing TTS or voice sample playback — no more overlapping audio. Same fix applied to widget.js.
+- Restaurant-demo kiosk link for mobile testing:
+  • Production: https://nova-saas-test.onrender.com/kiosk/restaurant-demo
+  • Local: http://localhost:3000/kiosk/restaurant-demo
+- Files modified:
+  • apps/widget/public/kiosk.html (+loadAvatars, +renderAvatar, +splashPortrait, +headerPortrait, +spokenWelcome auto-speak, +stop TTS on mic tap, ~70 new lines)
+  • apps/widget/public/widget.js (+stop TTS on mic tap in actionBtn click handler, +8 lines)
+
+---
+Task ID: v35.1-zip
+Agent: Super Z (main)
+Task: Re-package Nova v35.1 as a downloadable zip with a fresh comprehensive README.md, including all latest kiosk UX fixes from v35.1.
+
+Work Log:
+- Bumped package.json version 35.0.0 → 35.1.0 with updated description covering all v35.1 features (real agent avatar, spoken welcome, stop TTS on mic tap) plus v35.0 PWA + Catalog + v34.2 Voice Cloning Studio
+- Wrote a fresh, comprehensive README.md (18KB) — replaced the old Sep 16 README (49KB but pre-v34 era) with a modern, user-friendly guide covering:
+  • What's new in v35.1 (kiosk UX fixes)
+  • What's new in v35.0 (PWA + Catalog UI)
+  • What's new in v34.2 (modern kiosk + Voice Cloning Studio)
+  • Live demo URLs (Render deployment — 6 links)
+  • Quick Start (5-step local dev setup)
+  • Available tenants table (9 demo businesses)
+  • Tenant templates table (5 templates)
+  • Complete architecture tree
+  • Tech stack table
+  • All API endpoints grouped by auth level (public / admin / business owner)
+  • Voice Cloning Flow (8-step walkthrough)
+  • Kiosk PWA Flow (10-step walkthrough)
+  • Catalog Image Flow (8-step walkthrough)
+  • Security controls (12 items)
+  • Test commands
+  • Render deployment instructions
+  • Documentation index
+  • Feature timeline v9 → v35.1
+- Cleaned transient test files (owners.json, voice-profile.json, voice-samples/) from all tenants so the zip starts fresh
+- Built download/nova-v35.1.zip (1.4 MB, 1137 files) excluding:
+  • node_modules/ (npm install recreates it)
+  • .git/ (history not needed)
+  • .nova-data/, .nova-notifications/, .nova-feedback/, .nova-calendar-tokens/ (runtime state — preserves user's actual conversations)
+  • *.log files
+  • .env (secrets)
+- Verified zip contents:
+  • README.md (18KB, v35.1 — comprehensive new guide)
+  • apps/widget/public/kiosk.html (53KB, includes 18 references to v35.1 features: spokenWelcome, loadAvatars, renderAvatar, speechSynthesis.cancel, agent-portrait)
+  • apps/widget/public/widget.js (65KB, includes 5 v35.1 stop-TTS-on-mic references)
+  • apps/widget/public/kiosk-sw.js (5.9KB, v35.0 service worker)
+  • apps/widget/public/kiosk-manifest.json (1.5KB, v35.0 PWA manifest)
+  • apps/api/src/server.js (154KB, includes all v34.2 + v35.0 endpoints)
+  • apps/business-dashboard/public/app.js (49KB, includes Voice Studio + Kiosk & QR tabs)
+  • apps/admin-dashboard/public/app.js (88KB, includes Catalog tab)
+  • capabilities/catalog/src/index.js (includes [IMG:url] emission in formatProduct)
+  • packages/catalog-sdk/src/productRecord.js (includes imageUrl preservation)
+  • RELEASE_NOTES_V35.md (16.9KB detailed release notes)
+  • worklog.md (23KB full development history)
+  • 9 tenant profiles (cleaning-demo, byt-cleaners-dubai, default, salon-demo, restaurant-demo, healthcare-demo, education-demo, tutor-demo, driving-school-demo)
+  • 5 templates (cleaning, retail, salon, restaurant, gym)
+- Boot-tested from extracted zip:
+  • npm install completed (~3s)
+  • Server booted on PORT=4295 in ~6s
+  • All endpoints return 200: kiosk (restaurant + cleaning), avatars.js, PWA manifest, service worker
+  • Restaurant chat (POST /api/chat with "Show me the menu") → returns full menu with 4 items (Chicken Biryani Rs650, Beef Burger Rs850, Alfredo Pasta Rs1200, Grilled Chicken Rs1500)
+  • Cleaning chat (POST /api/chat with "What cleaning services do you offer?") → returns full service list with AED pricing
+- All tests pass after extraction + npm install.
+
+Stage Summary:
+- Nova v35.1 zip delivered at /home/z/my-project/download/nova-v35.1.zip (1.4 MB, 1137 files).
+- Fresh comprehensive README.md included — covers all features from v9 to v35.1, all 9 demo tenants, all 5 templates, complete API reference, setup instructions, security controls, and deployment guide.
+- User extracts → npm install → npm start → ready to go.
+- Verified end-to-end boot from extracted zip: kiosk, avatars.js, manifest, SW, widget config, catalog list, restaurant + cleaning chat all working.

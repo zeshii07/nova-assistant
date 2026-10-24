@@ -2,6 +2,9 @@ const {
   normalizeText,
   numberFromText,
 } = require("../../../packages/conversation-intelligence/src/text");
+const {
+  isConfirmation,
+} = require("../../../packages/conversation-intelligence/src/confirmation");
 class OfferingConversationAdapter {
   constructor() {
     this.capabilityId = "offering";
@@ -44,9 +47,40 @@ class OfferingConversationAdapter {
       return null;
     const offeringState = state?.capabilityState?.offering;
     const activeOrder = offeringState?.order;
+    // v35.2 BUG FIX: After OFFERING_VIEWED, customer says "I'll take 2 of those"
+    // or "I want 3 of this" — recognize as order start with quantity.
+    // The previous logic only matched if the offering name was mentioned again,
+    // which caused these natural continuations to fall through to the assistant.
+    if (
+      offeringState?.selectedOfferingId &&
+      offeringState?.lastIntent === "offering.details" &&
+      !activeOrder &&
+      /\b(?:i'?ll|ill|i will|i want|i need|give me|let me get|let me take|take|get|want|need|order|buy|purchase)\b/.test(text) &&
+      /\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|a couple|some|few)\b/.test(text)
+    ) {
+      const qty = numberFromText(text) || 1;
+      const item = svc.getById(tenant.id, offeringState.selectedOfferingId);
+      if (item?.orderable && cfg.actionMode === "order") {
+        return pack(
+          "offering.order.start",
+          0.999,
+          {
+            offeringId: item.id,
+            subject: item.name,
+            quantity: qty,
+          },
+          "viewed_offering_quantity_order",
+          130,
+        );
+      }
+    }
+    // v35.2 BUG FIX: "Yes, confirm" or "confirm" after an order is ready.
+    // The previous check used \b(confirm|yes|done|place it|order it|ok confirm)\b
+    // which misses "yes, confirm" and "confirm order". Broaden the pattern.
     if (
       activeOrder?.status === "ready" &&
-      /\b(confirm|yes|done|place it|order it|ok confirm)\b/.test(text)
+      (isConfirmation(message.text) ||
+        /\b(confirm|yes|yeah|yep|done|place it|order it|ok confirm|confirm order|place the order|finalize|finalise|pakka|kar do|kardo|تصدیق)\b/i.test(text))
     )
       return pack(
         "offering.order.confirm",
@@ -68,6 +102,19 @@ class OfferingConversationAdapter {
           "offering_order_quantity",
           130,
         );
+    }
+    // v35.2 BUG FIX: After OFFERING_VIEWED, customer says "Tomorrow at 3pm" or
+    // "tomorrow morning" — this is a booking intent for the just-viewed offering.
+    // Return null so the booking adapter can take over. Set a hint state first.
+    if (
+      offeringState?.selectedOfferingId &&
+      offeringState?.lastIntent === "offering.details" &&
+      !activeOrder &&
+      /\b(?:tomorrow|today|day after tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next week|next month)\b/i.test(text) &&
+      (/\b(?:\d{1,2}\s*(?:am|pm)|\d{1,2}:\d{2}|morning|afternoon|evening|night|subah|shaam)\b/i.test(text) || /\bat\b/i.test(text))
+    ) {
+      // Don't handle here — let booking adapter pick this up
+      return null;
     }
     if (
       offeringState?.suggestedOfferingId &&

@@ -339,6 +339,32 @@ class BookingConversationAdapter {
           entities.grade,
         ) &&
           Boolean(entities.subject || active)));
+    // v35.2 BUG FIX: If the customer just viewed an offering and is now
+    // providing a date/time, treat it as a booking trigger for that offering.
+    // Previous logic required an explicit booking keyword OR an existing active
+    // booking, so "Tomorrow at 3pm" after viewing "Haircut" fell through to the
+    // assistant and returned irrelevant knowledge answers.
+    const recentOfferingView = state?.capabilityState?.offering?.selectedOfferingId &&
+      state?.capabilityState?.offering?.lastIntent === "offering.details";
+    if (
+      !bookingTrigger &&
+      recentOfferingView &&
+      !active &&
+      (entities.date || entities.time) &&
+      !/\b(where|location|address|how|why|what|which|who)\b/.test(text)
+    ) {
+      // Inject the recently-viewed offering as the booking subject
+      entities.subject = services.offeringService?.getById?.(
+        tenant.id,
+        state.capabilityState.offering.selectedOfferingId
+      )?.name || entities.subject;
+      return pack(
+        "booking.start",
+        0.99,
+        entities,
+        "recent_offering_booking_trigger",
+      );
+    }
     if (active?.status === "ready" && isConfirmation(message.text))
       return pack("booking.confirm", 0.999, entities, "booking_confirmation");
     if (active?.status === "collecting" || active?.status === "ready")

@@ -120,6 +120,8 @@
       100% { transform: scale(1.5); opacity: 0; }
     }
     .splash .ring svg { width: 70px; height: 70px; color: #fff; }
+    .splash .ring .agent-portrait { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; }
+    .splash .ring .agent-portrait svg { width: 100%; height: 100%; display: block; }
     @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
     .splash h1 {
       font-size: 28px;
@@ -205,6 +207,8 @@
       position: relative;
       overflow: hidden;
     }
+    .agent-avatar .agent-portrait { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; }
+    .agent-avatar .agent-portrait svg { width: 100%; height: 100%; display: block; }
     .agent-avatar svg { width: 28px; height: 28px; color: #fff; }
     .agent-avatar .online {
       position: absolute;
@@ -215,6 +219,7 @@
       background: var(--ok);
       border-radius: 50%;
       border: 2px solid #11182a;
+      z-index: 2;
     }
     .agent-info {
       flex: 1;
@@ -568,13 +573,15 @@
 
   <!-- Splash (initial welcome) -->
   <div class="splash" id="splash">
-    <div class="ring">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-        <line x1="12" y1="19" x2="12" y2="23"/>
-        <line x1="8" y1="23" x2="16" y2="23"/>
-      </svg>
+    <div class="ring" id="splashRing">
+      <div class="agent-portrait" id="splashPortrait">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </div>
     </div>
     <h1 id="splashName">Nova Assistant</h1>
     <p id="splashDesc">Tap below to start chatting — no sign-up needed.</p>
@@ -604,12 +611,14 @@
   <div class="app" id="app" style="display:none">
     <header class="header">
       <div class="agent-avatar" id="agentAvatar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-          <line x1="12" y1="19" x2="12" y2="23"/>
-          <line x1="8" y1="23" x2="16" y2="23"/>
-        </svg>
+        <div class="agent-portrait" id="headerPortrait">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </div>
         <span class="online"></span>
       </div>
       <div class="agent-info">
@@ -714,7 +723,47 @@
     const idleOverlay = $('idleOverlay');
     const splashName = $('splashName');
     const splashDesc = $('splashDesc');
+    const splashPortrait = $('splashPortrait');
+    const headerPortrait = $('headerPortrait');
     const resumeBtn = $('resumeBtn');
+
+    // ─── Avatars loader (v35.1) ───────────────────────────────
+    // Loads /avatars.js which defines window.NOVA_AVATARS — 10 pre-built
+    // SVG portraits. Lets the kiosk render the tenant's chosen agent avatar
+    // (e.g. Natalie for restaurant-demo, David for cleaning-demo) instead of
+    // a generic mic icon.
+    const AVATARS_URL = `${NOVA_ORIGIN}/avatars.js`;
+    function loadAvatars() {
+      return new Promise((resolve) => {
+        if (window.NOVA_AVATARS) { resolve(window.NOVA_AVATARS); return; }
+        const existing = document.querySelector('script[data-nova-avatars]');
+        if (existing) {
+          existing.addEventListener('load', () => resolve(window.NOVA_AVATARS));
+          existing.addEventListener('error', () => resolve(null));
+          return;
+        }
+        const s = document.createElement('script');
+        s.src = AVATARS_URL;
+        s.setAttribute('data-nova-avatars', 'true');
+        s.onload = () => resolve(window.NOVA_AVATARS);
+        s.onerror = () => resolve(null);
+        document.head.appendChild(s);
+      });
+    }
+    function getAvatarSvg(key) {
+      const av = window.NOVA_AVATARS;
+      if (!av) return null;
+      const portrait = (av.get ? av.get(key) : av[key]) || (av.get ? av.get('marcus') : av['marcus']);
+      return portrait?.svg || null;
+    }
+    function renderAvatar(targetEl, key) {
+      if (!targetEl) return;
+      const svg = getAvatarSvg(key);
+      if (svg) {
+        targetEl.innerHTML = svg;
+      }
+      // If no avatars.js or no portrait — leave the existing fallback mic icon
+    }
 
     // ─── Helpers ──────────────────────────────────────────────
     function esc(s) {
@@ -735,11 +784,18 @@
     // ─── Initial config fetch ─────────────────────────────────
     async function loadConfig() {
       try {
+        // Kick off avatars.js load in parallel with config fetch
+        const avatarsPromise = loadAvatars();
         const r = await fetch(API_CONFIG);
         const data = await r.json();
         if (!data.ok) throw new Error(data.error || 'Config fetch failed');
         state.config = data;
         applyBranding(data);
+        // Wait for avatars.js then render the agent portrait (if config provides a key)
+        await avatarsPromise;
+        const avatarKey = data.agent?.avatar || 'marcus';
+        renderAvatar(splashPortrait, avatarKey);
+        renderAvatar(headerPortrait, avatarKey);
         // Voice profile + voice sample
         if (data.voiceProfile) {
           state.voiceProfile = data.voiceProfile;
@@ -1078,6 +1134,15 @@
         sendMessage();
         return;
       }
+      // v35.1: If Nova is currently speaking (TTS or voice sample), STOP it
+      // immediately when the customer taps the mic — overlapping audio is
+      // confusing and prevents the recognition engine from hearing clearly.
+      if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+      }
+      if (state.voiceSampleAudio && !state.voiceSampleAudio.paused) {
+        try { state.voiceSampleAudio.pause(); state.voiceSampleAudio.currentTime = 0; } catch {}
+      }
       // Otherwise toggle mic
       if (!state.recognition) state.recognition = initSpeechRecognition();
       if (!state.recognition) {
@@ -1212,14 +1277,28 @@
       splash.classList.add('hidden');
       setTimeout(() => { splash.style.display = 'none'; }, 600);
       app.style.display = 'flex';
-      // Show initial greeting from Nova
-      const welcome = state.config?.welcomeMessage || `Hi! I'm your ${state.config?.businessName || 'Nova'} assistant. How can I help you today?`;
-      // Skip pre-chat form — go straight to chat
+      // v35.1: Build a spoken "Welcome to {business}" greeting. The text bubble
+      // still shows the tenant's configured welcomeMessage (which can be long
+      // and contain emoji/JSON), but the SPOKEN greeting is always a clean
+      // welcome-to-the-business line so customers hear the agent's first
+      // words clearly regardless of tenant config.
+      const biz = state.config?.businessName || state.config?.assistantName || 'Nova';
+      const agentNameStr = state.config?.agent?.name || biz;
+      const spokenWelcome = `Welcome to ${biz}. I'm ${agentNameStr}, your assistant. How can I help you today?`;
+      // Show the configured welcomeMessage as the chat bubble (preserves emoji,
+      // marketing tone, multilingual content). Speak the clean welcome line.
+      const welcome = state.config?.welcomeMessage || spokenWelcome;
       appendMessage('bot', welcome);
-      // Speak the welcome if voice enabled
-      if (state.voiceEnabled) {
-        setTimeout(() => speakReply(welcome), 400);
+      // v35.1: Auto-enable voice on first chat so the agent speaks the welcome
+      // — even if the customer never touched the voice toggle. Mobile browsers
+      // require a user gesture (the splash tap counts) for TTS to start.
+      if (!state.voiceEnabled) {
+        state.voiceEnabled = true;
+        localStorage.setItem('nova-kiosk-voice', 'true');
+        updateVoiceToggle();
       }
+      // Speak the welcome. Small delay lets the panel render first.
+      setTimeout(() => speakReply(spokenWelcome), 300);
       // Focus input on desktop, but not mobile (avoid keyboard popup)
       if (window.matchMedia('(min-width: 768px)').matches) {
         inputEl.focus();
