@@ -26,7 +26,31 @@ function numberFromText(value) {
     ایک:1,دو:2,تین:3,چار:4,پانچ:5,چھ:6,سات:7,آٹھ:8,نو:9,دس:10,
     گیارہ:11,بارہ:12,تیرہ:13,چودہ:14,پندرہ:15,سولہ:16,سترہ:17,اٹھارہ:18,انیس:19,بیس:20
   };
-  for (const token of words(text)) if (map[token]) return map[token];
+  // v35.7: Context-aware number extraction.
+  // "do" can mean "two" in Roman Urdu OR "do/make" in English ("do biryani").
+  // Only treat "do" as quantity 2 when it's clearly a number — preceded by
+  // a quantity word or at the start with a unit context ("do biryani" where
+  // biryani is a known item). For safety, require "do" to be adjacent to an
+  // item noun, not used as a verb.
+  const tokens = words(text);
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (token === 'do') {
+      // Check if "do" is used as a verb (followed by a known action noun)
+      const nextToken = tokens[i + 1] || '';
+      const verbContexts = ['biryani','burger','pasta','chicken','beef','food','order','this','that','it','please','quickly','now','delivery','takeaway','pack','confirm','cancel','change','update'];
+      // If "do" is at start of sentence and followed by a food item, it's likely "do/make" not "two"
+      if (i === 0 && verbContexts.includes(nextToken)) continue;
+      // If preceded by a number word or quantity context, treat as 2
+      if (i > 0 && /\b(?:quantity|qty|x|×)\b/i.test(tokens[i-1])) return 2;
+      // If "do" is used as "I want do biryani" — skip (it's a verb)
+      if (i > 0 && /\b(?:want|need|like|please|ok|okay|just|only)\b/i.test(tokens[i-1])) continue;
+      // Default: only treat as 2 if surrounded by clear quantity context
+      // Skip "do" when ambiguous
+      continue;
+    }
+    if (map[token]) return map[token];
+  }
   return null;
 }
 

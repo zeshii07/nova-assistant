@@ -240,7 +240,12 @@ class OfferingConversationAdapter {
     const broadCollectionQuestion =
       /\b(what|which)\s+(treatments?|classes|grades?|foods?|menu items?|programs?|services)\b/.test(
         text,
-      ) || /\b(what(?:'s| is)?\s+(?:today'?s\s+)?specials?|today'?s\s+specials?|what(?:'s| is)?\s+on\s+(?:the\s+)?menu|any\s+specials?)\b/i.test(text);
+      ) || /\b(what(?:'s| is)?\s+(?:today'?s\s+)?specials?|today'?s\s+specials?|what(?:'s| is)?\s+on\s+(?:the\s+)?menu|any\s+specials?)\b/i.test(text)
+      // v35.7: Also match "what items do you have" / "what do you have in your menu"
+      || /\b(?:what|which)\s+(?:items?|dishes?|food|options?)\s+(?:do you have|have you got|are available|can i (?:see|order|get))\b/i.test(text)
+      || /\b(?:what|which)\s+(?:do you have|have you got|is (?:available|on (?:the )?menu))\b/i.test(text)
+      || /\b(?:show|tell me|see)\s+(?:me\s+)?(?:the\s+|your\s+)?(?:full\s+|complete\s+)?(?:food\s+)?menu\b/i.test(text)
+      || /\bwhat\s+items\s+do you have\b/i.test(text);
     const explicit =
       !broadBusinessServices &&
       !broadCollectionQuestion &&
@@ -484,7 +489,11 @@ function extractMultiItemOrder(text, items, svc, tenantId) {
     .replace(/\bbiriyani\b/gi, 'biryani')
     .replace(/\bburgers\b/gi, 'burger')
     .replace(/\bwnt\b/gi, 'want')
-    .replace(/\bi wnt\b/gi, 'i want');
+    .replace(/\bi wnt\b/gi, 'i want')
+    // v35.7: Strip "do" used as verb ("do biryani") to avoid false quantity=2
+    .replace(/\bdo\s+(biryani|burger|pasta|chicken|beef|food|order)\b/gi, '$1')
+    .replace(/\bplease\s+quickly\b/gi, '')
+    .replace(/\bquickly\b/gi, '');
   // Split on conjunctions
   const parts = normalized
     .split(/\s+(?:and|also|plus|with|aur|bhi|\+)\s+|,\s*/i)
@@ -495,11 +504,11 @@ function extractMultiItemOrder(text, items, svc, tenantId) {
   for (const part of parts) {
     // Skip pure numbers or quantity-only fragments
     if (/^\d+$/.test(part) || /^(one|two|three|four|five|six|seven|eight|nine|ten)$/i.test(part)) continue;
-    // Strip order verbs / filler words
+    // Strip order verbs / filler words — v35.7: also strip "do" as verb
     const cleaned = part
-      .replace(/\b(?:i want|i need|i'd like|i will|i'll|let me|can i|please|ok|okay|a|an|the|some|of|to|order|eat|get|have|take|deliver|send|give|bring|pack|karwana|krwana|chahiye|chaheye)\b/gi, '')
+      .replace(/\b(?:i want|i need|i'd like|i will|i'll|let me|can i|please|ok|okay|a|an|the|some|of|to|order|eat|get|have|take|deliver|send|give|bring|pack|do|make|karwana|krwana|chahiye|chaheye|quickly|now|please)\b/gi, '')
       .replace(/\d+\s*(?:x|×)?\s*/g, '')
-      .replace(/\b(?:one|two|three|four|five|six|seven|eight|nine|ten|ek|do|teen|char|paanch)\b/gi, '')
+      .replace(/\b(?:one|two|three|four|five|six|seven|eight|nine|ten|ek|teen|char|paanch)\b/gi, '')  // v35.7: removed "do" — handled above
       .trim();
     if (!cleaned || cleaned.length < 3) continue;
     const result = svc.resolve(tenantId, cleaned);
