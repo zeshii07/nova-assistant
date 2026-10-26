@@ -905,9 +905,9 @@ async function renderKiosk() {
   const view = $('view');
   const tid = state.owner?.tenantId || '';
   const kioskUrl = `${window.location.origin}/kiosk/${encodeURIComponent(tid)}`;
-  // QR code via goqr.me (free, no auth required)
-  const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(kioskUrl)}`;
-  const qrSvgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&format=svg&data=${encodeURIComponent(kioskUrl)}`;
+  // v35.3: QR code via self-hosted endpoint (no external API, no CSP violation)
+  const qrImgUrl = `${window.location.origin}/api/qr/${encodeURIComponent(tid)}.png`;
+  const qrSvgUrl = `${window.location.origin}/api/qr/${encodeURIComponent(tid)}.svg`;
 
   view.innerHTML = `
     <div class="card">

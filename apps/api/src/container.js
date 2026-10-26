@@ -350,7 +350,11 @@ async function buildContainer() {
   const domainSchemaRegistry = new DomainSchemaRegistry({ domainsDir:path.resolve(__dirname, "../../../domains"), logger });
   const domainResolver = new DomainResolver({ schemaRegistry:domainSchemaRegistry });
   const conversationIntelligenceEngine = new ConversationIntelligenceEngine({ adapterRegistry: conversationAdapterRegistry, llmInterpreter:null, nluInterpreter:remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, logger, socialIntelligenceEngine, domainResolver });
-  const replayRepository = new InMemoryReplayRepository();
+  // v35.3: Replay repository with file-based persistence — conversations
+  // survive server restarts. Backed by .nova-data/replays/ on disk + in-memory
+  // cache (bounded at 5000 entries + 7-day TTL).
+  const replayPersistDir = path.join(config.operationalDataDir || '.nova-data', 'replays');
+  const replayRepository = new InMemoryReplayRepository({ persistDir: replayPersistDir, logger });
   const replayService = new ReplayService({ repository: replayRepository });
 
   // v32.0: Business Owner Authentication — per-tenant email+password auth

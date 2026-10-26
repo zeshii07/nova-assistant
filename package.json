@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "35.2.0",
+  "version": "35.3.0",
   "private": true,
-  "description": "Nova v35.2 - Bug fixes: offering order quantity recognition ('I'll take 2 of those'), order confirmation broadening, offering→booking transition (date/time after viewing), cleaning booking type clarification, widget data-kiosk mode, mobile responsive admin/business dashboards",
+  "description": "Nova v35.3 - Critical bug fixes: bounded in-memory caches (no more leaks), atomic file writes + locks (no more race conditions), self-hosted QR codes (no more CSP violations from goqr.me), input sanitization on admin endpoints, in-memory state locking with optimistic versioning, circuit breakers for external services, structured logging with correlation IDs, expanded health checks, ARIA labels + keyboard nav on kiosk",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {

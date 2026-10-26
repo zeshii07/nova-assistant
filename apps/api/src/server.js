@@ -8,10 +8,18 @@ const packageJson = require("../../../package.json");
 const { ForbiddenError, ValidationError } = require("../../../packages/shared/src/errors");
 const { applyStatePatch } = require("../../../packages/state/src/stateSchema");
 const { replyToNovaVisitor } = require("./novaMarketingAssistant");
+// v35.3: Logger import — used for AsyncLocalStorage-based correlation ID propagation
+const { Logger } = require("../../../packages/logger/src/logger");
 
 async function startServer() {
   const container = await buildContainer();
   const server = http.createServer(async (req, res) => {
+    // v35.3: wrap every request in a correlation ID context so all logs
+    // emitted during the request lifecycle include `requestId`.
+    const reqId = String(req.headers['x-request-id'] || req.headers['x-correlation-id'] || '').trim()
+      || `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    res.setHeader('X-Request-Id', reqId);
+    return Logger.withCorrelationId(reqId, async () => {
     try {
       const url = new URL(req.url, "http://localhost");
       const whatsappMatch = url.pathname.match(/^\/webhooks\/whatsapp\/([^/]+)$/);
@@ -98,7 +106,37 @@ async function startServer() {
         if (container.mlIntentClassifier) {
           checks.ml = { version: container.mlIntentClassifier.model?.version || 'unknown', trained: container.mlIntentClassifier.trained };
         }
-        const allOk = (!checks.storage.postgres || checks.storage.postgres.ok) && (!checks.storage.redis || checks.storage.redis.ok);
+        // v35.3: External service status + circuit breaker states
+        checks.dependencies = {};
+        if (container.emailService) {
+          checks.dependencies.email = {
+            configured: container.emailService.configured,
+            circuit: container.emailService.breaker?.getStatus() || null
+          };
+        }
+        if (container.googleOAuthClient) {
+          checks.dependencies.googleCalendar = {
+            configured: container.googleOAuthClient.isConfigured?.() || false,
+          };
+        }
+        if (container.groqNluClient) {
+          checks.dependencies.groq = { available: !!container.groqNluClient };
+        }
+        if (container.llmRouter) {
+          checks.dependencies.llm = { available: !!container.llmRouter };
+        }
+        // Filesystem writability check
+        try {
+          const fs = require('fs');
+          const path = require('path');
+          const healthCheckFile = path.join(container.config.operationalDataDir, '.health-check');
+          fs.writeFileSync(healthCheckFile, String(Date.now()));
+          fs.unlinkSync(healthCheckFile);
+          checks.dependencies.filesystem = { ok: true, dir: container.config.operationalDataDir };
+        } catch (err) {
+          checks.dependencies.filesystem = { ok: false, error: err.message };
+        }
+        const allOk = (!checks.storage.postgres || checks.storage.postgres.ok) && (!checks.storage.redis || checks.storage.redis.ok) && checks.dependencies.filesystem.ok;
         return sendJson(res, allOk ? 200 : 503, { ok: allOk, ...checks });
       }
 
@@ -650,10 +688,18 @@ async function startServer() {
 
       if (req.method === "POST" && url.pathname === "/api/admin/templates/create") {
         const body = await readJson(req);
-        const templateId = String(body.id || '').trim().replace(/[^a-z0-9-]/gi, '-').toLowerCase();
-        const label = String(body.label || '').trim();
+        // v35.3: input sanitization — prevent path traversal + injection
+        const { sanitizeTemplateId, sanitizeName, sanitizeText } = require('../../../packages/validation/src/sanitize');
+        let templateId, label, description, domain;
+        try {
+          templateId = sanitizeTemplateId(body.id);
+          label = sanitizeName(body.label, 100);
+          description = sanitizeText(body.description, 500, false);
+          domain = sanitizeName(String(body.domain || 'generic'), 50);
+        } catch (err) {
+          return sendJson(res, 400, { ok:false, error: err.message });
+        }
         if (!templateId || !label) return sendJson(res, 400, { ok:false, error:'id and label are required' });
-        if (!/^[a-z0-9-]+$/.test(templateId)) return sendJson(res, 400, { ok:false, error:'id must be lowercase letters, numbers, hyphens only' });
 
         const templatesDir = path.resolve(container.config.tenantsDir, "_templates");
         const newTemplateDir = path.join(templatesDir, templateId);
@@ -661,10 +707,9 @@ async function startServer() {
 
         // For custom templates, we build a minimal but functional tenant from scratch
         const capabilities = Array.isArray(body.capabilities) && body.capabilities.length
-          ? body.capabilities : ['assistant', 'crm'];
-        const domain = String(body.domain || 'generic').trim();
-        const services = Array.isArray(body.services) ? body.services : [];
-        const faqs = Array.isArray(body.faqs) ? body.faqs : [];
+          ? body.capabilities.filter(c => /^[a-z_]+$/i.test(String(c))).slice(0, 20) : ['assistant', 'crm'];
+        const services = Array.isArray(body.services) ? body.services.slice(0, 50) : [];
+        const faqs = Array.isArray(body.faqs) ? body.faqs.slice(0, 50) : [];
         const businessFacts = body.businessFacts && typeof body.businessFacts === 'object' ? body.businessFacts : {};
 
         fs.mkdirSync(path.join(newTemplateDir, 'knowledge'), { recursive: true });
@@ -672,7 +717,7 @@ async function startServer() {
 
         // template.json
         fs.writeFileSync(path.join(newTemplateDir, 'template.json'), JSON.stringify({
-          id: templateId, label, description: String(body.description || ''), icon: body.icon || '🏢',
+          id: templateId, label, description, icon: body.icon || '🏢',
           domain, capabilities, defaultServices: services, sourceTenant: null,
           isCustom: true, createdAt: new Date().toISOString()
         }, null, 2) + '\n', 'utf8');
@@ -793,8 +838,18 @@ async function startServer() {
 
       if (req.method === "POST" && url.pathname === "/api/admin/tenants/create") {
         const body = await readJson(req);
-        const templateId = String(body.templateId || '').trim();
-        const businessName = String(body.businessName || '').trim();
+        // v35.3: input sanitization — prevent path traversal in templateId + injection in businessName
+        const { sanitizeTemplateId, sanitizeName, sanitizeEmail, sanitizePhone, sanitizeText } = require('../../../packages/validation/src/sanitize');
+        let templateId, businessName, ownerEmail, ownerPhone, businessDescription;
+        try {
+          templateId = sanitizeTemplateId(body.templateId);
+          businessName = sanitizeName(body.businessName, 200);
+          ownerEmail = body.ownerEmail ? sanitizeEmail(body.ownerEmail) : '';
+          ownerPhone = body.ownerPhone ? sanitizePhone(body.ownerPhone) : '';
+          businessDescription = body.businessDescription ? sanitizeText(body.businessDescription, 1000, false) : '';
+        } catch (err) {
+          return sendJson(res, 400, { ok:false, error: err.message });
+        }
         if (!templateId || !businessName) return sendJson(res, 400, { ok:false, error:'templateId and businessName are required' });
 
         // v30.1.5: Find the SOURCE TENANT to clone from.
@@ -1387,8 +1442,10 @@ async function startServer() {
         return sendText(res, 404, 'Kiosk page not found');
       }
 
-      // ─── v34.1: QR Code generation ────────────────────────────────────
-      // Returns a QR code that links to the kiosk URL for this tenant
+      // ─── v34.1 → v35.3: QR Code generation (server-side, no external API) ──
+      // Returns the kiosk URL + a self-hosted QR code endpoint. The QR code
+      // is generated in pure JS (packages/qr-engine) — no external dependency
+      // on goqr.me, no CSP violation, no third-party data leak.
       const qrCodeMatch = url.pathname.match(/^\/api\/admin\/tenants\/([^/]+)\/qr-code$/);
       if (req.method === "GET" && qrCodeMatch) {
         const tenantId = decodeURIComponent(qrCodeMatch[1]);
@@ -1397,20 +1454,47 @@ async function startServer() {
         const novaOrigin = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers['host'] || 'localhost:3000'}`;
         const kioskUrl = `${novaOrigin}/kiosk/${tenantId}`;
         const widgetUrl = `${novaOrigin}/widget.js?data-tenant=${tenantId}&data-server=${encodeURIComponent(novaOrigin)}`;
-        // Return QR code data (URL that can be embedded in an <img> tag)
-        // Using the QR Server API (free, no key needed) as a fallback
-        // Or generate a simple SVG QR code pattern
+        // Public QR code endpoints (no auth — kiosk links are public anyway)
+        const qrPngUrl = `${novaOrigin}/api/qr/${encodeURIComponent(tenantId)}.png`;
+        const qrSvgUrl = `${novaOrigin}/api/qr/${encodeURIComponent(tenantId)}.svg`;
         return sendJson(res, 200, {
           ok: true,
           tenantId,
           kioskUrl,
           widgetUrl,
-          // QR code image URL (using goqr.me API — free, no auth)
-          qrCodeImageUrl: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(kioskUrl)}`,
-          // Also provide a downloadable SVG
-          qrCodeSvgUrl: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=svg&data=${encodeURIComponent(kioskUrl)}`,
-          embedCode: `<img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(kioskUrl)}" alt="Scan to chat with Nova" />`
+          qrCodeImageUrl: qrPngUrl,
+          qrCodeSvgUrl: qrSvgUrl,
+          embedCode: `<img src="${qrPngUrl}" alt="Scan to chat with Nova" />`
         });
+      }
+      // v35.3: Server-side QR code endpoints (no external API)
+      // GET /api/qr/{tenantId}.png → QR code PNG
+      // GET /api/qr/{tenantId}.svg → QR code SVG
+      const qrImageMatch = url.pathname.match(/^\/api\/qr\/([^/]+)\.(png|svg)$/);
+      if (req.method === "GET" && qrImageMatch) {
+        const tenantId = decodeURIComponent(qrImageMatch[1]);
+        const format = qrImageMatch[2];
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendText(res, 404, 'Unknown tenant'); }
+        const novaOrigin = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers['host'] || 'localhost:3000'}`;
+        const kioskUrl = `${novaOrigin}/kiosk/${tenantId}`;
+        try {
+          const { generateQrMatrix, qrMatrixToSvg, qrMatrixToPng } = require('../../../packages/qr-engine/src/qrCode');
+          const matrix = generateQrMatrix(kioskUrl);
+          if (format === 'svg') {
+            const svg = qrMatrixToSvg(matrix, { scale: 10, margin: 4 });
+            res.writeHead(200, { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=86400' });
+            res.end(svg);
+            return;
+          } else {
+            const png = qrMatrixToPng(matrix, { scale: 8, margin: 4 });
+            res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400', 'Content-Length': png.length });
+            res.end(png);
+            return;
+          }
+        } catch (err) {
+          return sendText(res, 500, 'QR generation failed: ' + err.message);
+        }
       }
 
       // ─── End v34.1 endpoints ───────────────────────────────────────────
@@ -2311,6 +2395,7 @@ async function startServer() {
       container.logger.error("http.request_failed", { error: error.message });
       return sendJson(res, error.statusCode || 500, { ok: false, error: error.message, ...(error.code?{code:error.code}:{}), ...(error.details?{details:error.details}:{}) });
     }
+    }); // end Logger.withCorrelationId
   });
   server.listen(container.config.port, () => container.logger.info("api.started", { port: container.config.port }));
 

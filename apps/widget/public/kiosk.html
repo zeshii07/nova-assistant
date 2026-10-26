@@ -591,7 +591,7 @@
       <button data-lang="ur">اردو</button>
       <button data-lang="roman-urdu">Roman Urdu</button>
     </div>
-    <button id="installBtn" style="display:none;position:absolute;top:calc(16px + env(safe-area-inset-top));right:16px;background:rgba(45,91,209,.9);color:#fff;border:none;padding:10px 16px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(45,91,209,.4)">📱 Install App</button>
+    <button id="installBtn" aria-label="Install Nova Kiosk as an app" style="display:none;position:absolute;top:calc(16px + env(safe-area-inset-top));right:16px;background:rgba(45,91,209,.9);color:#fff;border:none;padding:10px 16px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(45,91,209,.4)">📱 Install App</button>
   </div>
 
   <!-- Idle overlay (after 5 min inactivity) -->
@@ -609,8 +609,8 @@
 
   <!-- Main app -->
   <div class="app" id="app" style="display:none">
-    <header class="header">
-      <div class="agent-avatar" id="agentAvatar">
+    <header class="header" role="banner">
+      <div class="agent-avatar" id="agentAvatar" aria-hidden="true">
         <div class="agent-portrait" id="headerPortrait">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
@@ -623,16 +623,16 @@
       </div>
       <div class="agent-info">
         <h2 id="agentName">Nova</h2>
-        <p><span class="dot"></span> <span id="agentStatus">Online · Tap to chat</span></p>
+        <p><span class="dot"></span> <span id="agentStatus" aria-live="polite">Online · Tap to chat</span></p>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" id="voiceToggle" title="Toggle voice replies">
+        <button class="icon-btn" id="voiceToggle" title="Toggle voice replies" aria-label="Toggle voice replies" aria-pressed="false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
           </svg>
         </button>
-        <button class="icon-btn" id="resetBtn" title="Start new conversation">
+        <button class="icon-btn" id="resetBtn" title="Start new conversation" aria-label="Start a new conversation">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="1 4 1 10 7 10"/>
             <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
@@ -640,12 +640,12 @@
         </button>
       </div>
     </header>
-    <div class="banner" id="banner" style="display:none"></div>
-    <div class="messages" id="messages"></div>
-    <div class="suggestions" id="suggestions"></div>
+    <div class="banner" id="banner" role="status" aria-live="polite" style="display:none"></div>
+    <div class="messages" id="messages" role="log" aria-label="Chat messages" aria-live="polite"></div>
+    <div class="suggestions" id="suggestions" role="navigation" aria-label="Suggested questions"></div>
     <div class="composer">
-      <textarea id="input" rows="1" placeholder="Type your message…" autocomplete="off" autocapitalize="sentences"></textarea>
-      <button class="action-btn mic" id="actionBtn" title="Tap to speak">
+      <textarea id="input" rows="1" placeholder="Type your message…" autocomplete="off" autocapitalize="sentences" aria-label="Type your message"></textarea>
+      <button class="action-btn mic" id="actionBtn" title="Tap to speak" aria-label="Microphone — tap to speak, or send your typed message">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
           <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>

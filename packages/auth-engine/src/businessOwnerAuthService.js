@@ -30,6 +30,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');  // v33.0.1: switched from bcrypt to bcryptjs for Render compatibility
 const fs = require('fs');
 const path = require('path');
+const { withFileLock, atomicWriteJson, readJsonSync } = require('../../storage/src/atomicWrite');
 
 const JWT_SECRET = process.env.NOVA_JWT_SECRET || crypto.randomBytes(32).toString('hex');
 const JWT_EXPIRY_DAYS = 7;
@@ -49,18 +50,14 @@ class BusinessOwnerAuthService {
   }
 
   _loadOwners(tenantId) {
-    try {
-      const filePath = this._ownersFilePath(tenantId);
-      if (!fs.existsSync(filePath)) return [];
-      const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      return Array.isArray(data) ? data : [];
-    } catch { return []; }
+    const data = readJsonSync(this._ownersFilePath(tenantId), []);
+    return Array.isArray(data) ? data : [];
   }
 
   _saveOwners(tenantId, owners) {
     const filePath = this._ownersFilePath(tenantId);
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, JSON.stringify(owners, null, 2) + '\n', 'utf8');
+    atomicWriteJson(filePath, owners, { pretty: true });
   }
 
   // ─── Account management ────────────────────────────────────────────

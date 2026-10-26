@@ -2,9 +2,14 @@
  * v30.0 — File-based Notification Log Repository
  * Stores notifications as JSON in .nova-notifications/{tenantId}.json
  * No database required; persists across restarts.
+ *
+ * v35.3: Uses atomic writes + in-process file locking to prevent race
+ * conditions when multiple notifications arrive concurrently for the
+ * same tenant.
  */
 const fs = require('fs');
 const path = require('path');
+const { withFileLock, atomicWriteJson, readJsonSync } = require('../../storage/src/atomicWrite');
 
 class FileNotificationLogRepository {
   constructor({ storageDir, logger = null } = {}) {
@@ -23,30 +28,27 @@ class FileNotificationLogRepository {
   }
 
   _load(tenantId) {
-    try {
-      const filePath = this._filePath(tenantId);
-      if (!fs.existsSync(filePath)) return [];
-      const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      return Array.isArray(data) ? data : [];
-    } catch { return []; }
+    return readJsonSync(this._filePath(tenantId), []) || [];
   }
 
   _save(tenantId, notifications) {
     try {
-      const filePath = this._filePath(tenantId);
-      fs.writeFileSync(filePath, JSON.stringify(notifications, null, 2), 'utf8');
+      atomicWriteJson(this._filePath(tenantId), notifications, { pretty: true });
     } catch (error) {
       this.logger?.warn?.('notification_log.save_failed', { tenantId, error: error.message });
     }
   }
 
   async append(tenantId, notification) {
-    const notifications = this._load(tenantId);
-    notifications.push(notification);
-    // Cap to last 500 notifications per tenant
-    if (notifications.length > 500) notifications.splice(0, notifications.length - 500);
-    this._save(tenantId, notifications);
-    return notification;
+    // v35.3: hold a per-tenant lock so concurrent appends don't lose entries
+    return withFileLock(this._filePath(tenantId), () => {
+      const notifications = this._load(tenantId);
+      notifications.push(notification);
+      // Cap to last 500 notifications per tenant
+      if (notifications.length > 500) notifications.splice(0, notifications.length - 500);
+      this._save(tenantId, notifications);
+      return notification;
+    });
   }
 
   async list(tenantId, { limit = 100, offset = 0, unreadOnly = false } = {}) {

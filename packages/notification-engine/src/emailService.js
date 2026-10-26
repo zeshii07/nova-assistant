@@ -1,10 +1,15 @@
 /**
- * v30.0 — Email Service
+ * v30.0 → v35.3 — Email Service
  * Wraps nodemailer. Sends via Gmail SMTP (or any SMTP).
  * If SMTP is not configured, emails are logged but not sent (dev mode).
  * Includes retry with exponential backoff (3 attempts).
+ *
+ * v35.3: Wraps sendMail in a circuit breaker so a sustained SMTP outage
+ * (e.g. Gmail throttling) fails fast instead of queuing requests that
+ * will all time out.
  */
 const nodemailer = require('nodemailer');
+const { CircuitBreaker } = require('../../circuit-breaker/src/circuitBreaker');
 
 class EmailService {
   constructor({ logger = null } = {}) {
@@ -12,6 +17,15 @@ class EmailService {
     this.transporter = null;
     this.fromAddress = null;
     this.configured = false;
+    // v35.3: circuit breaker for SMTP — opens after 5 failures, resets after 60s
+    this.breaker = new CircuitBreaker({
+      name: 'smtp',
+      failureThreshold: 5,
+      successThreshold: 2,
+      resetTimeout: 60_000,
+      timeout: 15_000,
+      logger
+    });
     this._configure();
   }
 
@@ -62,17 +76,23 @@ class EmailService {
     let lastError;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        const info = await this.transporter.sendMail({
+        // v35.3: route through circuit breaker
+        const info = await this.breaker.run(() => this.transporter.sendMail({
           from: this.fromAddress,
           to: recipients.join(', '),
           subject,
           html,
           text: text || subject
-        });
+        }));
         this.logger?.info?.('email_service.sent', { to: recipients, subject, messageId: info.messageId, attempt: attempt + 1 });
         return { ok: true, messageId: info.messageId, recipients };
       } catch (error) {
         lastError = error;
+        // v35.3: if circuit is open, fail fast — don't retry
+        if (error.code === 'CIRCUIT_OPEN') {
+          this.logger?.warn?.('email_service.circuit_open', { to: recipients, subject });
+          return { ok: false, error: 'Email service temporarily unavailable (circuit open)', circuitOpen: true, retryAfterMs: error.retryAfterMs };
+        }
         this.logger?.warn?.('email_service.send_failed', { attempt: attempt + 1, error: error.message });
         if (attempt < 2) await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
       }
