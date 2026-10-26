@@ -603,3 +603,73 @@ Stage Summary:
   3. "can i book a table today at evening around 6 pm" → captures date+time, asks for party size ✓
   4. Splash screen now shows "Welcome to Nova Bistro" + Order Food + Book a Table buttons ✓
 - Fresh zip at /home/z/my-project/download/nova-v35.4.zip
+
+---
+Task ID: v35.5
+Agent: Super Z (main)
+Task: User reported: (1) double welcome on kiosk (splash + chat start), (2) "i want to order biryani" returning "I'm not fully sure which restaurant request you mean", (3) "ok i will take two biryani" returning same. Asked to self-test full order + table booking flow with variations.
+
+Work Log:
+- BUG 1 (double welcome): In v35.4, applyBranding() spoke welcome on splash load (set state._welcomeSpoken=true), then startChat() spoke it AGAIN on Start Conversation tap. Fixed: startChat() now checks state._welcomeSpoken and only speaks if not already spoken. Result: welcome plays once on splash load (when voice enabled), not again on chat start.
+
+- BUG 2 (user's failing flow): Tested locally and found that v35.4 ALREADY fixes "i want to order biryani" → returns "🧾 Order Summary, Chicken Biryani × 1, Total: Rs650". User was testing on Render deployment which is still on v35.0/v35.1 (pre-fix). The fix has been in the zip since v35.4 but Render deployment hasn't been updated.
+
+- BUG 3 (ok i will take two biryani): Tested locally, returns "🧾 Order Summary, Chicken Biryani × 2, Total: Rs1,300" — also already working in v35.4.
+
+- IMPROVEMENTS made in v35.5 (extensive self-testing revealed these gaps):
+
+  1. Expanded order terms in offering adapter:
+     - Old: only "order", "buy", "purchase" + cfg.orderTerms
+     - New: also "send", "give", "get", "take", "bring", "have", "i want", "i need", "i'd like", "i will", "i'll", "let me get/take/have/order", "can i get/have/order", "can you bring", "i would like", "i would love", "i wish to", "deliver", "ship", "pack", "prepare", plus Roman Urdu: "lena", "leni", "chahiye", "chaheye", "karwa", "krwa", "bhej", "bhejo", "de do", "laga do"
+     - Now recognizes: "send me 2 chicken biryani", "give me one grilled chicken", "i want pasta", "i'll take 2 burgers", "can i get biryani please", etc.
+
+  2. Quantity-as-order-signal: If customer mentions a quantity (number word) + an offering name, treat as order even without explicit order verb. "2 chicken biryani" or "one burger" → starts order. Excludes question words (what/which/how/why/when/where/tell me/show me).
+
+  3. Plural fuzzy matching (entity resolver):
+     - Added singularize() function: handles regular plurals (s/es/ies) + irregulars (men→man, children→child, etc.)
+     - "burgers" → "burger" matches "Beef Burger" via token-level singularized comparison
+     - scoreSimilarity() now also tries singularized comparison → 0.96 confidence for singular/plural matches
+
+  4. Greeting filter in offering adapter:
+     - shortOfferingPhrase previously matched any text ≤4 words without question words
+     - This caused "hi" to fuzzy-match "Chicken Biryani" → "I don't see that exact option. Did you mean Chicken Biryani?"
+     - Now excludes: hi, hello, hey, salam, salaam, assalam, ok, okay, yes, yeah, no, nope, thanks, thank you, thx, please, bye, goodbye, cool, nice, great, sure, alright, fine, k, kk, yo, sup, howdy
+     - Also requires ≥2 words (single-word greetings no longer trigger offering suggestion)
+
+  5. Fuzzy order start: When customer wants to order + has quantity + offering is a fuzzy/suggestion match (not exact), start the order with the suggested offering instead of asking "did you mean X?".
+     - "i will take 2 burgers" → suggestion match for "Beef Burger" → starts order "Beef Burger × 2"
+     - Previously: returned "I don't see that exact option. Did you mean Beef Burger?"
+
+- Verified end-to-end (fresh state):
+  • "can i see your menu" → returns 4 menu items ✓
+  • "i want to order biryani" → starts order "Chicken Biryani × 1" ✓
+  • "can i get biryani please" → starts order "Chicken Biryani × 1" ✓
+  • "ok i will take two biryani" → starts order "Chicken Biryani × 2" ✓
+  • "Send me 2 chicken biryani" → starts order "Chicken Biryani × 2" ✓
+  • "I would like to order beef burger" → starts order "Beef Burger × 1" ✓
+  • "give me one grilled chicken" → starts order "Grilled Chicken × 1" ✓
+  • "i want pasta" → starts order "Alfredo Pasta × 1" ✓
+  • "i will take 2 burgers" → starts order "Beef Burger × 2" ✓ (PLURAL MATCH!)
+  • "order 3 biryani for takeaway" → starts order "Chicken Biryani × 3" ✓
+  • "Book a table for 2" → starts reservation workflow ✓
+  • "I want to book a table" → starts reservation workflow ✓
+  • "Reserve a table for tonight at 8 pm for 4 people" → starts reservation workflow ✓
+  • Combined flow: order → confirm → "also book a table for 2 tomorrow at 7pm" → starts new reservation ✓
+
+- Regression tests pass:
+  • sprint97.v220-persistence.integration.test.js — 13/13 pass ✓
+  • sprint5.catalog.integration.test.js — 6/6 pass ✓
+
+- Bumped package.json 35.4.0 → 35.5.0
+- Built fresh zip at /home/z/my-project/download/nova-v35.5.zip (1.4 MB)
+
+Stage Summary:
+- Nova v35.5 kiosk + restaurant order flow improvements complete.
+- 1 user-reported bug fixed: double welcome on kiosk (only speaks once on splash load, not again on chat start)
+- 5 offering adapter improvements: expanded order terms (15+ new phrases), quantity-as-order-signal, plural fuzzy matching, greeting filter, fuzzy order start
+- All 4 of the user's failing conversation flows from the report are now working:
+  1. "i want to order biryani" → starts order ✓ (was "I'm not fully sure which restaurant request you mean")
+  2. "can i get biryani please" → starts order ✓ (was returning product detail)
+  3. "ok i will take two biryani" → starts order with qty 2 ✓ (was "I'm not fully sure...")
+  4. Plus 5+ new variations now work: "send me 2", "give me one", "i want pasta", "i'll take 2 burgers", "order 3 for takeaway"
+- Fresh zip at /home/z/my-project/download/nova-v35.5.zip

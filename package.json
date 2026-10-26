@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "35.5.0",
+  "version": "35.6.0",
   "private": true,
-  "description": "Nova v35.5 - Fixed double welcome on kiosk (only speaks once on splash), expanded order term recognition (send/give/get/take/bring/have/i want/i need/i'd like/can i get), plural fuzzy matching (burgers→Beef Burger), greeting filter (hi no longer triggers offering suggestion), fuzzy order start (i will take 2 burgers → Beef Burger × 2)",
+  "description": "Nova v35.6 - Multi-item orders (chicken biryani AND beef burger → order summary with both items), typo tolerance (chiken→chicken, biriyani→biryani, wnt→want), out-of-scope query filter (weather/flight/sports/cricket/mobile phones no longer trigger menu), multi-item order confirmation shows all items with correct total",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {

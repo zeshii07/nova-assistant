@@ -8,12 +8,36 @@ class OfferingCapability extends BaseCapability{
      reply=`🧾 *Order Summary*\n${item.name} × ${quantity}${item.price!=null?`\nTotal: Rs${Number(item.price*quantity).toLocaleString('en-US')}`:''}\n\nSay confirm to place this order, or tell me a different quantity.`;
      return createCapabilityResult({handled:true,reply,responseModel:{intent:'OFFERING_ORDER_READY',payload:{legacyText:reply,item,quantity}},statePatch:{activePlugin:'offering',lastIntent:'offering.order.ready',capabilityState:{offering:{...previous,selectedOfferingId:item.id,order:{status:'ready',offeringId:item.id,quantity}}}}});
    }
+   // v35.6: Multi-item order — "chicken biryani and a beef burger"
+   if(i.intent==='offering.order.multi'){
+     const multiItems=entities.items||[];
+     if(multiItems.length===0){reply=formatList(svc.list(),cfg,lang);intent='OFFERING_LISTED';}
+     else{
+       const lines=multiItems.map(mi=>{const it=svc.getById(mi.offeringId);return it?{...it,quantity:mi.quantity}:null;}).filter(Boolean);
+       const total=lines.reduce((s,x)=>s+(x.price||0)*x.quantity,0);
+       const itemLines=lines.map(x=>`${x.name} × ${x.quantity}`).join('\n');
+       reply=`🧾 *Order Summary*\n${itemLines}${total>0?`\nTotal: Rs${Number(total).toLocaleString('en-US')}`:''}\n\nSay confirm to place this order, or tell me what to change.`;
+       return createCapabilityResult({handled:true,reply,responseModel:{intent:'OFFERING_ORDER_READY',payload:{legacyText:reply,items:lines}},statePatch:{activePlugin:'offering',lastIntent:'offering.order.ready',capabilityState:{offering:{...previous,selectedOfferingId:lines[0]?.id,order:{status:'ready',multiItem:true,offeringId:lines[0]?.id,quantity:1,items:lines.map(x=>({offeringId:x.id,quantity:x.quantity}))}}}}});
+     }
+   }
    if(i.intent==='offering.order.quantity'){
      const item=svc.getById(entities.offeringId);const quantity=entities.quantity;
      reply=`Updated 👍\n${item.name} × ${quantity}${item.price!=null?`\nTotal: Rs${Number(item.price*quantity).toLocaleString('en-US')}`:''}\n\nSay confirm to place the order.`;
      return createCapabilityResult({handled:true,reply,responseModel:{intent:'OFFERING_ORDER_READY',payload:{legacyText:reply,item,quantity}},statePatch:{activePlugin:'offering',lastIntent:'offering.order.ready',capabilityState:{offering:{...previous,selectedOfferingId:item.id,order:{status:'ready',offeringId:item.id,quantity}}}}});
    }
    if(i.intent==='offering.order.confirm'||i.intent==='offering.order.confirm_selected'){
+     // v35.6: Multi-item order confirmation
+     if(previous.order?.multiItem && previous.order?.items) {
+       const orderItems = previous.order.items.map(oi => {
+         const it = svc.getById(oi.offeringId);
+         return it ? { ...it, quantity: oi.quantity } : null;
+       }).filter(Boolean);
+       const itemLines = orderItems.map(x => `${x.name} × ${x.quantity}`).join('\n');
+       const total = orderItems.reduce((s, x) => s + (x.price || 0) * x.quantity, 0);
+       const record = await context.services.offeringOrder.create({ item: orderItems[0], quantity: orderItems[0].quantity });
+       reply = `✅ Order confirmed\nReference: ${record.id}\n${itemLines}${total > 0 ? `\nTotal: Rs${Number(total).toLocaleString('en-US')}` : ''}`;
+       return createCapabilityResult({handled:true,reply,responseModel:{intent:'OFFERING_ORDER_CREATED',payload:{legacyText:reply,record}},statePatch:{activePlugin:'offering',lastIntent:'offering.order.created',capabilityState:{offering:{selectedOfferingId:orderItems[0]?.id,order:{status:'completed',multiItem:true,items:previous.order.items,orderId:record.id}}}},events:[{name:'offering.order.created.v1',payload:{orderId:record.id}}]});
+     }
      const item=svc.getById(entities.offeringId||previous.selectedOfferingId);const quantity=entities.quantity||previous.order?.quantity||cfg.defaultQuantity||1;
      const record=await context.services.offeringOrder.create({item,quantity});
      reply=`✅ Order confirmed\nReference: ${record.id}\n${item.name} × ${quantity}${item.price!=null?`\nTotal: Rs${Number(record.total).toLocaleString('en-US')}`:''}`;

@@ -45,6 +45,17 @@ class OfferingConversationAdapter {
       /\b(campus|school|clinic|salon|restaurant|office)\b/.test(text)
     )
       return null;
+    // v35.6: Out-of-scope queries (weather, sports, flights, product sales,
+    // general knowledge) should NOT trigger offering browse. Return null so
+    // they fall through to the assistant which handles them gracefully.
+    if (/\b(?:weather|temperature|forecast|rain|sunny|cloudy)\b/i.test(text) ||
+        /\b(?:flight|plane ticket|airline|airport|book.*flight|flight.*ticket)\b/i.test(text) ||
+        /\b(?:cricket|football|soccer|match score|sports|game score|tennis|hockey)\b/i.test(text) ||
+        /\b(?:sell.*phone|buy.*phone|mobile phone|laptop|computer|electronics|tv|television)\b/i.test(text) ||
+        /\b(?:movie|film|cinema|netflix|youtube|tiktok|instagram)\b/i.test(text) ||
+        /\b(?:politics|election|government|president|prime minister)\b/i.test(text) ||
+        /\b(?:taxi|uber|careem|ride|cab)\b/i.test(text))
+      return null;
     const offeringState = state?.capabilityState?.offering;
     const activeOrder = offeringState?.order;
     // v35.2 BUG FIX: After OFFERING_VIEWED, customer says "I'll take 2 of those"
@@ -179,6 +190,22 @@ class OfferingConversationAdapter {
         130,
       );
     let resolved = svc.resolve(tenant.id, text);
+    // v35.6: Multi-item order detection. When customer says "chicken biryani
+    // and a beef burger" or "2 biryani + 1 burger", split on conjunctions and
+    // try to resolve each part. If 2+ parts match offerings, start a multi-item
+    // order instead of falling through to single-item or browse.
+    if (cfg.actionMode === "order" && !activeOrder && !activeBooking) {
+      const multiItems = extractMultiItemOrder(text, items, svc, tenant.id);
+      if (multiItems && multiItems.length >= 2) {
+        return pack(
+          "offering.order.multi",
+          0.998,
+          { items: multiItems },
+          "multi_item_order",
+          135,
+        );
+      }
+    }
     if (tenant.capabilities?.includes("catalog") && services.catalogService) {
       const catalogResult = await services.catalogService.search(
         tenant.id,
@@ -444,5 +471,47 @@ function pack(intent, confidence, entities, reason, priority = 80) {
     candidates: [{ intent, confidence, entities, reason }],
     vocabularyMatches: [],
   };
+}
+// v35.6: Multi-item order extraction.
+// Splits text on conjunctions ("and", "also", "+", ",", "with", "plus", "aur")
+// and tries to resolve each part as an offering. Returns array of
+// {offeringId, subject, quantity} if 2+ items matched, null otherwise.
+function extractMultiItemOrder(text, items, svc, tenantId) {
+  if (!text || !items || !items.length) return null;
+  // Normalize text — fix common typos before splitting
+  const normalized = String(text)
+    .replace(/\bchiken\b/gi, 'chicken')
+    .replace(/\bbiriyani\b/gi, 'biryani')
+    .replace(/\bburgers\b/gi, 'burger')
+    .replace(/\bwnt\b/gi, 'want')
+    .replace(/\bi wnt\b/gi, 'i want');
+  // Split on conjunctions
+  const parts = normalized
+    .split(/\s+(?:and|also|plus|with|aur|bhi|\+)\s+|,\s*/i)
+    .map(p => p.trim())
+    .filter(Boolean);
+  if (parts.length < 2) return null;
+  const matched = [];
+  for (const part of parts) {
+    // Skip pure numbers or quantity-only fragments
+    if (/^\d+$/.test(part) || /^(one|two|three|four|five|six|seven|eight|nine|ten)$/i.test(part)) continue;
+    // Strip order verbs / filler words
+    const cleaned = part
+      .replace(/\b(?:i want|i need|i'd like|i will|i'll|let me|can i|please|ok|okay|a|an|the|some|of|to|order|eat|get|have|take|deliver|send|give|bring|pack|karwana|krwana|chahiye|chaheye)\b/gi, '')
+      .replace(/\d+\s*(?:x|×)?\s*/g, '')
+      .replace(/\b(?:one|two|three|four|five|six|seven|eight|nine|ten|ek|do|teen|char|paanch)\b/gi, '')
+      .trim();
+    if (!cleaned || cleaned.length < 3) continue;
+    const result = svc.resolve(tenantId, cleaned);
+    if (result && result.record && (result.type === 'exact' || result.type === 'fuzzy' || result.type === 'suggestion')) {
+      const qty = numberFromText(part) || 1;
+      matched.push({
+        offeringId: result.record.id,
+        subject: result.record.name,
+        quantity: qty,
+      });
+    }
+  }
+  return matched.length >= 2 ? matched : null;
 }
 module.exports = { OfferingConversationAdapter };
