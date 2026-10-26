@@ -324,27 +324,31 @@ module.exports.isReadOnlyInterruptCandidate=isReadOnlyInterruptCandidate;
 function detectUnsupportedDomain(text, tenant) {
   // v24.1: Don't flag "shoe cleaner" or "face cleaner" as cleaning service.
   // Only flag if the message is about CLEANING SERVICE (not cleaning products).
-  // Check if the message is about a cleaning SERVICE (booking, scheduling, etc.)
-  // vs a cleaning PRODUCT (shoe cleaner, face wash, surface cleaner).
+  // v35.4 BUG FIX: "Book a table" was matching "book" keyword -> flagged as
+  // cleaning service -> restaurant reservations failed with "cleaning service
+  // isn't something this business offers". Now we only flag if the message
+  // contains an explicit cleaning SERVICE keyword (cleaning, maid, safai, etc.)
+  // OR an acquisition verb + cleaning domain word, AND no reservation keyword.
   if (!tenant.capabilities?.includes('cleaning')) {
-    // Check for cleaning SERVICE intent (book, schedule, maid, etc.)
-    const isCleaningService = /\b(?:book|schedule|reserve|arrange|hire|maid|housekeeping|deep clean|office clean|house clean|safai|صفائی|cleaning service|cleaning for my|clean my (?:apartment|villa|house|home|office|sofa|carpet|mattress|curtain|furniture))\b/.test(text);
+    const t = String(text || '');
+    // v35.4: cleaning-specific service keywords
+    const hasCleaningKeyword = /\b(?:cleaning|maid|housekeeping|deep clean|office clean|house clean|safai|صفائی|cleaning service|cleaning for my|clean my (?:apartment|villa|house|home|office|sofa|carpet|mattress|curtain|furniture))\b/i.test(t);
+    // v35.4: acquisition verb + cleaning domain word
+    const hasCleaningServiceIntent = /\b(?:book|schedule|reserve|arrange|hire|need|want|looking for)\b[\s\S]{0,30}\b(?:clean(?:ing|er)?|maid|housekeeping|safai|صفائی)\b/i.test(t);
     // Check for cleaning PRODUCT (shoe cleaner, face cleaner, surface cleaner, etc.)
-    const isCleaningProduct = /\b(?:shoe cleaner|shoe clean|face cleaner|face wash|surface cleaner|screen cleaner|glass cleaner|phone cleaner|lens cleaner)\b/.test(text);
+    const isCleaningProduct = /\b(?:shoe cleaner|shoe clean|face cleaner|face wash|surface cleaner|screen cleaner|glass cleaner|phone cleaner|lens cleaner)\b/i.test(t);
     // Check for standalone "cleaning" that could be a product search
-    const hasProductContext = /\b(?:product|buy|purchase|price|cost|available|have|do you (?:sell|have))\b/.test(text);
+    const hasProductContext = /\b(?:product|buy|purchase|price|cost|available|have|do you (?:sell|have))\b/i.test(t);
+    // v35.4: reservation/appointment keywords — "Book a table" should NOT match
+    const hasReservationKeyword = /\b(?:table|reservation|reserve a table|book a table|party|guests?|seats?|appointment|consultation|visit|session|service|treatment)\b/i.test(t);
     // Only flag as unsupported if it's clearly a cleaning SERVICE request
-    // and NOT a product search that happens to contain "clean" words
-    if (isCleaningService && !isCleaningProduct) return 'cleaning service';
-    // For standalone "cleaner" word, check if it could be a product
-    if (/\bcleaner\b/.test(text) && (hasProductContext || isCleaningProduct)) return null;
+    if ((hasCleaningKeyword || hasCleaningServiceIntent) && !isCleaningProduct && !hasReservationKeyword) return 'cleaning service';
+    // For "cleaner" word, check if it could be a product
+    if (/\bcleaner\b/i.test(t) && (hasProductContext || isCleaningProduct)) return null;
     // For "cleaning" alone without service context, don't flag
-    if (/\bcleaning\b/.test(text) && !isCleaningService && !isCleaningProduct && !hasProductContext) {
-      // Ambiguous — could be product or service. Don't flag as unsupported.
+    if (/\bcleaning\b/i.test(t) && !hasCleaningKeyword && !isCleaningProduct && !hasProductContext) {
       return null;
     }
-    // For explicit service keywords without product context
-    if (/\b(?:cleaning|safai|صفائی)\b/.test(text) && !isCleaningProduct && !hasProductContext) return 'cleaning service';
   }
   return null;
 }

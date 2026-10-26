@@ -94,29 +94,35 @@ const INTENT_CATALOG = Object.freeze([
   },
 
   // === Booking / Cleaning workflow ===
+  // v35.4 BUG FIX: booking.create was mapped to capabilityId='cleaning' which
+  // caused restaurant/salon reservations ("Book a table for 2") to be routed
+  // to the cleaning capability, then rejected as "unsupported tenant capability"
+  // because restaurants don't have cleaning. Now booking.create maps to the
+  // generic 'booking' capability — restaurants, salons, clinics all have it.
+  // Cleaning-specific requests are handled by cleaning.service_request.
   {
     canonicalId: 'booking.create',
-    capabilityId: 'cleaning',
+    capabilityId: 'booking',
     description: 'Book / schedule / reserve a service',
     weight: 1.0,
     examples: [
       'i want to book an appointment','please schedule this service',
-      'arrange a visit for tomorrow','i need a cleaner on friday',
-      'book a consultation at 3 pm','reserve this service for me',
-      'i am looking for a service for my villa','i was looking to get my apartment cleaned',
-      'could someone clean my place','help me arrange a cleaner',
-      'set me up with this service','i need someone to sort out the cleaning',
-      'can your team come and clean my house','i am interested in getting this treatment',
+      'arrange a visit for tomorrow','book a consultation at 3 pm',
+      'reserve this service for me','set me up with this service',
+      'i am interested in getting this treatment',
       'mujhe kal booking karwani hai','appointment rakh dein','service book kr do',
-      'mujhy kal ghar saaf krwana hai','booking kar do','book kar lo',
+      'booking kar do','book kar lo',
       'مجھے کل اپائنٹمنٹ چاہیے','أريد حجز موعد','احجز لي هذه الخدمة غدا',
       'i want to book cleaning for tomorrow','schedule for next monday',
-      'arrange cleaning at 10 am','can i book a service','need someone to clean'
+      'arrange cleaning at 10 am','can i book a service','need someone to clean',
+      'book a table for 2','reserve a table for 4','table reservation for tonight',
+      'book a table today at evening around 6 pm','can i book a table for tomorrow',
+      'table for 2 please','reserve a table for 7 pm'
     ]
   },
   {
     canonicalId: 'booking.modify',
-    capabilityId: 'cleaning',
+    capabilityId: 'booking',
     description: 'Change booking time/date',
     weight: 0.95,
     examples: [
@@ -129,7 +135,7 @@ const INTENT_CATALOG = Object.freeze([
   },
   {
     canonicalId: 'booking.cancel',
-    capabilityId: 'cleaning',
+    capabilityId: 'booking',
     description: 'Cancel a booking',
     weight: 1.0,
     examples: [
@@ -141,7 +147,7 @@ const INTENT_CATALOG = Object.freeze([
   },
   {
     canonicalId: 'booking.status',
-    capabilityId: 'cleaning',
+    capabilityId: 'booking',
     description: 'Check booking status',
     weight: 0.85,
     examples: [
@@ -242,16 +248,24 @@ const INTENT_CATALOG = Object.freeze([
   },
 
   // === Catalog / commerce ===
+  // v35.4: Added "specials" / "what's available today" examples so restaurant
+  // and salon customers asking about today's specials route to the menu/list
+  // instead of falling to the assistant with "I don't have approved info".
   {
     canonicalId: 'product.list',
     capabilityId: 'catalog',
-    description: 'Show me products',
+    description: 'Show me products / menu / offerings',
     weight: 0.90,
     examples: [
       'show me products','what products do you have','list your items',
       'show me watches','display available products',
       'products dikhao','kya kya available hai',
-      'اپنے پروڈکٹس دکھائیں','اعرض المنتجات'
+      'اپنے پروڈکٹس دکھائیں','اعرض المنتجات',
+      'what are todays specials','what are today\'s specials',
+      'show me the menu','whats on the menu','menu please',
+      'what do you have today','any specials today',
+      'today\'s special dish','what\'s special today',
+      'show me your services','what services do you offer'
     ]
   },
   {

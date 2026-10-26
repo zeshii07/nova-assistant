@@ -213,7 +213,7 @@ class OfferingConversationAdapter {
     const broadCollectionQuestion =
       /\b(what|which)\s+(treatments?|classes|grades?|foods?|menu items?|programs?|services)\b/.test(
         text,
-      );
+      ) || /\b(what(?:'s| is)?\s+(?:today'?s\s+)?specials?|today'?s\s+specials?|what(?:'s| is)?\s+on\s+(?:the\s+)?menu|any\s+specials?)\b/i.test(text);
     const explicit =
       !broadBusinessServices &&
       !broadCollectionQuestion &&
@@ -280,7 +280,9 @@ class OfferingConversationAdapter {
         120,
       );
     }
-    if (browse || interest)
+    // v35.4: broad collection question (today's specials, what's on the menu)
+    // should also trigger offering.browse
+    if (browse || interest || broadCollectionQuestion)
       return pack(
         "offering.browse",
         0.95,

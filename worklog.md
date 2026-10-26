@@ -438,3 +438,71 @@ Stage Summary:
 - All 13 persistence + 6 catalog regression tests pass
 - Fresh zip delivered at /home/z/my-project/download/nova-v35.2.zip
 - README.md updated to v35.2 with full bug fix documentation
+
+---
+Task ID: v35.3
+Agent: Super Z (main)
+Task: User reported critical bugs + scalability + frontend + architecture issues. Fixed all major ones systematically.
+
+Work Log:
+- BUG FIXES:
+  • Memory leak: InMemoryReplayRepository grew unbounded — added MAX_ITEMS=5000 FIFO cap + 7-day TTL GC
+  • Race conditions: Added packages/storage/src/atomicWrite.js with withFileLock() + atomicWriteJson() helpers (temp file + rename pattern)
+  • Applied atomic writes to: fileNotificationLogRepository (with per-tenant lock), businessOwnerAuthService (owner writes)
+  • State repository: Added per-conversation locks + optimistic versioning (rejects stale writes with STALE_STATE error code) + 24h TTL GC + 10000-state hard cap
+  • Widget CSP: Replaced external goqr.me API with self-hosted QR code generator (packages/qr-engine/src/qrCode.js — pure JS, no dependencies, supports versions 1-10, EC level M, PNG + SVG output)
+  • Added 2 new endpoints: GET /api/qr/{tenantId}.png, GET /api/qr/{tenantId}.svg
+  • Updated business dashboard to use self-hosted QR endpoint (no more https://api.qrserver.com/...)
+  • Input sanitization: Added packages/validation/src/sanitize.js with sanitizeTenantId, sanitizeName, sanitizeText, sanitizeEmail, sanitizePhone, sanitizeNumber, sanitizeUrl, sanitizeFilename
+  • Applied sanitization to: /api/admin/templates/create (id, label, description, domain), /api/admin/tenants/create (templateId, businessName, ownerEmail, ownerPhone, businessDescription)
+  • Sanitization blocks: path traversal (../), HTML/script/iframe injection, JavaScript: URLs, on* event handlers, control chars, length caps
+
+- ARCHITECTURE IMPROVEMENTS:
+  • Circuit breaker: Added packages/circuit-breaker/src/circuitBreaker.js with CLOSED/OPEN/HALF_OPEN states, failure threshold, reset timeout, call timeout
+  • Applied circuit breaker to EmailService.sendMail() — opens after 5 failures, resets after 60s, fails fast when OPEN
+  • Structured logging with correlation IDs: Logger now uses AsyncLocalStorage to propagate requestId through the entire request lifecycle automatically
+  • Wrapped every HTTP request in Logger.withCorrelationId() — sets X-Request-Id response header, all logs include requestId
+  • Expanded /health endpoint: now reports email circuit state, Google Calendar config, Groq availability, LLM availability, filesystem writability check
+  • Persisted replay repository: added packages/replay-engine/src/fileReplayRepository.js — conversations survive server restarts (write-through to .nova-data/replays/)
+  • Wired InMemoryReplayRepository to use file-based persistence via persistDir option
+
+- FRONTEND IMPROVEMENTS:
+  • ARIA labels added to kiosk: header role=banner, voiceToggle aria-pressed, agentStatus aria-live=polite, banner role=status, messages role=log aria-live=polite, suggestions role=navigation, input aria-label, actionBtn aria-label
+  • Keyboard navigation already worked (textarea + button focus), now properly announced via ARIA
+
+- SCALABILITY IMPROVEMENTS:
+  • Bounded caches prevent OOM in long-running processes
+  • Atomic writes prevent corrupted JSON files under concurrent writes
+  • File locking prevents lost updates when multiple requests modify the same file
+  • Circuit breakers prevent cascading failures when external services go down
+  • Structured logging with correlation IDs makes distributed tracing possible
+
+- Verified end-to-end:
+  • Server boots in ~6s
+  • Health endpoint returns 200 with new dependencies section (email circuit CLOSED, filesystem ok, googleCalendar configured=false)
+  • Self-hosted QR codes: PNG 4.7KB, SVG 32KB, both return correct Content-Type
+  • Path traversal blocked: '../../etc/passwd' → 'Invalid tenant ID (only a-z, 0-9, -, _ allowed)'
+  • XSS sanitized: '<script>alert(1)</script>' label → 'scriptalert(1)/script' (angle brackets stripped)
+  • Conversation still works: cleaning-demo 'hi' → 122-char reply
+  • Request correlation ID header set on every response
+  • Regression tests: 13/13 persistence + 6/6 catalog pass
+
+- Bumped package.json 35.2.0 → 35.3.0
+- Built fresh zip at /home/z/my-project/download/nova-v35.3.zip (1.4 MB, 1140 files)
+- Verified all v35.3 patches present in zip:
+  • Memory leak fix: 8 references to MAX_ITEMS/TTL_MS/_gc() in InMemoryReplayRepository
+  • Atomic write helper: packages/storage/src/atomicWrite.js (3189 bytes)
+  • Race condition fix: 2 withFileLock references in notification log
+  • Self-hosted QR: packages/qr-engine/src/qrCode.js (11052 bytes), 0 references to qrserver.com
+  • Input sanitization: packages/validation/src/sanitize.js (3776 bytes)
+  • Circuit breaker: packages/circuit-breaker/src/circuitBreaker.js (2784 bytes)
+  • State locking: 5 references to withLock/STALE_STATE/version in memoryStateRepository
+  • ARIA labels: 10 aria-* attributes in kiosk.html
+
+Stage Summary:
+- Nova v35.3 critical bug fix release complete.
+- 5 critical bugs fixed: memory leaks, race conditions, widget CSP, missing input sanitization, state race conditions
+- 4 architecture improvements: circuit breakers, structured logging with correlation IDs, expanded health checks, persisted replay repository
+- 1 frontend improvement: ARIA labels + screen reader support on kiosk
+- All 13 persistence + 6 catalog regression tests pass
+- Fresh zip at /home/z/my-project/download/nova-v35.3.zip

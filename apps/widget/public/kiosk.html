@@ -130,12 +130,20 @@
       text-align: center;
       padding: 0 24px;
     }
+    .splash .welcome-line {
+      font-size: 16px;
+      color: var(--ok);
+      font-weight: 500;
+      margin-top: 4px;
+      text-align: center;
+    }
     .splash p {
       font-size: 15px;
       color: var(--text-dim);
       text-align: center;
       max-width: 320px;
       line-height: 1.5;
+      margin-top: 8px;
     }
     .splash .tap {
       margin-top: 12px;
@@ -149,6 +157,29 @@
       box-shadow: 0 10px 30px rgba(45, 91, 209, 0.4);
       animation: pulse 2s ease-in-out infinite;
     }
+    .splash .quick-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 16px;
+      max-width: 460px;
+    }
+    .splash .quick-action {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      backdrop-filter: blur(8px);
+      transition: background 0.15s, transform 0.1s;
+    }
+    .splash .quick-action:active { transform: scale(0.96); }
+    .splash .quick-action:hover { background: var(--accent); border-color: var(--accent); }
     .splash .lang {
       position: absolute;
       bottom: calc(24px + var(--safe-bottom));
@@ -583,9 +614,11 @@
         </svg>
       </div>
     </div>
+    <div class="welcome-line" id="splashWelcome">Welcome to</div>
     <h1 id="splashName">Nova Assistant</h1>
     <p id="splashDesc">Tap below to start chatting — no sign-up needed.</p>
     <div class="tap">Start Conversation</div>
+    <div class="quick-actions" id="splashQuickActions" style="display:none"></div>
     <div class="lang">
       <button class="active" data-lang="en">English</button>
       <button data-lang="ur">اردو</button>
@@ -826,6 +859,9 @@
       document.title = biz + ' · Nova Kiosk';
       agentName.textContent = c.agent?.name || c.assistantName || biz;
       agentStatus.textContent = c.agent?.title || 'Online · Tap to chat';
+      // v35.4: "Welcome to {business}" line above the business name
+      const welcomeLine = $('splashWelcome');
+      if (welcomeLine) welcomeLine.textContent = `Welcome to`;
       // Theme color
       const color = c.themeColor || '#2d5bd1';
       document.documentElement.style.setProperty('--accent', color);
@@ -838,8 +874,83 @@
       }
       // Render suggestions
       renderSuggestions(c.suggestions || []);
+      // v35.4: Render domain-specific quick action buttons on splash screen.
+      // For restaurants: "Order Food" + "Book a Table". For salons: "Book Appointment".
+      // For cleaning: "Get a Quote". These pre-fill the first message so the
+      // customer can start a flow with one tap.
+      renderSplashQuickActions(c);
       // Voice toggle initial state
       updateVoiceToggle();
+      // v35.4: Speak welcome on splash load (auto-enables voice).
+      // Mobile browsers require a user gesture for TTS — the splash tap counts
+      // when customer taps Start Conversation. But on desktop / installed PWA,
+      // we can speak immediately on load.
+      if (!state._welcomeSpoken && state.voiceEnabled) {
+        // Defer 600ms so the splash animation completes + audio element preloads
+        setTimeout(() => {
+          const agentNameStr = c.agent?.name || biz;
+          const spokenWelcome = `Welcome to ${biz}. I'm ${agentNameStr}, your assistant. How can I help you today?`;
+          speakReply(spokenWelcome);
+          state._welcomeSpoken = true;
+        }, 600);
+      }
+    }
+
+    // v35.4: Render domain-specific quick action buttons on the splash screen.
+    // Picks the right actions based on the tenant's domain.
+    function renderSplashQuickActions(c) {
+      const container = $('splashQuickActions');
+      if (!container) return;
+      const actions = computeSplashActions(c);
+      if (actions.length === 0) { container.style.display = 'none'; return; }
+      container.style.display = 'flex';
+      container.innerHTML = '';
+      for (const action of actions) {
+        const btn = document.createElement('button');
+        btn.className = 'quick-action';
+        btn.textContent = action.label;
+        btn.setAttribute('aria-label', action.label);
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Start the chat + pre-fill the message
+          startChat(action.message);
+        });
+        container.appendChild(btn);
+      }
+    }
+
+    // Pick quick actions based on tenant domain + capabilities
+    function computeSplashActions(c) {
+      const actions = [];
+      // Heuristic based on the configured suggestions + business description
+      const suggestions = (c.suggestions || []).map(s => String(s).toLowerCase());
+      const description = String(c.businessDescription || '').toLowerCase();
+      const hasMenu = suggestions.some(s => s.includes('menu')) || description.includes('menu');
+      const hasBookTable = suggestions.some(s => s.includes('book a table') || s.includes('reservation'));
+      const hasBookAppointment = suggestions.some(s => s.includes('appointment') || s.includes('book'));
+      const hasQuote = suggestions.some(s => s.includes('quote') || s.includes('price'));
+      const hasProducts = suggestions.some(s => s.includes('product'));
+
+      // Restaurant-style: Order Food + Book a Table
+      if (hasMenu || hasBookTable) {
+        actions.push({ label: '🍽️ Order Food', message: "Show me the menu" });
+      }
+      if (hasBookTable) {
+        actions.push({ label: '📅 Book a Table', message: "Book a table for 2" });
+      }
+      // Salon-style: Book Appointment
+      if (hasBookAppointment && !hasBookTable) {
+        actions.push({ label: '📅 Book Appointment', message: "I'd like to book an appointment" });
+      }
+      // Cleaning-style: Get a Quote
+      if (hasQuote) {
+        actions.push({ label: '💰 Get a Quote', message: "I'd like a cleaning quote" });
+      }
+      // Retail: Browse Products
+      if (hasProducts && !hasMenu) {
+        actions.push({ label: '🛍️ Browse Products', message: "Show me available products" });
+      }
+      return actions.slice(0, 3); // cap at 3
     }
 
     function lighten(hex, percent) {
@@ -1273,7 +1384,7 @@
     });
 
     // ─── Splash interaction ──────────────────────────────────
-    function startChat() {
+    function startChat(prefillMessage) {
       splash.classList.add('hidden');
       setTimeout(() => { splash.style.display = 'none'; }, 600);
       app.style.display = 'flex';
@@ -1302,6 +1413,16 @@
       // Focus input on desktop, but not mobile (avoid keyboard popup)
       if (window.matchMedia('(min-width: 768px)').matches) {
         inputEl.focus();
+      }
+      // v35.4: If a prefill message was provided (from a quick action button),
+      // send it immediately after the welcome so the customer goes straight
+      // into the relevant flow (Order Food, Book a Table, etc.).
+      if (prefillMessage && typeof prefillMessage === 'string' && prefillMessage.trim()) {
+        setTimeout(() => {
+          inputEl.value = prefillMessage;
+          autoResize();
+          sendMessage();
+        }, 900);  // wait for welcome to finish speaking
       }
       resetIdle();
     }
