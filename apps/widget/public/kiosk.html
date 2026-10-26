@@ -1408,8 +1408,16 @@
         localStorage.setItem('nova-kiosk-voice', 'true');
         updateVoiceToggle();
       }
-      // Speak the welcome. Small delay lets the panel render first.
-      setTimeout(() => speakReply(spokenWelcome), 300);
+      // v35.5: Only speak the welcome here if we haven't already spoken it on
+      // splash load. The previous logic always spoke the welcome on startChat,
+      // causing a double welcome ("Welcome to..." on splash, then again when
+      // the customer tapped Start Conversation).
+      if (!state._welcomeSpoken) {
+        setTimeout(() => {
+          speakReply(spokenWelcome);
+          state._welcomeSpoken = true;
+        }, 300);
+      }
       // Focus input on desktop, but not mobile (avoid keyboard popup)
       if (window.matchMedia('(min-width: 768px)').matches) {
         inputEl.focus();

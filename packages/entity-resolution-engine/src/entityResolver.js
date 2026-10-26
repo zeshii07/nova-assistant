@@ -1,5 +1,24 @@
 const { normalizeText } = require('../../conversation-intelligence/src/text');
 
+// v35.5: Singularize common English plurals so "burgers" matches "Beef Burger"
+// and "biryani" matches "Chicken Biryani". Conservative — only handles
+// regular plurals (s/es/ies) plus a few common irregulars.
+function singularize(word) {
+  if (!word || word.length <= 3) return word;
+  // Common irregular plurals
+  const irregular = { 'men': 'man', 'women': 'woman', 'children': 'child', 'teeth': 'tooth', 'feet': 'foot', 'mice': 'mouse', 'geese': 'goose' };
+  const lower = word.toLowerCase();
+  if (irregular[lower]) return irregular[lower];
+  // Regular plurals
+  if (word.endsWith('ies') && word.length > 4) return word.slice(0, -3) + 'y';
+  if (word.endsWith('ses') || word.endsWith('xes') || word.endsWith('zes')) return word.slice(0, -2);
+  if (word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
+  return word;
+}
+function normalizeSingular(text) {
+  return String(text || '').split(/\s+/).map(singularize).join(' ');
+}
+
 function levenshtein(a,b){
   const m=Array.from({length:a.length+1},()=>Array(b.length+1).fill(0));
   for(let i=0;i<=a.length;i++)m[i][0]=i; for(let k=0;k<=b.length;k++)m[0][k]=k;
@@ -8,16 +27,21 @@ function levenshtein(a,b){
 }
 function scoreSimilarity(a,b){
   a=normalizeText(a); b=normalizeText(b); if(!a||!b)return 0; if(a===b)return 1;
+  // v35.5: also try singularized comparison — "burgers" → "burger"
+  const aS = normalizeSingular(a);
+  const bS = normalizeSingular(b);
+  if (aS === bS) return .96;
   const at=a.split(' ').filter(Boolean), bt=b.split(' ').filter(Boolean);
   if(at.length>1 && bt.length>1 && at.length===bt.length && [...at].sort().join(' ')===[...bt].sort().join(' ')) return .94;
   if(a.includes(b)||b.includes(a)) return .88;
+  // v35.5: singularized token-level includes
+  if (aS.includes(bS) || bS.includes(aS)) return .9;
   const qTokens=meaningfulTokens(a),nameTokens=meaningfulTokens(b);
-  // Compare tenant nouns against individual request tokens/windows. This
-  // recognizes "mujhe hair cut karwana hai" and small spelling mistakes while
-  // keeping the configured offering as the source of truth.
+  // v35.5: also compare singularized tokens
+  const qTokensS = qTokens.map(singularize);
   let tokenScore=0;
   if(nameTokens.length){
-    const matched=nameTokens.filter(name=>qTokens.some(query=>query===name||levenshtein(query,name)<=boundedTokenDistance(name))).length;
+    const matched=nameTokens.filter(name=>qTokens.some(query=>query===name||levenshtein(query,name)<=boundedTokenDistance(name))||qTokensS.some(query=>query===singularize(name)||levenshtein(query,singularize(name))<=boundedTokenDistance(name))).length;
     tokenScore=matched/nameTokens.length;
     if(tokenScore===1)tokenScore=nameTokens.length===1?.9:.93;
   }

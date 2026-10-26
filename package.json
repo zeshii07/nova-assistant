@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "35.4.0",
+  "version": "35.5.0",
   "private": true,
-  "description": "Nova v35.4 - Restaurant reservation bugs fixed (Book a table for 2 now works, today's specials returns menu), splash screen shows Welcome to {business} + quick action buttons (Order Food / Book a Table / Get a Quote), voice welcome on splash load, ML intent catalog fixed (booking intents no longer misrouted to cleaning capability)",
+  "description": "Nova v35.5 - Fixed double welcome on kiosk (only speaks once on splash), expanded order term recognition (send/give/get/take/bring/have/i want/i need/i'd like/can i get), plural fuzzy matching (burgers→Beef Burger), greeting filter (hi no longer triggers offering suggestion), fuzzy order start (i will take 2 burgers → Beef Burger × 2)",
   "main": "apps/api/src/server.js",
   "type": "commonjs",
   "engines": {

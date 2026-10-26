@@ -221,16 +221,29 @@ class OfferingConversationAdapter {
         text,
       );
     if (resolved.type === "exact") {
+      // v35.5: Expanded order terms — customers use many natural phrases:
+      // "send me 2", "give me one", "i'll take 2", "i want 2", "need 3",
+      // "get me", "let me get", "i'd like", "bring me", "have", etc.
       const orderTerms = [
         ...(cfg.orderTerms || []),
-        "order",
-        "buy",
-        "purchase",
+        "order", "buy", "purchase",
+        "send", "give", "get", "take", "bring", "have",
+        "i want", "i need", "i'd like", "i will", "i'll",
+        "let me get", "let me take", "let me have", "let me order",
+        "can i get", "can i have", "can i order", "can you bring",
+        "i would like", "i would love", "i wish to",
+        "deliver", "ship", "pack", "prepare",
+        "lena", "leni", "chahiye", "chaheye", "karwa", "krwa",
+        "bhej", "bhejo", "de do", "de do", "laga do",
       ];
+      // v35.5: Quantity + offering name is a strong order signal — even
+      // without an explicit order verb. "2 chicken biryani" or "one burger"
+      // is clearly an order.
+      const hasQuantity = /\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|a couple|some|few|ek|do|teen|char|paanch)\b/i.test(text);
       const wantsOrder =
         cfg.actionMode === "order" &&
         resolved.record.orderable &&
-        matchesAny(text, orderTerms);
+        (matchesAny(text, orderTerms) || (hasQuantity && !/\b(?:what|which|how|why|when|where|tell me|show me)\b/i.test(text)));
       if (wantsOrder)
         return pack(
           "offering.order.start",
@@ -251,13 +264,41 @@ class OfferingConversationAdapter {
         120,
       );
     }
+    // v35.5: shortOfferingPhrase should NOT match greetings ("hi", "hello",
+    // "salam"), acknowledgements ("ok", "yes", "thanks"), or single filler
+    // words. Otherwise "hi" fuzzy-matches "Chicken Biryani" and we get
+    // "I don't see that exact option. Did you mean Chicken Biryani?"
     const shortOfferingPhrase =
-      text.split(/\s+/).length <= 4 &&
-      !/\b(what|which|why|how|where|when)\b/.test(text);
+      text.split(/\s+/).length >= 2 && text.split(/\s+/).length <= 4 &&
+      !/\b(what|which|why|how|where|when)\b/.test(text) &&
+      !/^(hi|hello|hey|salam|salaam|assalam|ok|okay|yes|yeah|no|nope|thanks|thank you|thx|please|bye|goodbye|cool|nice|great|sure|alright|fine|k|kk|yo|sup|howdy)\b/i.test(text);
     if (
       (browse || interest || explicit || shortOfferingPhrase) &&
       (resolved.type === "fuzzy" || resolved.type === "suggestion")
     ) {
+      // v35.5: If customer clearly wants to ORDER (has order verb + quantity),
+      // start the order with the suggested offering instead of asking "did
+      // you mean X?". "i will take 2 burgers" → "Beef Burger × 2" order.
+      const orderTerms = ["order", "buy", "purchase", "send", "give", "get", "take", "bring", "have",
+        "i want", "i need", "i'd like", "i will", "i'll", "let me get", "let me take",
+        "can i get", "can i have", "i would like"];
+      const hasQuantity = /\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|a couple|some|few|ek|do|teen|char|paanch)\b/i.test(text);
+      const wantsOrder = cfg.actionMode === "order" && resolved.record.orderable &&
+        (matchesAny(text, orderTerms) || hasQuantity) &&
+        !/\b(?:what|which|how|why|when|where|tell me|show me)\b/i.test(text);
+      if (wantsOrder) {
+        return pack(
+          "offering.order.start",
+          0.998,
+          {
+            offeringId: resolved.record.id,
+            subject: resolved.record.name,
+            quantity: numberFromText(text) || cfg.defaultQuantity || 1,
+          },
+          "fuzzy_offering_order",
+          130,
+        );
+      }
       return pack(
         "offering.suggestion",
         0.994,

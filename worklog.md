@@ -506,3 +506,100 @@ Stage Summary:
 - 1 frontend improvement: ARIA labels + screen reader support on kiosk
 - All 13 persistence + 6 catalog regression tests pass
 - Fresh zip at /home/z/my-project/download/nova-v35.3.zip
+
+---
+Task ID: v35.4
+Agent: Super Z (main)
+Task: User reported restaurant-demo bugs: "Book a table for 2" returns "cleaning service isn't something this business offers", "What are today's specials?" returns "I don't have approved information", and asked for splash screen with welcome message + Order Food tab + voice welcome.
+
+Work Log:
+- ROOT CAUSE for "Book a table" failure:
+  • ML intent classifier catalog (packages/ml-intent-classifier/src/intentCatalog.js) mapped booking.create → capabilityId='cleaning'
+  • When customer says "Book a table for 2", ML detects booking.create (correct), but maps to cleaning capability (wrong)
+  • Restaurant-demo tenant doesn't have cleaning capability → detectUnsupportedDomain() returns 'cleaning service'
+  • ConversationIntelligenceEngine falls back to assistant with reason='unsupported_tenant_capability'
+  • Assistant renders "Sorry, cleaning service isn't something this business currently offers"
+- ROOT CAUSE for "today's specials" failure:
+  • ML classifier returned null intent (low confidence)
+  • Reason='knowledge_question_abstention' → falls to assistant → "I don't have approved information"
+- ROOT CAUSE for splash lacking welcome tab:
+  • Splash screen only showed business name + "Start Conversation" button
+  • No domain-specific quick actions like "Order Food" or "Book a Table"
+  • Voice welcome only triggered on chat start, not on splash load
+
+- FIX 1: Updated packages/ml-intent-classifier/src/intentCatalog.js:
+  • Changed booking.create → capabilityId from 'cleaning' to 'booking'
+  • Changed booking.modify → capabilityId from 'cleaning' to 'booking'
+  • Changed booking.cancel → capabilityId from 'cleaning' to 'booking'
+  • Changed booking.status → capabilityId from 'cleaning' to 'booking'
+  • Added restaurant reservation training examples to booking.create:
+    - 'book a table for 2', 'reserve a table for 4', 'table reservation for tonight'
+    - 'book a table today at evening around 6 pm', 'can i book a table for tomorrow'
+    - 'table for 2 please', 'reserve a table for 7 pm'
+  • Removed cleaning-specific examples (i need a cleaner, clean my house, etc.) — those now go through cleaning.service_request intent
+  • Updated product.list intent with new examples:
+    - 'what are todays specials', "what are today's specials"
+    - 'whats on the menu', 'any specials today', "today's special dish", "what's special today"
+    - 'show me your services', 'what services do you offer'
+
+- FIX 2: Updated packages/conversation-intelligence/src/conversationIntelligenceEngine.js detectUnsupportedDomain():
+  • Old: matched "book" keyword alone → "Book a table" was flagged as cleaning service request
+  • New: requires cleaning-specific keyword (cleaning/maid/housekeeping/safai/deep clean/etc.) OR acquisition verb + cleaning domain word
+  • Added hasReservationKeyword check — if message contains "table/reservation/appointment/consultation/treatment" etc., it's NOT a cleaning request
+  • Now "Book a table" → no longer flagged as cleaning service → routes correctly to booking capability
+
+- FIX 3: Updated capabilities/offering/conversation/index.js:
+  • broadCollectionQuestion now also matches: "what's today's specials", "today's specials", "what's on the menu", "any specials today"
+  • Updated offering.browse trigger to include broadCollectionQuestion
+  • Restaurant customers asking about "today's specials" now get the menu back
+
+- FIX 4: Updated apps/widget/public/kiosk.html splash screen:
+  • Added CSS for .welcome-line (green "Welcome to" above the business name)
+  • Added CSS for .quick-actions container + .quick-action button styles
+  • Added splash HTML: <div class="welcome-line" id="splashWelcome">Welcome to</div>
+  • Added <div class="quick-actions" id="splashQuickActions" style="display:none"></div>
+  • Updated applyBranding() to:
+    - Set the welcome line text to "Welcome to"
+    - Call renderSplashQuickActions(c) to populate domain-specific quick action buttons
+    - Speak the welcome on splash load (not just on chat start) when voice is enabled
+  • Added renderSplashQuickActions(c) function — renders up to 3 buttons based on tenant domain
+  • Added computeSplashActions(c) function — heuristic based on suggestions + business description:
+    - Restaurant: "Order Food" + "Book a Table"
+    - Salon: "Book Appointment"
+    - Cleaning: "Get a Quote"
+    - Retail: "Browse Products"
+  • Updated startChat(prefillMessage) to accept optional pre-fill message — when customer taps a quick action button, the message is sent immediately after the welcome so they go straight into the relevant flow
+
+- Verified end-to-end:
+  • "Book a table for 2" → "Subject: Table Reservation, Party Size: 2, What date would you like the table?" ✓
+  • "Show me the menu" → returns 4 menu items ✓
+  • "What are todays specials?" → returns 4 menu items ✓ (was "I don't have approved information")
+  • "can i book a table today at evening around 6 pm" → "Date: 26/10/2026, Time: 6 pm, How many guests should I reserve for?" ✓
+  • Salon "Haircut please" → still shows haircut details ✓
+  • Cleaning "book a cleaning for tomorrow" → still asks which type ✓
+  • Restaurant "I need to book a cleaning service" → correctly says cleaning not offered, mentions actual menu items ✓
+
+- Regression tests pass:
+  • sprint97.v220-persistence.integration.test.js — 13/13 pass ✓
+  • sprint5.catalog.integration.test.js — 6/6 pass ✓
+
+- Bumped package.json 35.3.0 → 35.4.0
+- Built fresh zip at /home/z/my-project/download/nova-v35.4.zip (1.4 MB)
+- Verified all v35.4 patches present in zip:
+  • ML catalog: booking.create → capabilityId='booking' (not 'cleaning') ✓
+  • detectUnsupportedDomain: 2 hasReservationKeyword references ✓
+  • Kiosk splash: 11 references to splashWelcome/splashQuickActions/quick-action/computeSplashActions ✓
+  • Offering specials: 5 references to specials/broadCollectionQuestion ✓
+
+Stage Summary:
+- Nova v35.4 restaurant routing + splash UX fixes complete.
+- 3 conversation engine bugs fixed: ML intent mapping (booking→cleaning), detectUnsupportedDomain false-positive (book keyword alone), today's specials not recognized
+- 1 splash UX feature added: Welcome message line + domain-specific quick action buttons (Order Food / Book a Table / Get a Quote / Book Appointment / Browse Products)
+- Voice welcome now plays on splash load (when voice enabled) instead of only on chat start
+- Quick action buttons pre-fill the first message and send it after the welcome — customers go straight into the relevant flow with one tap
+- All 4 restaurant conversation bugs from user report are fixed:
+  1. "Book a table for 2" → starts reservation workflow ✓
+  2. "What are today's specials?" → returns menu ✓
+  3. "can i book a table today at evening around 6 pm" → captures date+time, asks for party size ✓
+  4. Splash screen now shows "Welcome to Nova Bistro" + Order Food + Book a Table buttons ✓
+- Fresh zip at /home/z/my-project/download/nova-v35.4.zip
