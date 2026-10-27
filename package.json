@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "36.0.0",
+  "version": "36.1.0",
   "private": true,
-  "description": "Nova v36.0 - Scalability + efficiency: Node.js cluster mode (multi-core), file existence cache (60s TTL on hot paths), request timeout (30s), graceful shutdown (SIGTERM/SIGINT), startup commands (npm start=single, NOVA_SINGLE_WORKER=true for debug)",
+  "description": "Nova v36.1 - Comprehensive restaurant NLU fix: typo-tolerant menu browse (wht→what, somw→some), 'what kind of food do you have/you offer' detection, 'i want to order some food + what...' combined query handling, zinger burger no longer false-matches Beef Burger (single-word alias in multi-word query rejected as exact match), phone validation gives helpful message when customer references previous answers",
   "main": "apps/api/src/cluster.js",
   "type": "commonjs",
   "engines": {

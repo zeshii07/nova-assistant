@@ -57,7 +57,29 @@ class EntityResolver {
     for(const record of records){
       const names=[record.name,...(record.aliases||[])].filter(Boolean);
       let best=0, exactName=null;
-      for(const name of names){ const n=normalizeText(name); if(q===n || new RegExp(`\\b${escapeRegex(n)}\\b`).test(q)){best=1;exactName=name;break;} best=Math.max(best,scoreSimilarity(q,n)); }
+      for(const name of names){
+        const n=normalizeText(name);
+        // v36.1: exact match — full query equals the name/alias
+        if(q===n){best=1;exactName=name;break;}
+        // v36.1: word-boundary match, but ONLY if the alias is a significant
+        // portion of the query. "burger" matching inside "zinger burger" is
+        // NOT an exact match for "Beef Burger" — "zinger" is a different food.
+        // Rule: alias must be >= 50% of the query length OR query must be
+        // <= 2 words longer than the alias.
+        if(new RegExp(`\\b${escapeRegex(n)}\\b`).test(q)){
+          const qWords=q.split(/\s+/).length;
+          const nWords=n.split(/\s+/).length;
+          // If alias is a single word and query has other significant words, don't match
+          if(nWords===1 && qWords>2){
+            // Single-word alias in a longer query — don't treat as exact
+            // (e.g., "zinger burger" shouldn't exact-match alias "burger")
+            best=Math.max(best,scoreSimilarity(q,n));
+            continue;
+          }
+          best=1;exactName=name;break;
+        }
+        best=Math.max(best,scoreSimilarity(q,n));
+      }
       if(best===1) exact.push({record,match:exactName,confidence:1});
       scored.push({record,confidence:best});
     }

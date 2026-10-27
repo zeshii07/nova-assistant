@@ -216,7 +216,16 @@ class UniversalEngagementEngine {
 
   parsePhone(raw, options = {}) {
     const source=String(raw).trim();
-    if(/[\p{L}]/u.test(source))return invalid('phone','Please send only the contact number, for example 03012345678 or +923012345678.');
+    // v36.1: If the input contains words that suggest the customer is trying
+    // to change/correct a previous field (date, time, name) rather than
+    // provide a phone number, give a more helpful error message.
+    if(/[\p{L}]/u.test(source)){
+      // Check if the customer is referencing a previous answer
+      if(/\b(?:i told you|i said|already|friday|saturday|sunday|monday|tuesday|wednesday|thursday|tomorrow|today|date|time|name|change|update|different)\b/i.test(source)){
+        return invalid('phone','I understand you want to update a previous detail. Please share your phone number first so I can save this reservation, then tell me what to change. Or say "skip" to skip the phone number.');
+      }
+      return invalid('phone','Please send only the contact number, for example 03012345678 or +923012345678.');
+    }
     const numberGroups=source.match(/\+?\d[\d ()-]*\d/g)||[];
     if(numberGroups.length!==1)return invalid('phone','Please enter one valid contact number, for example 03012345678 or +923012345678.');
     const normalized = numberGroups[0].replace(/[^\d+]/g, '');
