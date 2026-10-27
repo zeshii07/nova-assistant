@@ -10,6 +10,8 @@ const { applyStatePatch } = require("../../../packages/state/src/stateSchema");
 const { replyToNovaVisitor } = require("./novaMarketingAssistant");
 // v35.3: Logger import — used for AsyncLocalStorage-based correlation ID propagation
 const { Logger } = require("../../../packages/logger/src/logger");
+// v36.0: File existence cache — avoids redundant fs.existsSync on hot paths
+const { fileExistenceCache } = require("../../../packages/storage/src/fileExistenceCache");
 
 async function startServer() {
   const container = await buildContainer();
@@ -1858,9 +1860,10 @@ async function startServer() {
           requiresApiKey: !!widget.apiKey,
           allowedDomains: widget.allowedDomains || [],
           // v34.1: Voice profile for TTS (voice cloning)
+          // v36.0: Uses fileExistenceCache to avoid redundant fs.existsSync on every request
           voiceProfile: (() => {
             const vpPath = path.join(container.config.tenantsDir, tenantId, 'voice-profile.json');
-            if (fs.existsSync(vpPath)) {
+            if (fileExistenceCache.exists(vpPath, fs)) {
               try { return JSON.parse(fs.readFileSync(vpPath, 'utf8')); } catch { return null; }
             }
             return null;
@@ -1869,13 +1872,13 @@ async function startServer() {
           // Public so the kiosk/widget can fetch without auth.
           voiceSampleUrl: (() => {
             const samplesDir = path.join(container.config.tenantsDir, tenantId, 'voice-samples');
-            if (fs.existsSync(samplesDir)) {
-              for (const ext of ['.webm', '.mp3', '.wav', '.m4a', '.ogg']) {
-                const p = path.join(samplesDir, 'sample' + ext);
-                if (fs.existsSync(p)) {
-                  return `${novaOrigin}/api/voice/sample/${encodeURIComponent(tenantId)}`;
-                }
-              }
+            const candidatePaths = ['.webm', '.mp3', '.wav', '.m4a', '.ogg'].map(ext =>
+              path.join(samplesDir, 'sample' + ext)
+            );
+            // v36.0: check existence via cache (1 disk hit per 60s instead of 5 per request)
+            const found = fileExistenceCache.findFirst(candidatePaths, fs);
+            if (found) {
+              return `${novaOrigin}/api/voice/sample/${encodeURIComponent(tenantId)}`;
             }
             return null;
           })(),
@@ -2220,9 +2223,12 @@ async function startServer() {
             try { fs.unlinkSync(oldP); } catch {}
           }
         }
+        // v36.0: invalidate file existence cache so next widget config read picks up the new file
+        fileExistenceCache.invalidatePrefix(samplesDir);
         const samplePath = path.join(samplesDir, 'sample' + ext);
         try {
           fs.writeFileSync(samplePath, Buffer.from(contentBase64, 'base64'));
+          fileExistenceCache.invalidate(samplePath);  // invalidate so it's re-checked
         } catch (err) {
           return sendJson(res, 500, { ok:false, error: 'Failed to save audio: ' + err.message });
         }
@@ -2295,6 +2301,7 @@ async function startServer() {
           savedAt: new Date().toISOString()
         };
         fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2) + '\n', 'utf8');
+        fileExistenceCache.invalidate(profilePath);  // v36.0: invalidate cache
         return sendJson(res, 200, { ok:true, tenantId, profile, message: 'Voice profile updated.' });
       }
 
@@ -2314,6 +2321,7 @@ async function startServer() {
             try { fs.unlinkSync(metaPath); } catch {}
           }
         }
+        fileExistenceCache.invalidatePrefix(samplesDir);  // v36.0: invalidate cache
         return sendJson(res, 200, { ok:true, message: 'Voice sample removed. Widget will fall back to browser TTS.' });
       }
       // ─── End v34.2 Voice Cloning (authenticated) ───────────────────────
@@ -2397,7 +2405,34 @@ async function startServer() {
     }
     }); // end Logger.withCorrelationId
   });
+  // v36.0: Request timeout — kill requests that hang for more than 30s.
+  // Prevents slow-client memory leaks and stuck connections.
+  server.requestTimeout = 30_000;
+  server.headersTimeout = 32_000;
+  server.keepAliveTimeout = 5_000;
+  server.timeout = 30_000;
+
   server.listen(container.config.port, () => container.logger.info("api.started", { port: container.config.port }));
+
+  // v36.0: Graceful shutdown — stop accepting new connections, finish in-flight
+  // requests, then exit. Render sends SIGTERM 30s before killing the process.
+  let shuttingDown = false;
+  function gracefulShutdown(signal) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    container.logger.info('api.shutting_down', { signal });
+    server.close(() => {
+      container.logger.info('api.closed', {});
+      process.exit(0);
+    });
+    // Force exit after 10s if connections don't close
+    setTimeout(() => {
+      container.logger.warn('api.force_exit', {});
+      process.exit(1);
+    }, 10_000).unref();
+  }
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
   // v33.3: Self-ping keep-alive — prevents Render free tier from sleeping.
   // Render sleeps after 15 min of no EXTERNAL traffic. Self-pinging localhost

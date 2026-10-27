@@ -1,16 +1,17 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "35.7.0",
+  "version": "36.0.0",
   "private": true,
-  "description": "Nova v35.7 - Context-aware numberFromText (do=2 only when clearly a quantity, not verb do biryani), broader menu browse detection (what items do you have, what do you have in your menu), multi-item order verb stripping (do/make/quickly/now), combined menu+order queries now return menu",
-  "main": "apps/api/src/server.js",
+  "description": "Nova v36.0 - Scalability + efficiency: Node.js cluster mode (multi-core), file existence cache (60s TTL on hot paths), request timeout (30s), graceful shutdown (SIGTERM/SIGINT), startup commands (npm start=single, NOVA_SINGLE_WORKER=true for debug)",
+  "main": "apps/api/src/cluster.js",
   "type": "commonjs",
   "engines": {
     "node": ">=20 <23"
   },
   "scripts": {
-    "start": "node apps/api/src/server.js",
-    "dev": "node --watch apps/api/src/server.js",
+    "start": "node apps/api/src/cluster.js",
+    "start:single": "NOVA_SINGLE_WORKER=true node apps/api/src/server.js",
+    "dev": "NOVA_SINGLE_WORKER=true node --watch apps/api/src/server.js",
     "test": "node --require ./tests/test-env.js --test",
     "check": "node scripts/check.js",
     "demo:users": "node scripts/demo-multi-user.js",
