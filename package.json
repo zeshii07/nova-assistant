@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "36.1.0",
+  "version": "36.2.0",
   "private": true,
-  "description": "Nova v36.1 - Comprehensive restaurant NLU fix: typo-tolerant menu browse (wht→what, somw→some), 'what kind of food do you have/you offer' detection, 'i want to order some food + what...' combined query handling, zinger burger no longer false-matches Beef Burger (single-word alias in multi-word query rejected as exact match), phone validation gives helpful message when customer references previous answers",
+  "description": "Nova v36.2 - Comprehensive menu browse detection: what type of food, what are you offering, can i see what you are offering, i want to eat food from your restaurant, do you any item for eating, i want to order some food please, typo tolerance (resturant, wht, somw, pls, plz, hw, shw, ordr)",
   "main": "apps/api/src/cluster.js",
   "type": "commonjs",
   "engines": {

@@ -237,34 +237,54 @@ class OfferingConversationAdapter {
       ...(cfg.interestTerms || []),
     ]);
     const broadBusinessServices = /\b(what|which)\s+services\b/.test(text);
-    // v36.1: Comprehensive menu/browse detection.
-    // Normalize text first to handle typos (wht→what, somw→some) before regex.
+    // v36.2: Comprehensive menu/browse detection with typo tolerance.
+    // Normalize text first to handle common typos + SMS shorthand.
     const normalizedBrowseText = text
       .replace(/\bwht\b/gi, 'what')
       .replace(/\bsomw\b/gi, 'some')
       .replace(/\bkinda\b/gi, 'kind of')
       .replace(/\bkindof\b/gi, 'kind of')
       .replace(/\bur\b/gi, 'your')
-      .replace(/\bu\b/gi, 'you');
+      .replace(/\bu\b/gi, 'you')
+      .replace(/\bresturant\b/gi, 'restaurant')
+      .replace(/\brestaurent\b/gi, 'restaurant')
+      .replace(/\bkinda\b/gi, 'kind of')
+      .replace(/\bpls\b/gi, 'please')
+      .replace(/\bplz\b/gi, 'please')
+      .replace(/\bhw\b/gi, 'how')
+      .replace(/\bshw\b/gi, 'show')
+      .replace(/\bordr\b/gi, 'order')
+      .replace(/\bordr\b/gi, 'order')
+      .replace(/\bavailabl\b/gi, 'available')
+      .replace(/\bavail\b/gi, 'available');
     const broadCollectionQuestion =
       /\b(what|which)\s+(treatments?|classes|grades?|foods?|menu items?|programs?|services)\b/.test(
         normalizedBrowseText,
       ) || /\b(what(?:'s| is)?\s+(?:today'?s\s+)?specials?|today'?s\s+specials?|what(?:'s| is)?\s+on\s+(?:the\s+)?menu|any\s+specials?)\b/i.test(normalizedBrowseText)
-      // v36.1: "what items do you have" / "what do you have in your menu"
       || /\b(?:what|which)\s+(?:items?|dishes?|food|options?)\s+(?:do you have|have you got|are available|can i (?:see|order|get))\b/i.test(normalizedBrowseText)
       || /\b(?:what|which)\s+(?:do you have|have you got|is (?:available|on (?:the )?menu))\b/i.test(normalizedBrowseText)
       || /\b(?:show|tell me|see)\s+(?:me\s+)?(?:the\s+|your\s+)?(?:full\s+|complete\s+)?(?:food\s+)?menu\b/i.test(normalizedBrowseText)
       || /\bwhat\s+items\s+do you have\b/i.test(normalizedBrowseText)
-      // v36.1: "what kind of food do you have" / "what kind of food you offer"
-      || /\b(?:what|which)\s+kind\s+of\s+(?:food|dishes?|items?|menu)?\s*(?:do you have|do you offer|have you got|are available|you offer|you have|can i (?:see|order|get))?\b/i.test(normalizedBrowseText)
-      // v36.1: "what food do you have" / "what food you offer"
+      // v36.2: "what kind of food" / "what type of food"
+      || /\b(?:what|which)\s+(?:kind|type)\s+of\s+(?:food|dishes?|items?|menu)?/i.test(normalizedBrowseText)
+      // v36.2: "what food do you have" / "what food you offer"
       || /\b(?:what|which)\s+(?:food|dishes?|items?)\s+(?:do you have|do you offer|have you got|are available|you offer|you have|can i (?:see|order|get))\b/i.test(normalizedBrowseText)
-      // v36.1: "what do you offer" / "what can i order"
-      || /\b(?:what|which)\s+(?:do you offer|can i order|can i get|can i see|can i have)\b/i.test(normalizedBrowseText)
-      // v36.1: "i want to order some food" + question about what's available
-      || /\b(?:i want|i need|i'?d like)\s+to order\s+(?:some\s+)?(?:food|something)\b.*\b(?:what|which|do you have|do you offer|kind of|menu)\b/i.test(normalizedBrowseText)
-      // v36.1: "do you have any food" / "do you have food"
-      || /\bdo you have\s+(?:any\s+)?(?:food|dishes?|items?|menu)\b/i.test(normalizedBrowseText);
+      // v36.2: "what do you offer" / "what can i order" / "what are you offering"
+      || /\b(?:what|which)\s+(?:do you offer|can i order|can i get|can i see|can i have|are you offering|are (?:the )?available)\b/i.test(normalizedBrowseText)
+      // v36.2: "i want to order some food" (with or without follow-up question)
+      || /\b(?:i want|i need|i'?d like|i'?ll)\s+(?:to\s+)?(?:order|eat|get|have)\s+(?:some\s+|any\s+)?(?:food|something|dinner|lunch|breakfast)\b/i.test(normalizedBrowseText)
+      // v36.2: "do you have any food" / "do you have food" / "do you any item"
+      || /\bdo you\s+(?:have|offer)\s+(?:any\s+)?(?:food|dishes?|items?|menu|something)\b/i.test(normalizedBrowseText)
+      // v36.2: "can i see what you are offering" / "can i see your menu"
+      || /\bcan i see\s+(?:what\s+)?(?:you\s+)?(?:are\s+)?(?:offering|your menu|the menu|what.*available)\b/i.test(normalizedBrowseText)
+      // v36.2: "i want to eat food from your restaurant" — intent to order food
+      || /\b(?:i want|i need|i'?d like)\s+to\s+(?:eat|order|get|have)\s+(?:food|something|lunch|dinner)\b/i.test(normalizedBrowseText)
+      // v36.2: "what items for eating" / "any item for eating"
+      || /\b(?:any|some)\s+(?:items?|dishes?|food)\s+for\s+eating\b/i.test(normalizedBrowseText)
+      // v36.2: Just "menu" or "show menu"
+      || /^(?:show|see|tell me|view)?\s*(?:the\s+|your\s+)?menu\s*(?:please)?$/i.test(normalizedBrowseText.trim())
+      // v36.2: "what's available" / "what is available"
+      || /\bwhat(?:'s| is| are)?\s+available\b/i.test(normalizedBrowseText);
     const explicit =
       !broadBusinessServices &&
       !broadCollectionQuestion &&
