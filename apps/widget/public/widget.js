@@ -270,6 +270,14 @@
 
   async function sendMessage(text) {
     if (!text || !text.trim()) return;
+    // v40.1: Stop any ongoing TTS / voice sample when user sends a message.
+    // This prevents Nova from continuing to talk over the user's new query.
+    if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+    if (state._voiceSampleAudio && !state._voiceSampleAudio.paused) {
+      try { state._voiceSampleAudio.pause(); state._voiceSampleAudio.currentTime = 0; } catch {}
+    }
     if (state.inFlight) { state.queue.push(text); return; }
     if (!state.customerId) {
       const saved = loadSession();

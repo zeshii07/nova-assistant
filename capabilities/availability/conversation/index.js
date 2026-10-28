@@ -4,6 +4,16 @@ class AvailabilityConversationAdapter{
  constructor(){this.capabilityId='availability';this.priority=105;}
  async analyze({tenant,message,services,state,temporal={}}){
   if(!tenant.capabilities?.includes('availability'))return empty(this.priority);
+  // v40.2: If there's an active cleaning or booking workflow, defer to it.
+  // Availability adapter was stealing turns from active workflows when the
+  // customer mentioned a weekday ("i want service on tuesday") — the
+  // availability adapter saw "tuesday" as a day constraint and returned
+  // high confidence, beating the cleaning/booking workflow adapter.
+  const activeCleaning = state?.capabilityState?.cleaning;
+  const activeBooking = state?.capabilityState?.booking;
+  if (activeCleaning?.step || (activeBooking?.status === 'collecting' || activeBooking?.status === 'ready')) {
+    return empty(this.priority);
+  }
   const text=normalizeWeekdayTypos(message.text),constraints=extractServiceConstraints(message.text),constraintText=constraints.text;
   // "Are you available in Sharjah?" asks about geographic coverage, not a
   // calendar slot. Let the tenant-knowledge path answer it from approved service

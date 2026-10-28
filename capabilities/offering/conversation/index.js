@@ -66,6 +66,15 @@ class OfferingConversationAdapter {
         /\b(?:politics|election|government|president|prime minister)\b/i.test(text) ||
         /\b(?:taxi|uber|careem|ride|cab)\b/i.test(text))
       return null;
+    // v40.2: If there's an active cleaning or booking workflow, defer to it.
+    // Offering adapter was stealing turns from active workflows when the
+    // customer mentioned a service name ("i want it on tuesday") — the
+    // offering adapter saw the service name and returned high confidence.
+    const activeCleaning = state?.capabilityState?.cleaning;
+    const activeBooking = state?.capabilityState?.booking;
+    if (activeCleaning?.step || (activeBooking?.status === 'collecting' || activeBooking?.status === 'ready')) {
+      return null;
+    }
     const offeringState = state?.capabilityState?.offering;
     const activeOrder = offeringState?.order;
     // v36.3: Add/Remove/Change items on an EXISTING order (before confirmation).
@@ -212,7 +221,8 @@ class OfferingConversationAdapter {
           130,
         );
     }
-    const activeBooking = state?.capabilityState?.booking;
+    // v40.2: activeBooking already declared above, reuse it
+    // const activeBooking = state?.capabilityState?.booking;
     // Item edits inside a booking/reservation basket belong to Booking even if
     // the requested word is only a partial offering identity (for example,
     // "add chicken" when two chicken dishes exist).

@@ -1054,6 +1054,14 @@
       text = (text ?? inputEl.value ?? '').trim();
       if (!text) return;
       if (state.inFlight) return;
+      // v40.1: Stop any ongoing TTS / voice sample when user sends a message.
+      // This prevents Nova from continuing to talk over the user's new query.
+      if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+      }
+      if (state.voiceSampleAudio && !state.voiceSampleAudio.paused) {
+        try { state.voiceSampleAudio.pause(); state.voiceSampleAudio.currentTime = 0; } catch {}
+      }
       inputEl.value = '';
       autoResize();
       updateActionButton();
