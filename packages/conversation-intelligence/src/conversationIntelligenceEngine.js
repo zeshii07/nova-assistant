@@ -13,7 +13,7 @@ const { TemporalSemanticExtractor } = require('./temporalSemanticExtractor');
 const { UniversalMessageFrame, mergeUniversalEntities, appendResolvedIntents } = require('./universalMessageFrame');
 
 class ConversationIntelligenceEngine {
-  constructor({ adapterRegistry, llmInterpreter = null, nluInterpreter = null, aiLanguageLayer = null, semanticRouter = null, semanticRoutePolicy = null, nluDecisionPolicy = null, nluInvocationPolicy = null, logger = null, socialIntelligenceEngine = null, domainResolver = null } = {}) {
+  constructor({ adapterRegistry, llmInterpreter = null, nluInterpreter = null, aiLanguageLayer = null, semanticRouter = null, semanticRoutePolicy = null, nluDecisionPolicy = null, nluInvocationPolicy = null, logger = null, socialIntelligenceEngine = null, domainResolver = null, tenantAdapterRegistry = null } = {}) {
     this.adapterRegistry = adapterRegistry;
     this.llmInterpreter = llmInterpreter;
     this.nluInterpreter = nluInterpreter;
@@ -23,6 +23,7 @@ class ConversationIntelligenceEngine {
     this.nluDecisionPolicy = nluDecisionPolicy;
     this.nluInvocationPolicy = nluInvocationPolicy;
     this.logger = logger;
+    this.tenantAdapterRegistry = tenantAdapterRegistry;
     this.globalCommands = new GlobalCommandEngine();
     this.corrections = new CorrectionEngine();
     this.interruptions = new InterruptionEngine();
@@ -41,6 +42,17 @@ class ConversationIntelligenceEngine {
 
   async analyze({ tenant, message, state, services = {} }) {
     const started = performance.now();
+    // v38.0: Tenant adapter — enrich text before any processing
+    let enrichedText = message.text;
+    let tenantAdapter = null;
+    if (this.tenantAdapterRegistry) {
+      tenantAdapter = this.tenantAdapterRegistry.get(tenant);
+      if (tenantAdapter) {
+        enrichedText = tenantAdapter.enrichText(message.text) || message.text;
+        // Use enriched text for all downstream processing
+        message = { ...message, text: enrichedText };
+      }
+    }
     const normalizedText = normalizeText(message.text);
     const social = this.social?.analyze(message.text) || {};
     const semantic = this.universal.analyze(message.text);
@@ -104,6 +116,26 @@ class ConversationIntelligenceEngine {
     const candidates = [];
     const vocabularyMatches = [];
     const entityCandidates = [];
+
+    // v38.0: Tenant adapter — extract entities + suggest intents BEFORE central adapters
+    if (tenantAdapter) {
+      try {
+        const taEntities = tenantAdapter.extractEntities(message.text, { tenant, message, state, services, normalizedText });
+        if (taEntities && Object.keys(taEntities).length) {
+          entityCandidates.push({ capabilityId: 'tenant_adapter', entities: taEntities });
+          // Merge into messageFrame entities so all downstream adapters see them
+          Object.assign(messageFrame.entities, taEntities);
+        }
+        const taCandidates = tenantAdapter.suggestIntents(message.text, { tenant, message, state, services, normalizedText });
+        for (const c of (taCandidates || [])) {
+          candidates.push({ capabilityId: c.capabilityId || 'catalog', priority: tenantAdapter.priority || 72, ...c });
+          vocabularyMatches.push({ capabilityId: 'tenant_adapter', type: 'intent_suggestion', value: c.intent, score: c.confidence });
+        }
+      } catch (err) {
+        this.logger?.error?.('tenant_adapter.failed', { tenantId: tenant.id, error: err.message });
+      }
+    }
+
     for (const adapter of this.adapterRegistry.list()) {
       if (!tenant.capabilities?.includes(adapter.capabilityId)) continue;
       try {

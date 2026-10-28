@@ -198,6 +198,20 @@ function contextualBoost(intent,raw,{tenant,context,tenantMatches,pending}){
   if(hasAcquisitionCue(n)&&productMatch&&['cart.add','order.create'].includes(intent))boost+=.065;
   if(/\b(?:return|wapas|واپس|إرجاع)\b/.test(n)&&intent==='order.return')boost+=.045;
   if(/\b(?:exchange|replace|swap|badal|بدل|استبدال)\b/.test(n)&&intent==='order.exchange')boost+=.045;
+  // v40.0: Enhanced semantic routing for unified service intents
+  if(/\b(?:services?|treatments?|programs?|packages?|options?)\b/i.test(n)&&/\b(?:what|which|show|see|list|offer)\b/i.test(n)&&intent==='service.browse')boost+=.05;
+  if(/\b(?:how much|price|cost|rate|kitna|kitne|qeemat)\b/i.test(n)&&intent==='service.quote')boost+=.045;
+  if(/\b(?:tell me about|details?|info|about)\b/i.test(n)&&intent==='service.detail')boost+=.04;
+  // v40.0: Roman Urdu service routing
+  if(/\b(?:services?|treatment|program|package)\s+(?:dikhao|batao|chahiye|kya hai)\b/i.test(n)&&intent==='service.browse')boost+=.045;
+  if(/\b(?:kitne|kitna|rate|qeemat)\b/i.test(n)&&/\b(?:service|treatment|cleaning|haircut|facial)\b/i.test(n)&&intent==='service.quote')boost+=.04;
+  // v40.0: Restaurant-specific routing
+  if(/\b(?:menu|food|dishes?|khana)\b/i.test(n)&&/\b(?:show|see|what|which|kya)\b/i.test(n)&&intent==='product.list')boost+=.05;
+  if(/\b(?:order|bhej|laga|deliver|takeaway|dine)\b/i.test(n)&&/\b(?:food|biryani|burger|pasta|chicken)\b/i.test(n)&&['cart.add','order.create'].includes(intent))boost+=.055;
+  // v40.0: Availability routing
+  if(/\b(?:open|hours|time|kab|kis time|khulta|band)\b/i.test(n)&&intent==='availability.check')boost+=.04;
+  // v40.0: Out-of-scope detection — demote all product/service intents for clearly irrelevant queries
+  if(/\b(?:weather|cricket|football|movie|flight|taxi|uber)\b/i.test(n))boost-=.08;
   return boost;
 }
 

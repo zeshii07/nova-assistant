@@ -4,8 +4,10 @@
   "capabilities": [
     "assistant",
     "crm",
-    "offering",
-    "booking"
+    "catalog",
+    "commerce",
+    "booking",
+    "service"
   ],
   "features": {
     "llmFallback": false
@@ -27,7 +29,23 @@
     "offering.read:offering",
     "booking.read:booking",
     "booking.write:booking",
-    "offering.read:booking"
+    "offering.read:booking",
+    "catalog.search:catalog",
+    "catalog.read:catalog",
+    "memory.read:catalog",
+    "memory.write:catalog",
+    "crm.activity.write:catalog",
+    "commerce.write:catalog",
+    "commerce.read:commerce",
+    "commerce.write:commerce",
+    "commerce.order.create:commerce",
+    "commerce.order.update:commerce",
+    "catalog.read:commerce",
+    "memory.read:commerce",
+    "memory.write:commerce",
+    "crm.customer.read:commerce",
+    "crm.customer.write:commerce",
+    "crm.activity.write:commerce"
   ],
   "id": "restaurant-demo",
   "name": "Nova Bistro",

@@ -117,7 +117,20 @@ const INTENT_CATALOG = Object.freeze([
       'arrange cleaning at 10 am','can i book a service','need someone to clean',
       'book a table for 2','reserve a table for 4','table reservation for tonight',
       'book a table today at evening around 6 pm','can i book a table for tomorrow',
-      'table for 2 please','reserve a table for 7 pm'
+      'table for 2 please','reserve a table for 7 pm',
+      // v40.0: More Roman Urdu + natural language
+      'mujhe appointment chahiye','kal appointment lena hai',
+      'booking karni hai','service ke liye book karo',
+      'kal shaam ko appointment','parson booking kar do',
+      'i need to schedule something','i want to reserve a slot',
+      'can i come in tomorrow','i need an appointment',
+      'book me in for friday','schedule me for saturday',
+      'kal time mil sakta hai','kya kal slot available hai',
+      'appointment lena hai kal ka','book karwana hai',
+      'i want to see the doctor','i need a haircut appointment',
+      'mujhe doctor ko dikhana hai','haircut ke liye book karo',
+      'book kar do mera','reserve kar lo',
+      'مجھے کل وقت چاہیے','أريد حجز موعد غدا'
     ]
   },
   {
@@ -470,6 +483,84 @@ const INTENT_CATALOG = Object.freeze([
       'can i use bleach on marble','how often should i deep clean',
       'stain kaise hataye','grease kaise saaf karein',
       'داغ کیسے ہٹائیں','كيف أنظف البقعة'
+    ]
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // v40.0: UNIFIED SERVICE INTENTS — for the unified service capability
+  // These intents cover ALL service-based tenants (salon, clinic, education, etc.)
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    canonicalId: 'service.browse',
+    capabilityId: 'service',
+    description: 'Browse available services / treatments / programs',
+    weight: 0.95,
+    examples: [
+      'what services do you offer','show me your services','what do you offer',
+      'what treatments do you have','which programs are available',
+      'what packages do you have','tell me about your services',
+      'show me available options','what can i get here',
+      'services dikhao','kya kya services hain','aap ke paas kya kya hai',
+      'konsi services available hain','services ki list do',
+      'آپ کے پاس کیا خدمات ہیں','哪些服务可用'
+    ]
+  },
+  {
+    canonicalId: 'service.detail',
+    capabilityId: 'service',
+    description: 'Get details about a specific service',
+    weight: 0.90,
+    examples: [
+      'tell me about haircut','details about deep cleaning',
+      'what is included in consultation','more info about facial',
+      'haircut ke baare mein batao','consultation ki detail do',
+      'facial mein kya kya hota hai','is service ke baare mein batao',
+      'تفصیل بتائیں','تفاصيل الخدمة'
+    ]
+  },
+  {
+    canonicalId: 'service.quote',
+    capabilityId: 'service',
+    description: 'Get price/quote for a service',
+    weight: 0.92,
+    examples: [
+      'how much is haircut','price for deep cleaning',
+      'what is the cost of consultation','how much does facial cost',
+      'rate for hair styling','quote for cleaning service',
+      'haircut ka kitna rate hai','cleaning kitne ki hai',
+      'consultation ki qeemat kya hai','facial ka price batao',
+      'kitne ka lagta hai','rate kya hai is service ka',
+      'كم سعر القص','قیمت کیا ہے'
+    ]
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // v40.0: ENHANCED TRAINING EXAMPLES — more Roman Urdu + Urdu for existing intents
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // v40.0: Additional conversational intents
+  {
+    canonicalId: 'conversation.help',
+    capabilityId: 'assistant',
+    description: 'Customer asking for help / what can you do',
+    weight: 0.80,
+    examples: [
+      'help','what can you do','how can you help me',
+      'what do you do','i need help','can you help me',
+      'help karo','aap kya kar sakte hain','mujhe madad chahiye',
+      'آپ کیا کر سکتے ہیں','كيف تساعدني'
+    ]
+  },
+  {
+    canonicalId: 'conversation.menu',
+    capabilityId: 'assistant',
+    description: 'Customer asking for options / what is available',
+    weight: 0.85,
+    examples: [
+      'what are my options','what choices do i have',
+      'show me everything','what can i choose from',
+      'kya options hain','kya kya kar sakte hain',
+      'میرے پاس کیا آپشنز ہیں'
     ]
   }
 ]);

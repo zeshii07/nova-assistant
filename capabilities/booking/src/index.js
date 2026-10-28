@@ -8,19 +8,44 @@ const {
 class BookingCapability extends BaseCapability {
   async canHandle(context) {
     const i = context.intelligence?.selected;
-    if (i?.capabilityId === "booking")
+    // v39.0: Accept both "booking" and "service" capability IDs
+    if (i?.capabilityId === "booking" || i?.capabilityId === "service")
       return { confidence: i.confidence || 0.97, reason: i.reason };
     return { confidence: 0 };
   }
 
   async execute(context) {
     const booking = context.services.booking;
-    const offering = context.services.offering;
+    const offering = context.services.offeringService || context.services.offering;
+    const cleaning = context.services.cleaning;
     const engagement = context.services.engagement;
     const config = booking.getConfig();
     const previous = context.state.capabilityState?.booking || {};
+    
+    const extracted = context.intelligence?.entities || context.intelligence?.selected?.entities || {};
     const selected = context.intelligence?.selected || {};
-    const extracted = context.intelligence?.entities || {};
+    const language = context.state?.language || context.language || "english";
+    const tenant = context.tenant;
+    const tenantDomain = tenant?.domain || 'universal';
+
+    // ═══════════════════════════════════════════════════════════════
+    // v39.0: UNIFIED SERVICE INTENTS
+    // ═══════════════════════════════════════════════════════════════
+
+    // Service browse: "what services do you offer?"
+    if (selected.intent === "service.browse") {
+      return this.handleServiceBrowse(context, offering, cleaning, language, tenant);
+    }
+
+    // Service detail: "tell me about haircut"
+    if (selected.intent === "service.detail") {
+      return this.handleServiceDetail(context, offering, cleaning, language, extracted, tenant);
+    }
+
+    // Service quote: "how much for deep cleaning?"
+    console.warn("[Execute] intent:", selected.intent, "entities:", JSON.stringify(extracted)); if (selected.intent === "service.quote") {
+      return this.handleServiceQuote(context, offering, cleaning, language, extracted, tenant);
+    }
 
     if (selected.intent === "booking.customer_field_edit") {
       const amendment = extracted.fieldAmendment || {};
@@ -628,6 +653,164 @@ class BookingCapability extends BaseCapability {
     const reply = `${notice ? `${notice}\n\n` : ""}${selectedIntro}${currentSummary ? `${currentSummary}\n\n` : ""}${savedOffer}`;
     return collectingResult(config, flow, missing, reply);
   }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // v39.0: UNIFIED SERVICE HANDLERS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Service browse: "what services do you offer?"
+  async handleServiceBrowse(context, offering, cleaning, language, tenant) {
+    const domain = tenant?.domain || 'universal';
+    const vocab = getServiceVocab(domain);
+    const hasCleaning = tenant?.capabilities?.includes('cleaning');
+
+    // Try offering service first (salon, healthcare, education)
+    if (offering) {
+      const items = offering.list(tenant.id);
+      if (items && items.length > 0) {
+        const lines = items.filter(i => !i.hidden).map(i =>
+          `• ${i.name}${i.price != null ? ` — ${formatMoney(i.price, i.currency || 'PKR')}` : ''}`
+        ).join('\n');
+        const heading = language === 'roman_urdu'
+          ? `Hamari ${vocab.servicesLabel}:\n${lines}\n\nJo pasand ho uska naam bata dein.`
+          : `Here are our ${vocab.servicesLabel}:\n${lines}\n\nTell me which one you'd like to know more about.`;
+        return createCapabilityResult({
+          handled: true,
+          reply: heading,
+          responseModel: { intent: 'SERVICE_LIST_VIEWED', payload: { services: items } },
+          statePatch: { activePlugin: 'booking', lastIntent: 'service.browse', capabilityState: { booking: { lastIntent: 'service.browse' } } },
+        });
+      }
+    }
+
+    // Try cleaning service (only if tenant has cleaning capability)
+    if (cleaning && hasCleaning) {
+      const services = await cleaning.listServices();
+      if (services && services.length > 0) {
+        const lines = services.filter(s => !s.hidden).map(s =>
+          `• ${s.name} — ${formatMoney(s.price, s.currency || 'AED')}${s.priceType === 'hourly' ? '/hr' : ''}`
+        ).join('\n');
+        const heading = language === 'roman_urdu'
+          ? `Hamari cleaning services:\n${lines}\n\nJo service chahiye uska naam bata dein.`
+          : `Here are our cleaning services:\n${lines}\n\nTell me which service you need.`;
+        return createCapabilityResult({
+          handled: true,
+          reply: heading,
+          responseModel: { intent: 'SERVICE_LIST_VIEWED', payload: { services } },
+          statePatch: { activePlugin: 'booking', lastIntent: 'service.browse', capabilityState: { booking: { lastIntent: 'service.browse' } } },
+        });
+      }
+    }
+
+    // Fallback
+    return createCapabilityResult({
+      handled: true,
+      reply: language === 'roman_urdu' ? 'Mujhe is business ke services ke baare mein confirmed information nahi hai.' : 'I don\'t have confirmed information about this business\'s services yet.',
+      statePatch: { activePlugin: 'booking', lastIntent: 'service.browse_empty' },
+    });
+  }
+
+  // Service detail: "tell me about haircut"
+  async handleServiceDetail(context, offering, cleaning, language, entities, tenant) {
+    const domain = tenant?.domain || 'universal';
+    const vocab = getServiceVocab(domain);
+
+    // Try offering
+    console.warn("[Quote] tenant:", tenant?.id, "offering:", !!offering, "serviceId:", entities.serviceId); if (offering && entities.serviceId) {
+      const item = offering.getById(tenant.id, entities.serviceId);
+      if (item) {
+        const lines = [
+          `📦 *${item.name}*`,
+          item.description || '',
+          item.price != null ? `💰 ${formatMoney(item.price, item.currency || 'PKR')}` : '',
+          item.duration ? `⏱️ Duration: ${item.duration} minutes` : '',
+        ].filter(Boolean);
+        const prompt = language === 'roman_urdu'
+          ? `\n\nAgar book karna ho to bata dein.`
+          : `\n\nIf you'd like to book it, tell me your preferred date/time.`;
+        return createCapabilityResult({
+          handled: true,
+          reply: lines.join('\n') + prompt,
+          responseModel: { intent: 'SERVICE_VIEWED', payload: { service: item } },
+          statePatch: { activePlugin: 'booking', lastIntent: 'service.detail', capabilityState: { booking: { lastIntent: 'service.detail', selectedServiceId: item.id, selectedServiceName: item.name } } },
+        });
+      }
+    }
+
+    // Try cleaning
+    if (cleaning && entities.serviceId && tenant?.capabilities?.includes('cleaning')) {
+      const scoped = cleaning.scope?.({ tenant, capabilityId: 'cleaning', customerId: context.message.customerId, conversationId: `${tenant.id}:${context.message.channel}:${context.message.customerId}` });
+      if (scoped) {
+        const services = await cleaning.listServices();
+        const service = services.find(s => s.id === entities.serviceId);
+        if (service) {
+          const lines = [
+            `📦 *${service.name}*`,
+            service.description || '',
+            service.price != null ? `💰 ${formatMoney(service.price, service.currency || 'AED')}${service.priceType === 'hourly' ? '/hr' : ''}` : '',
+          ].filter(Boolean);
+          const prompt = language === 'roman_urdu'
+            ? `\n\nAgar book karna ho to date aur time bata dein.`
+            : `\n\nIf you'd like to book it, tell me your preferred date and time.`;
+          return createCapabilityResult({
+            handled: true,
+            reply: lines.join('\n') + prompt,
+            responseModel: { intent: 'SERVICE_VIEWED', payload: { service } },
+            statePatch: { activePlugin: 'booking', lastIntent: 'service.detail', capabilityState: { booking: { lastIntent: 'service.detail', selectedServiceId: service.id, selectedServiceName: service.name } } },
+          });
+        }
+      }
+    }
+
+    return createCapabilityResult({
+      handled: true,
+      reply: 'I couldn\'t find details for that service. Could you tell me which one you\'re interested in?',
+      statePatch: { activePlugin: 'booking', lastIntent: 'service.detail_not_found' },
+    });
+  }
+
+  // Service quote: "how much for deep cleaning?"
+  async handleServiceQuote(context, offering, cleaning, language, entities, tenant) {
+    console.warn("[Quote] entities:", JSON.stringify(entities), "offering:", !!offering);
+    // Try offering
+    console.warn("[Quote] tenant:", tenant?.id, "offering:", !!offering, "serviceId:", entities.serviceId); if (offering && entities.serviceId) {
+      const item = offering.getById(tenant.id, entities.serviceId);
+      if (item && item.price != null) {
+        const reply = language === 'roman_urdu'
+          ? `${item.name} ki qeemat ${formatMoney(item.price, item.currency || 'PKR')} hai.`
+          : `${item.name} costs ${formatMoney(item.price, item.currency || 'PKR')}.`;
+        return createCapabilityResult({
+          handled: true,
+          reply: reply + (language === 'roman_urdu' ? '\n\nBook karne ke liye bata dein.' : '\n\nWould you like to book it?'),
+          responseModel: { intent: 'SERVICE_QUOTED', payload: { service: item, price: item.price } },
+          statePatch: { activePlugin: 'booking', lastIntent: 'service.quote', capabilityState: { booking: { lastIntent: 'service.quote', selectedServiceId: item.id, selectedServiceName: item.name } } },
+        });
+      }
+    }
+
+    // Try cleaning
+    if (cleaning && entities.serviceId && tenant?.capabilities?.includes('cleaning')) {
+      const services = await cleaning.listServices();
+      const service = services.find(s => s.id === entities.serviceId);
+      if (service && service.price != null) {
+        const reply = language === 'roman_urdu'
+          ? `${service.name} ki qeemat ${formatMoney(service.price, service.currency || 'AED')}${service.priceType === 'hourly' ? '/hr' : ''} hai.`
+          : `${service.name} costs ${formatMoney(service.price, service.currency || 'AED')}${service.priceType === 'hourly' ? '/hr' : ''}.`;
+        return createCapabilityResult({
+          handled: true,
+          reply: reply + (language === 'roman_urdu' ? '\n\nBook karne ke liye date aur time bata dein.' : '\n\nWould you like to book it?'),
+          responseModel: { intent: 'SERVICE_QUOTED', payload: { service, price: service.price } },
+          statePatch: { activePlugin: 'booking', lastIntent: 'service.quote', capabilityState: { booking: { lastIntent: 'service.quote', selectedServiceId: service.id, selectedServiceName: service.name } } },
+        });
+      }
+    }
+
+    return createCapabilityResult({
+      handled: true,
+      reply: 'I couldn\'t find pricing for that service. Could you tell me which one you\'re asking about?',
+      statePatch: { activePlugin: 'booking', lastIntent: 'service.quote_not_found' },
+    });
+  }
 }
 
 async function rescheduleResult(booking, previous, extracted, config) {
@@ -975,5 +1158,23 @@ function title(value) {
   return String(value || "that day").replace(/^./, (char) =>
     char.toUpperCase(),
   );
+}
+// v39.0: Domain-aware vocabulary for service-based tenants
+function getServiceVocab(domain) {
+  const vocabs = {
+    cleaning: { servicesLabel: 'cleaning services', serviceLabel: 'service', bookVerb: 'request', bookedLabel: 'request' },
+    salon: { servicesLabel: 'salon services', serviceLabel: 'treatment', bookVerb: 'book', bookedLabel: 'appointment' },
+    healthcare: { servicesLabel: 'clinic services', serviceLabel: 'consultation', bookVerb: 'book', bookedLabel: 'appointment' },
+    education: { servicesLabel: 'programs', serviceLabel: 'program', bookVerb: 'inquire', bookedLabel: 'inquiry' },
+    driving_school: { servicesLabel: 'packages', serviceLabel: 'package', bookVerb: 'book', bookedLabel: 'lesson' },
+    restaurant: { servicesLabel: 'reservation options', serviceLabel: 'table', bookVerb: 'reserve', bookedLabel: 'reservation' },
+    universal: { servicesLabel: 'services', serviceLabel: 'service', bookVerb: 'book', bookedLabel: 'booking' },
+  };
+  return vocabs[domain] || vocabs.universal;
+}
+function formatMoney(price, currency) {
+  if (price == null) return 'Price on request';
+  const symbol = currency === 'PKR' ? 'Rs' : (currency === 'AED' ? 'AED ' : (currency || 'Rs') + ' ');
+  return `${symbol}${Number(price).toLocaleString('en-US')}`;
 }
 module.exports = { Capability: BookingCapability, BookingCapability };

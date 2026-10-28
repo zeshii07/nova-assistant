@@ -1,0 +1,14 @@
+[
+  {
+    "id": "burgers",
+    "name": "Burgers"
+  },
+  {
+    "id": "pakistani",
+    "name": "Pakistani"
+  },
+  {
+    "id": "continental",
+    "name": "Continental"
+  }
+]

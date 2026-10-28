@@ -95,7 +95,13 @@ class HybridRouter {
 
     // If no regex candidate and ML is confident, inject synthetic candidate
     let finalCandidates = adjusted;
-    if (adjusted.length === 0 && mlCapabilityId && mlConfidence > 0.6) {
+    // v36.4: Also inject when the only candidate is the default assistant
+    // (confidence 0.5) and ML strongly suggests a different capability.
+    // This was the root cause of restaurant queries failing — catalog adapter
+    // returned no candidates, ML detected catalog at 0.99 confidence, but
+    // hybrid router couldn't inject because assistant was already a candidate.
+    const onlyAssistant = adjusted.length === 1 && adjusted[0].capability?.id === 'assistant' && adjusted[0].confidence < 0.6;
+    if ((adjusted.length === 0 || onlyAssistant) && mlCapabilityId && mlConfidence > 0.6) {
       // We can't directly create a capability here (we don't have the registry),
       // but we record this as a signal for the execution engine to use.
       adjustments.push({
@@ -105,6 +111,10 @@ class HybridRouter {
         delta: mlConfidence,
         reason: 'ml_inject_no_regex_candidate',
       });
+      // v36.4: Also suppress the assistant's confidence so ML suggestion wins
+      if (onlyAssistant) {
+        adjusted[0].confidence = Math.min(adjusted[0].confidence, 0.3);
+      }
     }
 
     // Re-sort by confidence (desc), then priority (desc)

@@ -28,6 +28,16 @@ class OfferingConversationAdapter {
       normalizedText ||
       normalizeText(message.text);
     const fullText = normalizedText || normalizeText(message.text);
+    // v39.0: If tenant has booking capability, defer service browse/detail/quote
+    // to the unified service adapter. The offering adapter only handles offering
+    // browse when there's no booking capability (backward compat for old tenants).
+    if (tenant.capabilities?.includes('booking')) {
+      // Check if this is a service browse / detail / quote query
+      const isServiceQuery = /\b(?:what|which|show|tell me|list|see).*(?:services?|treatments?|programs?|offer)\b/i.test(text) ||
+        /\b(?:how much|price|cost|rate|quote)\b/i.test(text) ||
+        /\b(?:tell me about|details?)\b/i.test(text);
+      if (isServiceQuery) return null;
+    }
     // Delivery/takeaway are business-policy facts, not menu/offering browse intents.
     if (
       /\b(deliver|delivery|shipping|takeaway|take away|pickup|pick up|payment|pay|jazz\s*cash|easypaisa|easy\s*paisa|bank transfer|cash on delivery)\b/.test(
@@ -58,6 +68,53 @@ class OfferingConversationAdapter {
       return null;
     const offeringState = state?.capabilityState?.offering;
     const activeOrder = offeringState?.order;
+    // v36.3: Add/Remove/Change items on an EXISTING order (before confirmation).
+    // When there's a ready order and the customer says "add X", "remove Y",
+    // "change quantity to N", or "also add Z", modify the existing order
+    // instead of starting a new one.
+    if (activeOrder?.status === "ready" && !/\b(?:confirm|cancel|checkout)\b/i.test(text)) {
+      // Check if this is an ADD request
+      if (/\b(?:add|include|also|plus|aur|bhi|one more|another)\b/i.test(text)) {
+        const addResult = resolveOfferingFromText(text, svc, tenant.id);
+        if (addResult?.record) {
+          const qty = numberFromText(text) || 1;
+          return pack(
+            "offering.order.add_item",
+            0.999,
+            { offeringId: addResult.record.id, subject: addResult.record.name, quantity: qty },
+            "add_to_existing_order",
+            135,
+          );
+        }
+      }
+      // Check if this is a REMOVE request
+      if (/\b(?:remove|cancel|delete|drop|take away|take off|hata|hatado)\b/i.test(text)) {
+        const removeResult = resolveOfferingFromText(text, svc, tenant.id);
+        if (removeResult?.record) {
+          return pack(
+            "offering.order.remove_item",
+            0.999,
+            { offeringId: removeResult.record.id, subject: removeResult.record.name },
+            "remove_from_order",
+            135,
+          );
+        }
+      }
+      // Check if this is a CHANGE QUANTITY request
+      if (/\b(?:change|update|make it|set|reduce|increase|quantity|qty|less|more)\b/i.test(text)) {
+        const changeResult = resolveOfferingFromText(text, svc, tenant.id);
+        if (changeResult?.record) {
+          const qty = numberFromText(text) || 1;
+          return pack(
+            "offering.order.change_quantity",
+            0.999,
+            { offeringId: changeResult.record.id, subject: changeResult.record.name, quantity: qty },
+            "change_quantity",
+            135,
+          );
+        }
+      }
+    }
     // v35.2 BUG FIX: After OFFERING_VIEWED, customer says "I'll take 2 of those"
     // or "I want 3 of this" — recognize as order start with quantity.
     // The previous logic only matched if the offering name was mentioned again,
@@ -562,4 +619,20 @@ function extractMultiItemOrder(text, items, svc, tenantId) {
   }
   return matched.length >= 2 ? matched : null;
 }
+// v36.3: Helper — resolve offering from text, stripping action verbs first.
+function resolveOfferingFromText(text, svc, tenantId) {
+  // Strip action verbs + filler words to get just the item name
+  const cleaned = String(text || '')
+    .replace(/\b(?:add|remove|cancel|delete|drop|change|update|make it|set|reduce|increase|quantity|qty|less|more|include|also|plus|another|one more|please|to|from|in|on|this|my|order|plate of|plate|piece of|piece|portion of|portion|serve of|serve|plate)\b/gi, '')
+    .replace(/\bone|two|three|four|five|six|seven|eight|nine|ten|ek|do|teen|char|paanch/gi, '')
+    .replace(/\d+/g, '')
+    .trim();
+  if (!cleaned || cleaned.length < 3) return null;
+  const result = svc.resolve(tenantId, cleaned);
+  if (result && result.record && (result.type === 'exact' || result.type === 'fuzzy' || result.type === 'suggestion')) {
+    return result;
+  }
+  return null;
+}
+
 module.exports = { OfferingConversationAdapter };

@@ -1,5 +1,25 @@
 const { normalizeText } = require('../../conversation-intelligence/src/text');
 
+// v40.0: Abbreviation expansion — common SMS shorthand → full words
+const ABBREVIATIONS = {
+  'wht': 'what', 'whn': 'when', 'whr': 'where', 'hw': 'how',
+  'pls': 'please', 'plz': 'please', 'thx': 'thanks', 'ty': 'thank you',
+  'ur': 'your', 'u': 'you', 'r': 'are', 'n': 'and',
+  'wnt': 'want', 'shd': 'should', 'wud': 'would', 'shw': 'show',
+  'avail': 'available', 'availabl': 'available',
+  'ordr': 'order', 'info': 'information',
+  'resturant': 'restaurant', 'restaurent': 'restaurant',
+  'chiken': 'chicken', 'biriyani': 'biryani', 'burgers': 'burger',
+  'somw': 'some', 'kinda': 'kind of', 'kindof': 'kind of',
+};
+function expandAbbreviations(text) {
+  let result = String(text || '');
+  for (const [abbr, full] of Object.entries(ABBREVIATIONS)) {
+    result = result.replace(new RegExp(`\\b${abbr}\\b`, 'gi'), full);
+  }
+  return result;
+}
+
 // v35.5: Singularize common English plurals so "burgers" matches "Beef Burger"
 // and "biryani" matches "Chicken Biryani". Conservative — only handles
 // regular plurals (s/es/ies) plus a few common irregulars.
@@ -53,7 +73,9 @@ function meaningfulTokens(value){return normalizeText(value).split(' ').filter(t
 function boundedTokenDistance(token){return token.length>=8?2:token.length>=5?1:0;}
 class EntityResolver {
   resolve(query, records=[], { fuzzyThreshold=.72, suggestionThreshold=.55 }={}) {
-    const q=normalizeText(query); const exact=[]; const scored=[];
+    // v40.0: Expand abbreviations before resolving (wht→what, chiken→chicken, etc.)
+    const expandedQuery = expandAbbreviations(query);
+    const q=normalizeText(expandedQuery); const exact=[]; const scored=[];
     for(const record of records){
       const names=[record.name,...(record.aliases||[])].filter(Boolean);
       let best=0, exactName=null;

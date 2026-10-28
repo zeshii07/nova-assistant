@@ -98,6 +98,35 @@ class CapabilityRouter {
       });
       finalCandidates = hybridResult.candidates;
       hybridAdjustments = hybridResult.adjustments;
+
+      // v36.4: ML injection — if ML strongly suggests a capability (confidence > 0.6)
+      // and no regex candidate exists for that capability, inject a synthetic candidate.
+      // This fixes the root cause of restaurant queries failing: ML correctly detects
+      // catalog/commerce but the conversation adapter returned no candidates, so the
+      // default assistant (0.5 confidence) won.
+      const mlCapId = mlPrediction?.topIntent?.capabilityId;
+      const mlConf = mlPrediction?.topIntent?.confidence || 0;
+      if (mlCapId && mlConf > 0.6) {
+        const hasMlCandidate = finalCandidates.some(c => c.capability?.id === mlCapId);
+        if (!hasMlCandidate) {
+          // Find the capability in the registry
+          const mlCapability = this.registry.list().find(cap => cap.id === mlCapId);
+          if (mlCapability && context.tenant?.capabilities?.includes(mlCapId)) {
+            // Inject synthetic candidate with ML confidence
+            finalCandidates.push({
+              capability: mlCapability,
+              confidence: mlConf,
+              priority: mlCapability.priority || 80,
+              reason: 'ml_injected',
+              entities: {},
+              mlAdjusted: true,
+              mlAdjustment: mlConf,
+            });
+            // Re-sort
+            finalCandidates.sort((a, b) => b.confidence - a.confidence || b.priority - a.priority || a.capability.id.localeCompare(b.capability.id));
+          }
+        }
+      }
     } else {
       finalCandidates.sort((a, b) => b.confidence - a.confidence || b.priority - a.priority || a.capability.id.localeCompare(b.capability.id));
     }

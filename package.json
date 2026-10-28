@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "36.2.0",
+  "version": "40.0.0",
   "private": true,
-  "description": "Nova v36.2 - Comprehensive menu browse detection: what type of food, what are you offering, can i see what you are offering, i want to eat food from your restaurant, do you any item for eating, i want to order some food please, typo tolerance (resturant, wht, somw, pls, plz, hw, shw, ordr)",
+  "description": "Nova v40.0 - Improved NLU engine: 5 new service intents (service.browse, service.detail, service.quote, conversation.help, conversation.menu), 25+ new Roman Urdu/Urdu training examples for booking.create, enhanced semantic router (service routing, restaurant routing, availability routing, out-of-scope demotion), abbreviation expansion in entity resolver (wht→what, chiken→chicken, resturant→restaurant, pls→please), complete unified architecture (product-based + service-based + tenant adapters)",
   "main": "apps/api/src/cluster.js",
   "type": "commonjs",
   "engines": {

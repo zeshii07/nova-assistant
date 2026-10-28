@@ -19,11 +19,15 @@ const CATEGORY_ALIASES = {
   'mobile-accessories':['mobile accessories','phone accessories','mobile accessory'],
   travel:['travel','travel accessories']
 };
-const REQUEST_CUES = ['do you have','do you sell','can i get','can i have','could i get','i want','i need','show me','looking for','searching for','shopping for','trying to find','interested in','help me find','buy','purchase','order','mujhe','mujhy','mujhay','chahiye','chahiyy','chahy','lyni','leni','lyna','lena','ap k pass','aap ke paas','dikhao','ہے','چاہیے','قیمت','ریٹ','مل','دستانی','دستیاب','بتائیں','کرنا','ہوگا','ہوگی','ہوں گے','بنے گا','بتا'];
+const REQUEST_CUES = ['do you have','do you sell','can i get','can i have','could i get','i want','i need','show me','looking for','searching for','shopping for','trying to find','interested in','help me find','buy','purchase','order','mujhe','mujhy','mujhay','chahiye','chahiyy','chahy','lyni','leni','lyna','lena','ap k pass','aap ke paas','dikhao','ہے','چاہیے','قیمت','ریٹ','مل','دستانی','دستیاب','بتائیں','کرنا','ہوگا','ہوگی','ہوں گے','بنے گا','بتا',
+  // v36.4: Restaurant order vocabulary
+  'i want to order','i want to eat','i want to get','let me get','let me order','add to cart','add to order','send me','give me','bring me','pack','deliver','take away','takeaway','i will take','i will have','i will order','i would like','i would love','i need to order','need to eat','khana hai','khana chahiye','order karna hai','order karna','bhej do','laga do'];
 const PRODUCT_FAMILIES = { shirts:aliasesFor('catalog.shirts'), jeans:aliasesFor('catalog.jeans') };
 const BROWSE_COLORS = { black:'Black', white:'White', blue:'Blue', navy:'Navy', grey:'Grey', gray:'Grey', brown:'Brown', silver:'Silver', gold:'Gold', olive:'Olive', maroon:'Maroon', red:'Red' };
 const BROWSE_SIZES = { small:'S', s:'S', medium:'M', m:'M', large:'L', l:'L', xl:'XL', xxl:'XXL' };
-const LIST_CUES = ['what products','what other products','other products','which products','what do you have','what do you sell','show products','show me your products','list products','list items','ap k pass kia kia','ap k pass kya kya','aap ke paas kya kya hai','kon sy products','konsay products','products dikhao','konsy chezyn ap k pss hain','konsi cheezen ap k pas hain','ap k pass kon kon c chez hai','ap k pas kon kon si cheezein hain','ap k pas kon kon si cheezen available hain','kon kon c chez','kya kya cheezen hain','kia kia cheezen hain'];
+const LIST_CUES = ['what products','what other products','other products','which products','what do you have','what do you sell','show products','show me your products','list products','list items','ap k pass kia kia','ap k pass kya kya','aap ke paas kya kya hai','kon sy products','konsay products','products dikhao','konsy chezyn ap k pss hain','konsi cheezen ap k pas hain','ap k pass kon kon c chez hai','ap k pas kon kon si cheezein hain','ap k pas kon kon si cheezen available hain','kon kon c chez','kya kya cheezen hain','kia kia cheezen hain',
+  // v36.4: Restaurant menu vocabulary — catalog adapter now handles restaurant tenants
+  'show me the menu','show me your menu','show menu','see menu','view menu','what is on the menu','whats on the menu','what\'s on the menu','menu please','the menu','your menu','full menu','food menu','what food do you have','what type of food','what kind of food','what items do you have','what do you offer','what are you offering','what are today\'s specials','todays specials','today\'s specials','any specials','what\'s available','what is available','do you have any food','do you have food','i want to order some food','i want to eat food','what can i order','what can i get','what can i see','can i see the menu','can i see your menu','can i see what you are offering','show me the food','apna menu dikhao','menu dikhao','menu bhejo','kya kya khana hai','konsa khana hai','khane ke options','menu items dikhao','menu kya hai','aaj ka menu kya hai','kya khana mil sakta hai','kya kya mil sakta hai','food list dikhao','dishes dikhao','khana menu','aaj ki special kya hai'];
 
 const activeAttributeExtractor = new AttributeExtractor();
 
@@ -82,9 +86,12 @@ class CatalogConversationAdapter {
     // currently being configured. Attribute follow-up handling therefore runs
     // only after new-subject/list/family/category intent checks below.
 
-    const listText = normalizedText.replace(/\bwht\b/g,'what').replace(/\bpss\b/g,'pass').replace(/\bchezyn\b/g,'cheezen').replace(/\bchez\b/g,'cheez');
-    const genericProductDiscovery=concreteProductCount===0&&/\b(?:products?|items?)\b/.test(listText)
-      && /\b(?:what|which|show|see|list|browse|have|sell|buy|purchase|catalog)\b/.test(listText)
+    const listText = normalizedText.replace(/\bwht\b/g,'what').replace(/\bpss\b/g,'pass').replace(/\bchezyn\b/g,'cheezen').replace(/\bchez\b/g,'cheez')
+      .replace(/\bsomw\b/gi,'some').replace(/\bresturant\b/gi,'restaurant').replace(/\brestaurent\b/gi,'restaurant');
+    // v36.4: Restaurant menu vocabulary — also detect "menu", "food", "dishes"
+    const genericProductDiscovery=concreteProductCount===0
+      && (/\b(?:products?|items?)\b/.test(listText) || /\b(?:menu|food|dishes?)\b/.test(listText))
+      && (/\b(?:what|which|show|see|list|browse|have|sell|buy|purchase|catalog|order|eat|offer)\b/.test(listText) || /\b(?:menu|food|dishes?)\b/.test(listText))
       && !/\b(?:price|cost|how much)\b/.test(listText);
     const tenantWideCollection=isTenantWideCollectionQuery(listText,tenant,tenantProducts);
     if (genericProductDiscovery || tenantWideCollection || hasConcept(listText,'discovery.list_offerings') || (hasConcept(listText,'discovery.other_more') && hasConcept(listText,'discovery.generic_item')) || hasAny(listText, LIST_CUES) || /\b(konsy|konsi|kon kon|kya kya|kia kia).*\b(products?|cheezen|cheez).*\b(pass|pas|paas)\b/.test(listText)) {

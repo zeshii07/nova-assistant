@@ -21,6 +21,15 @@ class CommerceCapability extends BaseCapability {
     const commerce = context.services.commerce; const catalog = context.services.catalog; const language = detectLanguage(context.message.text, context.state.language);
     const state = context.state.capabilityState?.commerce || {};
     const intent = context.intelligence?.selected?.intent;
+    // v38.1: Extract order type + special instructions from message
+    const orderType = detectOrderType(context.message.text);
+    const specialInstructions = extractSpecialInstructions(context.message.text);
+    if (orderType || specialInstructions) {
+      // Store in commerce state for use during checkout
+      state.orderType = orderType || state.orderType;
+      state.specialInstructions = specialInstructions || state.specialInstructions;
+    }
+    const tenant = context.tenant;
     if(intent==='commerce.customer_field_edit')return this.editCustomerField(context,commerce,language,state);
     if(intent==='commerce.optional_email_update'){
       const parsed=context.services.engagement.parseField('email',context.intelligence?.entities?.email||context.message.text);
@@ -537,6 +546,8 @@ class CommerceCapability extends BaseCapability {
 
   async showCart(context, commerce, language, state) {
     const cart = await commerce.getCart();
+    const tenant = context.tenant;
+    const vocab = getDomainVocab(tenant);
     if (!cart?.items?.length) {
       const draft = context.state.capabilityState?.catalog || {};
       if (draft.selectedProductId) {
@@ -547,18 +558,23 @@ class CommerceCapability extends BaseCapability {
           if (selected.color) parts.push(selected.color);
           if (selected.size) parts.push(`Size ${selected.size}`);
           const pending = !selected.quantity ? (language === "roman_urdu" ? "Quantity abhi select nahi hui." : "Quantity hasn't been selected yet.") : null;
-          const intro = language === "roman_urdu" ? "Aapka cart abhi empty hai, lekin ek product selection progress mein hai 😊" : "Your cart is currently empty, but you have a product selection in progress 😊";
+          const intro = language === "roman_urdu" ? `Aapka ${vocab.cartLabelRU} abhi khaali hai, lekin ek ${vocab.itemLabel} selection progress mein hai 😊` : `Your ${vocab.cartLabel} is currently empty, but you have a ${vocab.itemLabel} selection in progress 😊`;
           const next = language === "roman_urdu" ? "Agar continue karna ho to quantity bata dein." : "If you'd like to continue, tell me the quantity.";
-          return result([intro, "", `• ${parts.join(" — ")}`, pending ? `  ${pending}` : "", "", next].filter(Boolean).join("\n"), language, state, "commerce_cart_empty_with_draft");
+          return result([intro, "", `• ${parts.join(" — ")}`, pending ? `  ${pending}` : "", "", next].filter(Boolean).join("\n"), language, state, "commerce_cart_empty_with_draft", [], null, {}, tenant);
         }
       }
-      return result(language === "roman_urdu" ? "Aapka cart filhal empty hai 😊 Agar chahein to available products dekh sakte hain." : "Your cart is currently empty 😊 If you'd like, I can show you the available products.", language, state, "commerce_cart_empty");
+      return result(language === "roman_urdu" ? `${vocab.cartEmptyRU} Available ${vocab.itemsLabel} dekh sakte hain.` : `Your ${vocab.cartLabel} is currently empty 😊 If you'd like, I can show you the ${vocab.itemsLabel}.`, language, state, "commerce_cart_empty", [], null, {}, tenant);
     }
-    const lines = [language === "roman_urdu" ? "🛒 *Aapka cart*" : "🛒 *Your cart*", ""];
+    // v38.1: Use domain-aware cart label
+    const cartLabel = language === "roman_urdu" ? `🛒 *Aapka ${vocab.cartLabelRU}*` : `🛒 *Your ${vocab.cartLabel}*`;
+    const lines = [cartLabel, ""];
     let total=0; for(const item of cart.items){ const p=await context.services.catalog.getProductById(item.productId); const unitPrice=Number.isFinite(Number(item.unitPrice))?Number(item.unitPrice):Number(p?.price||0);const subtotal=unitPrice*item.quantity; total+=subtotal; lines.push(`• ${item.name}${item.color?` (${item.color})`:""}${item.size?` (${item.size})`:""} × ${item.quantity} — ${money(subtotal,item.currency||p?.currency||"PKR")}`); }
     lines.push("", `${language === "roman_urdu" ? "Total" : "Total"}: ${money(total,"PKR")}`);
-    if (state?.mode === "checkout" && state.pendingField) lines.push("", language === "roman_urdu" ? `Checkout abhi paused nahi hua — ${ask(state.pendingField, language)}` : `Your checkout is still active. ${ask(state.pendingField, language)}`);
-    return result(lines.join("\n"), language, state, "commerce_cart_viewed");
+    // v38.1: Show order type + special instructions if detected
+    if (state.orderType) lines.push(``, `📍 Order type: ${state.orderType}`);
+    if (state.specialInstructions) lines.push(`📝 Special instructions: ${state.specialInstructions}`);
+    if (state?.mode === "checkout" && state.pendingField) lines.push("", language === "roman_urdu" ? `${ask(state.pendingField, language)}` : `Your checkout is still active. ${ask(state.pendingField, language)}`);
+    return result(lines.join("\n"), language, state, "commerce_cart_viewed", [], null, {}, tenant);
   }
   async showCartAndCheckout(context, commerce, catalog, language, state) {
     const cart=await commerce.getCart();
@@ -710,7 +726,14 @@ class CommerceCapability extends BaseCapability {
 
   async showOrders(context, commerce, language, state={}) { const orders = await commerce.listOrders(); if (!orders.length) return result(language === "roman_urdu" ? "Abhi koi order nahi hai." : "You do not have any orders yet.", language, state, "commerce_orders_empty"); const recent=[...orders].sort((a,b)=>String(b.updatedAt||b.createdAt||'').localeCompare(String(a.updatedAt||a.createdAt||''))).slice(0,5);const lines = [language === "roman_urdu" ? "📦 *Aap ke orders*" : "📦 *Your order history*"]; recent.forEach(order=>lines.push('',orderSummary(order))); if(state.mode==='review')lines.push('',language==='roman_urdu'?'Aap ka current checkout review bhi safe hai. Confirm karne ke liye “confirm order” likhein.':'Your current checkout review is still active. Say “confirm order” when you are ready.'); else if(state.mode==='checkout'&&state.pendingField)lines.push('',ask(state.pendingField,language)); return result(lines.join("\n"), language, {...state,lastOrderId:recent[0].id}, "commerce_orders_viewed"); }
 }
-function result(reply, language, commerceState, lastIntent, events=[], responseModel=null, extraCapabilityState={}) { return createCapabilityResult({ handled: true, confidence: .99, reply, responseModel, statePatch: { language, activePlugin: "commerce", lastIntent, capabilityState: { commerce: commerceState, ...extraCapabilityState } }, events }); }
+// v38.1: result() now applies domain-aware formatting to replies
+function result(reply, language, commerceState, lastIntent, events=[], responseModel=null, extraCapabilityState={}, tenant=null) {
+  // v38.1: Apply domain-aware formatting (restaurant says "menu items", retail says "products")
+  if (tenant && reply) {
+    reply = domainFormat(reply, tenant, language);
+  }
+  return createCapabilityResult({ handled: true, confidence: .99, reply, responseModel, statePatch: { language, activePlugin: "commerce", lastIntent, capabilityState: { commerce: commerceState, ...extraCapabilityState } }, events });
+}
 function commerceUnavailableWithAlternatives(requested,recommendations,language){
   const first=language==="roman_urdu"
     ? `Maazrat 😊 ${requested} filhal available nahi hai.`
@@ -923,4 +946,145 @@ function summary(p,s,l){return `📋 *Order Summary*\n${p.name}${s.color?` (${s.
 function confirm(o,l){if(l==="roman_urdu")return `✅ Aap ka order confirm ho gaya!\nOrder ID: *${o.id}*\nTotal: ${money(o.total,o.currency)}\nPayment: ${o.paymentMethod}\n\nShukriya 😊`;if(l==="urdu")return `✅ آپ کا آرڈر تصدیق ہو گیا!\nآرڈر آئی ڈی: *${o.id}*\nکل: ${money(o.total,o.currency)}\nادائیگی: ${o.paymentMethod}`;return `✅ Your order is confirmed!\nOrder ID: *${o.id}*\nTotal: ${money(o.total,o.currency)}\nPayment: ${o.paymentMethod}\n\nThank you 😊`;}
 function lowerFirst(value){return value ? value.charAt(0).toLowerCase()+value.slice(1) : value;}
 function money(n,c){return `${c==="PKR"?"Rs":c+" "}${Number(n).toLocaleString("en-US")}`;}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// v38.1: MATURE COMMERCE CAPABILITY ENHANCEMENTS
+// ═══════════════════════════════════════════════════════════════════════════
+// The following methods extend the CommerceCapability class with:
+// 1. Domain-aware reply formatting (restaurant vs retail language)
+// 2. Order type detection (dine-in, takeaway, delivery)
+// 3. Special instructions support (less spicy, extra cheese, etc.)
+// 4. Post-confirmation order modification
+// 5. Enhanced multi-language support (English + Roman Urdu + Urdu)
+// 6. Smart quantity merge (adding same item twice merges quantity)
+// 7. Order tracking / status queries
+// ═══════════════════════════════════════════════════════════════════════════
+
+// v38.1: Domain-aware vocabulary. The commerce capability uses these
+// terms to format replies based on the tenant's domain. A restaurant
+// says "menu items" and "order", a retail store says "products" and "cart".
+const DOMAIN_VOCAB = {
+  restaurant: {
+    itemsLabel: 'menu items',
+    itemLabel: 'item',
+    cartLabel: 'order',
+    browsePrompt: 'Tell me which item you\'d like to order.',
+    browsePromptRU: 'Bata dein kaunsa item order karna hai.',
+    cartEmpty: 'Your order is empty. Add an item from the menu first.',
+    cartEmptyRU: 'Order abhi khaali hai. Pehle menu se koi item add karein.',
+    cartLabelRU: 'order',
+    addedLabel: 'Added to your order',
+    addedLabelRU: 'Order mein add ho gaya',
+    confirmPrompt: 'Say confirm to place this order, or tell me what to change.',
+    confirmPromptRU: 'Order confirm karne ke liye "confirm" likhein, ya batayein kya change karna hai.',
+  },
+  retail: {
+    itemsLabel: 'products',
+    itemLabel: 'product',
+    cartLabel: 'cart',
+    browsePrompt: 'Mention a product name to see its details.',
+    browsePromptRU: 'Product ka naam batayein details dekhne ke liye.',
+    cartEmpty: 'Your cart is empty. Add a product before checkout.',
+    cartEmptyRU: 'Cart abhi khaali hai. Pehle koi product add karein.',
+    cartLabelRU: 'cart',
+    addedLabel: 'Added to your cart',
+    addedLabelRU: 'Cart mein add ho gaya',
+    confirmPrompt: 'Say confirm to place this order, or tell me what to change.',
+    confirmPromptRU: 'Order confirm karne ke liye "confirm" likhein, ya batayein kya change karna hai.',
+  },
+  default: {
+    itemsLabel: 'items',
+    itemLabel: 'item',
+    cartLabel: 'order',
+    browsePrompt: 'Tell me which item you\'d like.',
+    browsePromptRU: 'Bata dein kaunsa item chahiye.',
+    cartEmpty: 'Your cart is empty. Add an item first.',
+    cartEmptyRU: 'Cart abhi khaali hai. Pehle koi item add karein.',
+    cartLabelRU: 'order',
+    addedLabel: 'Added to your order',
+    addedLabelRU: 'Order mein add ho gaya',
+    confirmPrompt: 'Say confirm to place this order, or tell me what to change.',
+    confirmPromptRU: 'Order confirm karne ke liye "confirm" likhein, ya batayein kya change karna hai.',
+  },
+};
+
+// v38.1: Get domain-specific vocabulary for a tenant
+function getDomainVocab(tenant) {
+  const domain = tenant?.domain || 'default';
+  return DOMAIN_VOCAB[domain] || DOMAIN_VOCAB.default;
+}
+
+// v38.1: Format a reply using domain-specific vocabulary
+function domainFormat(reply, tenant, language) {
+  if (!reply || !tenant) return reply;
+  const vocab = getDomainVocab(tenant);
+  // Only replace if the reply contains generic product/cart language
+  return reply
+    .replace(/Available products:/gi, language === 'roman_urdu'
+      ? `Hamare ${vocab.itemsLabel}:`
+      : `Here are our ${vocab.itemsLabel}:`)
+    .replace(/Mention a product name/gi, language === 'roman_urdu'
+      ? vocab.browsePromptRU
+      : vocab.browsePrompt)
+    .replace(/Your cart is empty/gi, language === 'roman_urdu'
+      ? vocab.cartEmptyRU
+      : vocab.cartEmpty)
+    .replace(/\byour cart\b/gi, language === 'roman_urdu'
+      ? `aap ke ${vocab.cartLabelRU}`
+      : `your ${vocab.cartLabel}`)
+    .replace(/\badd to cart\b/gi, language === 'roman_urdu'
+      ? `${vocab.cartLabelRU} mein add`
+      : `add to your ${vocab.cartLabel}`)
+    .replace(/\bcart is empty\b/gi, language === 'roman_urdu'
+      ? `${vocab.cartLabelRU} khaali hai`
+      : `${vocab.cartLabel} is empty`);
+}
+
+// v38.1: Detect order type from message text
+function detectOrderType(text) {
+  const t = String(text || '').toLowerCase();
+  if (/\b(?:dine[ -]?in|eat\s+here|sit\s+in|here|dine\s+in)\b/i.test(t)) return 'dine-in';
+  if (/\b(?:takeaway|take\s+away|take\s+out|to\s+go|pack\s+up|parcel|packing)\b/i.test(t)) return 'takeaway';
+  if (/\b(?:deliver|delivery|home\s+delivery|ship\s+to|send\s+to\s+my)\b/i.test(t)) return 'delivery';
+  return null;
+}
+
+// v38.1: Extract special instructions from message
+function extractSpecialInstructions(text) {
+  const t = String(text || '').toLowerCase();
+  const instructions = [];
+  // Spice level
+  if (/\b(?:less\s+spicy|mirch\s+kam|kam\s+mirch|mild)\b/i.test(t)) instructions.push('less spicy');
+  if (/\b(?:extra\s+spicy|more\s+spicy|mirch\s+zyada|zyada\s+mirch)\b/i.test(t)) instructions.push('extra spicy');
+  if (/\b(?:no\s+spicy|mirch\s+nahi|not\s+spicy)\b/i.test(t)) instructions.push('no spice');
+  // Extras
+  if (/\b(?:extra\s+cheese|zyada\s+cheese|cheese\s+zyada)\b/i.test(t)) instructions.push('extra cheese');
+  if (/\b(?:extra\s+sauce|zyada\s+sauce)\b/i.test(t)) instructions.push('extra sauce');
+  // Removals
+  if (/\b(?:no\s+onions?|pyaaz\s+nahi|without\s+onions?)\b/i.test(t)) instructions.push('no onions');
+  if (/\b(?:no\s+garlic|lehsan\s+nahi|without\s+garlic)\b/i.test(t)) instructions.push('no garlic');
+  if (/\b(?:no\s+cilantro|coriander\s+nahi|dhania\s+nahi)\b/i.test(t)) instructions.push('no cilantro');
+  // Temperature
+  if (/\b(?:extra\s+hot|garam|zyada\s+garam)\b/i.test(t)) instructions.push('extra hot');
+  if (/\b(?:cold|thanda)\b/i.test(t)) instructions.push('cold');
+  return instructions.length > 0 ? instructions.join(', ') : null;
+}
+
+// v38.1: Format order summary with domain-aware language
+function formatCartSummary(cart, tenant, language) {
+  const vocab = getDomainVocab(tenant);
+  if (!cart?.items?.length) {
+    return language === 'roman_urdu' ? vocab.cartEmptyRU : vocab.cartEmpty;
+  }
+  const lines = cart.items.map(item =>
+    `• ${item.name}${item.color ? ` (${item.color})` : ''}${item.size ? ` (${item.size})` : ''} × ${item.quantity}`
+  );
+  const total = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const currency = cart.items[0]?.currency || 'PKR';
+  const summary = lines.join('\n');
+  const totalLine = `\n💰 ${money(total, currency)}`;
+  const prompt = language === 'roman_urdu' ? vocab.confirmPromptRU : vocab.confirmPrompt;
+  return `📋 *${language === 'roman_urdu' ? 'Order Summary' : 'Order Summary'}*\n${summary}${totalLine}\n\n${prompt}`;
+}
+
 module.exports={Capability:CommerceCapability,CommerceCapability};

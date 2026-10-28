@@ -70,7 +70,7 @@ class CatalogCapability extends BaseCapability {
     }
     if (intelligenceIntent === "catalog.list") {
       const products=await catalog.listProducts();
-      const reply=formatProductList(products,language);
+      const reply=formatProductList(products,language,context.tenant);
       return result(reply,language,{...previous,selectedProductId:null,selectedAttributes:{}},"catalog_list_viewed",[],{intent:"CATALOG_LIST_VIEWED",payload:{products, productLines:products.filter((item)=>item.inStock).map((item)=>`• ${item.name} — ${formatMoney(item.price,item.currency)}`).join("\n")}});
     }
     if (intelligenceIntent === "catalog.goal_selection_required") {
@@ -141,7 +141,7 @@ class CatalogCapability extends BaseCapability {
     // item name. Concrete product evidence wins; pure browse requests list all.
     if (!product && isBrowseRequest(text)) {
       const products = await catalog.listProducts();
-      const reply = formatProductList(products, language);
+      const reply = formatProductList(products, language, context.tenant);
       await record(context, "catalog.list_viewed", { count: products.length });
       return result(reply, language, { ...previous, selectedProductId: null, selectedAttributes: {} }, "catalog_list_viewed", [{ name: "catalog.responded.v1", payload: { action: "list" } }], {
         intent: "CATALOG_LIST_VIEWED",
@@ -249,9 +249,17 @@ function formatRelatedProducts(products,language){
   ].join('\n');
 }
 
-function formatProductList(products, language) {
-  const heading = language === "urdu" ? "دستیاب مصنوعات:" : language === "roman_urdu" ? "Available products:" : "Available products:";
-  return [heading, ...products.filter((item) => item.inStock).map((item) => `• ${item.name} — ${formatMoney(item.price, item.currency)}`), "", language === "urdu" ? "کسی مصنوع کی تفصیل کے لیے اس کا نام لکھیں۔" : language === "roman_urdu" ? "Kisi product ki detail ke liye uska naam likhein." : "Mention a product name to see its details."].join("\n");
+function formatProductList(products, language, tenant) {
+  // v38.1: Domain-aware heading — restaurant says "menu items", retail says "products"
+  const domain = tenant?.domain || 'default';
+  const isRestaurant = domain === 'restaurant';
+  const headingEN = isRestaurant ? 'Here are our menu items:' : 'Available products:';
+  const headingRU = isRestaurant ? 'Hamare menu items:' : 'Available products:';
+  const heading = language === "urdu" ? "دستیاب مصنوعات:" : language === "roman_urdu" ? headingRU : headingEN;
+  const promptEN = isRestaurant ? 'Tell me which item you\'d like to order.' : 'Mention a product name to see its details.';
+  const promptRU = isRestaurant ? 'Bata dein kaunsa item order karna hai.' : 'Kisi product ki detail ke liye uska naam likhein.';
+  const prompt = language === "urdu" ? "کسی مصنوع کی تفصیل کے لیے اس کا نام لکھیں۔" : language === "roman_urdu" ? promptRU : promptEN;
+  return [heading, ...products.filter((item) => item.inStock).map((item) => `• ${item.name} — ${formatMoney(item.price, item.currency)}`), "", prompt].join("\n");
 }
 function formatCategoryProducts(category, products, language, filters = {}) {
   const name = category?.name || "Products";

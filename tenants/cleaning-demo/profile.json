@@ -8,7 +8,8 @@
     "crm",
     "cleaning",
     "pricing",
-    "availability"
+    "availability",
+    "service"
   ],
   "branding": {
     "assistantName": "SparkleCare Cleaning Assistant",

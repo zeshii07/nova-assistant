@@ -1,0 +1,86 @@
+[
+  {
+    "id": "chicken-biryani",
+    "sku": "CHICKEN-BIRYANI",
+    "name": "Chicken Biryani",
+    "category": "Pakistani",
+    "price": 650,
+    "currency": "PKR",
+    "description": "Chicken biryani served with raita.",
+    "aliases": [
+      "biryani",
+      "chicken biryani"
+    ],
+    "tags": [
+      "biryani",
+      "chicken biryani",
+      "pakistani"
+    ],
+    "inStock": true,
+    "inventory": 999,
+    "imageUrl": null
+  },
+  {
+    "id": "beef-burger",
+    "sku": "BEEF-BURGER",
+    "name": "Beef Burger",
+    "category": "Burgers",
+    "price": 850,
+    "currency": "PKR",
+    "description": "Beef burger with fries.",
+    "aliases": [
+      "burger",
+      "beef burger"
+    ],
+    "tags": [
+      "burger",
+      "beef burger",
+      "burgers"
+    ],
+    "inStock": true,
+    "inventory": 999,
+    "imageUrl": null
+  },
+  {
+    "id": "alfredo-pasta",
+    "sku": "ALFREDO-PASTA",
+    "name": "Alfredo Pasta",
+    "category": "Continental",
+    "price": 1200,
+    "currency": "PKR",
+    "description": "Creamy Alfredo pasta.",
+    "aliases": [
+      "pasta",
+      "alfredo"
+    ],
+    "tags": [
+      "pasta",
+      "alfredo",
+      "continental"
+    ],
+    "inStock": true,
+    "inventory": 999,
+    "imageUrl": null
+  },
+  {
+    "id": "grilled-chicken",
+    "sku": "GRILLED-CHICKEN",
+    "name": "Grilled Chicken",
+    "category": "Continental",
+    "price": 1500,
+    "currency": "PKR",
+    "description": "Grilled chicken with seasonal sides.",
+    "aliases": [
+      "grill chicken",
+      "grilled chicken"
+    ],
+    "tags": [
+      "grill chicken",
+      "grilled chicken",
+      "continental"
+    ],
+    "inStock": true,
+    "inventory": 999,
+    "imageUrl": null
+  }
+]

@@ -25,6 +25,63 @@ class OfferingCapability extends BaseCapability{
      reply=`Updated 👍\n${item.name} × ${quantity}${item.price!=null?`\nTotal: Rs${Number(item.price*quantity).toLocaleString('en-US')}`:''}\n\nSay confirm to place the order.`;
      return createCapabilityResult({handled:true,reply,responseModel:{intent:'OFFERING_ORDER_READY',payload:{legacyText:reply,item,quantity}},statePatch:{activePlugin:'offering',lastIntent:'offering.order.ready',capabilityState:{offering:{...previous,selectedOfferingId:item.id,order:{status:'ready',offeringId:item.id,quantity}}}}});
    }
+   // v36.3: Add item to existing order
+   if(i.intent==='offering.order.add_item'){
+     const newItem=svc.getById(entities.offeringId);const newQty=entities.quantity||1;
+     // Build updated order items list
+     let orderItems=[];
+     if(previous.order?.multiItem&&previous.order?.items){
+       orderItems=previous.order.items.map(oi=>{const it=svc.getById(oi.offeringId);return it?{offeringId:oi.offeringId,quantity:oi.quantity,name:it.name,price:it.price}:null;}).filter(Boolean);
+     } else if(previous.order?.offeringId){
+       const it=svc.getById(previous.order.offeringId);
+       if(it) orderItems=[{offeringId:previous.order.offeringId,quantity:previous.order.quantity||1,name:it.name,price:it.price}];
+     }
+     // Add or merge the new item
+     const existingIdx=orderItems.findIndex(x=>x.offeringId===newItem.id);
+     if(existingIdx>=0){orderItems[existingIdx].quantity+=newQty;}
+     else{orderItems.push({offeringId:newItem.id,quantity:newQty,name:newItem.name,price:newItem.price});}
+     const itemLines=orderItems.map(x=>`${x.name} × ${x.quantity}`).join('\n');
+     const total=orderItems.reduce((s,x)=>s+(x.price||0)*x.quantity,0);
+     reply=`✅ Added ${newItem.name} × ${newQty}\n\n🧾 *Updated Order Summary*\n${itemLines}\nTotal: Rs${Number(total).toLocaleString('en-US')}\n\nSay confirm to place this order, or tell me what to change.`;
+     return createCapabilityResult({handled:true,reply,responseModel:{intent:'OFFERING_ORDER_READY',payload:{legacyText:reply,items:orderItems}},statePatch:{activePlugin:'offering',lastIntent:'offering.order.ready',capabilityState:{offering:{...previous,selectedOfferingId:newItem.id,order:{status:'ready',multiItem:true,offeringId:newItem.id,quantity:1,items:orderItems.map(x=>({offeringId:x.offeringId,quantity:x.quantity}))}}}}});
+   }
+   // v36.3: Remove item from existing order
+   if(i.intent==='offering.order.remove_item'){
+     const removeItem=svc.getById(entities.offeringId);
+     let orderItems=[];
+     if(previous.order?.multiItem&&previous.order?.items){
+       orderItems=previous.order.items.map(oi=>{const it=svc.getById(oi.offeringId);return it?{offeringId:oi.offeringId,quantity:oi.quantity,name:it.name,price:it.price}:null;}).filter(Boolean);
+     } else if(previous.order?.offeringId){
+       const it=svc.getById(previous.order.offeringId);
+       if(it) orderItems=[{offeringId:previous.order.offeringId,quantity:previous.order.quantity||1,name:it.name,price:it.price}];
+     }
+     orderItems=orderItems.filter(x=>x.offeringId!==removeItem.id);
+     if(orderItems.length===0){
+       reply=`✅ Removed ${removeItem.name}. Your order is now empty. What would you like to order?`;
+       return createCapabilityResult({handled:true,reply,responseModel:{intent:'OFFERING_ORDER_EMPTY',payload:{legacyText:reply}},statePatch:{activePlugin:'offering',lastIntent:'offering.browse',capabilityState:{offering:{...previous,selectedOfferingId:null,order:{status:'empty',offeringId:null,quantity:0,items:[]}}}}});
+     }
+     const itemLines=orderItems.map(x=>`${x.name} × ${x.quantity}`).join('\n');
+     const total=orderItems.reduce((s,x)=>s+(x.price||0)*x.quantity,0);
+     reply=`✅ Removed ${removeItem.name}\n\n🧾 *Updated Order Summary*\n${itemLines}\nTotal: Rs${Number(total).toLocaleString('en-US')}\n\nSay confirm to place this order, or tell me what to change.`;
+     return createCapabilityResult({handled:true,reply,responseModel:{intent:'OFFERING_ORDER_READY',payload:{legacyText:reply,items:orderItems}},statePatch:{activePlugin:'offering',lastIntent:'offering.order.ready',capabilityState:{offering:{...previous,selectedOfferingId:orderItems[0]?.offeringId,order:{status:'ready',multiItem:true,offeringId:orderItems[0]?.offeringId,quantity:1,items:orderItems.map(x=>({offeringId:x.offeringId,quantity:x.quantity}))}}}}});
+   }
+   // v36.3: Change quantity of an item in existing order
+   if(i.intent==='offering.order.change_quantity'){
+     const changeItem=svc.getById(entities.offeringId);const newQty=entities.quantity||1;
+     let orderItems=[];
+     if(previous.order?.multiItem&&previous.order?.items){
+       orderItems=previous.order.items.map(oi=>{const it=svc.getById(oi.offeringId);return it?{offeringId:oi.offeringId,quantity:oi.quantity,name:it.name,price:it.price}:null;}).filter(Boolean);
+     } else if(previous.order?.offeringId){
+       const it=svc.getById(previous.order.offeringId);
+       if(it) orderItems=[{offeringId:previous.order.offeringId,quantity:previous.order.quantity||1,name:it.name,price:it.price}];
+     }
+     const idx=orderItems.findIndex(x=>x.offeringId===changeItem.id);
+     if(idx>=0) orderItems[idx].quantity=newQty;
+     const itemLines=orderItems.map(x=>`${x.name} × ${x.quantity}`).join('\n');
+     const total=orderItems.reduce((s,x)=>s+(x.price||0)*x.quantity,0);
+     reply=`✅ Updated ${changeItem.name} to × ${newQty}\n\n🧾 *Updated Order Summary*\n${itemLines}\nTotal: Rs${Number(total).toLocaleString('en-US')}\n\nSay confirm to place this order, or tell me what to change.`;
+     return createCapabilityResult({handled:true,reply,responseModel:{intent:'OFFERING_ORDER_READY',payload:{legacyText:reply,items:orderItems}},statePatch:{activePlugin:'offering',lastIntent:'offering.order.ready',capabilityState:{offering:{...previous,selectedOfferingId:changeItem.id,order:{status:'ready',multiItem:true,offeringId:orderItems[0]?.offeringId,quantity:1,items:orderItems.map(x=>({offeringId:x.offeringId,quantity:x.quantity}))}}}}});
+   }
    if(i.intent==='offering.order.confirm'||i.intent==='offering.order.confirm_selected'){
      // v35.6: Multi-item order confirmation
      if(previous.order?.multiItem && previous.order?.items) {

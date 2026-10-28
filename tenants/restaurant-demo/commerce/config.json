@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "mode": "order",
+  "currency": "PKR",
+  "checkoutFields": [
+    "name",
+    "phone"
+  ],
+  "cartExpiryMinutes": 30,
+  "maxItemsPerCart": 20
+}

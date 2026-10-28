@@ -171,16 +171,85 @@ class CommerceConversationAdapter {
       if(found?.product) candidates.push({intent:'commerce.cart.add_request',confidence:.99975,entities:{requestedText:text},reason:'catalog_product_add_request'});
     }
 
-    // Universal cart operations always outrank a pending checkout field.
-    if (/\b(show|view|see|open|what(?:'s| is) in)\s+(my\s+)?(?:full\s+)?cart\b|\bmy\s+(?:full\s+)?cart\b|(?:^|\b)show\s+(?:me\s+)?my\s+order\b/.test(text) && !/\b(track|status)\b/.test(text) && !/\b(?:add|put|include|buy|purchase)\b/.test(text)) {
+    // v37.0: UNIVERSAL product order detection — works for ALL product-based tenants
+    // (retail, restaurant, grocery, pharmacy, electronics, etc.)
+    // Detects natural order language: "i want X", "send me N X", "add X to cart/order",
+    // "give me N X", "i'll take X", "can i get X", "order N X", "pack N X"
+    // BUT defers to catalog adapter when the query is about product details,
+    // prices, or attributes (color/size) rather than ordering.
+    if(!candidates.length && tenant?.capabilities?.includes('catalog') && services?.catalogService){
+      const orderIntent = detectUniversalOrderIntent(text);
+      // v37.1: Skip universal order if this is clearly a price/detail query
+      // ("what is price of X", "how much is X", "tell me about X")
+      const isPriceQuery = /\b(?:what(?:'s| is)?\s+(?:the\s+)?(?:price|cost)|how much|price of|cost of|rate of)\b/i.test(text);
+      const isDetailQuery = /\b(?:tell me about|details? of|info(?:rmation)? (?:about|on)|what is|what's|describe)\b/i.test(text);
+      if(orderIntent && !isPriceQuery && !isDetailQuery){
+        // v37.1: Also skip if query has attribute words (color/size) —
+        // that's a product detail + attribute request, not a cart add
+        const hasAttribute = /\b(?:black|white|blue|navy|red|green|yellow|pink|gray|grey|brown|silver|gold|small|medium|large|xl|xxl|s\b|m\b|l\b)\b/i.test(text);
+        if(!hasAttribute){
+          // Try to resolve the product from the text
+          const cleaned = cleanProductQuery(text, orderIntent);
+          if(cleaned){
+            const found = await services.catalogService.search(tenant.id, cleaned);
+            if(found?.product){
+              const qty = numberFromText(text) || 1;
+              candidates.push({
+                intent: 'commerce.cart.add_request',
+                confidence: .9998,
+                entities: { requestedText: text, productId: found.product.id, quantity: qty },
+                reason: `universal_${orderIntent}`,
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // v37.0: UNIVERSAL cart operations — expanded vocabulary for all business types
+    // View cart: "show my cart", "show my order", "what's in my order", "view basket",
+    // "mera order dikhao", "cart kya hai", "order summary"
+    if (/\b(show|view|see|open|what(?:'s| is) in)\s+(my\s+)?(?:full\s+)?(?:cart|order|basket|bag)\b|\bmy\s+(?:full\s+)?(?:cart|order|basket|bag)\b|(?:^|\b)show\s+(?:me\s+)?my\s+order\b|mera\s+order\s+dikhao|cart\s+kya\s+h(?:ai|e)|order\s+summary/.test(text) && !/\b(track|status)\b/.test(text) && !/\b(?:add|put|include|buy|purchase)\b/.test(text)) {
       const checkoutToo=/\b(confirm|checkout|place order)\b/.test(text);
       candidates.push({intent:checkoutToo?'commerce.cart.view_checkout':'commerce.cart.view',confidence:.9998,entities:{},reason:checkoutToo?'cart_view_checkout':'cart_view'});
     }
-    if (/\b(clear|empty|remove everything from)\s+(my\s+)?cart\b/.test(text)) candidates.push({intent:'commerce.cart.clear',confidence:.9998,entities:{},reason:'cart_clear'});
-    if ((groundedProductRequest||Boolean(cs?.mode))&&/\b(add|include|put)\b.*\b(order|cart)\b|\badd\b.+\b(also|too)\b|\bi want .* (also|too)\b|\b(do you have|do you sell|can i get|can i have)\b.*\b(also|too)\b|\b(add (?:kr|kar) do|is (?:me|mein|mi).*(?:bhi|add)|order (?:me|mein).*add)\b|\b(?:mujhy|mujhe|mujhay|mai|main)?[^.]{0,40}\b(?:bhi)\b[^.]{0,30}\b(?:chahiye|chahiyy|chahy|lyni|leni|lyna|lena)\b|\b(?:chahiye|chahiyy|chahy)\b.*\b(?:bhi|also|too)\b/.test(text)) candidates.push({intent:'commerce.cart.add_request',confidence:.9997,entities:{requestedText:text},reason:'cart_add_request'});
-    if (/\b(remove|delete|take out)\b.*\b(from )?(my )?(?:cart|order)\b/.test(text)) candidates.push({intent:'commerce.cart.remove_request',confidence:.9996,entities:{requestedText:text,target:/\border\b/.test(text)?'order':'auto'},reason:'cart_remove_request'});
-    if (/\b(change|update|make|set|reduce|decrease|lower)\b.*\b(quantity|qty|pieces?|pcs?)\b/.test(text)) candidates.push({intent:'commerce.cart.update_quantity',confidence:.9996,entities:{requestedText:text},reason:'cart_quantity_update'});
+    // Clear cart: "clear my cart", "empty cart", "remove everything", "cancel order"
+    if (/\b(clear|empty|remove everything from|cancel)\s+(my\s+)?(?:cart|order|basket|bag)\b/.test(text)) candidates.push({intent:'commerce.cart.clear',confidence:.9998,entities:{},reason:'cart_clear'});
+    // v37.0: Expanded add-to-cart: handles restaurant + retail + grocery vocabulary
+    // "add X to cart", "add X to my order", "i want X also", "send me X",
+    // "give me N X", "i'll take X", "can i get X", "order N X", "pack N X",
+    // "X please", "one plate of X", "2 pieces of X", "bhej do X",
+    // "X chahiye", "X lena hai", "X ka order karna hai"
+    if ((groundedProductRequest||Boolean(cs?.mode))&&(
+      /\b(add|include|put|send|give|bring|pack|deliver|ship|prepare|make)\b.*\b(order|cart|basket|bag|plate|piece|serving|portion)?\b/.test(text) ||
+      /\badd\b.+\b(also|too|bhi|aur)\b/.test(text) ||
+      /\bi want .* (also|too|bhi)\b/.test(text) ||
+      /\b(do you have|do you sell|do you offer|can i get|can i have|can i order)\b/.test(text) ||
+      /\b(i'?ll|i will|i would|i'?d like|i need|i want|let me|let me get|let me have|let me order)\b/.test(text) ||
+      /\b(?:mujhy|mujhe|mujhay|mai|main)?[^.]{0,40}\b(?:bhi)\b[^.]{0,30}\b(?:chahiye|chahiyy|chahy|lyni|leni|lyna|lena)\b/.test(text) ||
+      /\b(?:chahiye|chahiyy|chahy)\b.*\b(?:bhi|also|too)\b/.test(text) ||
+      /\b(?:order|khana|food)\s+(?:karna|karna|chahiye|chahiyy)\b/.test(text)
+    )) {
+      // v37.1: Skip if query has color/size attribute — that's a catalog
+      // product detail + attribute request, not a cart add
+      const hasAttribute = /\b(?:black|white|blue|navy|red|green|yellow|pink|gray|grey|brown|silver|gold|small|medium|large|xl|xxl|size)\b/i.test(text);
+      if (!hasAttribute) {
+        candidates.push({intent:'commerce.cart.add_request',confidence:.9997,entities:{requestedText:text},reason:'universal_cart_add'});
+      }
+    }
+    // v37.0: Expanded remove: "remove X", "cancel X", "delete X", "take X off", "X hata do"
+    if (/\b(remove|delete|take out|take off|drop|cancel|hata|hatado)\b.*\b(from )?(my )?(?:cart|order|basket|bag)?\b/.test(text)) candidates.push({intent:'commerce.cart.remove_request',confidence:.9996,entities:{requestedText:text,target:/\border\b/.test(text)?'order':'auto'},reason:'cart_remove_request'});
+    // v37.0: Expanded quantity change: "change X to N", "update X quantity", "make it N",
+    // "reduce X to N", "increase X to N", "X quantity N kar do", "X kam kar do"
+    if (/\b(change|update|make|set|reduce|decrease|lower|increase|raise)\b.*\b(?:quantity|qty|pieces?|pcs?|plates?|servings?|portions?|to|less|more)\b/.test(text) ||
+        /\b(?:quantity|qty)\s+(?:to|kar do|kardo|set|change)\s*\d/i.test(text) ||
+        /\b(?:kam|zyada|less|more)\s+kar/i.test(text)
+    ) candidates.push({intent:'commerce.cart.update_quantity',confidence:.9996,entities:{requestedText:text},reason:'cart_quantity_update'});
     if (/\badd\s+\d{1,3}\s+more\b/.test(text)) candidates.push({intent:'commerce.cart.increment_quantity',confidence:.9999,entities:{requestedText:text},reason:'cart_quantity_increment'});
+    // v37.0: Checkout: "checkout", "place order", "confirm order", "done", "finalize"
+    if (/\b(checkout|place order|place the order|confirm order|confirm my order|finalize|finalise|done|complete|submit|place)\b/i.test(text) && (cs?.mode || cs?.lastOrderId)) {
+      candidates.push({intent:'commerce.cart.view_checkout',confidence:.9999,entities:{},reason:'checkout_request'});
+    }
     if (candidates.length) return {priority:this.priority,candidates,entities:candidates[0].entities,vocabularyMatches:[{type:'commerce_operation',value:candidates[0].intent,score:1}]};
 
     if (cs?.mode==='paused_add_item' && isWorkflowAcceptance(text)) {
@@ -425,3 +494,61 @@ function attributeAmbiguity(slots,segments,reason){
   return {reason,receivedValues:segments.length,pendingSlots:slots.length,products,fields};
 }
 module.exports={CommerceConversationAdapter,extractCartMutation,removalRequest};
+
+// v37.0: UNIVERSAL order intent detection — works for ALL product-based tenants.
+// Returns the detected order intent type, or null if not an order request.
+// Supports: English, Roman Urdu, Urdu script for order verbs.
+function detectUniversalOrderIntent(text) {
+  const t = String(text || '').toLowerCase().trim();
+  if (!t) return null;
+  // Direct order verbs (English)
+  if (/\b(?:i want|i need|i'?d like|i'?ll|i will|i would)\s+(?:to\s+)?(?:order|get|have|buy|eat|take)\b/.test(t)) return 'want_order';
+  if (/\b(?:send|deliver|ship|bring|pack|prepare|make)\s+(?:me\s+)?/.test(t)) return 'send';
+  if (/\b(?:give|get)\s+(?:me\s+)?/.test(t) && !/\b(?:information|details|price|cost)\b/.test(t)) return 'give';
+  if (/\b(?:can i|could i)\s+(?:get|have|order|buy)\b/.test(t)) return 'can_i';
+  if (/\b(?:let me)\s+(?:get|have|order|take)\b/.test(t)) return 'let_me';
+  if (/\b(?:add|include|put)\b/.test(t) && !/\b(?:to\s+my\s+(?:cart|order))/.test(t)) return 'add';
+  if (/\b(?:order|buy|purchase)\s+\d/i.test(t)) return 'order_direct';
+  // Roman Urdu
+  if (/\b(?:mujhe|mujhy|mujhay)\s+.*\b(?:chahiye|chahiyy|chahy|lena|leni|lyna|lyni)\b/.test(t)) return 'roman_want';
+  if (/\b(?:order|khana|food)\s+(?:karna|chahiye|chahiyy|chahy)\b/.test(t)) return 'roman_order';
+  if (/\b(?:bhej|bhejo|laga|laga\s*do|kar\s*do|kardo)\b/.test(t)) return 'roman_send';
+  // Short phrases: just the product name + "please" (≤ 5 words)
+  if (t.split(/\s+/).length <= 5 && /\bplease\b/.test(t) && !/\b(?:what|which|how|why|where|when|who)\b/.test(t)) return 'short_please';
+  // Quantity + product: "2 chicken biryani", "one burger"
+  if (/\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|ek|do|teen|char|paanch)\b/.test(t) &&
+      !/\b(?:what|which|how|why|where|when|who)\b/.test(t) &&
+      t.split(/\s+/).length <= 6) return 'quantity_product';
+  return null;
+}
+
+// v37.0: Clean product query from order text — strips action verbs, quantity words,
+// and filler words to get just the product name for entity resolution.
+function cleanProductQuery(text, intentType) {
+  let cleaned = String(text || '')
+    // Fix common typos
+    .replace(/\bchiken\b/gi, 'chicken')
+    .replace(/\bbiriyani\b/gi, 'biryani')
+    .replace(/\bburgers\b/gi, 'burger')
+    .replace(/\bwnt\b/gi, 'want')
+    .replace(/\bresturant\b/gi, 'restaurant')
+    .replace(/\bsomw\b/gi, 'some')
+    .replace(/\bwht\b/gi, 'what')
+    .replace(/\bordr\b/gi, 'order')
+    // Strip order verbs
+    .replace(/\b(?:i want|i need|i'?d like|i'?ll|i will|i would|let me|can i|could i|please|ok|okay|a|an|the|some|of|to|do|does)\b/gi, '')
+    .replace(/\b(?:order|buy|purchase|eat|get|have|take|deliver|send|give|bring|pack|ship|prepare|make|add|include|put)\b/gi, '')
+    .replace(/\b(?:want|need|like|will|would|let|can|could|please|ok|okay|just|only|also|too|bhi|aur)\b/gi, '')
+    // Strip quantity words
+    .replace(/\b(?:one|two|three|four|five|six|seven|eight|nine|ten|ek|do|teen|char|paanch)\b/gi, '')
+    .replace(/\b\d+\s*(?:x|×|pcs?|pieces?|plates?|servings?|portions?|bags?|units?)?\b/gi, '')
+    // Strip Roman Urdu
+    .replace(/\b(?:mujhe|mujhy|mujhay|chahiye|chahiyy|chahy|lena|leni|lyna|lyni|karna|bhej|bhejo|laga|kar|kardo|kar\s*do)\b/gi, '')
+    // Strip connectors + filler
+    .replace(/\b(?:and|or|with|plus|also|too|from|in|on|at|for|my|your|this|that|it|is|are|was|were)\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  // Remove leading/trailing punctuation
+  cleaned = cleaned.replace(/^[,.]+|[,.]+$/g, '').trim();
+  return cleaned.length >= 3 ? cleaned : null;
+}
