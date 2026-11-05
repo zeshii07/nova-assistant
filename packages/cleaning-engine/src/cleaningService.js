@@ -24,11 +24,26 @@ class CleaningService {
       checkAvailability: async (input) => {
         assert("read");
         if (!this.calendarService) return { status:"unknown", source:"calendar_not_connected" };
+        // v40.3: Skip check when calendar is disabled for this tenant
+        try {
+          const calConfig = this.calendarService.getConfig?.(tenant.id);
+          if (calConfig && calConfig.enabled === false) return { status:"unknown", source:"calendar_disabled" };
+        } catch {}
         return this.calendarService.check({ tenantId:tenant.id, ...cleaningCalendarInput(input) });
       },
       holdSlot: async (input) => {
         assert("request.create");
         if (!this.calendarService) return { status:"unknown", source:"calendar_not_connected" };
+        // v40.3: Check if calendar is actually enabled for this tenant.
+        // Even when calendarService is assigned, the tenant's calendar config
+        // may have enabled:false. In that case, skip the holdSlot check and
+        // return 'unknown' so the cleaning request proceeds without blocking.
+        try {
+          const calConfig = this.calendarService.getConfig?.(tenant.id);
+          if (calConfig && calConfig.enabled === false) {
+            return { status:"unknown", source:"calendar_disabled" };
+          }
+        } catch {}
         return this.calendarService.hold({ tenantId:tenant.id, customerId, conversationId, ...cleaningCalendarInput(input), subject:input.serviceName || "Cleaning service" });
       },
       releaseHold: async (holdId, reason) => this.calendarService?.releaseHold({ tenantId:tenant.id, customerId, holdId, reason }),

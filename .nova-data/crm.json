@@ -3306,6 +3306,26 @@
       "customFields": {},
       "createdAt": "2026-10-08T16:03:44.146Z",
       "updatedAt": "2026-10-08T16:03:44.146Z"
+    },
+    "cleaning-demo:kiosk-ec0b611b-f472-41e4-9487-c37f92ef7bdf": {
+      "tenantId": "cleaning-demo",
+      "customerId": "kiosk-ec0b611b-f472-41e4-9487-c37f92ef7bdf",
+      "name": "Zeeshan",
+      "phone": "03019299608",
+      "email": null,
+      "preferredLanguage": "english",
+      "status": "contact",
+      "leadStage": "new",
+      "source": "widget",
+      "tags": [],
+      "notes": [],
+      "customFields": {
+        "lastKnownLocation": {
+          "address": "ugfjgcd 76 fhsj gughsy"
+        }
+      },
+      "createdAt": "2026-11-04T08:34:16.274Z",
+      "updatedAt": "2026-11-04T08:34:16.274Z"
     }
   },
   "activities": {
@@ -8137,6 +8157,42 @@
         },
         "capabilityId": "cleaning",
         "createdAt": "2026-10-08T16:03:42.917Z"
+      }
+    ],
+    "cleaning-demo:kiosk-ec0b611b-f472-41e4-9487-c37f92ef7bdf": [
+      {
+        "id": "act_1793781258096_2vtzo0",
+        "type": "assistant.message",
+        "data": {
+          "intent": "small_talk",
+          "channel": "widget"
+        },
+        "capabilityId": "assistant",
+        "createdAt": "2026-11-04T08:34:18.096Z"
+      },
+      {
+        "id": "act_1793781276638_vt79o2",
+        "type": "cleaning.services_viewed",
+        "data": {
+          "count": 12,
+          "durationHours": null
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-11-04T08:34:36.638Z"
+      },
+      {
+        "id": "act_1793781913092_8zhsvb",
+        "type": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-3TXLFZ5O",
+          "requestIds": [
+            "CLN-3TXLFZ5O"
+          ],
+          "serviceId": "CLN002",
+          "count": 1
+        },
+        "capabilityId": "cleaning",
+        "createdAt": "2026-11-04T08:45:13.092Z"
       }
     ]
   }

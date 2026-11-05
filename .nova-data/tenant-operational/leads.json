@@ -13498,6 +13498,162 @@
         "nextBestQuestion": "What name should we use?",
         "complete": false
       }
+    },
+    "cleaning-demo:LD-WXW3BD": {
+      "id": "LD-WXW3BD",
+      "tenantId": "cleaning-demo",
+      "customerId": "kiosk-ec0b611b-f472-41e4-9487-c37f92ef7bdf",
+      "conversationId": "cleaning-demo:widget:kiosk-ec0b611b-f472-41e4-9487-c37f92ef7bdf",
+      "source": "widget",
+      "channel": "widget",
+      "lastCapabilityId": "cleaning",
+      "status": "converted",
+      "contact": {
+        "name": "Zeeshan",
+        "phone": "03019299608"
+      },
+      "location": {
+        "address": "ugfjgcd 76 fhsj gughsy"
+      },
+      "interests": [
+        {
+          "type": "servicelines",
+          "value": "• Standard / General Cleaning — AED 40 per hour per cleaner\n• Deep Cleaning — From AED 200; exact price depends on the configured size/scope\n• Furniture Cleanin"
+        },
+        {
+          "type": "capability",
+          "value": "cleaning"
+        },
+        {
+          "type": "serviceid",
+          "value": "deep-cleaning-matrix"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning Pricing Matrix"
+        },
+        {
+          "type": "operationalserviceid",
+          "value": "CLN002"
+        },
+        {
+          "type": "servicename",
+          "value": "Deep Cleaning"
+        }
+      ],
+      "requirements": {
+        "date": "monday",
+        "time": "11:00",
+        "startTime": "11:00",
+        "address": "al hamra road near metro station apartment 4 building 1006"
+      },
+      "signals": [
+        "intent:cleaning.service_explore",
+        "capability:cleaning",
+        "intent:cleaning.structured_service_request",
+        "intent:cleaning.workflow_input",
+        "requirement:date",
+        "requirement:time",
+        "requirement:startTime",
+        "requirement:address",
+        "intent:cleaning.correction"
+      ],
+      "recentMessages": [
+        {
+          "text": "i want to book a cleaning service",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:34:36.670Z"
+        },
+        {
+          "text": "i want deep cleaning service for my 4 bedroom apartment",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:34:55.220Z"
+        },
+        {
+          "text": "i want service on monday 4 pm",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:36:19.424Z"
+        },
+        {
+          "text": "al hamra road near metro station apartment 4 building 1006",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:39:29.183Z"
+        },
+        {
+          "text": "my name is Zeeshan",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:39:45.645Z"
+        },
+        {
+          "text": "03019299608",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:39:57.889Z"
+        },
+        {
+          "text": "ok confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:42:06.336Z"
+        },
+        {
+          "text": "ok chnge to any avilable slot near monday",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:43:01.422Z"
+        },
+        {
+          "text": "4 pm",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:43:10.661Z"
+        },
+        {
+          "text": "al hamra hall near metro sttion building 7 apartment 56",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:43:44.380Z"
+        },
+        {
+          "text": "keep detils",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:44:06.966Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:44:11.701Z"
+        },
+        {
+          "text": "ok change monday to friday then",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:44:35.375Z"
+        },
+        {
+          "text": "11 am",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:44:41.080Z"
+        },
+        {
+          "text": "ugfjgcd 76 fhsj gughsy",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:44:52.645Z"
+        },
+        {
+          "text": "confirm",
+          "capabilityId": "cleaning",
+          "at": "2026-11-04T08:45:13.113Z"
+        }
+      ],
+      "transaction": {
+        "intent": "CLEANING_REQUEST_CREATED",
+        "convertedAt": "2026-11-04T08:45:13.113Z"
+      },
+      "createdAt": "2026-11-04T08:34:36.670Z",
+      "updatedAt": "2026-11-04T08:45:13.113Z",
+      "revision": 16,
+      "score": 100,
+      "grade": "hot",
+      "qualification": {
+        "missing": [],
+        "nextBestQuestion": null,
+        "complete": true
+      }
     }
   }
 }

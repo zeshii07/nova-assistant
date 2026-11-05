@@ -811,6 +811,33 @@
       "releasedAt": null,
       "releaseReason": null,
       "eventId": "EVT-MU5EK1CT-932E8721"
+    },
+    "HLD-MW1VFQAS-5FD2EFC3": {
+      "id": "HLD-MW1VFQAS-5FD2EFC3",
+      "tenantId": "cleaning-demo",
+      "customerId": "kiosk-ec0b611b-f472-41e4-9487-c37f92ef7bdf",
+      "conversationId": "cleaning-demo:widget:kiosk-ec0b611b-f472-41e4-9487-c37f92ef7bdf",
+      "status": "confirmed",
+      "provider": "local",
+      "serviceIds": [
+        "CLN002"
+      ],
+      "subject": "Deep Cleaning Pricing Matrix",
+      "localDate": "09/11/2026",
+      "localTime": "11:00",
+      "endLocalTime": "16:00",
+      "startAt": "2026-11-09T07:00:00.000Z",
+      "endAt": "2026-11-09T12:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "idempotencyKey": "6af6ccc469d2e8eee3b1710913a6ecb15e01c5fe6a9c953857593eb7bc9a58c1",
+      "createdAt": "2026-11-04T08:45:13.060Z",
+      "expiresAt": "2026-11-04T08:55:13.060Z",
+      "confirmedAt": "2026-11-04T08:45:13.081Z",
+      "releasedAt": null,
+      "releaseReason": null,
+      "eventId": "EVT-MW1VFQBD-23B2997D"
     }
   },
   "events": {
@@ -1884,6 +1911,42 @@
           "at": "2026-09-17T10:44:20.573Z"
         }
       ]
+    },
+    "EVT-MW1VFQBD-23B2997D": {
+      "id": "EVT-MW1VFQBD-23B2997D",
+      "tenantId": "cleaning-demo",
+      "customerId": "kiosk-ec0b611b-f472-41e4-9487-c37f92ef7bdf",
+      "type": "appointment",
+      "status": "confirmed",
+      "provider": "local",
+      "referenceType": "cleaning_request",
+      "referenceId": "CLN-3TXLFZ5O",
+      "subject": "Deep Cleaning",
+      "serviceIds": [
+        "CLN002"
+      ],
+      "localDate": "09/11/2026",
+      "localTime": "11:00",
+      "endLocalTime": "16:00",
+      "startAt": "2026-11-09T07:00:00.000Z",
+      "endAt": "2026-11-09T12:00:00.000Z",
+      "timezone": "Asia/Dubai",
+      "poolId": "cleaning-teams",
+      "capacityRequired": 1,
+      "metadata": {
+        "requestIds": [
+          "CLN-3TXLFZ5O"
+        ]
+      },
+      "revision": 1,
+      "createdAt": "2026-11-04T08:45:13.081Z",
+      "updatedAt": "2026-11-04T08:45:13.081Z",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-04T08:45:13.081Z"
+        }
+      ]
     }
   },
   "idempotency": {
@@ -1915,7 +1978,8 @@
     "hold:efb0aa5928b55a967450635eafbbf3eb59cb81133f8be9b9745d111eb280a5ff": "HLD-MU5DRPO1-33E4E700",
     "hold:8139ac716d99e613a3c00769eafd4049b62b32301a5895630f582b8b82985fea": "HLD-MU5EJBWR-BB8A12CD",
     "hold:f96cd1efa91d61c7253112bbe08749602e27b7f3774252f98be40f694b2895c3": "HLD-MU5EJHMS-3CB266DA",
-    "hold:f2251383f6a93a64d0fa1dce3dd9eff6d5ae261b6a43f89359757526b6e199df": "HLD-MU5EK1CD-2FF48425"
+    "hold:f2251383f6a93a64d0fa1dce3dd9eff6d5ae261b6a43f89359757526b6e199df": "HLD-MU5EK1CD-2FF48425",
+    "hold:6af6ccc469d2e8eee3b1710913a6ecb15e01c5fe6a9c953857593eb7bc9a58c1": "HLD-MW1VFQAS-5FD2EFC3"
   },
   "audit": [
     {
@@ -2655,7 +2719,31 @@
         "referenceId": "CLN-101D3UYB"
       },
       "at": "2026-09-17T10:44:20.574Z"
+    },
+    {
+      "id": "CAL-AUD-MW1VFQAT-F9BDDB3E",
+      "tenantId": "cleaning-demo",
+      "action": "slot.held",
+      "metadata": {
+        "holdId": "HLD-MW1VFQAS-5FD2EFC3",
+        "customerId": "kiosk-ec0b611b-f472-41e4-9487-c37f92ef7bdf",
+        "localDate": "09/11/2026",
+        "localTime": "11:00"
+      },
+      "at": "2026-11-04T08:45:13.061Z"
+    },
+    {
+      "id": "CAL-AUD-MW1VFQBD-4CD3830C",
+      "tenantId": "cleaning-demo",
+      "action": "event.confirmed",
+      "metadata": {
+        "eventId": "EVT-MW1VFQBD-23B2997D",
+        "holdId": "HLD-MW1VFQAS-5FD2EFC3",
+        "referenceType": "cleaning_request",
+        "referenceId": "CLN-3TXLFZ5O"
+      },
+      "at": "2026-11-04T08:45:13.081Z"
     }
   ],
-  "updatedAt": "2026-09-17T10:44:20.575Z"
+  "updatedAt": "2026-11-04T08:45:13.082Z"
 }

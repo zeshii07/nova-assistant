@@ -1,0 +1,34 @@
+[
+  {
+    "id": "NOT-MW1VFQEK-A913A0",
+    "tenantId": "cleaning-demo",
+    "eventType": "lead_captured",
+    "createdAt": "2026-11-04T08:45:13.196Z",
+    "readAt": null,
+    "subject": "🎯 New Lead Captured — Zeeshan — Score: 100",
+    "preview": "New Lead Captured\n\nCustomer: Zeeshan\nLead Score: 100\nGrade: hot\nLead ID: LD-WXW3BD\nChannel: widget\nInterested in: • Standard / General Cleaning — AED 40 per hour per cleaner\n• Deep Cleaning — From AED",
+    "data": {
+      "tenantId": "cleaning-demo",
+      "leadId": "LD-WXW3BD",
+      "customerId": "kiosk-ec0b611b-f472-41e4-9487-c37f92ef7bdf",
+      "transactionIntent": "CLEANING_REQUEST_CREATED",
+      "customerName": "Zeeshan",
+      "customerPhone": "03019299608",
+      "score": 100,
+      "grade": "hot",
+      "interests": "• Standard / General Cleaning — AED 40 per hour per cleaner\n• Deep Cleaning — From AED 200; exact price depends on the configured size/scope\n• Furniture Cleanin, cleaning, deep-cleaning-matrix, Deep Cleaning Pricing Matrix, CLN002, Deep Cleaning",
+      "channel": "widget",
+      "tenantName": "SparkleCare Cleaning"
+    },
+    "email": {
+      "recipients": [
+        "owner@sparklecare.com"
+      ],
+      "sent": true,
+      "error": null,
+      "devMode": true,
+      "queued": false,
+      "messageId": null
+    }
+  }
+]
