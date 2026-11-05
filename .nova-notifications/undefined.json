@@ -1,0 +1,290 @@
+[
+  {
+    "id": "NOT-MVLVSD7V-A2CD26",
+    "eventType": "order_placed",
+    "createdAt": "2026-10-24T04:10:43.819Z",
+    "readAt": null,
+    "subject": "🛒 New Order Placed — Customer — Item",
+    "preview": "New Order Placed\n\nCustomer: —\nItem: Item\nQuantity: 1\nTotal: —\nOrder ID: OFR-MVLVSD6J-34BC84\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "orderId": "OFR-MVLVSD6J-34BC84",
+      "itemName": "Item",
+      "currency": "PKR",
+      "quantity": 1,
+      "customerName": null,
+      "customerPhone": null,
+      "deliveryAddress": null
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MVLVT7PS-811F57",
+    "eventType": "order_placed",
+    "createdAt": "2026-10-24T04:11:23.344Z",
+    "readAt": null,
+    "subject": "🛒 New Order Placed — Customer — Item",
+    "preview": "New Order Placed\n\nCustomer: —\nItem: Item\nQuantity: 1\nTotal: —\nOrder ID: OFR-MVLVT7OH-87706F\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "orderId": "OFR-MVLVT7OH-87706F",
+      "itemName": "Item",
+      "currency": "PKR",
+      "quantity": 1,
+      "customerName": null,
+      "customerPhone": null,
+      "deliveryAddress": null
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MVP2QXHM-1D6B4C",
+    "eventType": "order_placed",
+    "createdAt": "2026-10-26T09:48:52.618Z",
+    "readAt": null,
+    "subject": "🛒 New Order Placed — Customer — Item",
+    "preview": "New Order Placed\n\nCustomer: —\nItem: Item\nQuantity: 1\nTotal: —\nOrder ID: OFR-MVP2QXHE-FDC967\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "orderId": "OFR-MVP2QXHE-FDC967",
+      "itemName": "Item",
+      "currency": "PKR",
+      "quantity": 1,
+      "customerName": null,
+      "customerPhone": null,
+      "deliveryAddress": null
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MVP2R7VL-810DE3",
+    "eventType": "order_placed",
+    "createdAt": "2026-10-26T09:49:06.081Z",
+    "readAt": null,
+    "subject": "🛒 New Order Placed — Customer — Item",
+    "preview": "New Order Placed\n\nCustomer: —\nItem: Item\nQuantity: 1\nTotal: —\nOrder ID: OFR-MVP2R7VC-0A120B\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "orderId": "OFR-MVP2R7VC-0A120B",
+      "itemName": "Item",
+      "currency": "PKR",
+      "quantity": 1,
+      "customerName": null,
+      "customerPhone": null,
+      "deliveryAddress": null
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MVP2U74K-C75148",
+    "eventType": "order_placed",
+    "createdAt": "2026-10-26T09:51:25.076Z",
+    "readAt": null,
+    "subject": "🛒 New Order Placed — Customer — Item",
+    "preview": "New Order Placed\n\nCustomer: —\nItem: Item\nQuantity: 1\nTotal: —\nOrder ID: OFR-MVP2U74B-E79A95\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "orderId": "OFR-MVP2U74B-E79A95",
+      "itemName": "Item",
+      "currency": "PKR",
+      "quantity": 1,
+      "customerName": null,
+      "customerPhone": null,
+      "deliveryAddress": null
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MVP2WDEC-38D782",
+    "eventType": "order_placed",
+    "createdAt": "2026-10-26T09:53:06.516Z",
+    "readAt": null,
+    "subject": "🛒 New Order Placed — Customer — Item",
+    "preview": "New Order Placed\n\nCustomer: —\nItem: Item\nQuantity: 1\nTotal: —\nOrder ID: OFR-MVP2WDE3-652899\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "orderId": "OFR-MVP2WDE3-652899",
+      "itemName": "Item",
+      "currency": "PKR",
+      "quantity": 1,
+      "customerName": null,
+      "customerPhone": null,
+      "deliveryAddress": null
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MVP2XJSH-4E82B2",
+    "eventType": "order_placed",
+    "createdAt": "2026-10-26T09:54:01.457Z",
+    "readAt": null,
+    "subject": "🛒 New Order Placed — Customer — Item",
+    "preview": "New Order Placed\n\nCustomer: —\nItem: Item\nQuantity: 1\nTotal: —\nOrder ID: OFR-MVP2XJS8-A1DE9F\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "orderId": "OFR-MVP2XJS8-A1DE9F",
+      "itemName": "Item",
+      "currency": "PKR",
+      "quantity": 1,
+      "customerName": null,
+      "customerPhone": null,
+      "deliveryAddress": null
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MVP2YI38-9DD7EE",
+    "eventType": "order_placed",
+    "createdAt": "2026-10-26T09:54:45.908Z",
+    "readAt": null,
+    "subject": "🛒 New Order Placed — Customer — Item",
+    "preview": "New Order Placed\n\nCustomer: —\nItem: Item\nQuantity: 1\nTotal: —\nOrder ID: OFR-MVP2YI30-5E34DE\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "orderId": "OFR-MVP2YI30-5E34DE",
+      "itemName": "Item",
+      "currency": "PKR",
+      "quantity": 1,
+      "customerName": null,
+      "customerPhone": null,
+      "deliveryAddress": null
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MVP4QHZW-21D917",
+    "eventType": "order_placed",
+    "createdAt": "2026-10-26T10:44:31.772Z",
+    "readAt": null,
+    "subject": "🛒 New Order Placed — Customer — Item",
+    "preview": "New Order Placed\n\nCustomer: —\nItem: Item\nQuantity: 1\nTotal: —\nOrder ID: OFR-MVP4QHZN-67ABC3\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "orderId": "OFR-MVP4QHZN-67ABC3",
+      "itemName": "Item",
+      "currency": "PKR",
+      "quantity": 1,
+      "customerName": null,
+      "customerPhone": null,
+      "deliveryAddress": null
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MVP4RGUH-E39F41",
+    "eventType": "order_placed",
+    "createdAt": "2026-10-26T10:45:16.937Z",
+    "readAt": null,
+    "subject": "🛒 New Order Placed — Customer — Item",
+    "preview": "New Order Placed\n\nCustomer: —\nItem: Item\nQuantity: 1\nTotal: —\nOrder ID: OFR-MVP4RGU7-DCBBCE\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "orderId": "OFR-MVP4RGU7-DCBBCE",
+      "itemName": "Item",
+      "currency": "PKR",
+      "quantity": 1,
+      "customerName": null,
+      "customerPhone": null,
+      "deliveryAddress": null
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MVS10DFW-D9DBC8",
+    "eventType": "order_placed",
+    "createdAt": "2026-10-28T11:23:32.492Z",
+    "readAt": null,
+    "subject": "🛒 New Order Placed — Customer — Item",
+    "preview": "New Order Placed\n\nCustomer: —\nItem: Item\nQuantity: 1\nTotal: —\nOrder ID: OFR-MVS10DFN-A62823\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "orderId": "OFR-MVS10DFN-A62823",
+      "itemName": "Item",
+      "currency": "PKR",
+      "quantity": 1,
+      "customerName": null,
+      "customerPhone": null,
+      "deliveryAddress": null
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MVS10DVH-ACF85C",
+    "eventType": "order_placed",
+    "createdAt": "2026-10-28T11:23:33.054Z",
+    "readAt": null,
+    "subject": "🛒 New Order Placed — Customer — Item",
+    "preview": "New Order Placed\n\nCustomer: —\nItem: Item\nQuantity: 1\nTotal: —\nOrder ID: OFR-MVS10DVA-4551D3\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "orderId": "OFR-MVS10DVA-4551D3",
+      "itemName": "Item",
+      "currency": "PKR",
+      "quantity": 1,
+      "customerName": null,
+      "customerPhone": null,
+      "deliveryAddress": null
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  }
+]

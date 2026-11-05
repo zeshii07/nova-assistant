@@ -1,22 +1,179 @@
 [
   {
-    "id": "NOT-MW1VFQEK-A913A0",
+    "id": "NOT-MV0FJHB1-AED265",
     "tenantId": "cleaning-demo",
     "eventType": "lead_captured",
-    "createdAt": "2026-11-04T08:45:13.196Z",
-    "readAt": null,
-    "subject": "🎯 New Lead Captured — Zeeshan — Score: 100",
-    "preview": "New Lead Captured\n\nCustomer: Zeeshan\nLead Score: 100\nGrade: hot\nLead ID: LD-WXW3BD\nChannel: widget\nInterested in: • Standard / General Cleaning — AED 40 per hour per cleaner\n• Deep Cleaning — From AED",
+    "createdAt": "2026-10-09T03:52:45.661Z",
+    "readAt": "2026-10-09T03:53:49.029Z",
+    "subject": "🎯 New Lead Captured — Ahmed Khan — Score: 100",
+    "preview": "New Lead Captured\n\nCustomer: Ahmed Khan\nLead Score: 100\nGrade: hot\nLead ID: LD-2Z4F54\nChannel: http\nInterested in: deep-apartment-cleaning, Deep Apartment Cleaning, CLN010, cleaning\nPhone: +9715012345",
     "data": {
       "tenantId": "cleaning-demo",
-      "leadId": "LD-WXW3BD",
-      "customerId": "kiosk-ec0b611b-f472-41e4-9487-c37f92ef7bdf",
+      "leadId": "LD-2Z4F54",
+      "customerId": "v30-test-1",
+      "transactionIntent": "CLEANING_REQUEST_CREATED",
+      "customerName": "Ahmed Khan",
+      "customerPhone": "+971501234567",
+      "score": 100,
+      "grade": "hot",
+      "interests": "deep-apartment-cleaning, Deep Apartment Cleaning, CLN010, cleaning",
+      "channel": "http",
+      "tenantName": "SparkleCare Cleaning"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MV0FKMG8-788F06",
+    "tenantId": "cleaning-demo",
+    "eventType": "lead_captured",
+    "createdAt": "2026-10-09T03:53:38.985Z",
+    "readAt": "2026-10-09T03:53:49.029Z",
+    "subject": "🎯 New Lead Captured — Sara Ali — Score: 100",
+    "preview": "New Lead Captured\n\nCustomer: Sara Ali\nLead Score: 100\nGrade: hot\nLead ID: LD-3S33VU\nChannel: http\nInterested in: deep-villa-cleaning, Deep Villa Cleaning, CLN011, cleaning\nPhone: +971509998887\n\nView i",
+    "data": {
+      "tenantId": "cleaning-demo",
+      "leadId": "LD-3S33VU",
+      "customerId": "v30-test-2",
+      "transactionIntent": "CLEANING_REQUEST_CREATED",
+      "customerName": "Sara Ali",
+      "customerPhone": "+971509998887",
+      "score": 100,
+      "grade": "hot",
+      "interests": "deep-villa-cleaning, Deep Villa Cleaning, CLN011, cleaning",
+      "channel": "http",
+      "tenantName": "SparkleCare Cleaning"
+    },
+    "email": {
+      "recipients": [
+        "owner@sparklecare.com"
+      ],
+      "sent": true,
+      "error": null,
+      "devMode": true,
+      "queued": false,
+      "messageId": null
+    }
+  },
+  {
+    "id": "NOT-MVJR1U9K-E8B636",
+    "tenantId": "cleaning-demo",
+    "eventType": "lead_captured",
+    "createdAt": "2026-10-22T16:22:35.384Z",
+    "readAt": null,
+    "subject": "🎯 New Lead Captured — Ahmed Khan — Score: 100",
+    "preview": "New Lead Captured\n\nCustomer: Ahmed Khan\nLead Score: 100\nGrade: hot\nLead ID: LD-VCOM60\nChannel: widget\nInterested in: CLN010, Deep Apartment Cleaning, cleaning\nPhone: +971501234567\n\nView in dashboard: ",
+    "data": {
+      "tenantId": "cleaning-demo",
+      "leadId": "LD-VCOM60",
+      "customerId": "bug-3",
+      "transactionIntent": "CLEANING_REQUEST_CREATED",
+      "customerName": "Ahmed Khan",
+      "customerPhone": "+971501234567",
+      "score": 100,
+      "grade": "hot",
+      "interests": "CLN010, Deep Apartment Cleaning, cleaning",
+      "channel": "widget",
+      "tenantName": "SparkleCare Cleaning"
+    },
+    "email": {
+      "recipients": [
+        "owner@sparklecare.com"
+      ],
+      "sent": true,
+      "error": null,
+      "devMode": true,
+      "queued": false,
+      "messageId": null
+    }
+  },
+  {
+    "id": "NOT-MW32TYFF-4501F0",
+    "tenantId": "cleaning-demo",
+    "eventType": "lead_captured",
+    "createdAt": "2026-11-05T05:00:00.268Z",
+    "readAt": null,
+    "subject": "🎯 New Lead Captured — Zeeshan — Score: 100",
+    "preview": "New Lead Captured\n\nCustomer: Zeeshan\nLead Score: 100\nGrade: hot\nLead ID: LD-QR0R2Y\nChannel: widget\nInterested in: deep-apartment-cleaning, Deep Apartment Cleaning, CLN010, cleaning\nPhone: 03019299608\n",
+    "data": {
+      "tenantId": "cleaning-demo",
+      "leadId": "LD-QR0R2Y",
+      "customerId": "slot-1",
       "transactionIntent": "CLEANING_REQUEST_CREATED",
       "customerName": "Zeeshan",
       "customerPhone": "03019299608",
       "score": 100,
       "grade": "hot",
-      "interests": "• Standard / General Cleaning — AED 40 per hour per cleaner\n• Deep Cleaning — From AED 200; exact price depends on the configured size/scope\n• Furniture Cleanin, cleaning, deep-cleaning-matrix, Deep Cleaning Pricing Matrix, CLN002, Deep Cleaning",
+      "interests": "deep-apartment-cleaning, Deep Apartment Cleaning, CLN010, cleaning",
+      "channel": "widget",
+      "tenantName": "SparkleCare Cleaning"
+    },
+    "email": {
+      "recipients": [
+        "owner@sparklecare.com"
+      ],
+      "sent": true,
+      "error": null,
+      "devMode": true,
+      "queued": false,
+      "messageId": null
+    }
+  },
+  {
+    "id": "NOT-MW32WX5W-B5F737",
+    "tenantId": "cleaning-demo",
+    "eventType": "lead_captured",
+    "createdAt": "2026-11-05T05:02:18.596Z",
+    "readAt": null,
+    "subject": "🎯 New Lead Captured — Zeeshan — Score: 100",
+    "preview": "New Lead Captured\n\nCustomer: Zeeshan\nLead Score: 100\nGrade: hot\nLead ID: LD-RNEMNW\nChannel: widget\nInterested in: deep-apartment-cleaning, Deep Apartment Cleaning, CLN010, cleaning\nPhone: 03019299608\n",
+    "data": {
+      "tenantId": "cleaning-demo",
+      "leadId": "LD-RNEMNW",
+      "customerId": "slot-fix-1",
+      "transactionIntent": "CLEANING_REQUEST_CREATED",
+      "customerName": "Zeeshan",
+      "customerPhone": "03019299608",
+      "score": 100,
+      "grade": "hot",
+      "interests": "deep-apartment-cleaning, Deep Apartment Cleaning, CLN010, cleaning",
+      "channel": "widget",
+      "tenantName": "SparkleCare Cleaning"
+    },
+    "email": {
+      "recipients": [
+        "owner@sparklecare.com"
+      ],
+      "sent": true,
+      "error": null,
+      "devMode": true,
+      "queued": false,
+      "messageId": null
+    }
+  },
+  {
+    "id": "NOT-MW32WYK4-B958FA",
+    "tenantId": "cleaning-demo",
+    "eventType": "lead_captured",
+    "createdAt": "2026-11-05T05:02:20.404Z",
+    "readAt": null,
+    "subject": "🎯 New Lead Captured — Ahmed — Score: 100",
+    "preview": "New Lead Captured\n\nCustomer: Ahmed\nLead Score: 100\nGrade: hot\nLead ID: LD-2TWLD2\nChannel: widget\nInterested in: deep-apartment-cleaning, Deep Apartment Cleaning, CLN010, cleaning\nPhone: 03019299608\n\nV",
+    "data": {
+      "tenantId": "cleaning-demo",
+      "leadId": "LD-2TWLD2",
+      "customerId": "slot-fix-2",
+      "transactionIntent": "CLEANING_REQUEST_CREATED",
+      "customerName": "Ahmed",
+      "customerPhone": "03019299608",
+      "score": 100,
+      "grade": "hot",
+      "interests": "deep-apartment-cleaning, Deep Apartment Cleaning, CLN010, cleaning",
       "channel": "widget",
       "tenantName": "SparkleCare Cleaning"
     },

@@ -206,6 +206,125 @@ class CommerceConversationAdapter {
       }
     }
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // v42.0 (Sprint 2): NEW IMPORTANT MODIFICATION OPERATIONS — runs FIRST
+    // ─────────────────────────────────────────────────────────────────────────
+    // These specific patterns must be checked BEFORE the v41 quantity-change
+    // detection below, because v41 matches ANY ("change/update/set/make" + "to")
+    // and would otherwise swallow "change to delivery", "change to takeaway",
+    // "make it less spicy", "add a note", etc.
+    //   1. Promo / discount / coupon code application
+    //   2. Order type change (delivery <-> takeaway <-> dine-in) mid-checkout
+    //   3. Special-instructions edit (less spicy / extra cheese) mid-checkout
+    //   4. Order note add (free-text instruction for kitchen / delivery)
+    //   5. Reorder / repeat last order ("I'll have the usual")
+    //   6. Cancel single cart item ("cancel the biryani" vs whole order)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    // (1) Promo / discount / coupon code
+    if (/\b(?:apply|use|redeem|enter|have)\b\s+(?:a\s+)?(?:promo|coupon|discount|voucher)\s+(?:code\s+)?([A-Z0-9]{3,20})\b/i.test(message.text) ||
+        /\b(?:promo|coupon|discount|voucher)\s+(?:code\s+)?([A-Z0-9]{3,20})\b/i.test(message.text) ||
+        /\b(?:apply|use|redeem)\s+(?:code\s+)?([A-Z0-9]{3,20})\b/i.test(message.text) ||
+        /\b(?:coupon|promo|voucher|discount)\s+(?:code\s+)?(?:laga\s*do|lagao|lagana\s+hai)\b/i.test(message.text)) {
+      const codeMatch = message.text.match(/\b([A-Z0-9]{3,20})\b/g);
+      const promoCode = codeMatch ? codeMatch.find(c => !/^(?:APPLY|USE|CODE|COUPON|PROMO|DISCOUNT|VOUCHER|REDEEM|ENTER)$/i.test(c)) : null;
+      return {priority:this.priority,candidates:[{intent:'commerce.cart.apply_promo',confidence:1,priority:242,entities:{promoCode:promoCode||null,requestedText:text},reason:'v42_promo_code_apply'}],entities:{promoCode:promoCode||null,requestedText:text},vocabularyMatches:[{type:'commerce_operation',value:'commerce.cart.apply_promo',score:1}]};
+    }
+
+    // (2) Order type change mid-checkout: "change to delivery", "make it takeaway",
+    // "switch to dine-in", "make it delivery", "delivery change karo"
+    // v42.1: Skip if the message also contains a date/time keyword — that's a
+    // reschedule request ("change delivery to tomorrow at 7pm"), not an order
+    // type change. The v41 reschedule block below will handle it.
+    if ((/\b(?:change|switch|make|update|convert)\b.*\b(?:to\s+)?(?:delivery|takeaway|take\s*away|take\s*out|dine[\s-]?in|eat\s+here|parcel|packing)\b/i.test(text) ||
+        /\b(?:delivery|takeaway|dine[\s-]?in)\s+(?:change\s+)?(?:karo|kar\s*do|karna\s+hai)\b/i.test(text)) &&
+        !/\b(?:today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next week|kal|parso)\b/i.test(text) &&
+        !/\b(?:\d{1,2}\s*(?:am|pm)|\d{1,2}:\d{2})\b/i.test(text)) {
+      const orderType = /\bdine[\s-]?in|eat\s+here/.test(text) ? 'dine-in' :
+                       /\btakeaway|take\s*away|take\s*out|parcel|packing/.test(text) ? 'takeaway' : 'delivery';
+      return {priority:this.priority,candidates:[{intent:'commerce.cart.update_order_meta',confidence:1,priority:241,entities:{orderType,requestedText:text},reason:'v42_order_type_change'}],entities:{orderType,requestedText:text},vocabularyMatches:[{type:'commerce_operation',value:'commerce.cart.update_order_meta',score:1}]};
+    }
+
+    // (3) Special-instructions edit mid-checkout: "make it less spicy",
+    // "extra cheese laga do", "no onions please", "make it extra hot"
+    if (/\b(?:make\s+it|change\s+to|update|set)\b.*\b(?:less\s+spicy|extra\s+spicy|no\s+spice|mild|extra\s+cheese|extra\s+sauce|no\s+onions?|no\s+garlic|no\s+cilantro|extra\s+hot|cold|garam|thanda|kam\s+mirch|zyada\s+mirch|mirch\s+kam|mirch\s+zyada|pyaaz\s+nahi|lehsan\s+nahi|dhania\s+nahi|zyada\s+cheese)\b/i.test(text) ||
+        /\b(?:less\s+spicy|extra\s+spicy|no\s+spice|extra\s+cheese|extra\s+sauce|no\s+onions?|no\s+garlic|extra\s+hot|mirch\s+kam|mirch\s+zyada|pyaaz\s+nahi|lehsan\s+nahi|zyada\s+cheese)\b.*\b(?:karo|kar\s*do|laga\s*do|lagao|karna\s+hai|please)\b/i.test(text)) {
+      return {priority:this.priority,candidates:[{intent:'commerce.cart.update_order_meta',confidence:1,priority:241,entities:{editInstructions:true,requestedText:text},reason:'v42_special_instructions_edit'}],entities:{editInstructions:true,requestedText:text},vocabularyMatches:[{type:'commerce_operation',value:'commerce.cart.update_order_meta',score:1}]};
+    }
+
+    // (4) Order note add: "add a note", "leave a note for the kitchen",
+    // "note: deliver after 8pm", "instructions for the chef"
+    if (/\b(?:add|leave|put|include)\b\s+(?:a\s+)?(?:note|instruction|remark|message)\b/i.test(text) ||
+        /\b(?:note|instruction|remark)\s*[:\-]\s*(.+)/i.test(message.text) ||
+        /\b(?:kitchen|chef|delivery\s+guy|rider|cleaner)\s+ke\s+liye\s+note\b/i.test(message.text) ||
+        /\b(?:note|instruction|message)\s+(?:laga\s*do|likh\s*do|likho|karna\s+hai)\b/i.test(message.text)) {
+      const noteMatch = message.text.match(/(?:note|instruction|remark|message)\s*[:\-]\s*(.+?)(?:\.|$)/i);
+      const note = noteMatch ? noteMatch[1].trim() : null;
+      return {priority:this.priority,candidates:[{intent:'commerce.cart.add_note',confidence:1,priority:241,entities:{note:note,requestedText:text},reason:'v42_order_note_add'}],entities:{note:note,requestedText:text},vocabularyMatches:[{type:'commerce_operation',value:'commerce.cart.add_note',score:1}]};
+    }
+
+    // (5) Reorder / repeat last order: "reorder my last order", "I'll have my usual",
+    // "repeat my previous order", "same as last time", "phir se same order"
+    if (/\b(?:reorder|re[\s-]?order|repeat|same\s+as\s+last|my\s+usual|previous\s+order|last\s+order\s+again)\b/i.test(text) ||
+        /\b(?:phir\s+se|dobara)\b.*\b(?:same\s+order|order)\b/i.test(text) ||
+        /\b(?:same\s+order|order)\b.*\b(?:phir\s+se|dobara|karo)\b/i.test(text)) {
+      return {priority:this.priority,candidates:[{intent:'commerce.reorder',confidence:1,priority:242,entities:{requestedText:text},reason:'v42_reorder_request'}],entities:{requestedText:text},vocabularyMatches:[{type:'commerce_operation',value:'commerce.reorder',score:1}]};
+    }
+
+    // (6) Cancel single cart item: "cancel the biryani", "cancel just the burger",
+    // "cancel chicken biryani from my order". Distinct from "cancel my order" (whole cart).
+    // Match: cancel + product name (no "order"/"cart" noun).
+    if (/\b(?:cancel|remove|delete)\s+(?:just\s+|only\s+|the\s+)?(?:an?\s+|one\s+|two\s+|three\s+|\d+\s+)?([a-z][a-z\s]{2,40})\b/i.test(text) &&
+        !/\b(?:cancel|clear|empty)\s+(?:my\s+)?(?:order|cart|basket|bag|request)\b/i.test(text) &&
+        !/\b(?:whole|entire|all|complete)\s+(?:order|cart)\b/i.test(text) &&
+        tenant?.capabilities?.includes('catalog') && services?.catalogService) {
+      try {
+        const scoped = services.commerceService?.scope?.({tenant, capabilityId: 'commerce', customerId: message.customerId});
+        const cart = await scoped?.getCart?.();
+        if (cart?.items?.length) {
+          const loweredText = text.toLowerCase();
+          const matched = cart.items.find(item => {
+            const name = normalizeText(item.name || '');
+            return name && loweredText.includes(name);
+          });
+          if (matched) {
+            return {priority:this.priority,candidates:[{intent:'commerce.cart.cancel_item',confidence:1,priority:243,entities:{productId:matched.productId,productName:matched.name,requestedText:text},reason:'v42_single_item_cancel'}],entities:{productId:matched.productId,productName:matched.name,requestedText:text},vocabularyMatches:[{type:'commerce_operation',value:'commerce.cart.cancel_item',score:1}]};
+          }
+        }
+      } catch (_e) { /* fall through to default handling */ }
+    }
+
+    // v41.0: UNIVERSAL modification detection — runs after v42 specific ops
+    // so the v42 patterns above can short-circuit "change to delivery" etc.
+    if (cs?.mode || cs?.lastOrderId) {
+      // "change X to N" / "update X quantity to N" / "make it N"
+      // v42.1: Skip if text contains delivery/order-type keywords (already handled above)
+      // v42.1: Skip if text contains "people/persons/guests" — that's a booking party size change
+      if (/\b(?:change|update|set|make)\b/i.test(text) && /\b(?:to|quantity|qty|pcs?|pieces?|plates?)\b/i.test(text) &&
+          !/\b(?:delivery|takeaway|dine[\s-]?in|parcel|packing|less\s+spicy|extra\s+spicy|no\s+spice|extra\s+cheese|extra\s+sauce|no\s+onions?|no\s+garlic|extra\s+hot|mirch|pyaaz|lehsan|zyada|cheese)\b/i.test(text) &&
+          !/\b(?:\d+\s*(?:people|persons|guests|seats))\b/i.test(text)) {
+        return {priority:this.priority,candidates:[{intent:'commerce.cart.update_quantity',confidence:1,priority:240,entities:{requestedText:text},reason:'v41_explicit_quantity_change'}],entities:{requestedText:text},vocabularyMatches:[{type:'commerce_operation',value:'commerce.cart.update_quantity',score:1}]};
+      }
+      // "cancel order" / "cancel my order" / "clear cart" / "empty cart"
+      if (/\b(?:cancel|clear|empty)\s+(?:my\s+)?(?:order|cart|basket|bag|request)\b/i.test(text)) {
+        return {priority:this.priority,candidates:[{intent:'commerce.cart.clear',confidence:1,priority:240,entities:{},reason:'v41_explicit_cancel'}],entities:{},vocabularyMatches:[{type:'commerce_operation',value:'commerce.cart.clear',score:1}]};
+      }
+      // "change color/size" / "update variant"
+      if (/\b(?:change|update|switch)\b.*\b(?:color|colour|size|variant)\b/i.test(text)) {
+        return {priority:this.priority,candidates:[{intent:'commerce.cart.update_variant',confidence:1,priority:240,entities:{requestedText:text},reason:'v41_explicit_variant_change'}],entities:{requestedText:text},vocabularyMatches:[{type:'commerce_operation',value:'commerce.cart.update_variant',score:1}]};
+      }
+      // "change date" / "reschedule" / "change time" / "move to" / "change delivery to tomorrow"
+      // v42.1: Expand to also catch "change delivery to tomorrow at 7pm" — the user
+      // is asking to change the delivery/pickup slot, not the order type.
+      if (/\b(?:change|move|reschedule|shift)\b.*\b(?:date|time|day|slot|schedule)\b/i.test(text) ||
+          /\b(?:reschedule|move)\b.*\b(?:to|on|at)\b/i.test(text) ||
+          (/\b(?:change|move|update)\b/i.test(text) && /\b(?:to|on|at)\b/i.test(text) &&
+           /\b(?:today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next week|kal|parso)\b/i.test(text)) ||
+          (/\b(?:change|move|update)\b/i.test(text) && /\b(?:\d{1,2}\s*(?:am|pm)|\d{1,2}:\d{2})\b/i.test(text))) {
+        return {priority:this.priority,candidates:[{intent:'commerce.cart.reschedule',confidence:1,priority:240,entities:{requestedText:text},reason:'v41_explicit_reschedule'}],entities:{requestedText:text},vocabularyMatches:[{type:'commerce_operation',value:'commerce.cart.reschedule',score:1}]};
+      }
+    }
+
     // v37.0: UNIVERSAL cart operations — expanded vocabulary for all business types
     // View cart: "show my cart", "show my order", "what's in my order", "view basket",
     // "mera order dikhao", "cart kya hai", "order summary"
@@ -241,9 +360,17 @@ class CommerceConversationAdapter {
     if (/\b(remove|delete|take out|take off|drop|cancel|hata|hatado)\b.*\b(from )?(my )?(?:cart|order|basket|bag)?\b/.test(text)) candidates.push({intent:'commerce.cart.remove_request',confidence:.9996,entities:{requestedText:text,target:/\border\b/.test(text)?'order':'auto'},reason:'cart_remove_request'});
     // v37.0: Expanded quantity change: "change X to N", "update X quantity", "make it N",
     // "reduce X to N", "increase X to N", "X quantity N kar do", "X kam kar do"
-    if (/\b(change|update|make|set|reduce|decrease|lower|increase|raise)\b.*\b(?:quantity|qty|pieces?|pcs?|plates?|servings?|portions?|to|less|more)\b/.test(text) ||
+    // v42.1: Skip if the message is actually about delivery/takeaway/dine-in
+    // (order type change), special instructions (less spicy/extra cheese), or
+    // party size — those are handled by the v42 blocks above and the booking
+    // adapter's party_size_change handler respectively.
+    if ((/\b(change|update|make|set|reduce|decrease|lower|increase|raise)\b.*\b(?:quantity|qty|pieces?|pcs?|plates?|servings?|portions?|to|less|more)\b/.test(text) ||
         /\b(?:quantity|qty)\s+(?:to|kar do|kardo|set|change)\s*\d/i.test(text) ||
-        /\b(?:kam|zyada|less|more)\s+kar/i.test(text)
+        /\b(?:kam|zyada|less|more)\s+kar/i.test(text)) &&
+        !/\b(?:delivery|takeaway|dine[\s-]?in|parcel|packing|less\s+spicy|extra\s+spicy|no\s+spice|extra\s+cheese|extra\s+sauce|no\s+onions?|no\s+garlic|extra\s+hot|mirch|pyaaz|lehsan|zyada|cheese|note|instruction)\b/i.test(text) &&
+        !/\b(?:\d+\s*(?:people|persons|guests|seats))\b/i.test(text) &&
+        !/\b(?:today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next week)\b/i.test(text) &&
+        !/\b(?:\d{1,2}\s*(?:am|pm)|\d{1,2}:\d{2})\b/i.test(text)
     ) candidates.push({intent:'commerce.cart.update_quantity',confidence:.9996,entities:{requestedText:text},reason:'cart_quantity_update'});
     if (/\badd\s+\d{1,3}\s+more\b/.test(text)) candidates.push({intent:'commerce.cart.increment_quantity',confidence:.9999,entities:{requestedText:text},reason:'cart_quantity_increment'});
     // v37.0: Checkout: "checkout", "place order", "confirm order", "done", "finalize"

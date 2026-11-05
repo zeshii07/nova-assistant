@@ -1,0 +1,30 @@
+[
+  {
+    "id": "byt-cleaners-dubai:byt-cleaners-dubai:http:dup-test-2:1791689373544:5chec4",
+    "tenantId": "byt-cleaners-dubai",
+    "conversationId": "byt-cleaners-dubai:http:dup-test-2",
+    "customerId": "dup-test-2",
+    "messageText": "i want deep cleaning",
+    "selectedIntent": "cleaning.service_request",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": null,
+    "outcome": "negative",
+    "confidence": 0.9,
+    "responseIntent": null,
+    "timestamp": "2026-10-11T03:29:33.544Z"
+  },
+  {
+    "id": "byt-cleaners-dubai:byt-cleaners-dubai:http:dup-dbg:1791689418975:85g649",
+    "tenantId": "byt-cleaners-dubai",
+    "conversationId": "byt-cleaners-dubai:http:dup-dbg",
+    "customerId": "dup-dbg",
+    "messageText": "11 am",
+    "selectedIntent": "cleaning.workflow_input",
+    "selectedCapabilityId": "cleaning",
+    "mlPrediction": null,
+    "outcome": "negative",
+    "confidence": 0.9,
+    "responseIntent": null,
+    "timestamp": "2026-10-11T03:30:18.975Z"
+  }
+]

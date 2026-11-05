@@ -44,6 +44,14 @@ class CommerceCapability extends BaseCapability {
     if (intent === "commerce.cart.view") return this.showCart(context, commerce, language, state);
     if (intent === "commerce.cart.view_checkout") return this.showCartAndCheckout(context, commerce, catalog, language, state);
     if (intent === "commerce.cart.clear") return this.clearCart(context, commerce, language);
+    // v42.0 (Sprint 2): NEW modification intents
+    if (intent === "commerce.cart.apply_promo") return this.applyPromoCode(context, commerce, language, state);
+    if (intent === "commerce.cart.update_order_meta") return this.updateOrderMeta(context, commerce, language, state);
+    if (intent === "commerce.cart.add_note") return this.addOrderNote(context, commerce, language, state);
+    if (intent === "commerce.cart.cancel_item") return this.cancelSingleItem(context, commerce, language, state);
+    if (intent === "commerce.reorder") return this.reorderLast(context, commerce, catalog, language, state);
+    // v42.0 (Sprint 2): Fix Sprint 1 gap — commerce.cart.reschedule declared by adapter but never handled
+    if (intent === "commerce.cart.reschedule") return this.rescheduleOrder(context, commerce, language, state);
     if (intent === "commerce.order.return_exchange") return this.returnOrExchangeOrder(context, commerce, catalog, language, state);
     if (intent === "commerce.cart.mutate_request") return this.mutateCartRequest(context, commerce, catalog, language, state);
     if (intent === "commerce.cart.update_variant") return this.updateCartVariant(context, commerce, catalog, language, state);
@@ -521,14 +529,31 @@ class CommerceCapability extends BaseCapability {
   }
   async updateQuantity(context, commerce, catalog, language, state) {
     const cart=await commerce.getCart(); if(!cart?.items?.length) return result("Your cart is empty 😊",language,state,"commerce_cart_empty");
-    const text=normalize(context.message.text); const target=text.match(/\b(?:to|down to|at|=)\s*(?:only\s*)?(\d{1,3}|one|two|three|four|five|six|seven|eight|nine|ten)\b/); const qty=target?numberFromText(target[1]):null; const item=cart.items.find(i=>text.includes(normalize(i.name)) || (cart.items.length===1));
-    if(!item||!qty) return result("Tell me which cart item to update and the new quantity.",language,state,"commerce_cart_quantity_needs_details");
-    const valid=await catalog.validateSelection({...item,quantity:qty,cartId:cart.id}); if(!valid.valid) return result(valid.reason==='insufficient_inventory'?`Sorry, only ${valid.availableQuantity} ${item.name} are available right now.`:"That quantity isn't available.",language,state,"commerce_cart_quantity_invalid");
-    await commerce.updateItemQuantity(item.productId,qty);
+    const text=normalize(context.message.text);
+    // v41.1: Extract quantity from "change X to N" / "update X to N" / "make X N"
+    const target=text.match(/\b(?:to|down to|at|=|quantity)\s*(?:only\s*)?(\d{1,3}|one|two|three|four|five|six|seven|eight|nine|ten)\b/);
+    const qty=target?numberFromText(target[1]):null;
+    // v41.1: Also try to extract quantity from the end of the message ("change biryani to 3")
+    const endQty = !qty ? numberFromText(text.match(/\b(\d+)\b.*$/)?.[0] || '') : null;
+    const finalQty = qty || endQty;
+    // v41.1: Match item by name, alias (from catalog), or auto-select if single item
+    const allProducts = await catalog?.listProducts?.(context.tenant?.id || '').catch(() => []) || [];
+    const item=cart.items.find(i=>{
+      const itemName=normalize(i.name);
+      if(text.includes(itemName)) return true;
+      // Look up aliases from catalog
+      const product = allProducts.find(p => p.id === i.productId);
+      if(product?.aliases) return product.aliases.some(a=>text.includes(normalize(a)));
+      // Single item in cart — auto-select
+      return cart.items.length===1;
+    });
+    if(!item||!finalQty) return result("Tell me which cart item to update and the new quantity.",language,state,"commerce_cart_quantity_needs_details");
+    const valid=await catalog.validateSelection({...item,quantity:finalQty,cartId:cart.id}); if(!valid.valid) return result(valid.reason==='insufficient_inventory'?`Sorry, only ${valid.availableQuantity} ${item.name} are available right now.`:"That quantity isn't available.",language,state,"commerce_cart_quantity_invalid");
+    await commerce.updateItemQuantity(item.productId,finalQty);
     let resume='';
     if(state.mode==='checkout'&&state.pendingField)resume=`\n\n${ask(state.pendingField,language)}`;
     else if(state.mode==='review')resume=`\n\n${await checkoutReview(context,await commerce.getCart(),language)}`;
-    return result(`Updated 👍 ${item.name} quantity is now ${qty}.${resume}`,language,state,"commerce_cart_quantity_updated");
+    return result(`Updated 👍 ${item.name} quantity is now ${finalQty}.${resume}`,language,state,"commerce_cart_quantity_updated");
   }
 
   async incrementQuantity(context, commerce, catalog, language, state) {
@@ -589,6 +614,291 @@ class CommerceCapability extends BaseCapability {
     await commerce.clearCart();
     return result(language === "roman_urdu" ? "Theek hai 👍 Cart clear kar diya hai." : "Done 👍 Your cart is now empty.", language, {mode:"idle",pendingField:null,pendingMultiItemDraft:[],pendingProductChoices:[]}, "commerce_cart_cleared",[],null,{catalog:{selectedProductId:null,selectedAttributes:{}}});
   }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // v42.0 (Sprint 2): NEW MODIFICATION OPERATION HANDLERS
+  // These cover the gaps surfaced during Sprint 1 review:
+  //   - applyPromoCode: discount/coupon application
+  //   - updateOrderMeta: change order type or edit special instructions mid-checkout
+  //   - addOrderNote: free-text note for kitchen / delivery / cleaner
+  //   - cancelSingleItem: cancel one cart line without cancelling whole order
+  //   - reorderLast: repeat last successful order
+  //   - rescheduleOrder: change delivery/pickup date/time slot (Sprint 1 declared intent)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // v42.0 (1) Apply a promo / discount / coupon code to the active cart.
+  // The code is stored on the cart.checkout record and surfaced in the
+  // order summary. A real pricing engine can recompute totals later; here we
+  // persist the intent so the merchant can apply the discount on fulfilment.
+  async applyPromoCode(context, commerce, language, state) {
+    const entities = context.intelligence?.entities || {};
+    const promoCode = entities.promoCode || null;
+    if (!promoCode) {
+      const reply = language === 'roman_urdu'
+        ? 'Promo code ka naam bata dein, jaise SAVE10 ya DISCOUNT50.'
+        : 'Please tell me the promo code, for example SAVE10 or DISCOUNT50.';
+      return result(reply, language, state, 'commerce_promo_needs_code');
+    }
+    const cart = await commerce.getCart();
+    if (!cart?.items?.length) {
+      const reply = language === 'roman_urdu'
+        ? `Promo code ${promoCode} note kar liya hai, lekin cart abhi khaali hai. Pehle koi item add karein.`
+        : `I have noted promo code ${promoCode}, but your cart is empty. Please add an item first.`;
+      return result(reply, language, state, 'commerce_promo_cart_empty');
+    }
+    // Persist promoCode + a flag for pricing engine on the checkout record.
+    await commerce.updateCheckout({ promoCode, promoApplied: false });
+    const reply = language === 'roman_urdu'
+      ? `👍 Promo code ${promoCode} apply kar diya hai. Final discount order total par confirm hogi.`
+      : `👍 Promo code ${promoCode} applied. The final discount will be confirmed against the order total.`;
+    let resume = '';
+    if (state.mode === 'review') resume = `\n\n${await checkoutReview(context, await commerce.getCart(), language)}`;
+    else if (state.mode === 'checkout' && state.pendingField) resume = `\n\n${ask(state.pendingField, language)}`;
+    else resume = `\n\n${await cartSummary(context, await commerce.getCart(), language)}`;
+    return result(reply + resume, language, state, 'commerce_promo_applied');
+  }
+
+  // v42.0 (2) Update order meta — either orderType (delivery/takeaway/dine-in)
+  // or specialInstructions (less spicy / extra cheese / no onions). Both
+  // are mid-checkout safe and resume the active workflow.
+  async updateOrderMeta(context, commerce, language, state) {
+    const entities = context.intelligence?.entities || {};
+    const cart = await commerce.getCart();
+    if (!cart?.items?.length) {
+      const reply = language === 'roman_urdu'
+        ? 'Cart abhi khaali hai, is liye order type ya instructions update nahi ho sakti.'
+        : 'Your cart is empty, so I cannot update order type or instructions yet.';
+      return result(reply, language, state, 'commerce_meta_cart_empty');
+    }
+    const patch = {};
+    const changeMessages = [];
+    if (entities.orderType) {
+      patch.orderType = entities.orderType;
+      const label = entities.orderType === 'dine-in' ? (language === 'roman_urdu' ? 'dine-in' : 'dine-in')
+        : entities.orderType === 'takeaway' ? (language === 'roman_urdu' ? 'takeaway' : 'takeaway')
+        : (language === 'roman_urdu' ? 'delivery' : 'delivery');
+      changeMessages.push(language === 'roman_urdu'
+        ? `Order type badal kar ${label} kar diya hai`
+        : `Order type changed to ${label}`);
+    }
+    if (entities.editInstructions) {
+      // Re-extract special instructions from the current message
+      const newInstructions = extractSpecialInstructions(context.message.text);
+      if (newInstructions) {
+        const existing = state.specialInstructions ? state.specialInstructions.split(', ') : [];
+        const merged = [...new Set([...existing, ...newInstructions.split(', ')])];
+        patch.specialInstructions = merged.join(', ');
+        changeMessages.push(language === 'roman_urdu'
+          ? `Special instructions update kar di: ${patch.specialInstructions}`
+          : `Special instructions updated: ${patch.specialInstructions}`);
+      } else {
+        // User said "make it less spicy" etc but extractSpecialInstructions didn't catch the modifier.
+        // Persist the raw text so the merchant sees it.
+        patch.specialInstructions = (state.specialInstructions ? state.specialInstructions + ', ' : '') + context.message.text.trim();
+        changeMessages.push(language === 'roman_urdu'
+          ? `Note add kar di: ${context.message.text.trim()}`
+          : `Note added: ${context.message.text.trim()}`);
+      }
+    }
+    if (!Object.keys(patch).length) {
+      const reply = language === 'roman_urdu'
+        ? 'Order type ya special instructions update karne ke liye batayein kya change karna hai.'
+        : 'Tell me what to change: order type (delivery/takeaway/dine-in) or special instructions (less spicy, extra cheese, etc).';
+      return result(reply, language, state, 'commerce_meta_no_change');
+    }
+    // Persist orderType/specialInstructions on state + checkout record.
+    if (patch.orderType) state.orderType = patch.orderType;
+    if (patch.specialInstructions) state.specialInstructions = patch.specialInstructions;
+    const checkoutPatch = { ...patch };
+    if (patch.orderType) checkoutPatch.orderType = patch.orderType;
+    if (patch.specialInstructions) checkoutPatch.specialInstructions = patch.specialInstructions;
+    await commerce.updateCheckout(checkoutPatch);
+    let resume = '';
+    if (state.mode === 'review') resume = `\n\n${await checkoutReview(context, await commerce.getCart(), language)}`;
+    else if (state.mode === 'checkout' && state.pendingField) resume = `\n\n${ask(state.pendingField, language)}`;
+    else resume = `\n\n${await cartSummary(context, await commerce.getCart(), language)}`;
+    return result(`Done 👍\n• ${changeMessages.join('\n• ')}${resume}`, language, state, 'commerce_meta_updated');
+  }
+
+  // v42.0 (3) Add a free-text note to the cart (for kitchen / delivery / cleaner).
+  async addOrderNote(context, commerce, language, state) {
+    const entities = context.intelligence?.entities || {};
+    let note = entities.note || null;
+    if (!note) {
+      // Try to extract after a colon, e.g., "note: deliver after 8pm"
+      const colonMatch = context.message.text.match(/(?:note|instruction|remark|message)\s*[:\-]\s*(.+?)(?:\.|$)/i);
+      note = colonMatch ? colonMatch[1].trim() : null;
+    }
+    if (!note) {
+      // Last resort: take the text after "add a note" / "leave a note"
+      const m = context.message.text.match(/(?:add|leave|put|include)\s+(?:a\s+)?(?:note|instruction|remark|message)\s+(?:for\s+[^:]+)?[:\s]+(.+?)(?:\.|$)/i);
+      note = m ? m[1].trim() : null;
+    }
+    if (!note) {
+      const reply = language === 'roman_urdu'
+        ? 'Note ka text bata dein, jaise "deliver after 8pm" ya "extra ketchup please".'
+        : 'Please tell me the note text, e.g. "deliver after 8pm" or "extra ketchup please".';
+      return result(reply, language, state, 'commerce_note_needs_text');
+    }
+    if (note.length > 240) note = note.slice(0, 240) + '…';
+    const cart = await commerce.getCart();
+    if (!cart?.items?.length) {
+      const reply = language === 'roman_urdu'
+        ? `Note save kar liya hai: "${note}". Cart abhi khaali hai, lekin note order ke saath attach ho jayega jab aap items add karenge.`
+        : `Note saved: "${note}". Your cart is currently empty, but the note will be attached when you add items.`;
+      await commerce.updateCheckout?.({ note });
+      return result(reply, language, { ...state, note }, 'commerce_note_saved_empty_cart');
+    }
+    await commerce.updateCheckout({ note });
+    let resume = '';
+    if (state.mode === 'review') resume = `\n\n${await checkoutReview(context, await commerce.getCart(), language)}`;
+    else if (state.mode === 'checkout' && state.pendingField) resume = `\n\n${ask(state.pendingField, language)}`;
+    else resume = `\n\n${await cartSummary(context, await commerce.getCart(), language)}`;
+    const reply = language === 'roman_urdu'
+      ? `📝 Note add kar diya: "${note}"`
+      : `📝 Note added: "${note}"`;
+    return result(reply + resume, language, { ...state, note }, 'commerce_note_added');
+  }
+
+  // v42.0 (4) Cancel a SINGLE cart item — distinct from clearing the whole cart.
+  // "cancel the biryani" / "cancel just the burger" — removes only that line.
+  async cancelSingleItem(context, commerce, language, state) {
+    const entities = context.intelligence?.entities || {};
+    const productId = entities.productId || null;
+    const productName = entities.productName || null;
+    if (!productId) {
+      const reply = language === 'roman_urdu'
+        ? 'Konsa item cancel karna hai, uska naam bata dein.'
+        : 'Tell me the exact item name to cancel from your cart.';
+      return result(reply, language, { ...state, pendingRemoval: { target: 'cart' } }, 'commerce_cancel_item_needs_name');
+    }
+    const cart = await commerce.getCart();
+    if (!cart?.items?.length) {
+      const reply = language === 'roman_urdu' ? 'Cart abhi khaali hai, kuch cancel nahi hoga.' : 'Your cart is empty, nothing to cancel.';
+      return result(reply, language, state, 'commerce_cancel_item_empty_cart');
+    }
+    const target = cart.items.find(item => item.productId === productId);
+    if (!target) {
+      const reply = language === 'roman_urdu'
+        ? `${productName || 'Woh item'} cart mein nahi hai. Current items: ${cart.items.map(item=>item.name).join(', ')}.`
+        : `${productName || 'That item'} is not in your cart. Current items: ${cart.items.map(item=>item.name).join(', ')}.`;
+      return result(reply, language, state, 'commerce_cancel_item_not_found');
+    }
+    await commerce.removeItem(productId);
+    const updated = await commerce.getCart();
+    const reply = language === 'roman_urdu'
+      ? `👍 ${target.name} cancel kar diya hai.`
+      : `👍 Cancelled ${target.name}.`;
+    if (!updated?.items?.length) {
+      return result(`${reply} ${language==='roman_urdu'?'Ab cart khaali hai.':'Your cart is now empty.'}`, language, { mode: 'idle', pendingField: null }, 'commerce_cancel_item_cart_empty');
+    }
+    let resume = '';
+    if (state.mode === 'review') resume = `\n\n${await checkoutReview(context, updated, language)}`;
+    else if (state.mode === 'checkout' && state.pendingField) resume = `\n\n${ask(state.pendingField, language)}`;
+    else resume = `\n\n${await cartSummary(context, updated, language)}`;
+    return result(reply + resume, language, state, 'commerce_cancel_item_removed');
+  }
+
+  // v42.0 (5) Reorder the customer's last successful order.
+  // Re-creates the cart from the last order's items and resumes checkout.
+  async reorderLast(context, commerce, catalog, language, state) {
+    const orders = await commerce.listOrders();
+    if (!orders?.length) {
+      const reply = language === 'roman_urdu'
+        ? 'Abhi koi previous order nahi mila. Pehle koi order place karein, phir "reorder" bol kar repeat kar sakte hain.'
+        : 'I could not find any previous order for you. Place an order first, then say "reorder" to repeat it.';
+      return result(reply, language, state, 'commerce_reorder_no_history');
+    }
+    const last = [...orders].sort((a,b) => String(b.updatedAt || b.createdAt || '').localeCompare(String(a.updatedAt || a.createdAt || '')))[0];
+    if (!last?.items?.length) {
+      const reply = language === 'roman_urdu'
+        ? `Order ${last.id} mein koi item nahi tha. Doosra order try karein.`
+        : `Order ${last.id} had no items. Please try a different order.`;
+      return result(reply, language, state, 'commerce_reorder_empty_order');
+    }
+    // Clear current cart first to avoid mixing items
+    await commerce.clearCart();
+    // Re-add each item from the last order
+    const added = [];
+    for (const item of last.items) {
+      try {
+        await commerce.addItem({
+          productId: item.productId,
+          name: item.name,
+          color: item.color || null,
+          size: item.size || null,
+          quantity: Number(item.quantity || 1),
+          unitPrice: Number(item.unitPrice || 0),
+          currency: item.currency || last.currency || 'PKR',
+          variantSelectionRequired: false,
+        });
+        added.push(`${item.name} × ${item.quantity}`);
+      } catch (_e) { /* skip items that no longer exist in catalog */ }
+    }
+    if (!added.length) {
+      const reply = language === 'roman_urdu'
+        ? `Order ${last.id} ke items catalog mein available nahi. Sorry.`
+        : `The items from order ${last.id} are no longer available in the catalog.`;
+      return result(reply, language, state, 'commerce_reorder_items_unavailable');
+    }
+    // Carry over order type + special instructions + note from the previous order, if any
+    const meta = {};
+    if (last.orderType) meta.orderType = last.orderType;
+    if (last.specialInstructions) meta.specialInstructions = last.specialInstructions;
+    if (last.note) meta.note = last.note;
+    if (Object.keys(meta).length) await commerce.updateCheckout(meta);
+    const cart = await commerce.getCart();
+    const summary = await cartSummary(context, cart, language);
+    const reply = language === 'roman_urdu'
+      ? `👍 Aap ke pichle order ${last.id} ke items dobara cart mein add ho gaye:\n• ${added.join('\n• ')}\n\n${summary}\n\nCheckout continue karne ke liye "checkout" likhein, ya items modify karein.`
+      : `👍 I have re-added the items from your last order ${last.id}:\n• ${added.join('\n• ')}\n\n${summary}\n\nSay "checkout" to continue, or modify the items.`;
+    return result(reply, language, { mode: 'idle', pendingField: null, orderType: meta.orderType || state.orderType || null, specialInstructions: meta.specialInstructions || state.specialInstructions || null, note: meta.note || state.note || null, lastOrderId: last.id }, 'commerce_reordered');
+  }
+
+  // v42.0 (6) Fix Sprint 1 gap: handle commerce.cart.reschedule intent.
+  // Customer wants to change delivery/pickup date/time slot mid-checkout.
+  // Since commerce carts don't have a real calendar slot like bookings, we
+  // persist the requested slot as a checkout field and surface it in the
+  // review summary. The merchant fulfils based on this preferred slot.
+  async rescheduleOrder(context, commerce, language, state) {
+    const text = context.message.text || '';
+    // Try to extract date and/or time from the message
+    const engagement = context.services.engagement;
+    let proposedDate = null, proposedTime = null;
+    if (engagement?.parseField) {
+      const dateParsed = engagement.parseField('date', text, { allowPast: false });
+      if (dateParsed?.valid) proposedDate = dateParsed.value;
+      const timeParsed = engagement.parseField('time', text);
+      if (timeParsed?.valid) proposedTime = timeParsed.value;
+    }
+    const cart = await commerce.getCart();
+    if (!cart?.items?.length) {
+      const reply = language === 'roman_urdu'
+        ? 'Cart khaali hai, is liye delivery/pickup slot change nahi ho sakti.'
+        : 'Your cart is empty, so there is no delivery/pickup slot to change.';
+      return result(reply, language, state, 'commerce_reschedule_empty_cart');
+    }
+    if (!proposedDate && !proposedTime) {
+      const reply = language === 'roman_urdu'
+        ? 'Konsi date ya time pe delivery/pickup chahiye? Jaise "tomorrow at 7pm" ya "Friday 5pm".'
+        : 'What date or time would you like for delivery/pickup? E.g. "tomorrow at 7pm" or "Friday 5pm".';
+      return result(reply, language, state, 'commerce_reschedule_needs_slot');
+    }
+    const patch = {};
+    if (proposedDate) patch.preferredDate = proposedDate;
+    if (proposedTime) patch.preferredTime = proposedTime;
+    await commerce.updateCheckout(patch);
+    const when = [proposedDate, proposedTime].filter(Boolean).join(' at ');
+    const reply = language === 'roman_urdu'
+      ? `👍 Delivery/pickup slot update kar di: ${when}. Final confirmation merchant se hogi.`
+      : `👍 Delivery/pickup slot updated to ${when}. The merchant will confirm the final slot.`;
+    let resume = '';
+    if (state.mode === 'review') resume = `\n\n${await checkoutReview(context, await commerce.getCart(), language)}`;
+    else if (state.mode === 'checkout' && state.pendingField) resume = `\n\n${ask(state.pendingField, language)}`;
+    else resume = `\n\n${await cartSummary(context, await commerce.getCart(), language)}`;
+    return result(reply + resume, language, state, 'commerce_reschedule_applied');
+  }
+
   async multiItemRequest(context,commerce,catalog,language,state){
     const incoming=context.intelligence?.entities?.items||[], ambiguous=context.intelligence?.entities?.ambiguous||[];
     const attributeAmbiguity=context.intelligence?.entities?.attributeAmbiguity||null;

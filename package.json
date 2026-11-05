@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "40.0.0",
+  "version": "42.0.0",
   "private": true,
-  "description": "Nova v40.0 - Improved NLU engine: 5 new service intents (service.browse, service.detail, service.quote, conversation.help, conversation.menu), 25+ new Roman Urdu/Urdu training examples for booking.create, enhanced semantic router (service routing, restaurant routing, availability routing, out-of-scope demotion), abbreviation expansion in entity resolver (wht→what, chiken→chicken, resturant→restaurant, pls→please), complete unified architecture (product-based + service-based + tenant adapters)",
+  "description": "Nova v42.0 (Sprint 2) - Comprehensive modification operations: 9 new ops across commerce + booking + cleaning (promo code, order type edit, special instructions edit, order note, reorder, cancel single item, service swap, remove single service, recipient change, party size change, list bookings, scope quantity edit) + 6 Sprint 1 gap fixes (commerce.cart.reschedule handler, booking.cancel/service_change/reschedule/party_size_change/field_edit/list handlers) + early-exit modification detection in unifiedServiceAdapter + global cancel handler now persists booking cancellation + cleaning scope detection expanded (bedrooms/bhk/seater sofa/carpet)",
   "main": "apps/api/src/cluster.js",
   "type": "commonjs",
   "engines": {

@@ -444,13 +444,26 @@ class CleaningConversationAdapter {
     // Scope clarification outranks pending slot validation. A customer may say
     // "my office has two rooms" while we are waiting for a date. Preserve that
     // scope and continue the same workflow instead of validating it as a date.
-    const scopeMention=step && /\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:rooms?|shops?|floors?|workspaces?)\b|\b(full|complete|entire|whole|ground)\s+floor\b/.test(normalizedText);
+    // v42.0 (Sprint 2): Expanded scope detection — also covers:
+    //   - "4 bedrooms" / "3 bhk" (apartment cleaning)
+    //   - "5 seater sofa" / "7 seater carpet" (sofa/carpet cleaning)
+    //   - "actually 4 bedrooms instead of 3" (explicit quantity edit)
+    //   - "make it a 7-seater carpet"
+    const scopeMention=step && (
+      /\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:rooms?|shops?|floors?|workspaces?)\b/.test(normalizedText) ||
+      /\b(full|complete|entire|whole|ground)\s+floor\b/.test(normalizedText) ||
+      /\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:bedrooms?|bed|bhk|bdrooms?|bd|bdrm)\b/i.test(normalizedText) ||
+      /\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*[-\s]?(?:seater|seat)\s+(?:sofa|couch|carpet|rug|set)\b/i.test(normalizedText) ||
+      /\b(?:sofa|couch|carpet|rug)\s+(?:cleaning\s+)?(?:for\s+)?(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*[-\s]?(?:seater|seat)\b/i.test(normalizedText) ||
+      /\b(?:change|update|make|actually)\b.*\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:bedrooms?|bed|bhk|seater|seat|sofa|carpet|rug|rooms?|floors?)\b/i.test(normalizedText) ||
+      /\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:bedrooms?|bed|bhk|seater|seat|sofa|carpet|rug|rooms?|floors?)\s+(?:instead\s+of|rather\s+than|not)\b/i.test(normalizedText)
+    );
     if(scopeMention && !pricingRequested){
-      const m=normalizedText.match(/\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(rooms?|shops?|floors?|workspaces?)\b/);
+      const m=normalizedText.match(/\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(rooms?|shops?|floors?|workspaces?|bedrooms?|bed|bhk|bdrooms?|bd|bdrm|seater|seat|sofa|carpet|rug)\b/i);
       const scopeCount=m?numberFromText(m[1]):null;
       const scopeUnit=m?m[2]:null;
       entities={pendingField:step,scopeText:message.text,scopeCount,scopeUnit,preserveWorkflow:true};
-      candidates.push({intent:'cleaning.scope_update',confidence:1,entities,reason:'scope_clarification_interrupts_pending_slot'});
+      candidates.push({intent:'cleaning.scope_update',confidence:1,entities,reason:'v42_scope_quantity_or_property_edit'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_scope_update',score:1}]};
     }
 

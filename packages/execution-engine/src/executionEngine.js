@@ -226,6 +226,17 @@ class ExecutionEngine {
     if (command === "cancel") {
       const holdId=state.capabilityState?.booking?.metadata?.calendarHoldId;
       if(holdId)await this.services.calendarService?.releaseHold?.({tenantId:tenant.id,customerId:message.customerId,holdId,reason:"conversation_cancelled"});
+      // v42.0 (Sprint 2): If a stored booking record exists, persist the cancellation
+      // through the booking service so the merchant sees it as 'cancelled' (not just
+      // wiped from the conversation state). Without this, "cancel my booking" only
+      // clears local state but the stored booking record lingers as 'confirmed'.
+      const storedBookingId = state.capabilityState?.booking?.bookingId;
+      if (storedBookingId && this.services.bookingService) {
+        try {
+          const scoped = this.services.bookingService.scope?.({ tenant, capabilityId: 'booking', customerId: message.customerId, conversationId }) || this.services.bookingService;
+          if (scoped?.cancel) await scoped.cancel(storedBookingId, 'customer_requested');
+        } catch (_err) { /* ignore — calendar state was already released */ }
+      }
       reply = state.language === "roman_urdu" ? "Theek hai 👍 Current request/order cancel kar diya hai. Agar galti se cancel hua ho to 'undo' keh dein." : state.language === "urdu" ? "ٹھیک ہے 👍 موجودہ درخواست منسوخ کر دی گئی ہے۔ اگر غلطی سے منسوخ ہوا ہو تو واپس بحال کر سکتے ہیں۔" : "No problem 👍 I’ve cancelled the current request/order. If that was a mistake, just say ‘undo’ and I can restore it.";
       const cancelledSnapshot = { goal:state.context?.goal || null, capabilityState:structuredClone(state.capabilityState || {}), cancelledAt:new Date().toISOString() };
       patch = { activePlugin:null, pendingQuestion:null, mode:"chatting", lastIntent:"conversation_cancelled", context:{ ...(state.context||{}), lastCancelled:cancelledSnapshot, goal:null }, capabilityState:{ ...(state.capabilityState || {}), catalog:{}, commerce:{}, cleaning:{}, booking:{}, offering:{} } };

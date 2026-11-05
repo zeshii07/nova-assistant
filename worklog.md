@@ -837,3 +837,65 @@ Stage Summary:
 - Performance verified: 8ms per widget config request, 180ms per chat request
 - All regression tests pass
 - Fresh zip at /home/z/my-project/download/nova-v36.0.zip
+
+---
+Task ID: v42.0
+Agent: Super Z (main)
+Task: Sprint 2 — Comprehensive modification operations across commerce + booking + cleaning. Fix Sprint 1 declared-but-unhandled intents and add 9 new important modification ops.
+
+Work Log:
+- Surveyed v41.0 (Sprint 1) state across commerce + booking + cleaning conversation adapters.
+- Identified Sprint 1 gaps: 6 intents declared in adapters but never handled in src/index.js execute methods:
+  1. commerce.cart.reschedule
+  2. booking.cancel (active)
+  3. booking.service_change
+  4. booking.reschedule (active)
+  5. booking.party_size_change
+  6. booking.field_edit
+  7. booking.list
+
+- Implemented all 7 missing handlers + 9 new modification operations:
+
+  COMMERCE (capabilities/commerce):
+  - conversation/index.js: Added 6 new modification detections (promo code, order type change, special instructions edit, order note add, reorder, cancel single item) BEFORE the v41 quantity-change detection so v41's broad "change + to" pattern doesn't swallow them.
+  - src/index.js: Added 6 new handler methods:
+    * applyPromoCode: persists promoCode on cart.checkout
+    * updateOrderMeta: changes orderType (delivery/takeaway/dine-in) or merges special instructions
+    * addOrderNote: free-text note (240 char cap) on cart.checkout.note
+    * cancelSingleItem: removes one cart line, preserves the rest
+    * reorderLast: clears cart, re-adds items from most recent order, carries over order meta
+    * rescheduleOrder: extracts date/time via engagement.parseField, persists as preferredDate/preferredTime
+
+  BOOKING (capabilities/booking):
+  - conversation/unifiedServiceAdapter.js: Added EARLY modification-intent detection block at top of analyze() so cancellation/removal/etc win over service.detail and booking.start. Also hardened detectServiceDetail to return null when message contains booking-trigger or date/time keywords (was previously intercepting "book beard grooming tomorrow at 5pm" as service.detail).
+  - src/index.js: Added 10 new handler methods (cancel, service_change, swap_item, remove_item, add_note, recipient_change, party_size_change, field_edit, list, reschedule active). Fixed `message.text` → `context.message.text` (was causing "message is not defined" runtime errors).
+
+  CLEANING (capabilities/cleaning):
+  - conversation/index.js: Expanded scopeMention regex to cover bedrooms/bhk/seater-sofa/seater-carpet/"X instead of Y". Existing handler already supports scopeCount + scopeUnit persistence — no src changes needed.
+
+  EXECUTION ENGINE:
+  - packages/execution-engine/src/executionEngine.js: Global cancel handler now calls bookingService.cancel(storedBookingId) when state.capabilityState.booking.bookingId is set. Previously only released calendar hold — booking record remained "confirmed" in repository.
+
+- Wrote comprehensive integration test: tests/sprint42.v42-modification-operations.integration.test.js
+  - 20 tests across 4 groups (A: Sprint 1 gap fixes, B: new commerce ops, C: new booking ops, D: cleaning scope)
+  - All 20 tests pass (~13 seconds)
+
+- Regression sanity check:
+  - sprint6.commerce: 3/3 pass ✓
+  - sprint12.commerce-orchestration: 4/4 pass ✓
+  - sprint5.catalog: 6/6 pass ✓
+  - sprint31.cart-and-service-availability: 6/6 pass ✓
+  - sprint18.generic-domain-framework: 4/10 fail — PRE-EXISTING failures unrelated to v42 (test expected capabilityId='offering' but unifiedServiceAdapter returns service.browse with capabilityId='service' — same behavior in v41.0)
+
+- Bumped package.json 40.0.0 → 42.0.0
+- Wrote RELEASE_NOTES_V42.md with full breakdown
+- Built fresh zip at /home/z/my-project/download/nova-v42.0.zip
+
+Stage Summary:
+- Nova v42.0 Sprint 2 — comprehensive modification operations complete.
+- 9 new modification operations added across commerce (6) + booking (4 new + 6 Sprint 1 gap fixes) + cleaning (1 detection expansion)
+- 1 critical execution-engine fix: global cancel now persists booking cancellation on the stored record
+- 1 architectural improvement: early-exit modification detection in unifiedServiceAdapter prevents "cancel my booking" from being misrouted as a new booking.start (was matching trigger term "book" as substring of "booking")
+- 1 architectural improvement: detectServiceDetail no longer intercepts booking-trigger messages
+- 20/20 new integration tests pass; all commerce/catalog/cart regression tests still pass
+- Fresh zip at /home/z/my-project/download/nova-v42.0.zip

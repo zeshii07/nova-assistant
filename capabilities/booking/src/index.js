@@ -347,6 +347,387 @@ class BookingCapability extends BaseCapability {
       });
     }
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // v42.0 (Sprint 2): NEW modification handlers + Sprint 1 gap fixes
+    // The unifiedServiceAdapter emits these intents; this is where they are
+    // fulfilled. Each handler updates the active booking flow + (when a
+    // bookingId exists) persists the change through the booking service.
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    if (selected.intent === "booking.cancel") {
+      // v42.0: Cancel the active booking (in-progress OR stored).
+      if (previous.bookingId) {
+        try {
+          const record = await booking.cancel(previous.bookingId, "customer_requested");
+          const reply = `Booking ${record.id} has been cancelled. The reserved calendar capacity is now available again.`;
+          return createCapabilityResult({
+            handled: true,
+            reply,
+            responseModel: { intent: "GENERIC_BOOKING_CANCELLED", payload: { legacyText: reply, record } },
+            statePatch: {
+              activePlugin: "booking",
+              lastIntent: "booking_cancelled",
+              capabilityState: { booking: { status: "cancelled", metadata: { cancelledAt: record.cancelledAt } } },
+            },
+          });
+        } catch (_err) { /* fall through to in-progress cancellation */ }
+      }
+      // Cancel the in-progress flow (no booking record yet)
+      const reply = language === 'roman_urdu'
+        ? 'Theek hai 👍 Is booking ko cancel kar diya hai. Naya booking shuru karne ke liye service ka naam bata dein.'
+        : 'Done 👍 I have cancelled this booking. Tell me a service name to start a new one.';
+      return createCapabilityResult({
+        handled: true,
+        reply,
+        responseModel: { intent: "GENERIC_BOOKING_CANCELLED", payload: { legacyText: reply, inProgress: true } },
+        statePatch: {
+          activePlugin: "booking",
+          lastIntent: "booking_cancelled",
+          capabilityState: { booking: { status: "cancelled" } },
+        },
+      });
+    }
+
+    if (selected.intent === "booking.service_change") {
+      // v42.0: Change the service on an active booking flow.
+      const newServiceId = extracted.serviceId || extracted.offeringId;
+      const newServiceName = extracted.subject || extracted.serviceName;
+      if (!newServiceId && !newServiceName) {
+        const reply = language === 'roman_urdu'
+          ? 'Konsi service pe switch karna hai? Service ka naam bata dein.'
+          : 'Which service would you like to switch to? Tell me the service name.';
+        return createCapabilityResult({
+          handled: true,
+          reply,
+          statePatch: { activePlugin: "booking", lastIntent: "booking_service_change_needs_name", capabilityState: { booking: previous } },
+        });
+      }
+      const newItems = [];
+      if (newServiceId) {
+        const item = offering.getById(newServiceId);
+        if (item) newItems.push({ id: item.id, name: item.name, type: item.type || "service", price: item.price ?? null, metadata: { durationMinutes: item.durationMinutes || null } });
+      }
+      // If booking already exists (completed), persist as amendment proposal
+      if (previous.bookingId) {
+        const proposal = { type: "service_change", action: "replace", items: newItems, requestedAt: new Date().toISOString() };
+        const persisted = await booking.proposeAmendment?.(previous.bookingId, proposal);
+        const reply = `I saved a request to change your service to ${newServiceName || newItems[0]?.name || 'the new service'}. The original booking remains until the merchant confirms the change.${persisted?.revision ? ` Stored revision: ${persisted.revision}.` : ''}`;
+        return createCapabilityResult({
+          handled: true,
+          reply,
+          responseModel: { intent: "GENERIC_BOOKING_SERVICE_CHANGE_PROPOSED", payload: { legacyText: reply, proposal } },
+          statePatch: { activePlugin: "booking", lastIntent: "booking_service_change_proposed", capabilityState: { booking: { ...previous, metadata: { ...(previous.metadata || {}), proposedServiceChange: proposal } } } },
+        });
+      }
+      // Active in-progress flow: replace items and resume collecting
+      const flow = engagement.normalizeState({
+        kind: config.mode || "booking",
+        status: "collecting",
+        items: newItems,
+        fields: previous.slots || previous.fields || {},
+        pendingField: previous.pendingField && previous.pendingField !== "confirmation" ? previous.pendingField : (newItems.length ? engagement.nextMissing?.(requiredFields(config), {}) : "date"),
+        metadata: previous.metadata || {},
+      }, config);
+      const reply = language === 'roman_urdu'
+        ? `👍 Service badal kar ${newServiceName || newItems[0]?.name} kar diya hai. Ab date bata dein.`
+        : `👍 Service changed to ${newServiceName || newItems[0]?.name}. Please tell me your preferred date.`;
+      return collectingResult(config, flow, flow.pendingField || "date", reply);
+    }
+
+    if (selected.intent === "booking.swap_item") {
+      // v42.0: Swap one offering for another in an active booking flow.
+      const fromId = extracted.fromOfferingId;
+      const toId = extracted.toOfferingId;
+      const toName = extracted.toOfferingName;
+      if (!toId) {
+        const reply = language === 'roman_urdu'
+          ? 'Konsi service se swap karna hai? Dono services ke naam bata dein.'
+          : 'Which service would you like to swap to? Tell me both service names.';
+        return createCapabilityResult({ handled: true, reply, statePatch: { activePlugin: "booking", lastIntent: "booking_swap_needs_names", capabilityState: { booking: previous } } });
+      }
+      const toItem = offering.getById(toId);
+      if (!toItem) {
+        const reply = `I couldn't find ${toName || 'that service'} in our catalogue.`;
+        return createCapabilityResult({ handled: true, reply, statePatch: { activePlugin: "booking", lastIntent: "booking_swap_target_not_found", capabilityState: { booking: previous } } });
+      }
+      // Active flow: remove fromId, add toId
+      let items = (previous.items || []).filter(item => item.id !== fromId);
+      if (!items.some(item => item.id === toId)) {
+        items.push({ id: toItem.id, name: toItem.name, type: toItem.type || "service", price: toItem.price ?? null, metadata: { durationMinutes: toItem.durationMinutes || null } });
+      }
+      const flow = engagement.normalizeState({
+        kind: config.mode || "booking",
+        status: previous.status === "ready" ? "ready" : "collecting",
+        items,
+        fields: previous.slots || previous.fields || {},
+        pendingField: previous.pendingField,
+        metadata: previous.metadata || {},
+      }, config);
+      const reply = language === 'roman_urdu'
+        ? `👍 ${extracted.fromOfferingName || 'Wo service'} hata kar ${toItem.name} add kar diya hai.`
+        : `👍 Swapped ${extracted.fromOfferingName || 'the service'} for ${toItem.name}.`;
+      const notice = engagementSummary(flow, config);
+      return createCapabilityResult({
+        handled: true,
+        reply: `${reply}\n\n${notice}`,
+        responseModel: { intent: "GENERIC_BOOKING_SWAP_APPLIED", payload: { legacyText: reply, fromOfferingId: fromId, toOfferingId: toId } },
+        statePatch: { activePlugin: "booking", lastIntent: "booking_swap_applied", capabilityState: { booking: stateShape(flow, previous.bookingId || null) } },
+      });
+    }
+
+    if (selected.intent === "booking.remove_item") {
+      // v42.0: Remove a single service from an active multi-service booking flow.
+      const offeringId = extracted.offeringId;
+      const offeringName = extracted.offeringName;
+      if (!offeringId) {
+        const reply = language === 'roman_urdu'
+          ? 'Konsi service remove karna hai? Service ka naam bata dein.'
+          : 'Which service should I remove? Tell me the service name.';
+        return createCapabilityResult({ handled: true, reply, statePatch: { activePlugin: "booking", lastIntent: "booking_remove_item_needs_name", capabilityState: { booking: previous } } });
+      }
+      const existing = (previous.items || []).find(item => item.id === offeringId);
+      if (!existing) {
+        const reply = `${offeringName || 'That service'} is not in your current booking.`;
+        return createCapabilityResult({ handled: true, reply, statePatch: { activePlugin: "booking", lastIntent: "booking_remove_item_not_found", capabilityState: { booking: previous } } });
+      }
+      const remaining = (previous.items || []).filter(item => item.id !== offeringId);
+      if (!remaining.length) {
+        const reply = language === 'roman_urdu'
+          ? `👍 ${offeringName} remove kar diya. Ab booking mein koi service nahi hai. Naya service add karein ya booking cancel karein.`
+          : `👍 Removed ${offeringName}. Your booking has no services left. Add a new service or cancel the booking.`;
+        return createCapabilityResult({
+          handled: true,
+          reply,
+          statePatch: { activePlugin: "booking", lastIntent: "booking_remove_item_no_remaining", capabilityState: { booking: { status: "collecting", items: [], slots: previous.slots || {}, pendingField: "subject", metadata: previous.metadata || {} } } },
+        });
+      }
+      const flow = engagement.normalizeState({
+        kind: config.mode || "booking",
+        status: previous.status === "ready" ? "ready" : "collecting",
+        items: remaining,
+        fields: previous.slots || previous.fields || {},
+        pendingField: previous.pendingField,
+        metadata: previous.metadata || {},
+      }, config);
+      const reply = language === 'roman_urdu'
+        ? `👍 ${offeringName} booking se remove kar diya hai.`
+        : `👍 Removed ${offeringName} from your booking.`;
+      const notice = engagementSummary(flow, config);
+      return createCapabilityResult({
+        handled: true,
+        reply: `${reply}\n\n${notice}`,
+        responsePatch: null,
+        responseModel: { intent: "GENERIC_BOOKING_ITEM_REMOVED", payload: { legacyText: reply, removedOfferingId: offeringId } },
+        statePatch: { activePlugin: "booking", lastIntent: "booking_item_removed", capabilityState: { booking: stateShape(flow, previous.bookingId || null) } },
+      });
+    }
+
+    if (selected.intent === "booking.add_note") {
+      // v42.0: Add a free-text note for the service provider.
+      const note = extracted.note || context.message.text;
+      const trimmed = String(note || '').slice(0, 240);
+      const metadata = { ...(previous.metadata || {}), note: trimmed };
+      const reply = language === 'roman_urdu'
+        ? `📝 Note save kar liya: "${trimmed}"`
+        : `📝 Note saved: "${trimmed}"`;
+      // If booking is already created, propose an amendment
+      if (previous.bookingId) {
+        const proposal = { type: "note", action: "add", note: trimmed, requestedAt: new Date().toISOString() };
+        await booking.proposeAmendment?.(previous.bookingId, proposal).catch(() => null);
+      }
+      return createCapabilityResult({
+        handled: true,
+        reply,
+        responseModel: { intent: "GENERIC_BOOKING_NOTE_ADDED", payload: { legacyText: reply, note: trimmed } },
+        statePatch: { activePlugin: "booking", lastIntent: "booking_note_added", capabilityState: { booking: { ...previous, metadata } } },
+      });
+    }
+
+    if (selected.intent === "booking.recipient_change") {
+      // v42.0: Change the recipient ("this is for my wife Sara")
+      const recipientName = extracted.recipientName;
+      if (!recipientName) {
+        const reply = 'Whose name should this booking be under?';
+        return createCapabilityResult({ handled: true, reply, statePatch: { activePlugin: "booking", lastIntent: "booking_recipient_needs_name", capabilityState: { booking: previous } } });
+      }
+      // Validate via engagement
+      const parsed = engagement.parseField?.("name", recipientName);
+      if (!parsed?.valid) {
+        const reply = `${parsed?.message || 'That name does not look right.'} Please provide the recipient's full name.`;
+        return createCapabilityResult({ handled: true, reply, statePatch: { activePlugin: "booking", lastIntent: "booking_recipient_invalid", capabilityState: { booking: previous } } });
+      }
+      const fields = { ...(previous.slots || previous.fields || {}), name: parsed.value };
+      // If booking is already created, update via booking service
+      if (previous.bookingId) {
+        try { await booking.updateDetails?.(previous.bookingId, { name: parsed.value }); } catch (_e) { /* ignore */ }
+      }
+      const reply = language === 'roman_urdu'
+        ? `👍 Booking ab ${parsed.value} ke naam par hai.`
+        : `👍 Booking is now under the name ${parsed.value}.`;
+      const flow = engagement.normalizeState({
+        kind: config.mode || "booking",
+        status: previous.status || "collecting",
+        items: previous.items || [],
+        fields,
+        pendingField: previous.pendingField,
+        metadata: previous.metadata || {},
+      }, config);
+      const notice = engagementSummary(flow, config);
+      return createCapabilityResult({
+        handled: true,
+        reply: `${reply}\n\n${notice}`,
+        responseModel: { intent: "GENERIC_BOOKING_RECIPIENT_CHANGED", payload: { legacyText: reply, name: parsed.value } },
+        statePatch: { activePlugin: "booking", lastIntent: "booking_recipient_changed", capabilityState: { booking: stateShape(flow, previous.bookingId || null) } },
+      });
+    }
+
+    if (selected.intent === "booking.party_size_change") {
+      // v42.0: Change party size mid-booking (restaurant reservations)
+      const partyMatch = context.message.text.match(/\b(?:for\s+)?(\d+)\s*(?:people|persons|guests|seats)\b/i) || context.message.text.match(/\bto\s+(\d+)\b/i);
+      const newSize = partyMatch ? Number(partyMatch[1]) : null;
+      if (!newSize || newSize < 1 || newSize > 100) {
+        const reply = 'How many people should I reserve for?';
+        return createCapabilityResult({ handled: true, reply, statePatch: { activePlugin: "booking", lastIntent: "booking_party_size_needs_value", capabilityState: { booking: previous } } });
+      }
+      const fields = { ...(previous.slots || previous.fields || {}), partySize: newSize };
+      if (previous.bookingId) {
+        const proposal = { type: "party_size_change", action: "update", partySize: newSize, requestedAt: new Date().toISOString() };
+        await booking.proposeAmendment?.(previous.bookingId, proposal).catch(() => null);
+      }
+      const flow = engagement.normalizeState({
+        kind: config.mode || "booking",
+        status: previous.status || "collecting",
+        items: previous.items || [],
+        fields,
+        pendingField: previous.pendingField,
+        metadata: previous.metadata || {},
+      }, config);
+      const reply = `👍 Party size updated to ${newSize} ${newSize === 1 ? 'person' : 'people'}.`;
+      const notice = engagementSummary(flow, config);
+      return createCapabilityResult({
+        handled: true,
+        reply: `${reply}\n\n${notice}`,
+        responseModel: { intent: "GENERIC_BOOKING_PARTY_SIZE_CHANGED", payload: { legacyText: reply, partySize: newSize } },
+        statePatch: { activePlugin: "booking", lastIntent: "booking_party_size_changed", capabilityState: { booking: stateShape(flow, previous.bookingId || null) } },
+      });
+    }
+
+    if (selected.intent === "booking.field_edit") {
+      // v42.0: Edit customer name/phone/email mid-booking (active flow).
+      const amendment = extracted.fieldAmendment || {};
+      const field = amendment.field;
+      if (!["name", "phone", "email"].includes(field)) {
+        const reply = 'Tell me whether you want to change the booking name, phone, or optional email.';
+        return createCapabilityResult({ handled: true, reply, statePatch: { activePlugin: "booking", lastIntent: "booking_field_edit_unknown_field", capabilityState: { booking: previous } } });
+      }
+      const rawValue = amendment.rawValue;
+      if (rawValue == null || String(rawValue).trim() === "") {
+        const reply = `What should I use as the new ${pretty(field)}?`;
+        const metadata = { ...(previous.metadata || {}), pendingFieldEdit: { field } };
+        return createCapabilityResult({
+          handled: true,
+          reply,
+          responseModel: { intent: "GENERIC_BOOKING_FIELD_EDIT_NEEDS_VALUE", payload: { legacyText: reply, pendingField: field } },
+          statePatch: { activePlugin: "booking", lastIntent: "booking_field_edit_needs_value", capabilityState: { booking: { ...previous, metadata } } },
+        });
+      }
+      const parsed = engagement.parseField(field, rawValue, fieldOptions(field, config));
+      if (!parsed.valid) {
+        const reply = `${parsed.message} The existing ${pretty(field).toLowerCase()} has not been changed.`;
+        return createCapabilityResult({ handled: true, reply, statePatch: { activePlugin: "booking", lastIntent: "booking_field_edit_invalid", capabilityState: { booking: previous } } });
+      }
+      const fields = { ...(previous.slots || previous.fields || {}), [field]: parsed.value };
+      if (previous.bookingId) {
+        try { await booking.updateDetails?.(previous.bookingId, { [field]: parsed.value }); } catch (_e) { /* ignore */ }
+      }
+      const flow = engagement.normalizeState({
+        kind: config.mode || "booking",
+        status: previous.status || "collecting",
+        items: previous.items || [],
+        fields,
+        pendingField: previous.pendingField,
+        metadata: previous.metadata || {},
+      }, config);
+      const reply = language === 'roman_urdu'
+        ? `👍 ${pretty(field)} update kar diya: ${parsed.value}`
+        : `👍 Updated ${pretty(field).toLowerCase()} to ${parsed.value}.`;
+      const notice = engagementSummary(flow, config);
+      return createCapabilityResult({
+        handled: true,
+        reply: `${reply}\n\n${notice}`,
+        responseModel: { intent: "GENERIC_BOOKING_FIELD_EDITED", payload: { legacyText: reply, field, value: parsed.value } },
+        statePatch: { activePlugin: "booking", lastIntent: "booking_field_edited", capabilityState: { booking: stateShape(flow, previous.bookingId || null) } },
+      });
+    }
+
+    if (selected.intent === "booking.list") {
+      // v42.0: List all customer's bookings for this tenant
+      const scoped = booking.scope?.({ tenant, capabilityId: "booking", customerId: context.message.customerId, conversationId: `${tenant.id}:${context.message.channel}:${context.message.customerId}` }) || booking;
+      const list = scoped.list ? await scoped.list() : (booking.list ? await booking.list({ tenantId: tenant.id, customerId: context.message.customerId }) : []);
+      const records = (list || []).filter(record => !["cancelled"].includes(record.status) || true);
+      if (!records.length) {
+        const reply = language === 'roman_urdu'
+          ? 'Aap ke paas koi booking nahi hai.'
+          : 'You do not have any bookings yet.';
+        return createCapabilityResult({ handled: true, reply, statePatch: { activePlugin: "booking", lastIntent: "booking_list_empty", capabilityState: { booking: previous } } });
+      }
+      const lines = records.slice(0, 10).map(record =>
+        `• ${record.id} — ${record.slots?.subject || record.subject || "Booking"}${record.slots?.date ? ` on ${record.slots.date}` : ""}${record.slots?.time ? ` at ${record.slots.time}` : ""} (${record.status})`
+      );
+      const reply = `${language === 'roman_urdu' ? '📦 *Aap ki bookings*' : '📦 *Your bookings*'}\n${lines.join("\n")}`;
+      return createCapabilityResult({
+        handled: true,
+        reply,
+        responseModel: { intent: "GENERIC_BOOKING_LIST_VIEWED", payload: { legacyText: reply, bookings: records } },
+        statePatch: { activePlugin: "booking", lastIntent: "booking_list_viewed", capabilityState: { booking: previous } },
+      });
+    }
+
+    if (selected.intent === "booking.reschedule") {
+      // v42.0: Active reschedule (in-progress OR stored booking). Falls back to
+      // the existing reschedule_request handler when there's an active bookingId.
+      if (previous.bookingId) {
+        return rescheduleResult(booking, previous, extracted, config);
+      }
+      // In-progress: extract date/time and update the flow
+      const newDate = extracted.date;
+      const newTime = extracted.time;
+      if (!newDate && !newTime) {
+        const reply = language === 'roman_urdu'
+          ? 'Konsi date ya time pe reschedule karna hai? Jaise "tomorrow at 5pm".'
+          : 'What date or time should I reschedule to? E.g. "tomorrow at 5pm".';
+        return collectingResult(config, engagement.normalizeState({
+          kind: config.mode || "booking",
+          status: "collecting",
+          items: previous.items || [],
+          fields: previous.slots || previous.fields || {},
+          pendingField: "time",
+          metadata: previous.metadata || {},
+        }, config), "time", reply);
+      }
+      const fields = { ...(previous.slots || previous.fields || {}) };
+      if (newDate) fields.date = newDate;
+      if (newTime) fields.time = newTime;
+      const flow = engagement.normalizeState({
+        kind: config.mode || "booking",
+        status: previous.status || "collecting",
+        items: previous.items || [],
+        fields,
+        pendingField: !newDate ? "date" : !newTime ? "time" : (previous.pendingField || null),
+        metadata: previous.metadata || {},
+      }, config);
+      const reply = language === 'roman_urdu'
+        ? `👍 Booking ka time slot update kar diya.`
+        : `👍 Booking time slot updated.`;
+      const notice = engagementSummary(flow, config);
+      return createCapabilityResult({
+        handled: true,
+        reply: `${reply}\n\n${notice}`,
+        responseModel: { intent: "GENERIC_BOOKING_RESCHEDULED", payload: { legacyText: reply, inProgress: true } },
+        statePatch: { activePlugin: "booking", lastIntent: "booking_rescheduled", capabilityState: { booking: stateShape(flow, previous.bookingId || null) } },
+      });
+    }
+
     let flow = engagement.normalizeState(
       {
         kind: config.mode || "booking",
