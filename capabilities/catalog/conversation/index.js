@@ -52,13 +52,32 @@ class CatalogConversationAdapter {
     // A deeper active workflow owns its pending field. Catalog must not steal a
     // phone number, address, payment choice, etc. just because a product is
     // still selected underneath Commerce.
-    const checkoutActive = state.capabilityState?.commerce?.mode === "checkout";
+    const commerceMode = state.capabilityState?.commerce?.mode;
+    const checkoutActive = commerceMode === "checkout";
+    // v42.1 BUGFIX: Also suppress catalog search when the user is in
+    // `paused_add_item` mode (cart has items, waiting for user to confirm or
+    // add more). Previously, "ok confirm and i want to dine inn" was misrouted
+    // to catalog.unavailable_request because the catalog adapter tried to
+    // search for "dine inn" as a product. With items already in the cart,
+    // the user's intent is almost certainly about the existing order, not a
+    // new product search. Let the commerce adapter handle the turn.
+    const pausedWithItems = commerceMode === "paused_add_item";
     const explicitCatalogInterruption = hasAny(normalizedText, REQUEST_CUES)||hasAcquisitionCue(normalizedText);
     const referentialCheckoutValue=/\b(?:i want|send|deliver|ship)(?: it)? (?:in|to)\b/.test(normalizedText);
     if(checkoutActive&&referentialCheckoutValue){
       return {priority:this.priority,candidates:[],entities:{},vocabularyMatches:[]};
     }
     if (checkoutActive && !explicitCatalogInterruption) return { priority:this.priority, candidates:[], entities:{}, vocabularyMatches:[] };
+    // v42.1: When in paused_add_item with items already in the cart, only let
+    // the catalog adapter fire if the message contains a NEW product name
+    // (not order-type language like "dine in" / "takeaway" / "delivery").
+    if (pausedWithItems) {
+      const isOrderTypeLanguage = /\b(?:dine[\s-]?in|dine\s+inn|eat\s+here|sit\s+in|for\s+here|takeaway|take\s+away|take\s+out|to\s+go|pack\s+up|parcel|packing|delivery|home\s+delivery|deliver|ship\s+to)\b/i.test(normalizedText);
+      const isConfirmationLanguage = /\b(?:ok|okay|confirm|confirm\s+order|confirm\s+my\s+order|checkout|place\s+order|done|final|finalize|yes|theek|thik|haan|han)\b/i.test(normalizedText);
+      if (isOrderTypeLanguage || isConfirmationLanguage) {
+        return {priority:this.priority,candidates:[],entities:{},vocabularyMatches:[]};
+      }
+    }
     const selectedId = state.capabilityState?.catalog?.selectedProductId;
     const selectedAttrs = state.capabilityState?.catalog?.selectedAttributes || {};
 

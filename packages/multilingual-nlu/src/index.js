@@ -5,5 +5,7 @@ module.exports = {
   ...require('./groqNluClient'),
   ...require('./remoteNluInterpreter'),
   ...require('./nluDecisionPolicy'),
-  ...require('./nluInvocationPolicy')
+  ...require('./nluInvocationPolicy'),
+  ...require('./corpusFewShot'),
+  ...require('./mockNluClient')
 };

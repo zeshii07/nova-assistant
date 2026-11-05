@@ -2147,7 +2147,7 @@
       "sensitivity": "standard",
       "expiresAt": null,
       "createdAt": "2026-08-29T03:00:21.705Z",
-      "updatedAt": "2026-08-29T03:00:21.705Z",
+      "updatedAt": "2026-11-05T06:37:51.553Z",
       "metadata": {}
     },
     "restaurant-demo:customer:assistant:history.1787972421708.i2bmjo:playground-user": {
@@ -6803,6 +6803,106 @@
       "expiresAt": null,
       "createdAt": "2026-11-04T08:45:13.097Z",
       "updatedAt": "2026-11-04T08:45:13.097Z",
+      "metadata": {}
+    },
+    "byt-cleaners-dubai:customer:assistant:preference.language:playground-user": {
+      "id": "byt-cleaners-dubai:customer:assistant:preference.language:playground-user",
+      "tenantId": "byt-cleaners-dubai",
+      "customerId": "playground-user",
+      "conversationId": "byt-cleaners-dubai:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "preference.language",
+      "value": "english",
+      "tags": [
+        "preference"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-11-05T06:30:34.092Z",
+      "updatedAt": "2026-11-05T06:30:34.092Z",
+      "metadata": {}
+    },
+    "byt-cleaners-dubai:customer:assistant:history.1793860234097.2gjlx6:playground-user": {
+      "id": "byt-cleaners-dubai:customer:assistant:history.1793860234097.2gjlx6:playground-user",
+      "tenantId": "byt-cleaners-dubai",
+      "customerId": "playground-user",
+      "conversationId": "byt-cleaners-dubai:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1793860234097.2gjlx6",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-11-05T06:30:34.097Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-11-05T06:30:34.097Z",
+      "updatedAt": "2026-11-05T06:30:34.097Z",
+      "metadata": {}
+    },
+    "byt-cleaners-dubai:customer:cleaning:history.1793860583320.kw0e97:playground-user": {
+      "id": "byt-cleaners-dubai:customer:cleaning:history.1793860583320.kw0e97:playground-user",
+      "tenantId": "byt-cleaners-dubai",
+      "customerId": "playground-user",
+      "conversationId": "byt-cleaners-dubai:playground:playground-user",
+      "scope": "customer",
+      "namespace": "cleaning",
+      "key": "history.1793860583320.kw0e97",
+      "value": {
+        "event": "cleaning.request_created",
+        "data": {
+          "requestId": "CLN-3SHFM7P8",
+          "requestIds": [
+            "CLN-3SHFM7P8"
+          ],
+          "serviceId": "CLN010",
+          "count": 1
+        },
+        "occurredAt": "2026-11-05T06:36:23.320Z"
+      },
+      "tags": [
+        "history",
+        "cleaning.request_created"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-11-05T06:36:23.320Z",
+      "updatedAt": "2026-11-05T06:36:23.320Z",
+      "metadata": {}
+    },
+    "restaurant-demo:customer:assistant:history.1793860671561.6d4s4s:playground-user": {
+      "id": "restaurant-demo:customer:assistant:history.1793860671561.6d4s4s:playground-user",
+      "tenantId": "restaurant-demo",
+      "customerId": "playground-user",
+      "conversationId": "restaurant-demo:playground:playground-user",
+      "scope": "customer",
+      "namespace": "assistant",
+      "key": "history.1793860671561.6d4s4s",
+      "value": {
+        "event": "assistant.message",
+        "data": {
+          "intent": "greet",
+          "text": "hello"
+        },
+        "occurredAt": "2026-11-05T06:37:51.561Z"
+      },
+      "tags": [
+        "history",
+        "assistant.message"
+      ],
+      "sensitivity": "standard",
+      "expiresAt": null,
+      "createdAt": "2026-11-05T06:37:51.561Z",
+      "updatedAt": "2026-11-05T06:37:51.561Z",
       "metadata": {}
     }
   }

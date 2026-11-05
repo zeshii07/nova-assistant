@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "42.0.0",
+  "version": "46.0.0",
   "private": true,
-  "description": "Nova v42.0 (Sprint 2) - Comprehensive modification operations: 9 new ops across commerce + booking + cleaning (promo code, order type edit, special instructions edit, order note, reorder, cancel single item, service swap, remove single service, recipient change, party size change, list bookings, scope quantity edit) + 6 Sprint 1 gap fixes (commerce.cart.reschedule handler, booking.cancel/service_change/reschedule/party_size_change/field_edit/list handlers) + early-exit modification detection in unifiedServiceAdapter + global cancel handler now persists booking cancellation + cleaning scope detection expanded (bedrooms/bhk/seater sofa/carpet)",
+  "description": "Nova v46.0 (Sprint 6) - Multi-turn context intelligence + benchmarks + README update. (1) ContextResolutionEngine resolves pronouns and contextual references (book it again, same time, same address, i'll have the usual, change that) using recent turns + CRM + booking/commerce state. (2) 8 benchmark tests measuring cold-start, per-message p50/p95/p99, corpus accuracy, NLU accuracy, context resolution latency, throughput, error classifier accuracy, vocabulary enrichment latency. (3) README.md updated to v46.0 with full architecture diagram, feature list, test suites, benchmark results, configuration, deployment, project structure, and release history.",
   "main": "apps/api/src/cluster.js",
   "type": "commonjs",
   "engines": {

@@ -1,5 +1,6 @@
 /**
  * v38.0 — Tenant Adapter Registry
+ * v44.0 — Now uses domainVocabulary.js for comprehensive per-domain vocabulary.
  *
  * Loads tenant adapters from tenants/{tenantId}/adapter/index.js
  * Falls back to a domain-based default adapter if no tenant-specific one exists.
@@ -13,6 +14,7 @@
 const fs = require('fs');
 const path = require('path');
 const { BaseTenantAdapter } = require('./baseTenantAdapter');
+const domainVocabulary = require('./domainVocabulary');
 
 class TenantAdapterRegistry {
   constructor({ tenantsDir, logger = null }) {
@@ -24,95 +26,54 @@ class TenantAdapterRegistry {
   }
 
   _loadDomainDefaults() {
-    // Register domain-specific default adapters
-    // These provide vocabulary for all tenants of a given domain
-    // without requiring a per-tenant adapter file.
+    // v44.0: Register domain-specific default adapters using the comprehensive
+    // vocabulary dictionaries in domainVocabulary.js. Each adapter delegates
+    // enrichText / extractEntities / suggestIntents to the shared vocabulary
+    // module, so adding new terms is a one-file change.
 
-    // Restaurant domain defaults
-    this.domainDefaults.set('restaurant', class RestaurantDefaultAdapter extends BaseTenantAdapter {
-      constructor(opts) { super(opts); this.priority = 72; }
-      enrichText(text) {
-        return String(text || '')
-          .replace(/\bchiken\b/gi, 'chicken')
-          .replace(/\bbiriyani\b/gi, 'biryani')
-          .replace(/\bburgers\b/gi, 'burger')
-          .replace(/\bwnt\b/gi, 'want')
-          .replace(/\bsomw\b/gi, 'some')
-          .replace(/\bwht\b/gi, 'what')
-          .replace(/\bresturant\b/gi, 'restaurant')
-          .replace(/\brestaurent\b/gi, 'restaurant')
-          .replace(/\bordr\b/gi, 'order')
-          .replace(/\bpls\b/gi, 'please')
-          .replace(/\bplz\b/gi, 'please');
-      }
-      getQuantityUnits() {
-        return { plate: 1, serving: 1, piece: 1, portion: 1, bowl: 1, cup: 1, glass: 1, plate_of: 1, piece_of: 1, serving_of: 1 };
-      }
-      formatReply(reply, context) {
-        if (!reply) return reply;
-        // Replace "products" with "menu items" for restaurant context
-        if (context?.intent === 'catalog.list' || context?.intent === 'CATALOG_LIST_VIEWED') {
-          return reply
-            .replace(/Available products:/gi, 'Here are our menu items:')
-            .replace(/Mention a product name/gi, 'Tell me which item')
-            .replace(/Here's what we currently have available/gi, "Here are our menu items");
+    // Build an adapter class for each domain in the vocabulary
+    for (const domain of Object.keys(domainVocabulary)) {
+      if (domain === 'universal') continue; // skip universal — it's the fallback
+      const vocab = domainVocabulary[domain];
+      const AdapterClass = class extends BaseTenantAdapter {
+        constructor(opts) { super(opts); this.priority = 72; this.vocabulary = vocab; }
+        enrichText(text) {
+          return domainVocabulary.enrichText(text, this.domain);
         }
-        return reply;
-      }
-      suggestIntents(text, context) {
-        const candidates = [];
-        const t = String(text || '').toLowerCase().trim();
-        // "i want to order some food" → menu browse
-        if (/\b(?:i want|i need|i'?d like)\s+to\s+(?:order|eat|get|have)\s+(?:some\s+)?(?:food|something|lunch|dinner)\b/i.test(t)) {
-          candidates.push({
-            intent: 'catalog.list',
-            confidence: 0.99,
-            entities: {},
-            reason: 'restaurant_food_order_intent',
-          });
+        getQuantityUnits() { return vocab.quantityUnits || {}; }
+        suggestIntents(text, context) {
+          const candidates = [];
+          const t = String(text || '').toLowerCase().trim();
+          // Domain-specific intent suggestions based on vocabulary
+          if (domain === 'restaurant') {
+            // "i want to order some food" → menu browse
+            if (/\b(?:i want|i need|i'?d like)\s+to\s+(?:order|eat|get|have)\s+(?:some\s+)?(?:food|something|lunch|dinner)\b/i.test(t)) {
+              candidates.push({ intent: 'catalog.list', confidence: 0.99, entities: {}, reason: 'restaurant_food_order_intent' });
+            }
+            // "plate of biryani" → extract quantity=1 + product name
+            if (/\b(?:plate|serving|portion|piece)\s+of\s+/i.test(t)) {
+              candidates.push({ intent: 'commerce.cart.add_request', confidence: 0.998, entities: { requestedText: t, quantity: 1 }, reason: 'restaurant_plate_order' });
+            }
+          }
+          if (domain === 'cleaning') {
+            // "safai karwani hai" → cleaning request
+            if (/\b(?:safai|safaiwala|safai karwani)\b/i.test(t)) {
+              candidates.push({ intent: 'cleaning.pricing_request', confidence: 0.95, entities: { requestedText: t }, reason: 'cleaning_roman_urdu_request' });
+            }
+          }
+          return candidates;
         }
-        // "plate of biryani" → extract quantity=1 + product name
-        if (/\b(?:plate|serving|portion|piece)\s+of\s+/i.test(t)) {
-          candidates.push({
-            intent: 'commerce.cart.add_request',
-            confidence: 0.998,
-            entities: { requestedText: t, quantity: 1 },
-            reason: 'restaurant_plate_order',
-          });
-        }
-        return candidates;
-      }
-    });
+      };
+      // Name the class for debugging
+      Object.defineProperty(AdapterClass, 'name', { value: `${domain.charAt(0).toUpperCase() + domain.slice(1)}DefaultAdapter` });
+      this.domainDefaults.set(domain, AdapterClass);
+    }
 
-    // Retail domain defaults
-    this.domainDefaults.set('retail', class RetailDefaultAdapter extends BaseTenantAdapter {
-      constructor(opts) { super(opts); this.priority = 72; }
-      getQuantityUnits() {
-        return { box: 1, pack: 1, pair: 1, set: 1, bundle: 1, dozen: 12 };
-      }
-    });
-
-    // Cleaning domain defaults
-    this.domainDefaults.set('cleaning', class CleaningDefaultAdapter extends BaseTenantAdapter {
-      constructor(opts) { super(opts); this.priority = 72; }
-      enrichText(text) {
-        return String(text || '')
-          .replace(/\bsafai\b/gi, 'cleaning')
-          .replace(/\bsafai karwani hai\b/gi, 'i want cleaning')
-          .replace(/\bghar ki safai\b/gi, 'home cleaning')
-          .replace(/\bdeep safai\b/gi, 'deep cleaning');
-      }
-    });
-
-    // Salon domain defaults
-    this.domainDefaults.set('salon', class SalonDefaultAdapter extends BaseTenantAdapter {
-      constructor(opts) { super(opts); this.priority = 72; }
-      enrichText(text) {
-        return String(text || '')
-          .replace(/\bhair cut\b/gi, 'haircut')
-          .replace(/\bhair style\b/gi, 'hairstyle')
-          .replace(/\bbeard trim\b/gi, 'beard trimming');
-      }
+    // Universal fallback adapter — uses the universal vocabulary
+    this.domainDefaults.set('universal', class UniversalDefaultAdapter extends BaseTenantAdapter {
+      constructor(opts) { super(opts); this.priority = 72; this.vocabulary = domainVocabulary.universal; }
+      enrichText(text) { return domainVocabulary.enrichText(text, 'universal'); }
+      getQuantityUnits() { return domainVocabulary.universal.quantityUnits || {}; }
     });
   }
 
@@ -150,6 +111,15 @@ class TenantAdapterRegistry {
       }
     }
 
+    // Final fallback to universal adapter
+    if (!adapter) {
+      const UniversalAdapter = this.domainDefaults.get('universal');
+      if (UniversalAdapter) {
+        adapter = new UniversalAdapter({ tenantId: tenant.id, domain: 'universal' });
+        this.logger?.info?.('tenant_adapter.loaded', { tenantId: tenant.id, source: 'universal_fallback' });
+      }
+    }
+
     if (adapter) {
       this.adapters.set(tenant.id, adapter);
     }
@@ -169,4 +139,4 @@ class TenantAdapterRegistry {
   }
 }
 
-module.exports = { TenantAdapterRegistry, BaseTenantAdapter };
+module.exports = { TenantAdapterRegistry, BaseTenantAdapter, domainVocabulary };

@@ -127,13 +127,58 @@ class ExecutionEngine {
     }
 
     let intelligence = null;
+    let intelligenceFailed = false;
     if (this.conversationIntelligenceEngine) {
       try {
         intelligence = await this.conversationIntelligenceEngine.analyze({ tenant, message, state, services: this.services });
       } catch (error) {
         logger.error("conversation_intelligence.failed", { error:error.message, stack:error.stack });
         intelligence = null;
+        intelligenceFailed = true;
       }
+    }
+
+    // v44.0: Network resilience — if the conversation intelligence engine
+    // itself failed (e.g. NLU provider timeout), the customer is mid-flow.
+    // Don't fall through to a generic "I'm not sure" reply. Instead, preserve
+    // the active workflow and tell the customer to retry. This is the same
+    // pattern as the capability-execute catch block below.
+    if (intelligenceFailed) {
+      const activeWorkflow = state.capabilityState?.booking?.status || state.capabilityState?.commerce?.mode || state.capabilityState?.cleaning?.step;
+      const hasActiveWorkflow = Boolean(activeWorkflow && activeWorkflow !== 'idle' && activeWorkflow !== 'completed');
+      const reply = hasActiveWorkflow
+        ? (state.language === 'roman_urdu'
+            ? '⚠️ Network issue ki wajah se main aap ki message samajh nahi saka. Aap ka order/booking safe hai — please apni message dobara bhejein.'
+            : state.language === 'urdu'
+              ? '⚠️ نیٹ ورک مسئلے کی وجہ سے میں آپ کا پیغام نہیں سمجھ سکا۔ آپ کا آرڈر/بکنگ محفوظ ہے — براہ کرم اپنا پیغام دوبارہ بھیجیں۔'
+              : "⚠️ A network issue stopped me from understanding your message. Your order/booking is still saved — please send your message again.")
+        : (state.language === 'roman_urdu'
+            ? '⚠️ Network issue ki wajah se main aap ki message samajh nahi saka. Please dobara try karein.'
+            : "⚠️ A network issue stopped me from understanding your message. Please try again.");
+      return this.#finalize({
+        tenant, message, conversationId, customer, state, stateBefore,
+        capabilityId: 'system',
+        result: createCapabilityResult({
+          handled: true,
+          reply,
+          metadata: { error: 'intelligence_failed', retryable: true },
+          statePatch: {
+            context: {
+              ...state.context,
+              lastFailure: {
+                at: new Date().toISOString(),
+                capabilityId: 'system',
+                intent: null,
+                message: message.text,
+                error: 'conversation_intelligence.failed',
+                transient: true,
+                activeWorkflow: null,
+              },
+            },
+          },
+        }),
+        intelligence, logger, processStarted,
+      });
     }
 
     // Shared customer fields are cross-cutting. Persist validated values even
@@ -201,11 +246,63 @@ class ExecutionEngine {
     });
 
     let result;
+    // v44.0: Network resilience — when a capability throws mid-execution
+    // (e.g. calendarService.holdSlot times out, catalog API is unreachable,
+    // database write fails), we MUST NOT lose the customer's place in the
+    // conversation. The pre-execution `state` still has the active workflow
+    // (booking.collecting + pendingField='time' etc.), so we:
+    //   1. Save the customer's failed message text + the pre-failure state
+    //      snapshot under state.context.lastFailure
+    //   2. Return a clear "network issue — please try again" reply
+    //   3. On the NEXT message, the customer's retry will find the workflow
+    //      still active (because we never wiped it) and resume normally.
+    let capabilityError = null;
     try {
       result = createCapabilityResult(await match.capability.execute(executionContext));
     } catch (error) {
-      logger.error("capability.execute_failed", { capabilityId: match.capability.id, error: error.message });
-      result = createCapabilityResult({ handled: true, reply: "Sorry, I could not complete that request right now.", metadata: { error: "capability_execution_failed" } });
+      capabilityError = error;
+      logger.error("capability.execute_failed", { capabilityId: match.capability.id, error: error.message, stack: error.stack });
+      // Classify the failure: transient (network/timeout/5xx) vs permanent
+      // (validation/404). Transient failures get a "retry" reply that
+      // preserves the workflow; permanent failures get a clearer message.
+      const isTransient = isTransientError(error);
+      const reply = isTransient
+        ? (state.language === 'roman_urdu'
+            ? '⚠️ Network issue ki wajah se yeh request complete nahi ho saki. Aap ka order/booking safe hai — please apni message dobara bhejein.'
+            : state.language === 'urdu'
+              ? '⚠️ نیٹ ورک مسئلے کی وجہ سے یہ درخواست مکمل نہیں ہو سکی۔ آپ کا آرڈر/بکنگ محفوظ ہے — براہ کرم اپنا پیغام دوبارہ بھیجیں۔'
+              : "⚠️ A network issue stopped that request from completing. Your order/booking is still saved — please send your message again.")
+        : "Sorry, I could not complete that request right now.";
+      result = createCapabilityResult({
+        handled: true,
+        reply,
+        metadata: {
+          error: isTransient ? 'transient_capability_failure' : 'capability_execution_failed',
+          errorMessage: error.message,
+          capabilityId: match.capability.id,
+          retryable: isTransient,
+        },
+        // Preserve the pre-failure state so the workflow is still active.
+        // The customer's failed message is logged in context.lastFailure
+        // so the next turn can detect "you were mid-flow".
+        statePatch: {
+          // Don't override any capabilityState — keep what was there before
+          context: {
+            ...state.context,
+            lastFailure: {
+              at: new Date().toISOString(),
+              capabilityId: match.capability.id,
+              intent: intelligence?.selected?.intent || null,
+              message: message.text,
+              error: error.message,
+              transient: isTransient,
+              // Snapshot the pre-failure state shape so we can detect on
+              // the next message whether the workflow is still resumable.
+              activeWorkflow: intelligence?.workflow?.current || null,
+            },
+          },
+        },
+      });
     }
 
     await this.services.customerDataBridge?.sync({
@@ -292,7 +389,42 @@ class ExecutionEngine {
         : { ...(state.capabilityState || {}), ...(result.statePatch.capabilityState || {}) },
       context: { ...state.context, ...(result.statePatch.context || {}), goal: nextGoal, goalHistory, lastMessage: message.text, lastCapability: capabilityId, conversationIntelligence: summarizeIntelligence(intelligence), recentTurns }
     });
-    await this.stateRepository.save(state);
+    // v44.0: Network resilience — the stateRepository.save() can fail with
+    // STALE_STATE if a concurrent request updated the conversation between
+    // our read and our write. When that happens, re-read the current state,
+    // re-apply our patch on top of it, and retry the save once. This prevents
+    // the customer from losing their place when two messages race.
+    try {
+      await this.stateRepository.save(state);
+    } catch (saveError) {
+      if (saveError?.code === 'STALE_STATE' || /stale state/i.test(String(saveError.message || ''))) {
+        logger.warn('state.save.stale_retry', { conversationId, capabilityId });
+        try {
+          const fresh = await this.stateRepository.get(conversationId);
+          if (fresh) {
+            // Re-apply our patch on top of the fresh state
+            const reapply = applyStatePatch(fresh, {
+              ...result.statePatch,
+              capabilityState: replaceCapabilityState
+                ? (result.statePatch.capabilityState || {})
+                : { ...(fresh.capabilityState || {}), ...(result.statePatch.capabilityState || {}) },
+              context: { ...fresh.context, ...(result.statePatch.context || {}), goal: nextGoal, goalHistory, lastMessage: message.text, lastCapability: capabilityId, conversationIntelligence: summarizeIntelligence(intelligence), recentTurns }
+            });
+            await this.stateRepository.save(reapply);
+            state = reapply;
+          } else {
+            // No fresh state — save ours directly
+            await this.stateRepository.save(state);
+          }
+        } catch (retryError) {
+          logger.error('state.save.retry_failed', { conversationId, error: retryError.message });
+          // Don't crash — the reply is still valid, just state persistence failed
+        }
+      } else {
+        // Non-stale error — log but don't crash
+        logger.error('state.save.failed', { conversationId, error: saveError.message });
+      }
+    }
 
     for (const event of result.events) await this.eventBus.publish(event.name, event.payload || {}, { tenantId:tenant.id, conversationId, capabilityId });
     let experience = null;
@@ -357,7 +489,7 @@ class ExecutionEngine {
     return { conversationId, reply:result.reply, state, capabilityId, intelligence, replayId, experience:experience ? { intent:experience.semantic.intent, language:experience.language, relationship:experience.relationship } : null };
   }
 }
-function summarizeIntelligence(value){ if(!value)return null; return { selected:value.selected,entities:value.entities,messageFrame:value.messageFrame,workflow:value.workflow,goal:value.goal ? { current:value.goal.current,nextGoal:value.goal.nextGoal,transition:value.goal.transition,override:value.goal.override } : null,correction:value.correction,interruption:value.interruption,globalCommand:value.globalCommand,requiresClarification:value.requiresClarification,clarificationReason:value.clarificationReason,nlu:value.nlu ? {used:value.nlu.used,validated:value.nlu.validated,mode:value.nlu.mode,strategy:value.nlu.strategy,deterministicFallback:value.nlu.deterministicFallback,executionAuthority:value.nlu.executionAuthority,model:value.nlu.model,promptVersion:value.nlu.promptVersion,decision:value.nlu.decision,invocationReason:value.nlu.invocationReason,error:value.nlu.error,httpStatus:value.nlu.httpStatus,providerMessage:value.nlu.providerMessage,providerErrorType:value.nlu.providerErrorType,providerRequestId:value.nlu.providerRequestId,latencyMs:value.nlu.latencyMs,languageContract:value.nlu.languageContract}:null}; }
+function summarizeIntelligence(value){ if(!value)return null; return { selected:value.selected,entities:value.entities,messageFrame:value.messageFrame,workflow:value.workflow,goal:value.goal ? { current:value.goal.current,nextGoal:value.goal.nextGoal,transition:value.goal.transition,override:value.goal.override } : null,correction:value.correction,interruption:value.interruption,globalCommand:value.globalCommand,requiresClarification:value.requiresClarification,clarificationReason:value.clarificationReason,resolvedContext:value.resolvedContext||null,nlu:value.nlu ? {used:value.nlu.used,validated:value.nlu.validated,mode:value.nlu.mode,strategy:value.nlu.strategy,deterministicFallback:value.nlu.deterministicFallback,executionAuthority:value.nlu.executionAuthority,model:value.nlu.model,promptVersion:value.nlu.promptVersion,decision:value.nlu.decision,invocationReason:value.nlu.invocationReason,error:value.nlu.error,httpStatus:value.nlu.httpStatus,providerMessage:value.nlu.providerMessage,providerErrorType:value.nlu.providerErrorType,providerRequestId:value.nlu.providerRequestId,latencyMs:value.nlu.latencyMs,languageContract:value.nlu.languageContract}:null}; }
 function clarificationReply({text,language,tenant,workflow}){
   const name=tenant?.business?.name||tenant?.name||'this business';
   const domain=String(tenant?.domain||'business').replace(/_/g,' ');
@@ -409,4 +541,48 @@ function deduplicateParagraphs(text) {
   }
   return unique.join('\n\n');
 }
-module.exports = { ExecutionEngine };
+
+/**
+ * v44.0 — Classify whether an error is transient (worth retrying) or permanent.
+ *
+ * Transient errors:
+ *   - Network timeouts (ETIMEDOUT, ECONNRESET, ECONNREFUSED, EAI_AGAIN)
+ *   - HTTP 5xx responses (502 Bad Gateway, 503 Service Unavailable, 504 Gateway Timeout)
+ *   - Fetch/axios errors with `code: 'ECONNABORTED'` or `code: 'ENOTFOUND`
+ *   - Calendar service timeouts
+ *   - Database connection errors
+ *   - Optimistic-lock stale-state (the customer can simply retry)
+ *
+ * Permanent errors:
+ *   - Validation failures (invalid phone, invalid date)
+ *   - HTTP 4xx (404 Not Found, 400 Bad Request)
+ *   - Authorization errors
+ *   - Unknown product / service not found
+ *
+ * The classification determines whether the customer gets a "please retry"
+ * reply (transient) or a "something went wrong" reply (permanent).
+ */
+function isTransientError(error) {
+  if (!error) return false;
+  const message = String(error.message || '').toLowerCase();
+  const code = String(error.code || '').toUpperCase();
+  // Network / connection errors — always transient
+  if (['ETIMEDOUT','ECONNRESET','ECONNREFUSED','ECONNABORTED','ENOTFOUND','EAI_AGAIN','EHOSTUNREACH','ENETUNREACH'].includes(code)) return true;
+  // Generic "timeout" / "network" in message
+  if (/\b(timeout|timed out|network|connection|econnreset|econnrefused|etimedout|socket hang up|fetch failed)\b/i.test(message)) return true;
+  // HTTP 5xx status codes
+  const status = Number(error.statusCode || error.status || 0);
+  if (status >= 500 && status < 600) return true;
+  if (/\b5\d{2}\b/.test(message) && /\b(server|gateway|bad|unavailable|timeout)\b/i.test(message)) return true;
+  // Optimistic-lock stale-state — the customer can retry and it will work
+  if (code === 'STALE_STATE' || /stale state/i.test(message)) return true;
+  // Calendar service specific
+  if (/calendar.*(?:timeout|unavailable|error)/i.test(message)) return true;
+  // Database / repository errors
+  if (/\b(database|repository|persist|snapshot)\b/i.test(message) && /\b(failed|error|timeout)\b/i.test(message)) return true;
+  // Default: NOT transient — treat unknown errors as permanent so we don't
+  // tell the customer to retry something that will never work.
+  return false;
+}
+
+module.exports = { ExecutionEngine, isTransientError };

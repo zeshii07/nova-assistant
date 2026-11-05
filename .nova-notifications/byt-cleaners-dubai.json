@@ -1,0 +1,34 @@
+[
+  {
+    "id": "NOT-MW369WQD-4C449F",
+    "tenantId": "byt-cleaners-dubai",
+    "eventType": "lead_captured",
+    "createdAt": "2026-11-05T06:36:23.414Z",
+    "readAt": null,
+    "subject": "🎯 New Lead Captured — Zeeshan — Score: 100",
+    "preview": "New Lead Captured\n\nCustomer: Zeeshan\nLead Score: 100\nGrade: hot\nLead ID: LD-1NHBVD\nChannel: playground\nInterested in: cleaning, CLN010, Deep Cleaning, Deep Apartment Cleaning, Deep Apartment Cleaning,",
+    "data": {
+      "tenantId": "byt-cleaners-dubai",
+      "leadId": "LD-1NHBVD",
+      "customerId": "playground-user",
+      "transactionIntent": "CLEANING_REQUEST_CREATED",
+      "customerName": "Zeeshan",
+      "customerPhone": "03086754345",
+      "score": 100,
+      "grade": "hot",
+      "interests": "cleaning, CLN010, Deep Cleaning, Deep Apartment Cleaning, Deep Apartment Cleaning, CLN010, Deep Apartment Cleaning",
+      "channel": "playground",
+      "tenantName": "Byt Cleaners Dubai"
+    },
+    "email": {
+      "recipients": [
+        "owner@bytcleaners.ae"
+      ],
+      "sent": true,
+      "error": null,
+      "devMode": true,
+      "queued": false,
+      "messageId": null
+    }
+  }
+]

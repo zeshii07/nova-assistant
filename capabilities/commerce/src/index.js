@@ -8,6 +8,14 @@ class CommerceCapability extends BaseCapability {
     const text = normalize(context.message.text); const cs = context.state.capabilityState?.commerce;
     if (context.intelligence?.selected?.capabilityId === 'commerce') return {confidence:context.intelligence.selected.confidence||.99,reason:context.intelligence.selected.reason||'commerce_intelligence'};
     if (cs?.mode === "paused_add_item" && isWorkflowAcceptance(text)) return {confidence:1,reason:"paused_add_item_confirm"};
+    // v42.1 BUGFIX: When in paused_add_item mode, also accept "ok confirm" + extra
+    // context (e.g., "ok confirm and i want to dine inn"). The user has items in
+    // the cart and is clearly trying to confirm the order — the extra context is
+    // an inline modification (order type / instructions), not a new product search.
+    // Without this, the catalog adapter would fire catalog.unavailable_request
+    // for the unrecognized "dine inn" text and cause a clarification reply that
+    // leaves the customer confused.
+    if (cs?.mode === "paused_add_item" && /\b(?:ok\s+)?confirm\b/i.test(text)) return {confidence:1,reason:"paused_add_item_confirm_with_inline_modification"};
     const freshBrowse=/\b(can i see|show me|other products?|more products?|browse products?|do you have|do you sell|do you offer|can i get|can i have|i want|i need|looking for)\b/.test(text);
     if (cs?.mode === "checkout" && freshBrowse) return { confidence: 0 };
     if (cs?.mode === "checkout" && context.intelligence?.interruption?.type === "new_subject") return { confidence: 0 };
@@ -81,10 +89,15 @@ class CommerceCapability extends BaseCapability {
     }
     if (/\b(track (?:my )?order|my orders|orders|order status|mera order|میرے آرڈر)\b/.test(normalize(context.message.text)) && state.mode !== "checkout") return this.showOrders(context, commerce, language, state);
     if (state.mode === "review") return this.reviewOrder(context,commerce,language,state);
-    if (state.mode !== "checkout") return this.startCheckout(context, commerce, catalog, language);
+    if (state.mode !== "checkout") return this.startCheckout(context, commerce, catalog, language, state);
     return this.continueCheckout(context, commerce, catalog, state, language);
   }
-  async startCheckout(context, commerce, catalog, language) {
+  async startCheckout(context, commerce, catalog, language, currentState = null) {
+    // v42.1: Accept the caller's state object so we can preserve orderType,
+    // specialInstructions, note, and promoCode that were detected at the top
+    // of execute() in this same turn (e.g., "ok confirm and i want to dine inn"
+    // sets state.orderType='dine-in' before falling through to startCheckout).
+    const state = currentState || context.state.capabilityState?.commerce || {};
     const existingCart = await commerce.getCart();
     const catalogState = context.state.capabilityState?.catalog || {};
     const selected = catalogState.selectedAttributes || {};
@@ -127,7 +140,29 @@ class CommerceCapability extends BaseCapability {
     const paused = context.state.capabilityState?.commerce?.resumeCheckout;
     const nextField = paused?.pendingField || "name";
     const saved=await savedCheckoutDetails(context);
-    const next = { mode: "checkout", pendingField: nextField, savedDetailsOffered:Object.keys(saved).length>0 };
+    // v42.1 BUGFIX: Preserve orderType + specialInstructions set at the top of
+    // execute() when the user declared them in the same message that triggered
+    // checkout (e.g., "ok confirm and i want to dine inn"). Without this, the
+    // orderType was detected and stored on the local `state` object but lost
+    // when `next` was built with only `mode` + `pendingField`.
+    const previousCommerceState = context.state.capabilityState?.commerce || {};
+    const next = {
+      mode: "checkout",
+      pendingField: nextField,
+      savedDetailsOffered: Object.keys(saved).length > 0,
+      ...(state.orderType ? { orderType: state.orderType } : (previousCommerceState.orderType ? { orderType: previousCommerceState.orderType } : {})),
+      ...(state.specialInstructions ? { specialInstructions: state.specialInstructions } : (previousCommerceState.specialInstructions ? { specialInstructions: previousCommerceState.specialInstructions } : {})),
+      ...(state.note ? { note: state.note } : (previousCommerceState.note ? { note: previousCommerceState.note } : {})),
+      ...(state.promoCode ? { promoCode: state.promoCode } : (previousCommerceState.promoCode ? { promoCode: previousCommerceState.promoCode } : {})),
+    };
+    // Persist orderType on the cart.checkout record too so it survives across turns
+    if (state.orderType || state.specialInstructions || state.note) {
+      const patch = {};
+      if (state.orderType) patch.orderType = state.orderType;
+      if (state.specialInstructions) patch.specialInstructions = state.specialInstructions;
+      if (state.note) patch.note = state.note;
+      try { await commerce.updateCheckout(patch); } catch (_e) { /* cart may not exist yet — ignore */ }
+    }
     const added = context.state.capabilityState?.commerce?.mode === "paused_add_item";
     const cartNow = await commerce.getCart();
     const cartText = await cartSummary(context, cartNow, language);
@@ -946,7 +981,18 @@ class CommerceCapability extends BaseCapability {
     if(recognized.length){
       const subtotal=recognized.reduce((sum,item)=>sum+Number(item.p.price||0)*item.quantity,0);
       const currency=recognized[0].p.currency||'PKR';
-      lines.push(`Provisional merchandise subtotal (assuming the requested sizes and colors are available): ${money(subtotal,currency)}.`);
+      // v42.1 BUGFIX: Only show "Provisional merchandise subtotal (assuming
+      // the requested sizes and colors are available)" when at least one of
+      // the recognized products actually has colors or sizes. Restaurant
+      // food items (chicken biryani, beef burger) don't have variants, so
+      // showing that message there is misleading — the customer sees
+      // "assuming sizes/colors are available" for items that have none.
+      const anyHasVariants = recognized.some(item => Boolean(item.p.colors?.length || item.p.sizes?.length));
+      if (anyHasVariants) {
+        lines.push(`Provisional merchandise subtotal (assuming the requested sizes and colors are available): ${money(subtotal,currency)}.`);
+      } else {
+        lines.push(`Provisional subtotal: ${money(subtotal,currency)}.`);
+      }
     }
     for(const a of ambiguous){
       lines.push("",`I found more than one match for “${a.term||a.segment}”. Which one do you mean?`,...a.candidates.map(x=>`• ${x.name}`));
@@ -1353,9 +1399,15 @@ function domainFormat(reply, tenant, language) {
 // v38.1: Detect order type from message text
 function detectOrderType(text) {
   const t = String(text || '').toLowerCase();
-  if (/\b(?:dine[ -]?in|eat\s+here|sit\s+in|here|dine\s+in)\b/i.test(t)) return 'dine-in';
-  if (/\b(?:takeaway|take\s+away|take\s+out|to\s+go|pack\s+up|parcel|packing)\b/i.test(t)) return 'takeaway';
-  if (/\b(?:deliver|delivery|home\s+delivery|ship\s+to|send\s+to\s+my)\b/i.test(t)) return 'delivery';
+  // v42.1 BUGFIX: Expanded patterns to catch common standalone declarations:
+  //   - "i want to dine in" / "i want to dine inn" (typo)
+  //   - "for here" / "eat here" / "sit in"
+  //   - "to go" / "take away" / "takeaway" / "parcel"
+  //   - "for delivery" / "home delivery" / "deliver it"
+  // Also catch Roman Urdu: "dine in karna hai", "delivery chahiye", "takeaway karo"
+  if (/\b(?:dine[\s-]?in|dine\s+inn|eat\s+here|sit\s+in|for\s+here|here\s+please|dine\s+in\s+(?:please|karna|karo|chahiye|hai))\b/i.test(t)) return 'dine-in';
+  if (/\b(?:takeaway|take\s+away|take\s+out|to\s+go|pack\s+up|parcel|packing|take\s+away\s+(?:please|karna|karo|chahiye|hai))\b/i.test(t)) return 'takeaway';
+  if (/\b(?:deliver|delivery|home\s+delivery|ship\s+to|send\s+to\s+my|for\s+delivery|deliver\s+it|delivery\s+chahiye|delivery\s+karna|delivery\s+karo)\b/i.test(t)) return 'delivery';
   return null;
 }
 

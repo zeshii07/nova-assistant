@@ -1,7 +1,8 @@
 const { validateNluOutput } = require('./nluValidator');
 const { NluContextBuilder } = require('./nluContextBuilder');
+const { getBalancedExamples, getDomainExamples, formatFewShotPrompt } = require('./corpusFewShot');
 
-const NLU_PROMPT_VERSION = 'nova-language-2.0';
+const NLU_PROMPT_VERSION = 'nova-language-2.1';
 
 class RemoteNluInterpreter {
   constructor({ client, mode = 'off', contextBuilder = new NluContextBuilder(), maxInputChars = 4000, logger = null } = {}) {
@@ -22,6 +23,19 @@ class RemoteNluInterpreter {
     }
     const context = await this.contextBuilder.build({ tenant, state, services, pending });
     const customerText = String(message?.text || '').slice(0, this.maxInputChars);
+
+    // v45.0: Build few-shot examples from the variation corpus.
+    // Include domain-specific examples (for the tenant's domain) + a balanced
+    // sample across all intents. This gives the Groq model concrete examples
+    // of how Nova classifies customer messages.
+    const domain = String(tenant?.domain || 'universal').toLowerCase();
+    const domainExamples = getDomainExamples(domain, { maxExamples: 8 });
+    const balancedExamples = getBalancedExamples({ maxPerIntent: 3, maxTotal: 20 });
+    const allExamples = [...domainExamples, ...balancedExamples];
+    const fewShotSection = allExamples.length > 0
+      ? formatFewShotPrompt(allExamples, { maxPerIntent: 3, maxTotal: 20 })
+      : '';
+
     const system = [
       `You are Nova Multilingual NLU (${NLU_PROMPT_VERSION}). Interpret language only and return exactly the supplied JSON schema.`,
       'Do not answer the customer and do not provide reasoning.',
@@ -39,8 +53,10 @@ class RemoteNluInterpreter {
       'Keep relative date/time wording in *_text. A normalized value is only a linguistic suggestion; Nova validates and normalizes it again.',
       'Set service_id or product_id only when it exactly matches an ID in tenant_context.vocabulary. Otherwise leave the ID null.',
       'Use null for entity/customer properties not stated and empty arrays when no list values apply. Do not invent a fact or identifier absent from the message or tenant_context.',
+      // v45.0: Few-shot examples from the variation corpus
+      fewShotSection,
       `tenant_context=${JSON.stringify(stripAllowedLists(context))}`
-    ].join('\n');
+    ].filter(Boolean).join('\n');
     const response = await this.client.complete([
       { role:'system', content:system },
       { role:'user', content:customerText }

@@ -6,7 +6,7 @@ const { extractFieldAmendment } = require('../../../packages/conversation-intell
 const pendingAttributeExtractor=new AttributeExtractor();
 class CommerceConversationAdapter {
   constructor(){this.capabilityId='commerce';this.priority=110;}
-  async analyze({ tenant, message, state, services, interruption, correction }) {
+  async analyze({ tenant, message, state, services, interruption, correction, resolvedContext }) {
     const text=normalizeText(message.text); const cs=state.capabilityState?.commerce;
     const candidates=[]; let entities={};let groundedProductRequest=false;
     const pendingFieldEdit=cs?.pendingFieldEdit||null;
@@ -24,7 +24,10 @@ class CommerceConversationAdapter {
       // Cart-level commands own the turn even while a multi-item draft is
       // waiting for variants. Otherwise "clear my cart" is misread as another
       // color/size reply and the durable cart survives unexpectedly.
-      if(/\b(clear|empty|remove everything from)\s+(my\s+)?cart\b/.test(text)){
+      // v43.0: Also catch Roman Urdu noun-first patterns: "cart clear kar do",
+      // "order cancel kar do", "cart khaali kar do".
+      if(/\b(clear|empty|remove everything from)\s+(my\s+)?cart\b/.test(text) ||
+         /\b(?:cart|order|basket|bag)\s+(?:clear|empty|cancel|khaali|khaali\s+kar|cancel\s+kar)\s*(?:do|kar\s*do|karo)?\b/i.test(text)){
         entities={};
         return {priority:this.priority,candidates:[{intent:'commerce.cart.clear',confidence:1,priority:230,entities,reason:'cart_clear_global_commerce'}],entities,vocabularyMatches:[{type:'commerce_operation',value:'commerce.cart.clear',score:1}]};
       }
@@ -233,15 +236,36 @@ class CommerceConversationAdapter {
 
     // (2) Order type change mid-checkout: "change to delivery", "make it takeaway",
     // "switch to dine-in", "make it delivery", "delivery change karo"
+    // v42.1: Also catch STANDALONE declarations when there's an active commerce
+    // workflow — "i want to dine in" / "for here" / "to go" / "dine inn" (typo).
+    // Without this, "ok confirm and i want to dine inn" was sent to the catalog
+    // adapter which tried to find "dine inn" as a product and failed.
     // v42.1: Skip if the message also contains a date/time keyword — that's a
     // reschedule request ("change delivery to tomorrow at 7pm"), not an order
     // type change. The v41 reschedule block below will handle it.
-    if ((/\b(?:change|switch|make|update|convert)\b.*\b(?:to\s+)?(?:delivery|takeaway|take\s*away|take\s*out|dine[\s-]?in|eat\s+here|parcel|packing)\b/i.test(text) ||
-        /\b(?:delivery|takeaway|dine[\s-]?in)\s+(?:change\s+)?(?:karo|kar\s*do|karna\s+hai)\b/i.test(text)) &&
+    // v43.0: Skip if the message is a NOTE / instruction / remark — those start
+    // with "note:" / "instruction:" / "remark:" / "message:" and the body may
+    // legitimately mention "delivery" (e.g., "note: call before delivery").
+    // The note-add block below will handle it.
+    const isNotePrefix = /^\s*(?:note|instruction|remark|message)\s*[:\-]/i.test(message.text);
+    const hasOrderTypeVerb = !isNotePrefix && /\b(?:change|switch|make|update|convert)\b.*\b(?:to\s+)?(?:delivery|takeaway|take\s*away|take\s*out|dine[\s-]?in|dine\s+inn|eat\s+here|for\s+here|sit\s+in|parcel|packing|to\s+go|pack\s+up|pack\s+it)\b/i.test(text);
+    // v43.0: Standalone detection — only fire when the message is PRIMARILY about
+    // the order type, not just containing the word "delivery" (which could be a
+    // payment method "cash on delivery"). Require either:
+    //   - A short standalone phrase (≤ 6 words) with the order-type noun as the
+    //     main subject (no payment method words like "cash", "jazz", "easy",
+    //     "bank", "card", "method")
+    //   - OR an explicit change/make/switch verb (already covered by hasOrderTypeVerb)
+    //   - OR the Roman Urdu pattern (already covered by hasOrderTypeUrdu)
+    const isPaymentMethodContext = /\b(?:cash|jazz|easy|bank|card|method|payment)\b/i.test(text);
+    const isShortStandalone = (cs?.mode || cs?.lastOrderId) && !isPaymentMethodContext && text.split(/\s+/).length <= 6;
+    const hasOrderTypeStandalone = !isNotePrefix && !isPaymentMethodContext && isShortStandalone && /\b(?:delivery|home\s+delivery|takeaway|take\s*away|take\s*out|dine[\s-]?in|dine\s+inn|eat\s+here|sit\s+in|for\s+here|parcel|packing|to\s+go|pack\s+up|pack\s+it|deliver\s+it|for\s+delivery)\b/i.test(text);
+    const hasOrderTypeUrdu = !isNotePrefix && !isPaymentMethodContext && /\b(?:delivery|takeaway|dine[\s-]?in)\s+(?:change\s+)?(?:karo|kar\s*do|karna\s+hai|chahiye)\b/i.test(text);
+    if ((hasOrderTypeVerb || hasOrderTypeStandalone || hasOrderTypeUrdu) &&
         !/\b(?:today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next week|kal|parso)\b/i.test(text) &&
         !/\b(?:\d{1,2}\s*(?:am|pm)|\d{1,2}:\d{2})\b/i.test(text)) {
-      const orderType = /\bdine[\s-]?in|eat\s+here/.test(text) ? 'dine-in' :
-                       /\btakeaway|take\s*away|take\s*out|parcel|packing/.test(text) ? 'takeaway' : 'delivery';
+      const orderType = /\bdine[\s-]?in|dine\s+inn|eat\s+here|sit\s+in|for\s+here/.test(text) ? 'dine-in' :
+                       /\btakeaway|take\s*away|take\s*out|parcel|packing|to\s+go|pack\s+up|pack\s+it/.test(text) ? 'takeaway' : 'delivery';
       return {priority:this.priority,candidates:[{intent:'commerce.cart.update_order_meta',confidence:1,priority:241,entities:{orderType,requestedText:text},reason:'v42_order_type_change'}],entities:{orderType,requestedText:text},vocabularyMatches:[{type:'commerce_operation',value:'commerce.cart.update_order_meta',score:1}]};
     }
 
@@ -265,10 +289,17 @@ class CommerceConversationAdapter {
 
     // (5) Reorder / repeat last order: "reorder my last order", "I'll have my usual",
     // "repeat my previous order", "same as last time", "phir se same order"
-    if (/\b(?:reorder|re[\s-]?order|repeat|same\s+as\s+last|my\s+usual|previous\s+order|last\s+order\s+again)\b/i.test(text) ||
+    // v46.0: Also catch "book it again" / "do it again" / "same thing" when
+    // the resolved context indicates the last action was commerce-related.
+    const isRepeatReference = /\b(?:book (?:it|that|this) again|do (?:it|that) again|repeat (?:that|it|the)|same (?:order|thing|usual)|i'?ll have (?:the usual|my usual)|phir se|dobara|again)\b/i.test(text);
+    const isExplicitReorder = /\b(?:reorder|re[\s-]?order|repeat|same\s+as\s+last|my\s+usual|previous\s+order|last\s+order\s+again)\b/i.test(text) ||
         /\b(?:phir\s+se|dobara)\b.*\b(?:same\s+order|order)\b/i.test(text) ||
-        /\b(?:same\s+order|order)\b.*\b(?:phir\s+se|dobara|karo)\b/i.test(text)) {
-      return {priority:this.priority,candidates:[{intent:'commerce.reorder',confidence:1,priority:242,entities:{requestedText:text},reason:'v42_reorder_request'}],entities:{requestedText:text},vocabularyMatches:[{type:'commerce_operation',value:'commerce.reorder',score:1}]};
+        /\b(?:same\s+order|order)\b.*\b(?:phir\s+se|dobara|karo)\b/i.test(text);
+    // Check if resolvedContext says the last capability was commerce
+    const resolvedCtx = resolvedContext || null;
+    const lastWasCommerce = resolvedCtx?.lastCapability === 'commerce' || resolvedCtx?.lastOrderId;
+    if (isExplicitReorder || (isRepeatReference && lastWasCommerce)) {
+      return {priority:this.priority,candidates:[{intent:'commerce.reorder',confidence:1,priority:242,entities:{requestedText:text,resolvedContext:resolvedCtx||null},reason:isExplicitReorder?'v42_reorder_request':'v46_context_repeat_reference'}],entities:{requestedText:text,resolvedContext:resolvedCtx||null},vocabularyMatches:[{type:'commerce_operation',value:'commerce.reorder',score:1}]};
     }
 
     // (6) Cancel single cart item: "cancel the biryani", "cancel just the burger",
@@ -339,7 +370,11 @@ class CommerceConversationAdapter {
     // "give me N X", "i'll take X", "can i get X", "order N X", "pack N X",
     // "X please", "one plate of X", "2 pieces of X", "bhej do X",
     // "X chahiye", "X lena hai", "X ka order karna hai"
-    if ((groundedProductRequest||Boolean(cs?.mode))&&(
+    // v43.0: Skip if the message contains order-type keywords ("pack it up"
+    // means "pack it as takeaway", not "add a new product called 'pack it up'")
+    // Also catch "pack it up" / "pack it" — imperative phrase, not a product.
+    const isOrderTypeKeyword = /\b(?:delivery|home\s+delivery|takeaway|take\s*away|take\s*out|dine[\s-]?in|dine\s+inn|eat\s+here|sit\s+in|for\s+here|parcel|packing|to\s+go|pack\s+up|pack\s+it|deliver\s+it|for\s+delivery)\b/i.test(text);
+    if ((groundedProductRequest||Boolean(cs?.mode)) && !isOrderTypeKeyword && (
       /\b(add|include|put|send|give|bring|pack|deliver|ship|prepare|make)\b.*\b(order|cart|basket|bag|plate|piece|serving|portion)?\b/.test(text) ||
       /\badd\b.+\b(also|too|bhi|aur)\b/.test(text) ||
       /\bi want .* (also|too|bhi)\b/.test(text) ||

@@ -16,7 +16,13 @@ class BookingCapability extends BaseCapability {
 
   async execute(context) {
     const booking = context.services.booking;
-    const offering = context.services.offeringService || context.services.offering;
+    // v43.0 BUGFIX: Prefer the scoped `offering` service (injected by the
+    // execution engine's scopedServices block) over the unscooped
+    // `offeringService`. The unscooped version's getById requires (tenantId, id)
+    // while the scoped version takes just (id) — using the unscooped one was
+    // causing booking.swap_item / booking.service_change / booking.remove_item
+    // to return null for valid offering IDs.
+    const offering = context.services.offering || context.services.offeringService;
     const cleaning = context.services.cleaning;
     const engagement = context.services.engagement;
     const config = booking.getConfig();
@@ -1097,8 +1103,10 @@ class BookingCapability extends BaseCapability {
     const vocab = getServiceVocab(domain);
 
     // Try offering
+    // v43.0: Use single-arg getById (scoped offering service). Fall back to
+    // two-arg form (unscoped offeringService) for backward compatibility.
     console.warn("[Quote] tenant:", tenant?.id, "offering:", !!offering, "serviceId:", entities.serviceId); if (offering && entities.serviceId) {
-      const item = offering.getById(tenant.id, entities.serviceId);
+      const item = offering.getById ? (offering.getById.length === 1 ? offering.getById(entities.serviceId) : offering.getById(tenant.id, entities.serviceId)) : null;
       if (item) {
         const lines = [
           `📦 *${item.name}*`,
@@ -1154,8 +1162,10 @@ class BookingCapability extends BaseCapability {
   async handleServiceQuote(context, offering, cleaning, language, entities, tenant) {
     console.warn("[Quote] entities:", JSON.stringify(entities), "offering:", !!offering);
     // Try offering
+    // v43.0: Use single-arg getById (scoped offering service). Fall back to
+    // two-arg form (unscoped offeringService) for backward compatibility.
     console.warn("[Quote] tenant:", tenant?.id, "offering:", !!offering, "serviceId:", entities.serviceId); if (offering && entities.serviceId) {
-      const item = offering.getById(tenant.id, entities.serviceId);
+      const item = offering.getById ? (offering.getById.length === 1 ? offering.getById(entities.serviceId) : offering.getById(tenant.id, entities.serviceId)) : null;
       if (item && item.price != null) {
         const reply = language === 'roman_urdu'
           ? `${item.name} ki qeemat ${formatMoney(item.price, item.currency || 'PKR')} hai.`

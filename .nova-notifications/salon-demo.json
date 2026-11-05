@@ -283,5 +283,1088 @@
       "devMode": false,
       "queued": false
     }
+  },
+  {
+    "id": "NOT-MW35FLQF-45EF68",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T06:12:49.479Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v42-list-bookings\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_4E1WSR0S",
+      "tenantId": "salon-demo",
+      "customerId": "v42-list-bookings",
+      "conversationId": "salon-demo:test:v42-list-bookings",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW35FLN6-BFADE5E9",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:97be23c8b6544281b2f3ecc0f29099e1",
+      "revision": 1,
+      "calendarEventId": "EVT-MW35FLQD-6FB78FC9",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T06:12:49.477Z"
+        }
+      ],
+      "createdAt": "2026-11-05T06:12:49.477Z",
+      "updatedAt": "2026-11-05T06:12:49.478Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW36U5XV-42A518",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T06:52:08.467Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v42-list-bookings\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_0OS3HPHE",
+      "tenantId": "salon-demo",
+      "customerId": "v42-list-bookings",
+      "conversationId": "salon-demo:test:v42-list-bookings",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW36U5UM-33A4F2E8",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:96f279d0ea99826602af6f128be7879e",
+      "revision": 1,
+      "calendarEventId": "EVT-MW36U5XT-9C0BAF54",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T06:52:08.464Z"
+        }
+      ],
+      "createdAt": "2026-11-05T06:52:08.464Z",
+      "updatedAt": "2026-11-05T06:52:08.465Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW387AKB-E939A7",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T07:30:20.603Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v42-list-bookings\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_4G0UMMS1",
+      "tenantId": "salon-demo",
+      "customerId": "v42-list-bookings",
+      "conversationId": "salon-demo:test:v42-list-bookings",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW387AH4-A84B9D89",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:a2cff97319c2ebe90b501a0e5f9770ca",
+      "revision": 1,
+      "calendarEventId": "EVT-MW387AKA-C8206C92",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T07:30:20.601Z"
+        }
+      ],
+      "createdAt": "2026-11-05T07:30:20.601Z",
+      "updatedAt": "2026-11-05T07:30:20.602Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW38ANS9-E98A14",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T07:32:57.705Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v42-list-bookings\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_7PBEQU3O",
+      "tenantId": "salon-demo",
+      "customerId": "v42-list-bookings",
+      "conversationId": "salon-demo:test:v42-list-bookings",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW38ANP2-C4BD5729",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:05741a5950cee805da19bbb9193a3fbe",
+      "revision": 1,
+      "calendarEventId": "EVT-MW38ANS8-9696BB3E",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T07:32:57.703Z"
+        }
+      ],
+      "createdAt": "2026-11-05T07:32:57.703Z",
+      "updatedAt": "2026-11-05T07:32:57.704Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3ELJOS-2B4AE1",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T10:29:23.308Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v42-list-bookings\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_5TQTO368",
+      "tenantId": "salon-demo",
+      "customerId": "v42-list-bookings",
+      "conversationId": "salon-demo:test:v42-list-bookings",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3ELJLL-BF58C830",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:623d679518824f90f7b3eee1d4dbd429",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3ELJOR-32650188",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T10:29:23.306Z"
+        }
+      ],
+      "createdAt": "2026-11-05T10:29:23.306Z",
+      "updatedAt": "2026-11-05T10:29:23.307Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3ETRN2-E6FAAE",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T10:35:46.863Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v44-network-retry\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_68QYX9O3",
+      "tenantId": "salon-demo",
+      "customerId": "v44-network-retry",
+      "conversationId": "salon-demo:test:v44-network-retry",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3ETRGO-099B1866",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:be0ee2a172713c5eb0f58038c94118af",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3ETRN1-CA0511AB",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T10:35:46.860Z"
+        }
+      ],
+      "createdAt": "2026-11-05T10:35:46.860Z",
+      "updatedAt": "2026-11-05T10:35:46.861Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3EUHQG-9AEF8C",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T10:36:20.680Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v42-list-bookings\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_860KEQAM",
+      "tenantId": "salon-demo",
+      "customerId": "v42-list-bookings",
+      "conversationId": "salon-demo:test:v42-list-bookings",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3EUHN8-3BF320BE",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:254b500f461a88af7cbe59427c7cb75c",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3EUHQE-DD5008E4",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T10:36:20.678Z"
+        }
+      ],
+      "createdAt": "2026-11-05T10:36:20.678Z",
+      "updatedAt": "2026-11-05T10:36:20.679Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3EW3EB-C686DC",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T10:37:35.411Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v44-network-retry\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_A4BYEMQR",
+      "tenantId": "salon-demo",
+      "customerId": "v44-network-retry",
+      "conversationId": "salon-demo:test:v44-network-retry",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3EW381-BD26FC95",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:b57d2dfe11db8eca9e7de6471bc279b6",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3EW3EA-FBB8EF71",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T10:37:35.409Z"
+        }
+      ],
+      "createdAt": "2026-11-05T10:37:35.409Z",
+      "updatedAt": "2026-11-05T10:37:35.410Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3FB960-8AA755",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T10:49:22.728Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v42-list-bookings\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_27O9B3G3",
+      "tenantId": "salon-demo",
+      "customerId": "v42-list-bookings",
+      "conversationId": "salon-demo:test:v42-list-bookings",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3FB92T-A91CEF81",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:2885aff2eb00f0fece38dccf86febc8b",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3FB95Z-958BDCD1",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T10:49:22.726Z"
+        }
+      ],
+      "createdAt": "2026-11-05T10:49:22.726Z",
+      "updatedAt": "2026-11-05T10:49:22.727Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3FCUEN-AD2F66",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T10:50:36.911Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v44-network-retry\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_883BNBR1",
+      "tenantId": "salon-demo",
+      "customerId": "v44-network-retry",
+      "conversationId": "salon-demo:test:v44-network-retry",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3FCU82-341E3BDB",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:9e1e60edbaec63412cc8bbb8d794d897",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3FCUEL-7064AE7A",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T10:50:36.908Z"
+        }
+      ],
+      "createdAt": "2026-11-05T10:50:36.908Z",
+      "updatedAt": "2026-11-05T10:50:36.909Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3FOFHS-208074",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T10:59:37.456Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v42-list-bookings\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_5UFTO4HA",
+      "tenantId": "salon-demo",
+      "customerId": "v42-list-bookings",
+      "conversationId": "salon-demo:test:v42-list-bookings",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3FOFEI-0389EA27",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:f116cb2d4f49eff4387711956c68e6ed",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3FOFHR-F6398AA0",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T10:59:37.454Z"
+        }
+      ],
+      "createdAt": "2026-11-05T10:59:37.454Z",
+      "updatedAt": "2026-11-05T10:59:37.455Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3FOIX0-C812E7",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T10:59:41.892Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v44-network-retry\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_46QEJOJM",
+      "tenantId": "salon-demo",
+      "customerId": "v44-network-retry",
+      "conversationId": "salon-demo:test:v44-network-retry",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3FOIQQ-446DC757",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:148c2dcd89044f0ec307da593dc412f6",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3FOIWZ-8D407917",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T10:59:41.890Z"
+        }
+      ],
+      "createdAt": "2026-11-05T10:59:41.890Z",
+      "updatedAt": "2026-11-05T10:59:41.891Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3FPSJV-2A33E6",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T11:00:41.035Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v46-context-repeat-booking\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_5GO8OEPS",
+      "tenantId": "salon-demo",
+      "customerId": "v46-context-repeat-booking",
+      "conversationId": "salon-demo:test:v46-context-repeat-booking",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3FPSGF-2DEB5EFF",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:a752db9630af550e65dd4b39ec781518",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3FPSJT-3B8A768C",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T11:00:41.032Z"
+        }
+      ],
+      "createdAt": "2026-11-05T11:00:41.032Z",
+      "updatedAt": "2026-11-05T11:00:41.034Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3FRMOS-EF548A",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T11:02:06.748Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v46-context-repeat-booking\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_B1PWHWN1",
+      "tenantId": "salon-demo",
+      "customerId": "v46-context-repeat-booking",
+      "conversationId": "salon-demo:test:v46-context-repeat-booking",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3FRMLC-6F71BDF3",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:5a295385ecc11332c17b2dc7aacf5873",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3FRMOR-0CBE16A8",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T11:02:06.746Z"
+        }
+      ],
+      "createdAt": "2026-11-05T11:02:06.746Z",
+      "updatedAt": "2026-11-05T11:02:06.747Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3FWDRU-8F7169",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T11:05:48.474Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v46-context-repeat-booking\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_DZM3NKTQ",
+      "tenantId": "salon-demo",
+      "customerId": "v46-context-repeat-booking",
+      "conversationId": "salon-demo:test:v46-context-repeat-booking",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3FWDOJ-79446BD4",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:67921bbd35ba687284a515b6a2c2ed46",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3FWDRS-AD9B0A13",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T11:05:48.471Z"
+        }
+      ],
+      "createdAt": "2026-11-05T11:05:48.471Z",
+      "updatedAt": "2026-11-05T11:05:48.473Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3FXYWI-519A42",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T11:07:02.514Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v46-context-repeat-booking\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_8ZX7KORL",
+      "tenantId": "salon-demo",
+      "customerId": "v46-context-repeat-booking",
+      "conversationId": "salon-demo:test:v46-context-repeat-booking",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3FXYT6-FB7D2385",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:cebd25fbec01a5707d176bdd53db647a",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3FXYWH-23EEB6F1",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T11:07:02.512Z"
+        }
+      ],
+      "createdAt": "2026-11-05T11:07:02.512Z",
+      "updatedAt": "2026-11-05T11:07:02.513Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3FYVEG-C22CE3",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T11:07:44.632Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v42-list-bookings\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_DLAOEYMR",
+      "tenantId": "salon-demo",
+      "customerId": "v42-list-bookings",
+      "conversationId": "salon-demo:test:v42-list-bookings",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3FYVBA-891DE3BE",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:94407ad7af2fed4f318f0c5b7afa5dc7",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3FYVEF-D733BCE9",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T11:07:44.630Z"
+        }
+      ],
+      "createdAt": "2026-11-05T11:07:44.630Z",
+      "updatedAt": "2026-11-05T11:07:44.631Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3FYYWJ-191F73",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T11:07:49.171Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v44-network-retry\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_18PMKQCJ",
+      "tenantId": "salon-demo",
+      "customerId": "v44-network-retry",
+      "conversationId": "salon-demo:test:v44-network-retry",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3FYYPZ-78D893D9",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:6f1a3f11fbe1bebf471247ae03004ab9",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3FYYWH-BE8A93C0",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T11:07:49.168Z"
+        }
+      ],
+      "createdAt": "2026-11-05T11:07:49.168Z",
+      "updatedAt": "2026-11-05T11:07:49.169Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3FZC6V-D75D60",
+    "tenantId": "salon-demo",
+    "eventType": "booking_confirmed",
+    "createdAt": "2026-11-05T11:08:06.391Z",
+    "readAt": null,
+    "subject": "📅 New Booking Confirmed — Customer — Booking",
+    "preview": "New Booking Confirmed\n\nCustomer: —\nService: Booking\nDate: —\nTime: —\nPrice: —\nCustomer ID: v46-context-repeat-booking\n\nView in dashboard: https://nova-saas-test.onrender.com/admin",
+    "data": {
+      "id": "BKG_6UO2OQGM",
+      "tenantId": "salon-demo",
+      "customerId": "v46-context-repeat-booking",
+      "conversationId": "salon-demo:test:v46-context-repeat-booking",
+      "status": "confirmed",
+      "slots": {
+        "subject": null,
+        "items": [],
+        "date": "21/08/2026",
+        "time": "17:00",
+        "name": "Test User",
+        "phone": "03009999999",
+        "metadata": {
+          "calendarHoldId": "HLD-MW3FZC3K-B9931A16",
+          "calendarHoldExpiresAt": "2026-08-20T12:10:00.000Z",
+          "calendarStatus": "held"
+        }
+      },
+      "idempotencyKey": "booking:eec479a859b48a3814e34f69291062a4",
+      "revision": 1,
+      "calendarEventId": "EVT-MW3FZC6T-30FDF102",
+      "calendarProvider": "local",
+      "timeline": [
+        {
+          "action": "confirmed",
+          "at": "2026-11-05T11:08:06.389Z"
+        }
+      ],
+      "createdAt": "2026-11-05T11:08:06.389Z",
+      "updatedAt": "2026-11-05T11:08:06.390Z",
+      "serviceName": "Booking",
+      "date": null,
+      "time": null,
+      "price": null,
+      "currency": "AED",
+      "customerName": null,
+      "customerPhone": null,
+      "customerEmail": null,
+      "tenantName": "Nova Style Salon"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
   }
 ]

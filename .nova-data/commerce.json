@@ -393,6 +393,52 @@
         "status": "active",
         "expiresAt": "2026-10-05T16:55:22.686Z"
       }
+    },
+    "restaurant-demo:playground-user": {
+      "id": "CART-MW36D2UU-649F90",
+      "tenantId": "restaurant-demo",
+      "customerId": "playground-user",
+      "status": "active",
+      "items": [
+        {
+          "productId": "chicken-biryani",
+          "variantId": null,
+          "sku": "CHICKEN-BIRYANI",
+          "name": "Chicken Biryani",
+          "color": null,
+          "size": null,
+          "quantity": 2,
+          "unitPrice": 650,
+          "currency": "PKR",
+          "inventory": null,
+          "variantSelectionRequired": false
+        },
+        {
+          "productId": "beef-burger",
+          "variantId": null,
+          "sku": "BEEF-BURGER",
+          "name": "Beef Burger",
+          "color": null,
+          "size": null,
+          "quantity": 6,
+          "unitPrice": 850,
+          "currency": "PKR",
+          "inventory": null,
+          "variantSelectionRequired": false
+        }
+      ],
+      "checkout": {
+        "name": null,
+        "phone": null,
+        "email": null,
+        "city": null,
+        "address": null,
+        "landmark": null,
+        "paymentMethod": null,
+        "notes": null
+      },
+      "createdAt": "2026-11-05T06:38:51.318Z",
+      "updatedAt": "2026-11-05T06:38:51.325Z"
     }
   },
   "orders": {

@@ -11,6 +11,7 @@ const { WorkflowOwnershipEngine } = require('./workflowOwnershipEngine');
 const { ClauseSemanticEngine } = require('./clauseSemanticEngine');
 const { TemporalSemanticExtractor } = require('./temporalSemanticExtractor');
 const { UniversalMessageFrame, mergeUniversalEntities, appendResolvedIntents } = require('./universalMessageFrame');
+const { ContextResolutionEngine } = require('./contextResolutionEngine');
 
 class ConversationIntelligenceEngine {
   constructor({ adapterRegistry, llmInterpreter = null, nluInterpreter = null, aiLanguageLayer = null, semanticRouter = null, semanticRoutePolicy = null, nluDecisionPolicy = null, nluInvocationPolicy = null, logger = null, socialIntelligenceEngine = null, domainResolver = null, tenantAdapterRegistry = null } = {}) {
@@ -37,6 +38,9 @@ class ConversationIntelligenceEngine {
     this.workflowOwnership = new WorkflowOwnershipEngine();
     this.clauses = new ClauseSemanticEngine();
     this.temporal = new TemporalSemanticExtractor();
+    // v46.0: Context resolution engine — resolves pronouns and contextual
+    // references like "book it again" / "same time as last week" / "same address"
+    this.contextResolver = new ContextResolutionEngine({ logger });
     this.messageFrames = new UniversalMessageFrame();
   }
 
@@ -74,6 +78,25 @@ class ConversationIntelligenceEngine {
     const deterministicInterruption = this.interruptions.detect(message.text, state);
     const pending = workflowStack[workflowStack.length - 1] || null;
     const pendingValidation = pending ? this.validation.validatePending({ field: pending.pendingField, message: message.text }) : { valid:true };
+
+    // v46.0: Resolve contextual references ("book it again", "same time",
+    // "same address") using recent turns + CRM customer data. The resolved
+    // context is attached to the analysis output as `resolvedContext` so
+    // adapters can use it without re-implementing the lookup logic.
+    let resolvedContext = null;
+    try {
+      const customer = services.crmService?.getCustomer?.(tenant.id, message.customerId) || null;
+      resolvedContext = this.contextResolver.resolve({ message, state, customer, services });
+      if (resolvedContext?.hasReference) {
+        this.logger?.debug?.('context_reference_detected', {
+          referenceType: resolvedContext.referenceType,
+          lastCapability: resolvedContext.lastCapability,
+          lastServiceName: resolvedContext.lastServiceName,
+        });
+      }
+    } catch (err) {
+      this.logger?.warn?.('context_resolution.failed', { error: err.message });
+    }
 
     // Nova's lightweight statistical router runs locally before capability
     // adapters. It recognizes paraphrased intent and conversation meaning,
@@ -139,7 +162,7 @@ class ConversationIntelligenceEngine {
     for (const adapter of this.adapterRegistry.list()) {
       if (!tenant.capabilities?.includes(adapter.capabilityId)) continue;
       try {
-        const analysis = await adapter.analyze({ tenant, message, state, services, normalizedText, correction, interruption:deterministicInterruption, pending, domain, clauseSemantics, temporal, messageFrame, nluInterpretation:nlu?.interpretation || null });
+        const analysis = await adapter.analyze({ tenant, message, state, services, normalizedText, correction, interruption:deterministicInterruption, pending, domain, clauseSemantics, temporal, messageFrame, nluInterpretation:nlu?.interpretation || null, resolvedContext: resolvedContext || null });
         if (!analysis) continue;
         for (const item of analysis.vocabularyMatches || []) vocabularyMatches.push({ capabilityId:adapter.capabilityId, ...item });
         if (analysis.entities && Object.keys(analysis.entities).length) entityCandidates.push({ capabilityId:adapter.capabilityId, entities:mergeUniversalEntities(messageFrame.entities,analysis.entities) });
@@ -244,6 +267,8 @@ class ConversationIntelligenceEngine {
         providerRequestId:nlu?.providerRequestId || null, latencyMs:nlu?.latencyMs || 0
       },
       llm:{ used:Boolean(llm), validated:Boolean(llm?.validated), interpretation:llm?.interpretation || null },
+      // v46.0: Resolved context from pronoun/reference detection
+      resolvedContext: resolvedContext || null,
       timingMs:Number((performance.now()-started).toFixed(3))
     };
     return analysis;

@@ -742,5 +742,368 @@
       "devMode": false,
       "queued": false
     }
+  },
+  {
+    "id": "NOT-MW37EDNI-A1E0F7",
+    "tenantId": "restaurant-demo",
+    "eventType": "handoff_requested",
+    "createdAt": "2026-11-05T07:07:51.582Z",
+    "readAt": null,
+    "subject": "🤝 Customer Requesting Human Assistance — v43-corpus-edge-014",
+    "preview": "Human Handoff Requested\n\nCustomer ID: v43-corpus-edge-014\nConversation ID: restaurant-demo:test:v43-corpus-edge-014\nReason: customer_requested\nTenant: restaurant-demo\nContext: {\"message\":\"speak to a h",
+    "data": {
+      "id": "HND-MW37EDNG-M5JJ6",
+      "tenantId": "restaurant-demo",
+      "conversationId": "restaurant-demo:test:v43-corpus-edge-014",
+      "customerId": "v43-corpus-edge-014",
+      "reason": "customer_requested",
+      "status": "open",
+      "context": {
+        "message": "speak to a human",
+        "activePlugin": null,
+        "pendingQuestion": null,
+        "goal": null,
+        "capabilityState": {}
+      },
+      "createdAt": "2026-11-05T07:07:51.580Z",
+      "tenantName": "Nova Bistro"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW37MVRK-F8CB3B",
+    "tenantId": "restaurant-demo",
+    "eventType": "handoff_requested",
+    "createdAt": "2026-11-05T07:14:28.304Z",
+    "readAt": null,
+    "subject": "🤝 Customer Requesting Human Assistance — v43-corpus-edge-014",
+    "preview": "Human Handoff Requested\n\nCustomer ID: v43-corpus-edge-014\nConversation ID: restaurant-demo:test:v43-corpus-edge-014\nReason: customer_requested\nTenant: restaurant-demo\nContext: {\"message\":\"speak to a h",
+    "data": {
+      "id": "HND-MW37MVRJ-JGPUP",
+      "tenantId": "restaurant-demo",
+      "conversationId": "restaurant-demo:test:v43-corpus-edge-014",
+      "customerId": "v43-corpus-edge-014",
+      "reason": "customer_requested",
+      "status": "open",
+      "context": {
+        "message": "speak to a human",
+        "activePlugin": null,
+        "pendingQuestion": null,
+        "goal": null,
+        "capabilityState": {}
+      },
+      "createdAt": "2026-11-05T07:14:28.303Z",
+      "tenantName": "Nova Bistro"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW37S6NM-F3B808",
+    "tenantId": "restaurant-demo",
+    "eventType": "handoff_requested",
+    "createdAt": "2026-11-05T07:18:35.698Z",
+    "readAt": null,
+    "subject": "🤝 Customer Requesting Human Assistance — v43-corpus-edge-014",
+    "preview": "Human Handoff Requested\n\nCustomer ID: v43-corpus-edge-014\nConversation ID: restaurant-demo:test:v43-corpus-edge-014\nReason: customer_requested\nTenant: restaurant-demo\nContext: {\"message\":\"speak to a h",
+    "data": {
+      "id": "HND-MW37S6NL-XDI15",
+      "tenantId": "restaurant-demo",
+      "conversationId": "restaurant-demo:test:v43-corpus-edge-014",
+      "customerId": "v43-corpus-edge-014",
+      "reason": "customer_requested",
+      "status": "open",
+      "context": {
+        "message": "speak to a human",
+        "activePlugin": null,
+        "pendingQuestion": null,
+        "goal": null,
+        "capabilityState": {}
+      },
+      "createdAt": "2026-11-05T07:18:35.697Z",
+      "tenantName": "Nova Bistro"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW37YZZJ-9104AF",
+    "tenantId": "restaurant-demo",
+    "eventType": "handoff_requested",
+    "createdAt": "2026-11-05T07:23:53.648Z",
+    "readAt": null,
+    "subject": "🤝 Customer Requesting Human Assistance — v43-corpus-edge-014",
+    "preview": "Human Handoff Requested\n\nCustomer ID: v43-corpus-edge-014\nConversation ID: restaurant-demo:test:v43-corpus-edge-014\nReason: customer_requested\nTenant: restaurant-demo\nContext: {\"message\":\"speak to a h",
+    "data": {
+      "id": "HND-MW37YZZI-2BOV9",
+      "tenantId": "restaurant-demo",
+      "conversationId": "restaurant-demo:test:v43-corpus-edge-014",
+      "customerId": "v43-corpus-edge-014",
+      "reason": "customer_requested",
+      "status": "open",
+      "context": {
+        "message": "speak to a human",
+        "activePlugin": null,
+        "pendingQuestion": null,
+        "goal": null,
+        "capabilityState": {}
+      },
+      "createdAt": "2026-11-05T07:23:53.646Z",
+      "tenantName": "Nova Bistro"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW382TI0-04F291",
+    "tenantId": "restaurant-demo",
+    "eventType": "handoff_requested",
+    "createdAt": "2026-11-05T07:26:51.864Z",
+    "readAt": null,
+    "subject": "🤝 Customer Requesting Human Assistance — v43-corpus-edge-014",
+    "preview": "Human Handoff Requested\n\nCustomer ID: v43-corpus-edge-014\nConversation ID: restaurant-demo:test:v43-corpus-edge-014\nReason: customer_requested\nTenant: restaurant-demo\nContext: {\"message\":\"speak to a h",
+    "data": {
+      "id": "HND-MW382THZ-I3FES",
+      "tenantId": "restaurant-demo",
+      "conversationId": "restaurant-demo:test:v43-corpus-edge-014",
+      "customerId": "v43-corpus-edge-014",
+      "reason": "customer_requested",
+      "status": "open",
+      "context": {
+        "message": "speak to a human",
+        "activePlugin": null,
+        "pendingQuestion": null,
+        "goal": null,
+        "capabilityState": {}
+      },
+      "createdAt": "2026-11-05T07:26:51.863Z",
+      "tenantName": "Nova Bistro"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW386IL0-5A4F2E",
+    "tenantId": "restaurant-demo",
+    "eventType": "handoff_requested",
+    "createdAt": "2026-11-05T07:29:44.340Z",
+    "readAt": null,
+    "subject": "🤝 Customer Requesting Human Assistance — v43-corpus-edge-014",
+    "preview": "Human Handoff Requested\n\nCustomer ID: v43-corpus-edge-014\nConversation ID: restaurant-demo:test:v43-corpus-edge-014\nReason: customer_requested\nTenant: restaurant-demo\nContext: {\"message\":\"speak to a h",
+    "data": {
+      "id": "HND-MW386IKZ-8B3B6",
+      "tenantId": "restaurant-demo",
+      "conversationId": "restaurant-demo:test:v43-corpus-edge-014",
+      "customerId": "v43-corpus-edge-014",
+      "reason": "customer_requested",
+      "status": "open",
+      "context": {
+        "message": "speak to a human",
+        "activePlugin": null,
+        "pendingQuestion": null,
+        "goal": null,
+        "capabilityState": {}
+      },
+      "createdAt": "2026-11-05T07:29:44.339Z",
+      "tenantName": "Nova Bistro"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW389WYM-9C455A",
+    "tenantId": "restaurant-demo",
+    "eventType": "handoff_requested",
+    "createdAt": "2026-11-05T07:32:22.942Z",
+    "readAt": null,
+    "subject": "🤝 Customer Requesting Human Assistance — v43-corpus-edge-014",
+    "preview": "Human Handoff Requested\n\nCustomer ID: v43-corpus-edge-014\nConversation ID: restaurant-demo:test:v43-corpus-edge-014\nReason: customer_requested\nTenant: restaurant-demo\nContext: {\"message\":\"speak to a h",
+    "data": {
+      "id": "HND-MW389WYL-2MYD5",
+      "tenantId": "restaurant-demo",
+      "conversationId": "restaurant-demo:test:v43-corpus-edge-014",
+      "customerId": "v43-corpus-edge-014",
+      "reason": "customer_requested",
+      "status": "open",
+      "context": {
+        "message": "speak to a human",
+        "activePlugin": null,
+        "pendingQuestion": null,
+        "goal": null,
+        "capabilityState": {}
+      },
+      "createdAt": "2026-11-05T07:32:22.941Z",
+      "tenantName": "Nova Bistro"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3ENDKI-4272F0",
+    "tenantId": "restaurant-demo",
+    "eventType": "handoff_requested",
+    "createdAt": "2026-11-05T10:30:48.691Z",
+    "readAt": null,
+    "subject": "🤝 Customer Requesting Human Assistance — v43-corpus-edge-014",
+    "preview": "Human Handoff Requested\n\nCustomer ID: v43-corpus-edge-014\nConversation ID: restaurant-demo:test:v43-corpus-edge-014\nReason: customer_requested\nTenant: restaurant-demo\nContext: {\"message\":\"speak to a h",
+    "data": {
+      "id": "HND-MW3ENDKH-IHKD5",
+      "tenantId": "restaurant-demo",
+      "conversationId": "restaurant-demo:test:v43-corpus-edge-014",
+      "customerId": "v43-corpus-edge-014",
+      "reason": "customer_requested",
+      "status": "open",
+      "context": {
+        "message": "speak to a human",
+        "activePlugin": null,
+        "pendingQuestion": null,
+        "goal": null,
+        "capabilityState": {}
+      },
+      "createdAt": "2026-11-05T10:30:48.689Z",
+      "tenantName": "Nova Bistro"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3EVVJS-F38A3B",
+    "tenantId": "restaurant-demo",
+    "eventType": "handoff_requested",
+    "createdAt": "2026-11-05T10:37:25.240Z",
+    "readAt": null,
+    "subject": "🤝 Customer Requesting Human Assistance — v43-corpus-edge-014",
+    "preview": "Human Handoff Requested\n\nCustomer ID: v43-corpus-edge-014\nConversation ID: restaurant-demo:test:v43-corpus-edge-014\nReason: customer_requested\nTenant: restaurant-demo\nContext: {\"message\":\"speak to a h",
+    "data": {
+      "id": "HND-MW3EVVJR-M5SSF",
+      "tenantId": "restaurant-demo",
+      "conversationId": "restaurant-demo:test:v43-corpus-edge-014",
+      "customerId": "v43-corpus-edge-014",
+      "reason": "customer_requested",
+      "status": "open",
+      "context": {
+        "message": "speak to a human",
+        "activePlugin": null,
+        "pendingQuestion": null,
+        "goal": null,
+        "capabilityState": {}
+      },
+      "createdAt": "2026-11-05T10:37:25.239Z",
+      "tenantName": "Nova Bistro"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3FCMNO-094D23",
+    "tenantId": "restaurant-demo",
+    "eventType": "handoff_requested",
+    "createdAt": "2026-11-05T10:50:26.868Z",
+    "readAt": null,
+    "subject": "🤝 Customer Requesting Human Assistance — v43-corpus-edge-014",
+    "preview": "Human Handoff Requested\n\nCustomer ID: v43-corpus-edge-014\nConversation ID: restaurant-demo:test:v43-corpus-edge-014\nReason: customer_requested\nTenant: restaurant-demo\nContext: {\"message\":\"speak to a h",
+    "data": {
+      "id": "HND-MW3FCMNN-KLVO6",
+      "tenantId": "restaurant-demo",
+      "conversationId": "restaurant-demo:test:v43-corpus-edge-014",
+      "customerId": "v43-corpus-edge-014",
+      "reason": "customer_requested",
+      "status": "open",
+      "context": {
+        "message": "speak to a human",
+        "activePlugin": null,
+        "pendingQuestion": null,
+        "goal": null,
+        "capabilityState": {}
+      },
+      "createdAt": "2026-11-05T10:50:26.867Z",
+      "tenantName": "Nova Bistro"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
+  },
+  {
+    "id": "NOT-MW3FW5JF-B77657",
+    "tenantId": "restaurant-demo",
+    "eventType": "handoff_requested",
+    "createdAt": "2026-11-05T11:05:37.803Z",
+    "readAt": null,
+    "subject": "🤝 Customer Requesting Human Assistance — bench-corpus-EDGE-014",
+    "preview": "Human Handoff Requested\n\nCustomer ID: bench-corpus-EDGE-014\nConversation ID: restaurant-demo:test:bench-corpus-EDGE-014\nReason: customer_requested\nTenant: restaurant-demo\nContext: {\"message\":\"speak to",
+    "data": {
+      "id": "HND-MW3FW5JE-3M10O",
+      "tenantId": "restaurant-demo",
+      "conversationId": "restaurant-demo:test:bench-corpus-EDGE-014",
+      "customerId": "bench-corpus-EDGE-014",
+      "reason": "customer_requested",
+      "status": "open",
+      "context": {
+        "message": "speak to a human",
+        "activePlugin": null,
+        "pendingQuestion": null,
+        "goal": null,
+        "capabilityState": {}
+      },
+      "createdAt": "2026-11-05T11:05:37.802Z",
+      "tenantName": "Nova Bistro"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
   }
 ]
