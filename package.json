@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "51.0.0",
+  "version": "53.0.0",
   "private": true,
-  "description": "Nova v51.0 (Sprint 11 Phase 4) - Integration channels. Channel Gateway with universal message normalization across website, WhatsApp, kiosk, REST API. WhatsApp adapter handles text, image, audio, document, location messages. Kiosk adapter strips markdown. Integration Hub with provider registry (Google Calendar, Stripe, Email, WhatsApp Business, Generic POS), credential manager (encrypted storage), webhook signature verification.",
+  "description": "Nova v53.0 (Sprint 13 Phase 6) - Production optimization. Conversation Replay Engine with PII redaction, regression detection, and export/import. Regression Evaluator with baseline comparison, diff reporting, and accuracy trend tracking. Cost Optimizer with token budget tracking, rate limiting (per-tenant), and caching. Load Tester with concurrent conversation simulation, fault injection, stress testing, and throughput measurement.",
   "main": "apps/api/src/cluster.js",
   "type": "commonjs",
   "engines": {

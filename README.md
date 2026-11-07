@@ -1,10 +1,21 @@
-# Nova Assistant — v51.0
+# Nova Assistant — v53.0
 
 **Multi-tenant SaaS conversation engine** for service businesses. Handles orders, bookings, hotel room reservations, and customer interactions across restaurants, hotels, salons, cleaning services, retail, healthcare, education, and driving schools.
 
 ---
 
-## 🚀 What's New (v40.0 → v51.0)
+## 🚀 What's New (v40.0 → v53.0)
+
+### v53.0 — Production Optimization (Phase 6) — FINAL PHASE
+- **Conversation Replay Engine** — records production conversations with PII redaction (phone, email, name, address). Replays against current engine and compares outputs (capability, intent, reply text). Generates diff reports highlighting regressions. Export/import recordings for cross-environment testing
+- **Regression Evaluator** — runs the variation corpus against the engine, compares against saved baselines, identifies new failures (regressions) and new passes (improvements). Tracks accuracy trends across versions
+- **Cost Optimizer** — tracks LLM token costs, per-tenant rate limiting (60 req/min default), caching to avoid redundant API calls, cost-per-conversation estimation, system-wide cost summary
+- **Load Tester** — concurrent conversation simulation (configurable parallelism), fault injection (force errors at specific probability), stress testing with automatic breaking-point detection, latency percentiles, throughput measurement, memory delta tracking
+
+### v52.0 — Business Intelligence (Phase 5)
+- **Business Config Profile** — per-tenant configuration that determines capabilities, channels, policies, integrations, and assistant personality. Supports custom business types (e.g., pet grooming) without hardcoded categories. Domain defaults for all 8 domains. Validation with error reporting
+- **Customer Memory** — preferences, interaction history (last 50), consent management (dataCollection, marketing), tags, notes, GDPR right to erasure. Tenant-isolated. Customer insights (success rate, VIP detection, preferred channel/language/payment, interaction breakdown)
+- **Analytics Engine** — real-time metrics tracking: message count, unique customers, booking/order success rates, fallback rate, escalation rate, duplicate action rate, latency percentiles (p50/p95/p99), channel/capability/intent breakdowns. Per-tenant dashboards and per-customer insights
 
 ### v51.0 — Integration Channels (Phase 4)
 - **Channel Gateway** — unified communication layer that normalizes incoming/outgoing messages across all channels (website, WhatsApp, kiosk, REST API). Auto-detects channel from payload structure. WhatsApp adapter handles text, image, audio, document, and location messages. Kiosk adapter strips markdown for display. Identity mapping persists customer IDs across sessions
