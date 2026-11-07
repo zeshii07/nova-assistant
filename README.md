@@ -1,10 +1,14 @@
-# Nova Assistant — v50.0
+# Nova Assistant — v51.0
 
 **Multi-tenant SaaS conversation engine** for service businesses. Handles orders, bookings, hotel room reservations, and customer interactions across restaurants, hotels, salons, cleaning services, retail, healthcare, education, and driving schools.
 
 ---
 
-## 🚀 What's New (v40.0 → v50.0)
+## 🚀 What's New (v40.0 → v51.0)
+
+### v51.0 — Integration Channels (Phase 4)
+- **Channel Gateway** — unified communication layer that normalizes incoming/outgoing messages across all channels (website, WhatsApp, kiosk, REST API). Auto-detects channel from payload structure. WhatsApp adapter handles text, image, audio, document, and location messages. Kiosk adapter strips markdown for display. Identity mapping persists customer IDs across sessions
+- **Integration Hub** — provider registry with 5 builtin providers (Google Calendar, Stripe, Email SMTP, WhatsApp Business API, Generic POS). Encrypted credential manager with per-tenant storage. Webhook signature verification (HMAC-SHA256). Custom provider registration for extensibility
 
 ### v50.0 — Reply Intelligence (Phase 3)
 - **Reply Engine** — dedicated reply-planning and response-generation system with 6-stage pipeline: Response Context Builder → Information Grounding → Response Planner → Response Composer → Response Validator → Channel Formatter
