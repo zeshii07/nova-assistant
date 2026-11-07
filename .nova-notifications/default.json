@@ -288,5 +288,34 @@
       "devMode": false,
       "queued": false
     }
+  },
+  {
+    "id": "NOT-MW3GZC5X-A8E8DD",
+    "tenantId": "default",
+    "eventType": "lead_captured",
+    "createdAt": "2026-11-05T11:36:05.973Z",
+    "readAt": null,
+    "subject": "🎯 New Lead Captured — Zeeshan Ahmad — Score: 100",
+    "preview": "New Lead Captured\n\nCustomer: Zeeshan Ahmad\nLead Score: 100\nGrade: hot\nLead ID: LD-WPSK7I\nChannel: http\nInterested in: P003, Wireless Earbuds, catalog, commerce\nPhone: 03019299608\n\nView in dashboard: h",
+    "data": {
+      "tenantId": "default",
+      "leadId": "LD-WPSK7I",
+      "customerId": "commerce-user",
+      "transactionIntent": "COMMERCE_ORDER_CREATED",
+      "customerName": "Zeeshan Ahmad",
+      "customerPhone": "03019299608",
+      "score": 100,
+      "grade": "hot",
+      "interests": "P003, Wireless Earbuds, catalog, commerce",
+      "channel": "http",
+      "tenantName": "Demo Store"
+    },
+    "email": {
+      "recipients": [],
+      "sent": false,
+      "error": "No recipient emails configured",
+      "devMode": false,
+      "queued": false
+    }
   }
 ]

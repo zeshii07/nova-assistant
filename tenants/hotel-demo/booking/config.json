@@ -1,0 +1,32 @@
+{
+  "enabled": true,
+  "mode": "reservation",
+  "defaultSubject": "Room Reservation",
+  "triggerTerms": [
+    "book",
+    "reserve",
+    "room",
+    "check in",
+    "accommodation",
+    "stay",
+    "i need a room",
+    "room for tonight"
+  ],
+  "requiredFields": [
+    "subject",
+    "date",
+    "time",
+    "name",
+    "phone"
+  ],
+  "confirmedLabel": "Room reservation received",
+  "readyLabel": "Your room reservation is ready",
+  "confirmPrompt": "Confirm this reservation when you are ready.",
+  "prompts": {
+    "subject": "Which room type would you like to book?",
+    "date": "What is your check-in date?",
+    "time": "How many nights will you be staying?",
+    "name": "May I have the name for this reservation?",
+    "phone": "What is the best contact phone number for this reservation?"
+  }
+}

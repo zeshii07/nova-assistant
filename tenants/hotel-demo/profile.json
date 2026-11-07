@@ -1,0 +1,47 @@
+{
+  "status": "active",
+  "defaultLanguage": "english",
+  "capabilities": [
+    "assistant",
+    "crm",
+    "offering",
+    "booking",
+    "service"
+  ],
+  "features": {
+    "llmFallback": false
+  },
+  "permissions": [
+    "knowledge.read",
+    "memory.read:assistant",
+    "memory.write:assistant",
+    "memory.delete:assistant",
+    "crm.customer.read:assistant",
+    "crm.customer.write:assistant",
+    "crm.activity.write:assistant",
+    "crm.customer.read:crm",
+    "crm.customer.write:crm",
+    "crm.note.write:crm",
+    "crm.tag.write:crm",
+    "crm.activity.read:crm",
+    "crm.activity.write:crm",
+    "offering.read:offering",
+    "booking.read:booking",
+    "booking.write:booking",
+    "offering.read:booking"
+  ],
+  "id": "hotel-demo",
+  "name": "Grand Plaza Hotel",
+  "domain": "hotel",
+  "branding": {
+    "assistantName": "Grand Plaza Hotel Booking Assistant",
+    "welcomeMessage": "Welcome to Grand Plaza Hotel! 🏨 I can help you check room availability, compare room types, and make a reservation. How can I assist you today?",
+    "welcomeMessageRomanUrdu": "Grand Plaza Hotel mein khush aamdeed! 🏨 Main aap ki room availability check karne, room types compare karne aur reservation banane mein madad kar sakta hoon.",
+    "welcomeMessageUrdu": "گرانڈ پلازا ہوٹل میں خوش آمدید! 🏨 میں آپ کی کمرے کی دستیابی چیک کرنے، کمرے کی اقسام کا موازنہ کرنے اور بکنگ بنانے میں مدد کر سکتا ہوں۔"
+  },
+  "business": {
+    "name": "Grand Plaza Hotel",
+    "description": "A 4-star hotel with 120 rooms including standard, deluxe, executive, and presidential suites. Located in the heart of the city.",
+    "timezone": "Asia/Karachi"
+  }
+}

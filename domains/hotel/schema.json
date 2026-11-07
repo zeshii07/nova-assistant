@@ -1,0 +1,59 @@
+{
+  "id": "hotel",
+  "version": 1,
+  "extends": "universal",
+  "entities": [
+    "room_type",
+    "room_number",
+    "check_in_date",
+    "check_out_date",
+    "number_of_guests",
+    "number_of_rooms",
+    "number_of_nights",
+    "room_amenity",
+    "booking_id"
+  ],
+  "actions": [
+    "browse_rooms",
+    "check_room_availability",
+    "book_room",
+    "modify_booking",
+    "cancel_booking",
+    "check_in",
+    "check_out",
+    "ask_hotel_info"
+  ],
+  "semantics": {
+    "offeringBrowseTerms": [
+      "rooms",
+      "room types",
+      "available rooms",
+      "what rooms do you have",
+      "accommodation",
+      "suites",
+      "do you have any rooms",
+      "room rates"
+    ],
+    "offeringInterestTerms": [
+      "standard room",
+      "deluxe room",
+      "suite",
+      "family room",
+      "executive room",
+      "presidential suite",
+      "single room",
+      "double room",
+      "twin room"
+    ],
+    "bookingTerms": [
+      "book a room",
+      "reserve a room",
+      "room for tonight",
+      "check in",
+      "check out",
+      "i need a room",
+      "accommodation",
+      "stay"
+    ]
+  }
+}

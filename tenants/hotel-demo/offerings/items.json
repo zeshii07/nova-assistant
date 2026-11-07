@@ -1,0 +1,97 @@
+[
+  {
+    "id": "standard-room",
+    "name": "Standard Room",
+    "aliases": ["standard", "basic room", "economy room", "single bed room"],
+    "type": "room",
+    "category": "standard",
+    "description": "Comfortable 25 sqm room with a queen-size bed, air conditioning, free Wi-Fi, and a flat-screen TV. Perfect for solo travelers or couples.",
+    "price": 8000,
+    "currency": "PKR",
+    "durationMinutes": null,
+    "priceType": "per_night",
+    "bookable": true,
+    "metadata": {
+      "maxGuests": 2,
+      "bedType": "queen",
+      "size": "25 sqm",
+      "amenities": ["wifi", "ac", "tv", "room service", "minibar"]
+    }
+  },
+  {
+    "id": "deluxe-room",
+    "name": "Deluxe Room",
+    "aliases": ["deluxe", "premium room", "superior room", "delux room"],
+    "type": "room",
+    "category": "deluxe",
+    "description": "Spacious 35 sqm room with a king-size bed, city view, air conditioning, free Wi-Fi, flat-screen TV, and a sitting area. Ideal for business travelers.",
+    "price": 12000,
+    "currency": "PKR",
+    "durationMinutes": null,
+    "priceType": "per_night",
+    "bookable": true,
+    "metadata": {
+      "maxGuests": 3,
+      "bedType": "king",
+      "size": "35 sqm",
+      "amenities": ["wifi", "ac", "tv", "room service", "minibar", "sitting area", "city view"]
+    }
+  },
+  {
+    "id": "executive-room",
+    "name": "Executive Room",
+    "aliases": ["executive", "business room", "club room", "executive suite"],
+    "type": "room",
+    "category": "executive",
+    "description": "Premium 40 sqm room with a king-size bed, access to the Executive Lounge, complimentary breakfast, and a dedicated workspace. Designed for business executives.",
+    "price": 18000,
+    "currency": "PKR",
+    "durationMinutes": null,
+    "priceType": "per_night",
+    "bookable": true,
+    "metadata": {
+      "maxGuests": 3,
+      "bedType": "king",
+      "size": "40 sqm",
+      "amenities": ["wifi", "ac", "tv", "room service", "minibar", "executive lounge access", "breakfast included", "workspace", "city view"]
+    }
+  },
+  {
+    "id": "family-room",
+    "name": "Family Room",
+    "aliases": ["family", "family suite", "connecting rooms"],
+    "type": "room",
+    "category": "family",
+    "description": "Large 50 sqm room with two queen beds and a separate sitting area. Perfect for families with children. Includes complimentary breakfast for all guests.",
+    "price": 22000,
+    "currency": "PKR",
+    "durationMinutes": null,
+    "priceType": "per_night",
+    "bookable": true,
+    "metadata": {
+      "maxGuests": 5,
+      "bedType": "two queen",
+      "size": "50 sqm",
+      "amenities": ["wifi", "ac", "tv", "room service", "minibar", "breakfast included", "sitting area", "pool view"]
+    }
+  },
+  {
+    "id": "presidential-suite",
+    "name": "Presidential Suite",
+    "aliases": ["presidential", "vip suite", "royal suite", "president suite"],
+    "type": "room",
+    "category": "suite",
+    "description": "Our finest 80 sqm suite with a king bedroom, separate living room, dining area, private balcony, and panoramic city views. Includes butler service and all premium amenities.",
+    "price": 50000,
+    "currency": "PKR",
+    "durationMinutes": null,
+    "priceType": "per_night",
+    "bookable": true,
+    "metadata": {
+      "maxGuests": 4,
+      "bedType": "king",
+      "size": "80 sqm",
+      "amenities": ["wifi", "ac", "tv", "room service", "minibar", "butler service", "private balcony", "panoramic view", "dining area", "living room", "jacuzzi"]
+    }
+  }
+]

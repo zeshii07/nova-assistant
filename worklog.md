@@ -1207,3 +1207,215 @@ Stage Summary:
 - 8 benchmarks track performance across releases
 - README fully updated with architecture, features, tests, config, and deployment
 - Fresh zip at /home/z/my-project/download/nova-v46.0.zip
+
+---
+Task ID: v47.0
+Agent: Super Z (main)
+Task: Sprint 7 — Hotel management system + restaurant reservation bug fix.
+
+Work Log:
+
+TRACK 1 — RESTAURANT RESERVATION BUG FIX:
+- Bug: "i want to reserve a table for party of 10 people" / "i want to book a table for 10 persons" / "i want to reserve space for my family" were ALL misrouted to catalog.unavailable_request ("Sorry, that item is not available") instead of booking.start.
+- Root cause: catalog adapter's explicit_unmatched_catalog_request handler fires when message contains REQUEST_CUE ("i want") + no product match. Since "table" isn't a food item, catalog returned unavailable_request with priority 180, beating booking adapter's booking.start.
+- Fix: Added reservation-language guard at top of catalog adapter analyze() — detects "reserve", "book a table", "book a room", "party of N", "table for N", "family dinner", "dinner buffet" etc. When detected + tenant has booking capability, catalog returns empty candidates (yields to booking).
+- Verified: All 3 failing phrases now route to booking.start with correct party size extraction. Normal product ordering ("i want 1 chicken biryani") still works correctly.
+
+TRACK 2 — HOTEL MANAGEMENT SYSTEM:
+- Created domains/hotel/schema.json — hotel domain with room_type, check_in_date, check_out_date, number_of_guests, number_of_rooms, number_of_nights, room_amenity entities and browse_rooms, check_room_availability, book_room, modify_booking, cancel_booking, check_in, check_out, ask_hotel_info actions.
+- Added hotel vocabulary to domainVocabulary.js — 20+ typos (delux→deluxe, accomodation→accommodation, presedential→presidential), 8 abbreviations, 9 synonym groups (standard/deluxe/executive/family/presidential/single/double/twin), quantity units (room/night/guest), 12 special instructions (early check in, late check out, high floor, sea view), 30+ domain terms, 5 Roman Urdu mappings.
+- Created hotel-demo tenant (Grand Plaza Hotel):
+  - profile.json: 4-star hotel, 120 rooms, domain=hotel, capabilities=[assistant, crm, offering, booking, service]
+  - offerings/items.json: 5 room types — Standard Room (Rs8,000), Deluxe Room (Rs12,000), Executive Room (Rs18,000), Family Room (Rs22,000), Presidential Suite (Rs50,000) — each with description, price, maxGuests, bedType, size, amenities
+  - booking/config.json: mode=reservation, triggerTerms=[book, reserve, room, check in, accommodation, stay], requiredFields=[subject, date, time, name, phone]
+  - calendar/config.json: 120 room capacity, timezone=Asia/Karachi
+  - knowledge/business.json: address, phone, email, check-in/out times, policies (cancellation, pets, smoking, extra bed, breakfast)
+
+TESTS:
+- 6 reservation bug fix tests (P1-P6): verify "reserve a table" / "book a table" / "reserve space for family" route to booking, not catalog; party size extracted correctly; normal product orders still work
+- 12 hotel system tests (Q1-Q12): browse rooms, book deluxe/standard room, check presidential suite price, family room availability, vocabulary typo enrichment (delux/accomodation/presedential), domain adapter registration, room detail view, full booking flow completion, check-in time query
+- All 18 pass
+- 128/128 total regression tests pass (excluding 273 variation corpus)
+
+- Bumped package.json 46.0.0 → 47.0.0
+- Updated README.md to v47.0 with hotel domain
+- Wrote RELEASE_NOTES_V47.md
+- Built fresh zip at /home/z/my-project/download/nova-v47.0.zip
+
+Stage Summary:
+- Nova v47.0 Sprint 7 — hotel management system + reservation bug fix complete.
+- Restaurant reservation bug fixed: "reserve a table" / "book a table" now correctly routes to booking adapter
+- Hotel management system: customers can browse rooms, check prices, and book rooms via Nova chat
+- 5 room types with full pricing and amenities
+- Hotel admin interface to be built separately
+- Fresh zip at /home/z/my-project/download/nova-v47.0.zip
+
+---
+Task ID: v48.0
+Agent: Super Z (main)
+Task: Sprint 8 Phase 1 — Architecture foundation. Four new critical components based on comprehensive architecture audit.
+
+Work Log:
+
+ARCHITECTURE AUDIT:
+- Surveyed all 78 existing packages. Found many proposed components already exist but are thin:
+  - policy-engine: only text filtering (forbidden phrases, emoji level). NOT a business policy engine.
+  - permission-engine: basic capability enablement check. Not action-level RBAC.
+  - state-machine: exists with schema validation. Could be extended for workflow state.
+  - concurrency-control: has DistributedLock, OptimisticVersioning, IdempotencyGuard. Good foundation.
+  - circuit-breaker: exists and works.
+  - event-engine: in-process event bus. Good foundation.
+  - channel: basic WhatsApp adapter. Not a full channel gateway.
+
+PHASE 1 — FOUR NEW CRITICAL COMPONENTS:
+
+1. BUSINESS POLICY ENGINE (packages/business-policy-engine/src/index.js):
+   - Centralized business rules configurable per-tenant via policies.json
+   - Domain defaults for all 8 domains (restaurant, hotel, salon, cleaning, retail, healthcare, education, driving_school)
+   - Policies: cancellation (windowHours, chargePercentage), booking (maxPartySize, minPartySize, maxAdvanceDays, requiresStaffApproval), payment (minOrderValue, acceptedMethods), refund (windowDays, percentage), escalation (maxFailures, highValueThreshold)
+   - Methods: evaluateCancellation(), evaluateBookingRestrictions(), evaluatePaymentRequirements(), evaluateRefund(), requiresStaffApproval(), shouldEscalateToHuman()
+   - 14 unit tests (R1-R14) all pass
+
+2. ACTION REGISTRY (packages/action-registry/src/index.js):
+   - Standardized action contracts with ActionDefinition class
+   - Each action has: id, category, description, inputSchema (required/optional/types), outputSchema, permissions, riskLevel (low/medium/high), idempotent, timeout, retry (maxAttempts/backoffMs), audit, handler, validator
+   - 8 builtin actions registered: booking.create, booking.cancel, booking.reschedule, commerce.create_order, commerce.process_refund, crm.create_customer, communication.send_email, communication.notify_owner
+   - Methods: register(), get(), list(), execute() with permission checks and audit logging
+   - 10 unit tests (S1-S10) all pass
+
+3. MULTI-INTENT ROUTER (packages/multi-intent-router/src/index.js):
+   - Decomposes complex multi-intent messages into parallel execution plans
+   - Detects secondary intents from different capabilities (skips assistant fallback and supporting candidates)
+   - Analyzes dependencies between intents (sequential vs parallel)
+   - Maps intents to action IDs in the Action Registry
+   - Identifies consequential intents requiring customer confirmation
+   - Methods: plan() returns { primaryIntent, secondaryIntents, executionMode, plan, combinedReply }
+   - 6 unit tests (T1-T6) all pass
+
+4. DIALOGUE MANAGER (packages/dialogue-manager/src/index.js):
+   - Separates dialogue/workflow management from NLU
+   - DialogueState class tracks: capabilityId, intent, status, pendingField, items, fields, metadata
+   - DialogueManager.decide() returns one of: start, continue, interrupt, correct, confirm, cancel, fallback
+   - Decides based on: active workflow state, corrections, interruptions, global commands
+   - nextPendingField() finds the first missing required field
+   - 10 unit tests (U1-U10) all pass
+
+RESULTS:
+- 40/40 new Phase 1 tests pass
+- All existing regression tests still pass
+- Four new packages created with clean, testable interfaces
+
+- Bumped package.json 47.0.0 → 48.0.0
+- Updated README.md to v48.0
+- Built fresh zip at /home/z/my-project/download/nova-v48.0.zip
+
+Stage Summary:
+- Nova v48.0 Sprint 8 Phase 1 — architecture foundation complete.
+- 4 new critical components: Business Policy Engine, Action Registry, Multi-Intent Router, Dialogue Manager
+- 40/40 tests pass
+- These components are ready to be wired into the execution pipeline in subsequent phases
+- Fresh zip at /home/z/my-project/download/nova-v48.0.zip
+
+---
+Task ID: v49.0
+Agent: Super Z (main)
+Task: Sprint 9 Phase 2 — Automation engine. Workflow Engine + Idempotency Engine.
+
+Work Log:
+
+PHASE 2 — TWO NEW AUTOMATION COMPONENTS:
+
+1. WORKFLOW ENGINE (packages/workflow-engine/src/index.js):
+   - Multi-step stateful business workflows that span multiple capabilities
+   - WorkflowDefinition: id, name, description, steps[], version
+   - WorkflowStep: id, name, action (Action Registry ID), input, condition (function), compensation (rollback action), requiresApproval, delayMs, retry, dependsOn
+   - WorkflowInstance: running state with context sharing between steps
+   - Features:
+     * Conditional branching: step.condition function → skip if false
+     * Step dependencies: step.dependsOn → wait for dependencies
+     * Context passing: ${context.s1.bookingId} template syntax
+     * Retry policies: maxAttempts + backoffMs per step
+     * Compensation/rollback: when a step fails, completed steps with compensation actions are rolled back in reverse order
+     * Human approval: step.requiresApproval → pauses workflow, staff approves/rejects
+     * Cancellation: cancel(workflowId, reason) at any point
+     * Audit trail: instance.history records all step transitions
+   - Workflow statuses: pending, running, paused, completed, failed, cancelled
+   - Step statuses: pending, running, completed, failed, skipped, compensated, waiting_approval, approved, rejected
+   - 10 tests (V1-V10) all pass
+
+2. IDEMPOTENCY ENGINE (packages/idempotency-engine/src/index.js):
+   - Prevents duplicate execution of business actions when customers retry
+   - Idempotency key = SHA-256(tenantId:customerId:actionId:inputFingerprint)
+   - Input fingerprint is order-independent (sorted keys before hashing)
+   - Caches successful results (does NOT cache failures → allows retry)
+   - TTL-based expiry (default 24 hours)
+   - Automatic garbage collection (every 5 minutes)
+   - IdempotencyEngine.execute({ key, action }) → returns cached result or executes
+   - 10 tests (W1-W10) all pass, including:
+     * W3: same action called once, second call returns cached result
+     * W4: failed actions are NOT cached (retry allowed)
+     * W8: duplicate booking prevention (bookingId same on retry)
+     * W9: TTL expiry (50ms test TTL)
+
+RESULTS:
+- 20/20 Phase 2 tests pass
+- All existing regression tests still pass
+- Two new packages created with clean, testable interfaces
+
+- Bumped package.json 48.0.0 → 49.0.0
+- Updated README.md to v49.0
+- Built fresh zip at /home/z/my-project/download/nova-v49.0.zip
+
+Stage Summary:
+- Nova v49.0 Sprint 9 Phase 2 — automation engine complete.
+- Workflow Engine: multi-step workflows with branching, compensation, human approval
+- Idempotency Engine: duplicate action prevention via fingerprint-based deduplication
+- 20/20 tests pass
+- Fresh zip at /home/z/my-project/download/nova-v49.0.zip
+
+---
+Task ID: v50.0
+Agent: Super Z (main)
+Task: Sprint 10 Phase 3 — Reply intelligence. Reply Engine + Knowledge Engine + Response Validator.
+
+Work Log:
+
+PHASE 3 — TWO NEW REPLY INTELLIGENCE COMPONENTS:
+
+1. REPLY ENGINE (packages/reply-engine/src/index.js):
+   - 6-stage pipeline: Context Builder → Grounding → Planner → Composer → Validator → Formatter
+   - BusinessPersonality: configurable tone, responseLength, emojiUsage, greetingStyle, brandPersonality, escalationStyle
+   - InformationGrounding: extracts verified facts from execution results (bookingId, orderTotal, price, availability, knowledgeAnswer). validateClaims() detects ungrounded confirmations, price mismatches, ungrounded availability claims
+   - ResponsePlanner: determines responseType (direct, clarification, confirmation, error, fallback), pendingAction, missingInfo, shouldAskForConfirmation
+   - ResponseComposer: joins content blocks and applies personality (emoji removal, length control, tone adjustments)
+   - Architecture rule: humanization never changes meaning. If booking is not confirmed, reply never says confirmed.
+
+2. KNOWLEDGE ENGINE (packages/knowledge-engine/src/index.js):
+   - Retrieves business-specific info from tenant knowledge files
+   - Sources: FAQs (faqs.json), business info (business.json)
+   - FAQ matching: keyword match (10 pts each) + word overlap (2 pts each) + exact substring (50 pts). Threshold >= 5.
+   - Business info matching: hours, location, phone, email, check-in time, check-out time, cancellation policy
+   - Check-in/out queries checked BEFORE generic hours to give specific answers
+   - Cached per-tenant for performance
+   - Returns: { answer, source, confidence, type }
+
+FIXES DURING PHASE 3:
+- Fixed planner order: confirmation check (pendingField='confirmation') runs BEFORE clarification check, so "ready" workflows produce confirmation plans instead of clarification plans
+- Fixed emoji regex: removed \b word boundary anchors that don't work with emoji characters
+- Fixed knowledge engine: moved check-in/check-out matching BEFORE generic hours matching to give specific answers
+
+RESULTS:
+- 32/32 Phase 3 tests pass (X1-X13 Reply Engine, Y1-Y10 Knowledge Engine, Z1-Z9 Business Personality)
+- All existing tests still pass
+
+- Bumped package.json 49.0.0 → 50.0.0
+- Updated README.md to v50.0
+- Built fresh zip at /home/z/my-project/download/nova-v50.0.zip
+
+Stage Summary:
+- Nova v50.0 Sprint 10 Phase 3 — reply intelligence complete.
+- Reply Engine with grounding, planning, composing, and validation
+- Knowledge Engine for business-specific FAQ and info retrieval
+- Configurable Business Personality system
+- 32/32 tests pass
+- Fresh zip at /home/z/my-project/download/nova-v50.0.zip

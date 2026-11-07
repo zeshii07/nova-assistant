@@ -1,8 +1,8 @@
 {
   "name": "nova-saas-universal-engagement",
-  "version": "46.0.0",
+  "version": "50.0.0",
   "private": true,
-  "description": "Nova v46.0 (Sprint 6) - Multi-turn context intelligence + benchmarks + README update. (1) ContextResolutionEngine resolves pronouns and contextual references (book it again, same time, same address, i'll have the usual, change that) using recent turns + CRM + booking/commerce state. (2) 8 benchmark tests measuring cold-start, per-message p50/p95/p99, corpus accuracy, NLU accuracy, context resolution latency, throughput, error classifier accuracy, vocabulary enrichment latency. (3) README.md updated to v46.0 with full architecture diagram, feature list, test suites, benchmark results, configuration, deployment, project structure, and release history.",
+  "description": "Nova v50.0 (Sprint 10 Phase 3) - Reply intelligence. Reply Engine with response context builder, information grounding (verifies factual claims against execution results), response planner (direct/clarification/confirmation/error/fallback), response composer, and response validator (detects ungrounded confirmations, price mismatches, ungrounded availability). Knowledge Engine retrieves business-specific info from FAQs and business.json (hours, location, contact, check-in/out, policies). Configurable Business Personality (tone, response length, emoji usage, greeting style, brand personality).",
   "main": "apps/api/src/cluster.js",
   "type": "commonjs",
   "engines": {

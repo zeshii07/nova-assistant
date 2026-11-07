@@ -49,6 +49,20 @@ class CatalogConversationAdapter {
     if(/\b(payment|payment method|pay|jazz\s*cash|easypaisa|easy\s*paisa|bank transfer|cash on delivery|refund|return policy|warranty)\b/.test(normalizedText)) {
       return {priority:this.priority,candidates:[],entities:{},vocabularyMatches:[]};
     }
+    // v47.0 BUGFIX: Reservation/booking requests must NOT be intercepted by
+    // the catalog adapter. "reserve a table", "book a table", "book a room",
+    // "reserve space for my family" are booking intents, not product searches.
+    // Previously, "i want to book a table for 10 persons" was misrouted to
+    // catalog.unavailable_request because "i want" is a REQUEST_CUE and "table"
+    // didn't match any catalog product. Now we detect reservation language
+    // early and yield to the booking adapter.
+    const isReservationRequest = /\b(?:reserve|reservation|book\s+(?:a\s+)?(?:table|room|space|booth|slot|hall)|reserve\s+(?:a\s+)?(?:table|space|booth|hall|room))\b/i.test(normalizedText)
+      || /\b(?:table\s+for\s+\d|party\s+of\s+\d|guests?\s+for|\d+\s*(?:people|persons|guests|seats))\b/i.test(normalizedText)
+      || /\b(?:book\s+(?:a\s+)?(?:table|room|space|booth))\b/i.test(normalizedText)
+      || /\b(?:family\s+(?:dinner|gathering|event|celebration)|dinner\s+(?:buffet|party|reservation))\b/i.test(normalizedText);
+    if (isReservationRequest && tenant.capabilities?.includes('booking')) {
+      return {priority:this.priority,candidates:[],entities:{},vocabularyMatches:[]};
+    }
     // A deeper active workflow owns its pending field. Catalog must not steal a
     // phone number, address, payment choice, etc. just because a product is
     // still selected underneath Commerce.

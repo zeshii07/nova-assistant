@@ -1,10 +1,34 @@
-# Nova Assistant — v46.0
+# Nova Assistant — v50.0
 
-**Multi-tenant SaaS conversation engine** for service businesses. Handles orders, bookings, and customer interactions across restaurants, salons, cleaning services, retail, healthcare, education, and driving schools.
+**Multi-tenant SaaS conversation engine** for service businesses. Handles orders, bookings, hotel room reservations, and customer interactions across restaurants, hotels, salons, cleaning services, retail, healthcare, education, and driving schools.
 
 ---
 
-## 🚀 What's New (v40.0 → v46.0)
+## 🚀 What's New (v40.0 → v50.0)
+
+### v50.0 — Reply Intelligence (Phase 3)
+- **Reply Engine** — dedicated reply-planning and response-generation system with 6-stage pipeline: Response Context Builder → Information Grounding → Response Planner → Response Composer → Response Validator → Channel Formatter
+- **Information Grounding** — verifies every factual claim (booking ID, price, availability) against actual execution results. Prevents hallucinations — Nova never says "confirmed" unless a real booking ID is grounded
+- **Response Validator** — detects ungrounded confirmations, price mismatches, and ungrounded availability claims. Returns violation list for debugging
+- **Knowledge Engine** — retrieves business-specific information from FAQs (`faqs.json`) and business info (`business.json`): hours, location, phone, email, check-in/out times, cancellation policies. Keyword + word-overlap matching with confidence scoring
+- **Business Personality** — configurable per-tenant: tone (professional/friendly/casual), response length (short/balanced/detailed), emoji usage (none/minimal/moderate), greeting style, brand personality, escalation style
+
+### v49.0 — Automation Engine (Phase 2)
+- **Workflow Engine** — multi-step stateful business workflows with: conditional branching, step dependencies, delays, retry policies, compensation/rollback on failure, human approval pauses, cancellation, context passing between steps, and audit trail
+- **Idempotency Engine** — prevents duplicate bookings/orders when customers retry (double-click confirm, network retries). Uses SHA-256 fingerprinting of action inputs, caches successful results, TTL-based expiry, does NOT cache failures
+- **Action Registry wiring** — 8 builtin actions (booking.create/cancel/reschedule, commerce.create_order/process_refund, crm.create_customer, communication.send_email/notify_owner) with standardized contracts
+
+### v48.0 — Architecture Foundation (Phase 1)
+- **Business Policy Engine** — centralized business rules (cancellation windows, booking restrictions, payment requirements, refund policies, escalation conditions) configurable per-tenant with domain defaults for all 8 domains
+- **Action Registry** — standardized action contracts with input/output schema, permissions, risk levels (low/medium/high), idempotency requirements, timeout, retry policy, and audit logging. 8 builtin actions registered (booking.create/cancel/reschedule, commerce.create_order/process_refund, crm.create_customer, communication.send_email/notify_owner)
+- **Multi-Intent Router** — decomposes complex multi-intent messages into parallel execution plans with dependency analysis. Detects secondary intents from different capabilities, identifies supporting candidates, and maps intents to action IDs
+- **Dialogue Manager** — separates dialogue/workflow management from NLU. Decides whether to continue, start, interrupt, correct, confirm, cancel, or fallback based on the active workflow state, corrections, interruptions, and global commands
+
+### v47.0 — Hotel Management System + Reservation Bug Fix
+- **Hotel management system** — new "hotel" domain with 5 room types (standard, deluxe, executive, family, presidential suite). Customers can browse rooms, check prices, and book rooms via Nova chat. Hotel admin interface to be built separately.
+- **Restaurant reservation bug fix** — "reserve a table" / "book a table" / "reserve space for my family" was being misrouted to `catalog.unavailable_request` ("Sorry, that item is not available") instead of the booking adapter. Fixed by adding reservation-language detection in the catalog adapter that yields to booking.
+- New hotel vocabulary dictionary (room types, amenities, check-in/out terms, Roman Urdu)
+- New hotel-demo tenant with offerings, booking config, calendar, and business knowledge
 
 ### v46.0 — Multi-Turn Context Intelligence + Benchmarks
 - **Context Resolution Engine** — resolves pronouns and contextual references: "book it again", "same time as last week", "same address", "i'll have the usual", "change that to X"
@@ -128,6 +152,7 @@ Customer Message
 | Domain | Capabilities | Example Tenants |
 | --- | --- | --- |
 | restaurant | catalog, commerce, booking, service | restaurant-demo |
+| hotel | offering, booking, service | hotel-demo |
 | salon | offering, booking, service | salon-demo |
 | cleaning | cleaning, pricing, availability, service | cleaning-demo, byt-cleaners-dubai |
 | retail | catalog, commerce | default |

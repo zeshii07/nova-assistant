@@ -396,6 +396,84 @@ module.exports = {
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // HOTEL
+  // ═══════════════════════════════════════════════════════════════════════════
+  hotel: {
+    typos: {
+      accomodation: 'accommodation', accomadation: 'accommodation',
+      checkin: 'check in', checkout: 'check out',
+      'check-in': 'check in', 'check-out': 'check out',
+      'presedential suite': 'presidential suite', 'president suite': 'presidential suite',
+      'delux room': 'deluxe room', 'delux': 'deluxe',
+      'exective room': 'executive room',
+      'famly room': 'family room',
+      'standard room': 'standard room', 'standard': 'standard room',
+      'single room': 'single room', 'single': 'single room',
+      'double room': 'double room', 'double': 'double room',
+      'twin room': 'twin room', 'twin': 'twin room',
+      'suite': 'suite', 'suites': 'suite',
+      'rooms': 'room', 'room': 'room',
+      'nights': 'night', 'nite': 'night',
+      'gueasts': 'guests', 'gust': 'guest',
+      'availibility': 'availability', 'availble': 'available',
+      'reserveation': 'reservation', 'reserve': 'reserve',
+      'bookig': 'booking', 'bookng': 'booking',
+    },
+    abbreviations: {
+      'ac': 'air conditioned', 'a/c': 'air conditioned',
+      'wifi': 'wi-fi', 'tv': 'television',
+      'b&b': 'bed and breakfast',
+      'roi': 'return on investment',
+      'revpar': 'revenue per available room',
+      'no-show': 'no show',
+      'eta': 'estimated time of arrival',
+    },
+    synonyms: {
+      'standard room': ['standard','basic room','economy room'],
+      'deluxe room': ['delux room','deluxe','premium room','superior room'],
+      'suite': ['suites','junior suite','senior suite','executive suite'],
+      'family room': ['famly room','family suite','family','connecting rooms'],
+      'executive room': ['exective room','executive','business room','club room'],
+      'presidential suite': ['presedential suite','president suite','presidential','vip suite','royal suite'],
+      'single room': ['single','solo room'],
+      'double room': ['double','full room','queen room','king room'],
+      'twin room': ['twin','twin bed room'],
+    },
+    quantityUnits: {
+      room: 1, rooms: 1, night: 1, nights: 1,
+      guest: 1, guests: 1, person: 1, persons: 1, adult: 1, adults: 1, child: 1, children: 1,
+    },
+    orderTypeVerbs: [],
+    specialInstructions: [
+      'early check in','late check out','high floor','low floor','quiet room',
+      'smoking room','non smoking','pet friendly','wheelchair accessible',
+      'extra bed','baby cot','airport transfer','breakfast included',
+      'sea view','city view','pool view','garden view',
+    ],
+    domainTerms: [
+      'hotel','motel','resort','inn','lodge','guesthouse','hostel',
+      'room','suite','lobby','reception','concierge','bellboy','housekeeping',
+      'check in','check out','reservation','booking','availability',
+      'night','nights','stay','check-in date','check-out date',
+      'amenities','pool','gym','spa','restaurant','bar','wifi','parking',
+      'room service','mini bar','safe','balcony','terrace',
+      'standard','deluxe','executive','family','presidential','suite',
+      'single','double','twin','king','queen',
+    ],
+    bookingTerms: [
+      'book','reserve','room','check in','check out','stay','accommodation',
+      'available','availability','night','nights',
+    ],
+    romanUrdu: {
+      'kamra': 'room', 'kamra chahiye': 'need a room',
+      'room book karna hai': 'want to book a room',
+      'kal check in': 'check in tomorrow',
+      '2 raat': '2 nights',
+      'mehman': 'guest',
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // UNIVERSAL (fallback for unknown domains)
   // ═══════════════════════════════════════════════════════════════════════════
   universal: {

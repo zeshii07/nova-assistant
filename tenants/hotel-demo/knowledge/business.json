@@ -1,0 +1,33 @@
+{
+  "name": "Grand Plaza Hotel",
+  "description": "A 4-star hotel with 120 rooms including standard, deluxe, executive, and presidential suites. Located in the heart of the city with easy access to business districts and tourist attractions.",
+  "address": "Main Boulevard, Gulberg III, Lahore",
+  "phone": "+92-42-111-222-333",
+  "email": "reservations@grandplazahotel.com",
+  "website": "www.grandplazahotel.com",
+  "checkInTime": "2:00 PM",
+  "checkOutTime": "12:00 PM",
+  "totalRooms": 120,
+  "starRating": 4,
+  "amenities": [
+    "Free Wi-Fi",
+    "Swimming Pool",
+    "Fitness Center",
+    "Spa",
+    "Restaurant",
+    "Bar",
+    "Room Service (24/7)",
+    "Business Center",
+    "Conference Rooms",
+    "Airport Shuttle",
+    "Free Parking",
+    "Concierge Service"
+  ],
+  "policies": {
+    "cancellation": "Free cancellation up to 48 hours before check-in. After that, 1 night charge applies.",
+    "pets": "Pets are not allowed.",
+    "smoking": "Non-smoking rooms available. Smoking rooms on request.",
+    "extraBed": "Extra bed available at PKR 3,000 per night.",
+    "breakfast": "Complimentary breakfast included with Executive and Family rooms."
+  }
+}
