@@ -153,7 +153,79 @@ class AnalyticsEngine {
     };
   }
 
-  // ─── Private ──────────────────────────────────────────────
+  /**
+   * v59.0 — Knowledge analytics dashboard (spec §13.5).
+   *
+   * Aggregates knowledge.* events into the metrics the admin Knowledge
+   * Analytics panel needs: retrieval volume, answerable/abstain/clarify/
+   * escalate rates, conflict rate, p95 latency, top retrieved sources,
+   * never-retrieved chunks, failed ingestion jobs, evaluation pass rate.
+   */
+  getKnowledgeDashboard(tenantId, options = {}) {
+    const events = this.events.filter(e =>
+      e.tenantId === tenantId && String(e.type || '').startsWith('knowledge.')
+    );
+    if (!events.length) {
+      return {
+        tenantId,
+        retrievalVolume: 0,
+        answerableRate: 0,
+        abstainRate: 0,
+        clarificationRate: 0,
+        escalationRate: 0,
+        conflictRate: 0,
+        p95LatencyMs: 0,
+        topSources: [],
+        failedIngestionJobs: 0,
+        generatedAt: new Date().toISOString(),
+      };
+    }
+    const retrieve = events.filter(e => e.type === 'knowledge.retrieve');
+    const clarify = events.filter(e => e.type === 'knowledge.clarification');
+    const escalate = events.filter(e => e.type === 'knowledge.escalation');
+    const conflict = events.filter(e => e.type === 'knowledge.conflict');
+    const validated = events.filter(e => e.type === 'knowledge.answer.validated');
+    const ingestionStarted = events.filter(e => e.type === 'knowledge.ingestion.started');
+    const ingestionFailed = events.filter(e => e.type === 'knowledge.ingestion.failed');
+
+    const latencies = retrieve.map(e => Number(e.latencyMs || 0)).filter(Boolean).sort((a, b) => a - b);
+    const p95 = latencies.length ? latencies[Math.floor(latencies.length * 0.95)] : 0;
+
+    // Top retrieved sources (by sourceId on retrieve events).
+    const sourceCounts = new Map();
+    for (const e of retrieve) {
+      if (Array.isArray(e.matches)) {
+        for (const m of e.matches) {
+          const sid = m.sourceId || m.source || 'unknown';
+          sourceCounts.set(sid, (sourceCounts.get(sid) || 0) + 1);
+        }
+      }
+    }
+    const topSources = [...sourceCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+    const answerable = retrieve.filter(e => e.answerable === true).length;
+    const notAnswerable = retrieve.length - answerable;
+    const denominator = retrieve.length || 1;
+
+    return {
+      tenantId,
+      retrievalVolume: retrieve.length,
+      answerableRate: answerable / denominator,
+      abstainRate: notAnswerable / denominator, // non-answerable retrieves
+      clarificationRate: clarify.length / denominator,
+      escalationRate: escalate.length / denominator,
+      conflictRate: conflict.length / denominator,
+      validatedAnswers: validated.length,
+      p95LatencyMs: p95,
+      topSources,
+      ingestionStarted: ingestionStarted.length,
+      failedIngestionJobs: ingestionFailed.length,
+      evaluationPassRate: null, // populated by the regression evaluator
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  // ─── Private ──────────────────────────────────────────────────────
 
   _emptyMetrics() {
     return {

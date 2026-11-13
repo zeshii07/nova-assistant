@@ -3,15 +3,18 @@
  *
  * Tests:
  *   X — Reply Engine (grounding, planning, composing, validation)
- *   Y — Knowledge Engine (FAQ matching, business info retrieval)
  *   Z — Business Personality (tone, length, emoji control)
+ *
+ * NOTE: Group Y (KnowledgeEngine) was migrated to
+ * tests/sprint54.v54-knowledge-unified-path.regression.test.js (Group Z3)
+ * as part of Phase 1 architecture cleanup. The duplicate KnowledgeEngine
+ * package was deleted; the unified path is KnowledgeService.
  */
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
   ReplyEngine, BusinessPersonality, InformationGrounding, ResponsePlanner, ResponseComposer,
 } = require('../packages/reply-engine/src');
-const { KnowledgeEngine } = require('../packages/knowledge-engine/src');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GROUP X — Reply Engine
@@ -185,108 +188,8 @@ test('X13: ReplyEngine detects validation errors in ungrounded response', async 
   assert.ok(result.validationErrors.some(e => e.type === 'ungrounded_confirmation'));
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// GROUP Y — Knowledge Engine
-// ─────────────────────────────────────────────────────────────────────────────
-
-test('Y1: KnowledgeEngine loads tenant FAQs', () => {
-  const engine = new KnowledgeEngine({ tenantsDir: './tenants' });
-  const knowledge = engine._loadTenantKnowledge('restaurant-demo');
-  assert.ok(knowledge);
-  // May or may not have FAQs depending on tenant config
-  assert.ok(typeof knowledge.faqs === 'object' || Array.isArray(knowledge.faqs));
-});
-
-test('Y2: KnowledgeEngine loads tenant business info', () => {
-  const engine = new KnowledgeEngine({ tenantsDir: './tenants' });
-  const knowledge = engine._loadTenantKnowledge('hotel-demo');
-  assert.ok(knowledge.business);
-  assert.ok(knowledge.business.name);
-});
-
-test('Y3: KnowledgeEngine matches business hours query', async () => {
-  const engine = new KnowledgeEngine({ tenantsDir: './tenants' });
-  const result = await engine.retrieve({
-    tenant: { id: 'hotel-demo' },
-    message: { text: 'what time is check in' },
-    state: {},
-  });
-  assert.ok(result.answer);
-  assert.match(result.answer, /check.?in/i);
-  assert.equal(result.source, 'business_info');
-});
-
-test('Y4: KnowledgeEngine matches business location query', async () => {
-  const engine = new KnowledgeEngine({ tenantsDir: './tenants' });
-  const result = await engine.retrieve({
-    tenant: { id: 'hotel-demo' },
-    message: { text: 'where are you located' },
-    state: {},
-  });
-  assert.ok(result.answer);
-  assert.match(result.answer, /located at/i);
-});
-
-test('Y5: KnowledgeEngine matches business contact query', async () => {
-  const engine = new KnowledgeEngine({ tenantsDir: './tenants' });
-  const result = await engine.retrieve({
-    tenant: { id: 'hotel-demo' },
-    message: { text: 'what is your phone number' },
-    state: {},
-  });
-  assert.ok(result.answer);
-  assert.match(result.answer, /reach us at/i);
-});
-
-test('Y6: KnowledgeEngine returns null for unknown query', async () => {
-  const engine = new KnowledgeEngine({ tenantsDir: './tenants' });
-  const result = await engine.retrieve({
-    tenant: { id: 'hotel-demo' },
-    message: { text: 'what is the weather today' },
-    state: {},
-  });
-  assert.equal(result.answer, null);
-  assert.equal(result.confidence, 0);
-});
-
-test('Y7: KnowledgeEngine matches check-out query for hotel', async () => {
-  const engine = new KnowledgeEngine({ tenantsDir: './tenants' });
-  const result = await engine.retrieve({
-    tenant: { id: 'hotel-demo' },
-    message: { text: 'what time is checkout' },
-    state: {},
-  });
-  assert.ok(result.answer);
-  assert.match(result.answer, /check.?out/i);
-});
-
-test('Y8: KnowledgeEngine FAQ matching with keywords', () => {
-  const engine = new KnowledgeEngine({ tenantsDir: './tenants' });
-  const faqs = [
-    { question: 'Do you have WiFi?', keywords: 'wifi,internet', answer: 'Yes, free WiFi is available.' },
-    { question: 'Do you have parking?', keywords: 'parking,car', answer: 'Yes, free parking is available.' },
-  ];
-  const result = engine._matchFAQ('do you have wifi', faqs);
-  assert.ok(result);
-  assert.match(result.answer, /free WiFi/i);
-});
-
-test('Y9: KnowledgeEngine caches tenant knowledge', () => {
-  const engine = new KnowledgeEngine({ tenantsDir: './tenants' });
-  engine._loadTenantKnowledge('hotel-demo');
-  assert.ok(engine.cache.has('hotel-demo'));
-  // Second call should use cache
-  const k2 = engine._loadTenantKnowledge('hotel-demo');
-  assert.ok(k2.business);
-});
-
-test('Y10: KnowledgeEngine clearCache removes entry', () => {
-  const engine = new KnowledgeEngine({ tenantsDir: './tenants' });
-  engine._loadTenantKnowledge('hotel-demo');
-  assert.ok(engine.cache.has('hotel-demo'));
-  engine.clearCache('hotel-demo');
-  assert.ok(!engine.cache.has('hotel-demo'));
-});
+// Group Y (Knowledge Engine) was migrated to sprint54.v54-knowledge-unified-path
+// as part of Phase 1 architecture cleanup (duplicate KnowledgeEngine deleted).
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GROUP Z — Business Personality

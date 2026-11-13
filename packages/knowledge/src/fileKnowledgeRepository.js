@@ -19,11 +19,28 @@ class FileKnowledgeRepository{
   const business=hasOverlay?deepMerge(this.readJson(path.join(base,"business.json"),{}),this.readJson(path.join(overlay,"business.json"),{})):this.readJson(path.join(base,"business.json"),{});
   const faqs=hasOverlay?mergeFaqs(this.readJson(path.join(base,"faqs.json"),[]),this.readJson(path.join(overlay,"faqs.json"),[])):this.readJson(path.join(base,"faqs.json"),[]);
   const registry=hasOverlay?mergeSources(this.readJson(path.join(base,"sources.json"),[]),this.readJson(path.join(overlay,"sources.json"),[])):this.readJson(path.join(base,"sources.json"),[]);
-  const disabledFiles=new Set((registry||[]).filter(x=>x.status==="disabled"&&x.file).map(x=>String(x.file).replace(/^knowledge\//,'')));
-  const byFile=new Map((registry||[]).filter(x=>x.status!=="disabled"&&x.file).map(x=>[String(x.file).replace(/^knowledge\//,''),x]));
+  // v55.0 spec §8: only 'published' and 'active' sources are loaded by the
+  // retriever. 'draft', 'processing', 'disabled', 'archived', 'failed' are
+  // excluded. Also exclude sources whose effectiveUntil is in the past.
+  const now=new Date();
+  const isRetrievable=x=>{
+    if(!x)return false;
+    if(!['published','active'].includes(x.status))return false;
+    if(x.effectiveUntil){
+      const until=new Date(x.effectiveUntil);
+      if(!isNaN(until.getTime())&&until<now)return false;
+    }
+    if(x.effectiveFrom){
+      const from=new Date(x.effectiveFrom);
+      if(!isNaN(from.getTime())&&from>now)return false;
+    }
+    return true;
+  };
+  const disabledFiles=new Set((registry||[]).filter(x=>!isRetrievable(x)&&x.file).map(x=>String(x.file).replace(/^knowledge\//,'')));
+  const byFile=new Map((registry||[]).filter(x=>isRetrievable(x)&&x.file).map(x=>[String(x.file).replace(/^knowledge\//,''),x]));
   const enrich=(rows,file,defaults={})=>{
     const source=byFile.get(file)||defaults;
-    return rows.map(row=>({...row,sourceId:source.id||null,sourceKind:source.kind||defaults.kind||'document',sourceRevision:Number(source.revision||1),sourceStatus:source.status||'active',evidenceType:row.evidenceType||source.metadata?.evidenceType||defaults.evidenceType||'customer_fact',customerSafe:row.customerSafe!==false,priority:Number(source.priority??defaults.priority??50),sourceTitle:source.title||file}));
+    return rows.map(row=>({...row,sourceId:source.id||null,sourceKind:source.kind||defaults.kind||'document',sourceRevision:Number(source.revision||1),sourceStatus:source.status||'active',evidenceType:row.evidenceType||source.metadata?.evidenceType||defaults.evidenceType||'customer_fact',customerSafe:row.customerSafe!==false,priority:Number(source.priority??defaults.priority??50),sourceTitle:source.title||file,sourceVersion:Number(source.version||source.revision||1),supersedes:source.supersedes||null,effectiveFrom:source.effectiveFrom||null,effectiveUntil:source.effectiveUntil||null,approvedBy:source.approvedBy||null}));
   };
   const docs=[];
   docs.push(...enrich(normalizeJson("business.json",business).filter(x=>!/\b(not enabled|not configured|assistant-only tenant|placeholder|todo|unknown)\b/i.test(x.text)),"business.json",{id:"SRC-BUSINESS",kind:"business_profile",priority:100,title:"Business profile"}));

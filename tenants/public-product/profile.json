@@ -1,0 +1,40 @@
+{
+  "id": "public-product",
+  "name": "Nova Product Assistant",
+  "status": "active",
+  "defaultLanguage": "english",
+  "capabilities": ["public_assistant"],
+  "domain": "public_product",
+  "branding": {
+    "assistantName": "Nova Product Assistant",
+    "welcomeMessage": "Hi! I'm Nova's product assistant. I can show you how Nova helps businesses manage customer enquiries, share product and service information, and support configured workflows such as bookings and commerce. Tell me what kind of business you run, or ask me anything about Nova.",
+    "welcomeMessageRomanUrdu": "Assalam-o-Alaikum! Main Nova ka product assistant hoon. Main aapko bata sakta hoon ke Nova aapke business ke customer messages, bookings aur information requests ko manage karne mein kis tarah madad kar sakta hai. Aap kis type ka business chalate hain?"
+  },
+  "business": {
+    "description": "Nova is a business automation and AI customer communication platform that helps businesses manage customer conversations and automate configured workflows such as enquiries, bookings, product and service information, availability, and commerce-related interactions.",
+    "contact": "hello@nova.example"
+  },
+  "features": {
+    "llmFallback": false,
+    "isPublicAssistant": true
+  },
+  "permissions": [
+    "knowledge.read"
+  ],
+  "widget": {
+    "enabled": true,
+    "position": "bottom-right",
+    "themeColor": "#6366f1",
+    "language": "auto",
+    "suggestions": [
+      "What is Nova?",
+      "What can Nova automate?",
+      "Can Nova work for my business?",
+      "Show me a booking example",
+      "How can I request a demo?"
+    ]
+  },
+  "notifications": {
+    "enabled": false
+  }
+}

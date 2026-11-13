@@ -106,6 +106,8 @@ const { FileControlPlaneRepository, ControlPlaneAccessPolicy, TenantControlPlane
 const { TenantAdapterRegistry } = require("../../../packages/tenant-adapter/src/tenantAdapterRegistry");
 const { InventoryService } = require("../../../packages/inventory-engine/src");
 const { FileCalendarConfigRepository, CalendarService } = require("../../../packages/calendar-engine/src");
+// Public product assistant + lead capture (Nova Public Product Assistant spec).
+const { PublicAssistantService, PublicIntentRouter, PublicAssistantPolicy, PublicFeatureRegistryService, PublicLeadService, PublicLeadRepository, UnansweredQuestionRepository, PublicLlmAnswerService } = require("../../../packages/public-assistant");
 
 async function buildContainer() {
   const config = loadConfig();
@@ -171,6 +173,47 @@ async function buildContainer() {
   const handoffService = new HandoffService({ eventBus });
   const knowledgeRepository = new FileKnowledgeRepository({ tenantsDir: config.tenantsDir, knowledgeDataDir:config.knowledgeDataDir, logger });
   const knowledgeService = new KnowledgeService({ knowledgeRepository, controlPlaneRepository });
+  // Public product assistant + lead capture (Nova Public Product Assistant spec).
+  // Isolated from customer tenant assistants: fixed public tenant id, dedicated
+  // knowledge namespace (tenants/public-product/), and a separate lead store.
+  const publicFeatureRegistryService = new PublicFeatureRegistryService({
+    registryPath: path.join(config.tenantsDir, "public-product", "feature-registry.json"),
+    logger
+  });
+  const publicLeadRepository = new PublicLeadRepository({
+    snapshotFile: path.join(config.operationalDataDir, "public-leads.json")
+  });
+  const publicLeadService = new PublicLeadService({
+    repository: publicLeadRepository, eventBus, logger
+  });
+  const publicIntentRouter = new PublicIntentRouter({ logger });
+  const publicAssistantPolicy = new PublicAssistantPolicy({ logger });
+  const unansweredQuestionRepository = new UnansweredQuestionRepository({
+    snapshotFile: path.join(config.operationalDataDir, "public-unanswered-questions.json")
+  });
+  // §16/§17 — public LLM generation is OFF by default. The LlmAnswerService is
+  // wired after llmRouter is declared (below), since llmRouter is constructed
+  // later in this function. For now create the service disabled; we attach the
+  // router once it exists.
+  const publicLlmAnswerService = new PublicLlmAnswerService({
+    llmRouter: null,
+    policy: publicAssistantPolicy,
+    logger,
+    enabled: config.publicLlmMode === "on"
+  });
+  const publicAssistantService = new PublicAssistantService({
+    knowledgeService, knowledgeRepository, tenantRepository,
+    featureRegistryService: publicFeatureRegistryService,
+    leadService: publicLeadService,
+    intentRouter: publicIntentRouter,
+    policy: publicAssistantPolicy,
+    stateRepository,
+    eventBus,
+    logger,
+    publicTenantId: "public-product",
+    unansweredQuestionRepository,
+    llmAnswerService: publicLlmAnswerService
+  });
   const availabilityRuleRepository = new FileServiceAvailabilityRepository({ tenantsDir: config.tenantsDir });
   const businessHoursProvider = new StaticBusinessHoursProvider({ knowledgeRepository, controlPlaneRepository });
   const calendarRepository = storage.calendarRepository;
@@ -220,6 +263,9 @@ async function buildContainer() {
   // Business answers remain deterministic/grounded and cannot trigger an
   // untracked second model call through the general response path.
   const llmRouter = new LlmRouter({ providers: [], logger });
+  // §16/§17 — now that the llmRouter exists, attach it to the public LLM answer
+  // service so it can attempt grounded generation when enabled (NOVA_PUBLIC_LLM_MODE=on).
+  publicLlmAnswerService.llmRouter = llmRouter;
   const assistantService = new AssistantService({ languageEngine: new LanguageEngine(), intentEngine: new IntentEngine(), knowledgeService, responseEngine: new ResponseEngine(), llmRouter, logger });
   const templateRepository = new FileTemplateRepository({ tenantsDir: config.tenantsDir });
   const templateEngine = new TemplateEngine({ repository: templateRepository });
@@ -371,6 +417,10 @@ async function buildContainer() {
   const feedbackCollector = new FeedbackCollector({ logger, storageDir: path.resolve(__dirname, "../../../.nova-feedback") });
   const onlineLearner = new OnlineLearner({ feedbackCollector, mlIntentClassifier, logger });
 
+  // === v59.0: Knowledge Analytics Engine (Phase 6 admin tools) ===
+  const { AnalyticsEngine } = require("../../../packages/analytics-engine/src");
+  const analyticsEngine = new AnalyticsEngine({ logger });
+
   // === v30.0: Business Email Notifications ===
   // Listens to booking.confirmed.v1, offering.order.created.v1, lead.converted.v1,
   // handoff.requested.v1 events. Sends Gmail SMTP emails to business owners.
@@ -416,6 +466,6 @@ async function buildContainer() {
     executionEngine,
     logger
   });
-  return { config, logger, storage, tenantAdapterRegistry, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, googleOAuthClient, calendarTokenRepository, googleCalendarProvider, businessOwnerAuthService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, leadRepository, leadService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService, mlIntentClassifier, hybridRouter, productEmbeddingMatcher, transformerEmbeddingService, feedbackCollector, onlineLearner, emailService, notificationService, notificationLogRepository };
+  return { config, logger, storage, tenantAdapterRegistry, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, googleOAuthClient, calendarTokenRepository, googleCalendarProvider, businessOwnerAuthService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, leadRepository, leadService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService, mlIntentClassifier, hybridRouter, productEmbeddingMatcher, transformerEmbeddingService, feedbackCollector, onlineLearner, analyticsEngine, emailService, notificationService, notificationLogRepository, publicAssistantService, publicFeatureRegistryService, publicLeadService, publicLeadRepository, publicIntentRouter, publicAssistantPolicy, unansweredQuestionRepository, publicLlmAnswerService };
 }
 module.exports = { buildContainer };

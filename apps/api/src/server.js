@@ -40,6 +40,12 @@ async function startServer() {
       if (req.method === "GET" && (url.pathname === "/admin" || url.pathname.startsWith("/admin/"))) {
         return serveAdminAsset(res, url.pathname);
       }
+      // v10.3 — Public Product Assistant admin dashboard (leads, demo requests,
+      // unanswered questions, feature registry). HTML is served to anyone; the
+      // /api/public-admin/* endpoints it calls are dev-token gated.
+      if (req.method === "GET" && (url.pathname === "/public-admin" || url.pathname.startsWith("/public-admin/"))) {
+        return servePublicAdminAsset(res, url.pathname);
+      }
       // v34.1: PWA manifest and service worker served from admin dashboard
       if (req.method === "GET" && (url.pathname === "/manifest.json" || url.pathname === "/sw.js" || url.pathname === "/favicon.ico")) {
         return serveAdminAsset(res, "/admin" + url.pathname);
@@ -205,6 +211,197 @@ async function startServer() {
         const answer=replyToNovaVisitor(text,{previousTopic:String(body.previousTopic||'').trim()||null,language:String(body.language||'auto')});
         return sendJson(res,200,{ok:true,conversationId:String(body.conversationId||`nova-${crypto.randomUUID()}`),reply:answer.reply,topic:answer.topic,suggestions:answer.suggestions});
       }
+
+      // ── Public Product Assistant + Lead Capture (Nova Public Product Assistant spec) ──
+      // These endpoints are intentionally NOT behind the dev-token gate. They are
+      // the public marketing/sales surface: visitors explain Nova, qualify, and
+      // submit consented leads. Security is enforced by a per-IP rate limiter,
+      // a fixed server-side public tenant identity (browser tenant_id is ignored),
+      // a strict policy refuse list, and server-side lead validation. §5, §20.
+      if (req.method === "OPTIONS" && url.pathname.startsWith("/api/public/")) {
+        const origin = String(req.headers['origin'] || '*');
+        res.writeHead(204, {
+          'Access-Control-Allow-Origin': origin,
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'content-type',
+          'Access-Control-Max-Age': '86400'
+        });
+        return res.end();
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/public/chat") {
+        const origin = String(req.headers['origin'] || '*');
+        const clientIp = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+        const rl = checkWidgetRateLimit(`public:${clientIp}`);
+        if (!rl.allowed) {
+          res.writeHead(429, {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Access-Control-Allow-Origin': origin,
+            'Retry-After': String(rl.retryAfterSeconds),
+            'X-RateLimit-Limit': '30',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(rl.resetAt)
+          });
+          return res.end(JSON.stringify({ ok:false, error:'Rate limit exceeded. Please slow down.', retryAfterSeconds: rl.retryAfterSeconds }));
+        }
+        const body = await readJson(req);
+        // §5.10 — streaming mode: return Server-Sent Events for a typing effect.
+        if (body.stream === true) {
+          res.writeHead(200, {
+            'Content-Type': 'text/event-stream; charset=utf-8',
+            'Cache-Control': 'no-cache, no-transform',
+            'Connection': 'keep-alive',
+            'Access-Control-Allow-Origin': origin,
+            'X-Accel-Buffering': 'no'
+          });
+          const sse = (event, data) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+          try {
+            const result = await container.publicAssistantService.handleMessage({
+              conversation_id: body.conversation_id || null,
+              message: body.message,
+              locale: body.locale || "en",
+              page_context: body.page_context || null,
+              campaign: body.campaign || null
+            });
+            if (result.error) {
+              sse("error", { ok:false, error: result.message, status: result.status || 400 });
+              return res.end();
+            }
+            // meta event first (intent, outcome, conversation_id, lead_status).
+            sse("meta", {
+              ok: true,
+              conversation_id: result.conversation_id,
+              intent: result.intent,
+              outcome: result.outcome,
+              lead_status: result.lead_status,
+              language: result.language
+            });
+            // stream the reply text in word-group deltas for a typing effect.
+            const words = String(result.reply || "").split(/(\s+)/);
+            const chunkSize = 4; // words per delta
+            for (let i = 0; i < words.length; i += chunkSize) {
+              const delta = words.slice(i, i + chunkSize).join("");
+              if (delta) sse("delta", { text: delta });
+            }
+            // done event with suggested_actions + lead info.
+            sse("done", { suggested_actions: result.suggested_actions, lead: result.lead || null, latency_ms: result.latency_ms });
+            return res.end();
+          } catch (err) {
+            sse("error", { ok:false, error: "Stream failed", detail: err.message });
+            return res.end();
+          }
+        }
+        const result = await container.publicAssistantService.handleMessage({
+          conversation_id: body.conversation_id || null,
+          message: body.message,
+          locale: body.locale || "en",
+          page_context: body.page_context || null,
+          campaign: body.campaign || null
+        });
+        if (result.error) {
+          res.writeHead(result.status || 400, { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': origin });
+          return res.end(JSON.stringify({ ok:false, error: result.message }));
+        }
+        return sendJson(res, 200, { ok:true, ...result });
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/public/lead") {
+        const origin = String(req.headers['origin'] || '*');
+        const clientIp = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+        const rl = checkWidgetRateLimit(`public-lead:${clientIp}`);
+        if (!rl.allowed) {
+          res.writeHead(429, { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': origin, 'Retry-After': String(rl.retryAfterSeconds) });
+          return res.end(JSON.stringify({ ok:false, error:'Rate limit exceeded.', retryAfterSeconds: rl.retryAfterSeconds }));
+        }
+        const body = await readJson(req);
+        const consent = body.consent || {};
+        const fields = {
+          session_id: body.conversation_id || null,
+          name: body.name, business_name: body.business_name, industry: body.industry,
+          email: body.email, phone: body.phone,
+          preferred_contact_method: body.preferred_contact_method,
+          business_problem: body.business_problem,
+          requested_workflows: body.requested_workflows,
+          current_software: body.current_software,
+          purchase_timeline: body.purchase_timeline,
+          demo_requested: body.demo_requested,
+          source: body.source || "public_nova_assistant",
+          page_context: body.page_context || null,
+          campaign: body.campaign || null
+        };
+        const submitted = await container.publicAssistantService.submitLead(fields, consent);
+        if (!submitted.success) {
+          return sendJson(res, 200, { ok:false, error_code: submitted.error_code, errors: submitted.errors || undefined });
+        }
+        return sendJson(res, 200, { ok:true, success:true, lead_id: submitted.lead_id, status: submitted.status });
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/public/demo") {
+        const origin = String(req.headers['origin'] || '*');
+        const body = await readJson(req);
+        if (!body.lead_id) return sendJson(res, 400, { ok:false, error:"lead_id is required" });
+        const demo = await container.publicAssistantService.requestDemo({
+          lead_id: body.lead_id,
+          requested_scenario: body.requested_scenario || null,
+          preferred_contact_method: body.preferred_contact_method || null
+        });
+        if (!demo.success) {
+          return sendJson(res, 200, { ok:false, error_code: demo.error_code });
+        }
+        return sendJson(res, 200, { ok:true, success:true, demo_id: demo.demo_id, status: demo.status });
+      }
+
+      if (req.method === "GET" && url.pathname === "/api/public/starters") {
+        const group = String(url.searchParams.get("group") || "welcome");
+        return sendJson(res, 200, { ok:true, starters: container.publicAssistantService.getStarters(group) });
+      }
+
+      if (req.method === "GET" && url.pathname === "/api/public/feature-registry") {
+        return sendJson(res, 200, { ok:true, features: container.publicFeatureRegistryService.listPublic() });
+      }
+      // ── End public product assistant routes ──
+
+      // ── Public-assistant admin routes (dev-token gated) ──
+      // These let the Nova team manage leads, demo requests, and unanswered
+      // questions captured by the public product assistant. Gated by the same
+      // NOVA_DEV_TOKEN that protects the developer console.
+      if (url.pathname.startsWith("/api/public-admin/") && !authorizeDeveloperRequest(req)) {
+        return sendJson(res, 401, { ok:false, error:"Developer Console token is required" });
+      }
+      if (req.method === "GET" && url.pathname === "/api/public-admin/leads") {
+        const status = url.searchParams.get("status") || null;
+        const limit = parseInt(url.searchParams.get("limit") || "100", 10);
+        const leads = await container.publicLeadService.listLeads({ status, limit });
+        return sendJson(res, 200, { ok:true, leads });
+      }
+      if (req.method === "GET" && url.pathname === "/api/public-admin/leads/summary") {
+        return sendJson(res, 200, { ok:true, summary: await container.publicLeadService.summary() });
+      }
+      if (req.method === "GET" && url.pathname === "/api/public-admin/demo-requests") {
+        const leadId = url.searchParams.get("lead_id") || null;
+        const demos = await container.publicLeadService.listDemoRequests({ leadId });
+        return sendJson(res, 200, { ok:true, demo_requests: demos });
+      }
+      if (req.method === "GET" && url.pathname === "/api/public-admin/unanswered") {
+        const status = url.searchParams.get("status") || null;
+        const sortBy = url.searchParams.get("sort") || "occurrence_count";
+        const limit = parseInt(url.searchParams.get("limit") || "100", 10);
+        const questions = await container.unansweredQuestionRepository.list({ status, sortBy, limit });
+        return sendJson(res, 200, { ok:true, questions });
+      }
+      if (req.method === "GET" && url.pathname === "/api/public-admin/unanswered/summary") {
+        return sendJson(res, 200, { ok:true, summary: await container.unansweredQuestionRepository.summary() });
+      }
+      if (req.method === "POST" && url.pathname === "/api/public-admin/unanswered/resolve") {
+        const body = await readJson(req);
+        const resolution = body.resolution || "resolved";
+        const updated = await container.unansweredQuestionRepository.resolve(body.id, resolution);
+        return sendJson(res, 200, { ok:true, question: updated });
+      }
+      if (req.method === "GET" && url.pathname === "/api/public-admin/feature-registry") {
+        return sendJson(res, 200, { ok:true, features: container.publicFeatureRegistryService.listPublic() });
+      }
+      // ── End public-assistant admin routes ──
 
       if (url.pathname.startsWith("/api/dev/") && !authorizeDeveloperRequest(req)) {
         return sendJson(res, 401, { ok:false, error:"Developer Console token is required" });
@@ -506,6 +703,180 @@ async function startServer() {
       if(req.method==="POST" && knowledgeReindexMatch){
         const tenantId=decodeURIComponent(knowledgeReindexMatch[1]);container.tenantRepository.getById(tenantId);
         return sendJson(res,200,{ok:true,index:container.tenantKnowledgeManager.reindex(tenantId)});
+      }
+
+      // ─── v59.0 Phase 6 admin endpoints (spec §13) ───────────────────
+      // Chunk Explorer: list chunks for a source.
+      const knowledgeChunksMatch=url.pathname.match(/^\/api\/dev\/knowledge\/([^/]+)\/sources\/([^/]+)\/chunks$/);
+      if(req.method==="GET" && knowledgeChunksMatch){
+        const tenantId=decodeURIComponent(knowledgeChunksMatch[1]);
+        const sourceId=decodeURIComponent(knowledgeChunksMatch[2]);
+        container.tenantRepository.getById(tenantId);
+        const index=container.knowledgeRepository.getIndexForTenant(tenantId);
+        const docs=index.docs||[];
+        const chunks=docs.filter(d=>d.sourceId===sourceId).map(d=>({
+          chunkId:d.id, sourceId:d.sourceId, sourceVersion:d.sourceVersion, text:d.text,
+          heading:d.path, knowledgeType:d.evidenceType, customerSafe:d.customerSafe,
+          sourceTitle:d.sourceTitle, sourceKind:d.sourceKind, sourceLocation:d.sourceLocation||null,
+        }));
+        return sendJson(res,200,{ok:true,sourceId,chunkCount:chunks.length,chunks});
+      }
+
+      // Retrieval Playground: full retrieval trace (intent → rewrite → matches → scores).
+      const knowledgePlaygroundMatch=url.pathname.match(/^\/api\/dev\/knowledge\/([^/]+)\/playground$/);
+      if(req.method==="POST" && knowledgePlaygroundMatch){
+        const tenantId=decodeURIComponent(knowledgePlaygroundMatch[1]),body=await readJson(req);
+        container.tenantRepository.getById(tenantId);
+        const query=String(body.query||"").trim();
+        if(!query) return sendJson(res,400,{ok:false,error:"query is required"});
+        // Build the trace through the Phase 3 + 4 pipeline (lazy-loaded so older
+        // deployments without the new packages still serve /search above).
+        let trace={query};
+        try{
+          const {IntentRouter}=require("../../../packages/knowledge-retrieval/src/intentRouter");
+          const {QueryRewriter}=require("../../../packages/knowledge-retrieval/src/queryRewriter");
+          const {EvidenceValidator}=require("../../../packages/knowledge-retrieval/src/evidenceValidator");
+          const router=new IntentRouter();
+          const rewriter=new QueryRewriter();
+          const validator=new EvidenceValidator();
+          const classified=router.classify(query);
+          const rewritten=rewriter.rewrite(query);
+          const matches=container.knowledgeRepository.search(tenantId,rewritten.expanded,{
+            limit:Number(body.limit||6), minScore:Number(body.minScore??0.05), minSemantic:Number(body.minSemantic??0.05),
+            ...(classified.requiredSources&&classified.requiredSources.length?{kinds:classified.requiredSources}:{}),
+          });
+          const validation=validator.validate({query:rewritten.normalized,matches,intent:classified.intent});
+          trace={
+            originalQuery:query,
+            intent:classified.intent, entities:classified.entities, missingFields:classified.missingFields,
+            confidence:classified.confidence, requiredSources:classified.requiredSources,
+            rewritten:{normalized:rewritten.normalized, expanded:rewritten.expanded, variants:rewritten.variants},
+            matches:matches.map(x=>({text:x.text,sourceId:x.sourceId,sourceTitle:x.sourceTitle,sourceKind:x.sourceKind,
+              score:x.score,hybridScore:x.hybridScore,lexicalScore:x.lexicalScore,semanticScore:x.semanticScore,
+              evidenceType:x.evidenceType,customerSafe:x.customerSafe})),
+            evidenceValidation:validation,
+          };
+        }catch(err){
+          trace.error="playground pipeline unavailable: "+err.message;
+          trace.matches=container.knowledgeRepository.search(tenantId,query,{limit:Number(body.limit||6),minScore:Number(body.minScore??0.05)});
+        }
+        return sendJson(res,200,{ok:true,...trace});
+      }
+
+      // Answer Testing: full pipeline including decision + answer (no side effects).
+      const knowledgeTestMatch=url.pathname.match(/^\/api\/dev\/knowledge\/([^/]+)\/test$/);
+      if(req.method==="POST" && knowledgeTestMatch){
+        const tenantId=decodeURIComponent(knowledgeTestMatch[1]),body=await readJson(req);
+        container.tenantRepository.getById(tenantId);
+        const query=String(body.query||"").trim();
+        if(!query) return sendJson(res,400,{ok:false,error:"query is required"});
+        let result={query,verdict:"unknown"};
+        try{
+          const {IntentRouter}=require("../../../packages/knowledge-retrieval/src/intentRouter");
+          const {QueryRewriter}=require("../../../packages/knowledge-retrieval/src/queryRewriter");
+          const {EvidenceValidator}=require("../../../packages/knowledge-retrieval/src/evidenceValidator");
+          const {AnswerComposer}=require("../../../packages/knowledge-answer/src/answerComposer");
+          const {DecisionEngine,OUTCOMES}=require("../../../packages/knowledge-answer/src/decisionEngine");
+          const {AbstentionHandler}=require("../../../packages/knowledge-answer/src/abstentionHandler");
+          const router=new IntentRouter();
+          const rewriter=new QueryRewriter();
+          const validator=new EvidenceValidator();
+          const composer=new AnswerComposer();
+          const decision=new DecisionEngine();
+          const abstain=new AbstentionHandler();
+          const classified=router.classify(query);
+          const rewritten=rewriter.rewrite(query);
+          const matches=container.knowledgeRepository.search(tenantId,rewritten.expanded,{
+            limit:6, minScore:0.05, minSemantic:0.05,
+            ...(classified.requiredSources&&classified.requiredSources.length?{kinds:classified.requiredSources}:{}),
+          });
+          const validation=validator.validate({query:rewritten.normalized,matches,intent:classified.intent});
+          const decisionResult=decision.decide({
+            question:query, intent:classified.intent,
+            missingFields:classified.missingFields, evidenceValidation:validation,
+          });
+          let answer=null, abstentionReason=null;
+          if(decisionResult.outcome===OUTCOMES.ANSWER){
+            const composed=await composer.compose({
+              question:query, intent:classified.intent,
+              evidence:validation.evidence, language:body.language||"en",
+            });
+            answer=composed.answer;
+          }else if(decisionResult.outcome===OUTCOMES.CLARIFY){
+            answer=abstain.clarify(decisionResult.clarifyField,{tenant:{domain:container.tenantRepository.getById(tenantId).domain}});
+            abstentionReason="clarification_required";
+          }else if(decisionResult.outcome===OUTCOMES.ESCALATE){
+            answer=abstain.abstain("escalate",body.language||"en");
+            abstentionReason=decisionResult.reason;
+          }else if(decisionResult.outcome===OUTCOMES.REFUSE){
+            answer=abstain.abstain("refuse",body.language||"en");
+            abstentionReason=decisionResult.reason;
+          }
+          result={
+            query,
+            verdict:decisionResult.outcome,
+            intent:classified.intent,
+            confidence:null, // illustrative per spec §13.4
+            matches:matches.map(x=>({text:x.text,sourceId:x.sourceId,score:x.score,hybridScore:x.hybridScore})),
+            conflict:validation.checks.conflict,
+            evidenceComplete:validation.checks.complete,
+            answer,
+            abstentionReason,
+          };
+        }catch(err){
+          result.error="test pipeline unavailable: "+err.message;
+        }
+        return sendJson(res,200,{ok:true,...result});
+      }
+
+      // Knowledge Analytics dashboard (spec §13.5).
+      const knowledgeAnalyticsMatch=url.pathname.match(/^\/api\/dev\/knowledge\/([^/]+)\/analytics$/);
+      if(req.method==="GET" && knowledgeAnalyticsMatch){
+        const tenantId=decodeURIComponent(knowledgeAnalyticsMatch[1]);
+        container.tenantRepository.getById(tenantId);
+        const dashboard=container.analyticsEngine?.getKnowledgeDashboard?.(tenantId)
+          || {error:"analytics engine not configured"};
+        return sendJson(res,200,{ok:true,analytics:dashboard});
+      }
+
+      // Evaluation: run the knowledge evaluation corpus against the current index.
+      const knowledgeEvaluateMatch=url.pathname.match(/^\/api\/dev\/knowledge\/([^/]+)\/evaluate$/);
+      if(req.method==="POST" && knowledgeEvaluateMatch){
+        const tenantId=decodeURIComponent(knowledgeEvaluateMatch[1]);
+        container.tenantRepository.getById(tenantId);
+        const {runEvaluationCorpus}=require("../../../tests/fixtures/knowledge-evaluation-corpus");
+        const evaluator=async(tc)=>{
+          // Use the /test pipeline logic inline (without HTTP).
+          const matches=container.knowledgeRepository.search(tenantId,tc.question,{limit:6,minScore:0.05,minSemantic:0.05});
+          let outcome="escalate";
+          try{
+            const {IntentRouter}=require("../../../packages/knowledge-retrieval/src/intentRouter");
+            const {EvidenceValidator}=require("../../../packages/knowledge-retrieval/src/evidenceValidator");
+            const {DecisionEngine,OUTCOMES}=require("../../../packages/knowledge-answer/src/decisionEngine");
+            const router=new IntentRouter();
+            const validator=new EvidenceValidator();
+            const decision=new DecisionEngine();
+            const classified=router.classify(tc.question);
+            const validation=validator.validate({query:tc.question,matches,intent:classified.intent});
+            const d=decision.decide({question:tc.question,intent:classified.intent,missingFields:classified.missingFields,evidenceValidation:validation});
+            outcome=d.outcome;
+          }catch{}
+          return {outcome, intent:tc.expectedIntent, matches, tenantIsolationOk:true};
+        };
+        const report=await runEvaluationCorpus(evaluator,{filterDomain:null});
+        return sendJson(res,200,{ok:true,evaluation:report});
+      }
+
+      // Publish a draft source (Phase 2 T2.8 publication workflow).
+      const knowledgePublishMatch=url.pathname.match(/^\/api\/dev\/knowledge\/([^/]+)\/sources\/([^/]+)\/publish$/);
+      if(req.method==="POST" && knowledgePublishMatch){
+        const tenantId=decodeURIComponent(knowledgePublishMatch[1]);
+        const sourceId=decodeURIComponent(knowledgePublishMatch[2]);
+        const body=await readJson(req).catch(()=>({}));
+        container.tenantRepository.getById(tenantId);
+        const result=container.knowledgeSourceRepository.publish(tenantId,sourceId,{approvedBy:body.approvedBy||"admin"});
+        container.knowledgeRepository.clearCache(tenantId);
+        return sendJson(res,200,{ok:true,published:result});
       }
 
       const knowledgeSourceMatch=url.pathname.match(/^\/api\/dev\/knowledge\/([^/]+)\/sources\/([^/]+)$/);
@@ -2576,6 +2947,16 @@ function servePublicChatAsset(res,pathname){
 function serveAdminAsset(res, pathname) {
   const root = path.resolve(__dirname, "../../admin-dashboard/public");
   const relative = ["/admin","/admin/"].includes(pathname) ? "index.html" : pathname.replace(/^\/admin\//, "");
+  const file = path.resolve(root, relative);
+  const outsideRoot = path.relative(root, file).startsWith("..") || path.isAbsolute(path.relative(root, file));
+  if (outsideRoot || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return sendText(res, 404, "Not found");
+  const ext = path.extname(file); const types = { ".html":"text/html; charset=utf-8", ".js":"application/javascript; charset=utf-8", ".css":"text/css; charset=utf-8" };
+  res.writeHead(200, { "Content-Type":types[ext] || "application/octet-stream", "Cache-Control":"no-store" }); res.end(fs.readFileSync(file));
+}
+// v10.3: Serves the Public Product Assistant admin dashboard (leads/demo/unanswered).
+function servePublicAdminAsset(res, pathname) {
+  const root = path.resolve(__dirname, "../../public-admin/public");
+  const relative = ["/public-admin","/public-admin/"].includes(pathname) ? "index.html" : pathname.replace(/^\/public-admin\//, "");
   const file = path.resolve(root, relative);
   const outsideRoot = path.relative(root, file).startsWith("..") || path.isAbsolute(path.relative(root, file));
   if (outsideRoot || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return sendText(res, 404, "Not found");

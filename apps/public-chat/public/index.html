@@ -1,69 +1,213 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#080a14">
-  <meta name="description" content="Meet Nova, the AI customer automation platform for bookings, sales, service requests and customer support.">
-  <title>Nova — AI Customer Automation</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080B16">
+  <meta name="description" content="Nova — your business, in better conversation. Explore how Nova handles customer enquiries, bookings, product information and commerce, then request a demo.">
+  <meta name="color-scheme" content="dark">
+  <title>Nova — Your business, in better conversation.</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238B5CF6'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='48' height='48' rx='12' fill='url(%23g)'/%3E%3Cpath d='M16 33V15l16 18V15' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='24' cy='24' r='2.4' fill='white'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="/assistant/style.css">
 </head>
-<body>
-  <div class="ambient ambient-one" aria-hidden="true"></div>
-  <div class="ambient ambient-two" aria-hidden="true"></div>
-  <main class="app-shell">
-    <aside class="product-panel">
-      <div class="brand-lockup">
-        <span class="brand-mark" aria-hidden="true"><b>N</b></span>
-        <span>NOVA <small>10.2</small></span>
+<body class="nova-page">
+  <div class="aurora aurora-violet" aria-hidden="true"></div>
+  <div class="aurora aurora-cyan" aria-hidden="true"></div>
+  <div class="aurora aurora-grid" aria-hidden="true"></div>
+
+  <!-- ── Top navigation (§7) ── -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a class="brand" href="/chat" aria-label="Nova — home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="34" height="34" role="img" aria-label="Nova">
+            <defs>
+              <linearGradient id="novaGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#8B5CF6"></stop>
+                <stop offset="0.55" stop-color="#4F46E5"></stop>
+                <stop offset="1" stop-color="#22D3EE"></stop>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#novaGrad)"></rect>
+            <path d="M15 34V15l18 19V15" fill="none" stroke="#F8FAFC" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path>
+            <circle cx="24" cy="24" r="2.2" fill="#F8FAFC"></circle>
+          </svg>
+        </span>
+        <span class="brand-word">Nova</span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Primary">
+        <button class="nav-link" type="button" data-prompt="What is Nova?">Product</button>
+        <button class="nav-link" type="button" data-prompt="What can Nova automate?">Solutions</button>
+        <button class="nav-link" type="button" data-prompt="How does Nova work?">How it works</button>
+        <button class="nav-link" type="button" data-prompt="How much does Nova cost?">Pricing</button>
+      </nav>
+
+      <div class="header-cta">
+        <button class="demo-cta" id="header-demo" type="button">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <span>Book a demo</span>
+        </button>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="mobile-nav" id="mobile-nav" hidden>
+      <button class="mobile-nav-link" type="button" data-prompt="What is Nova?">Product</button>
+      <button class="mobile-nav-link" type="button" data-prompt="What can Nova automate?">Solutions</button>
+      <button class="mobile-nav-link" type="button" data-prompt="How does Nova work?">How it works</button>
+      <button class="mobile-nav-link" type="button" data-prompt="How much does Nova cost?">Pricing</button>
+      <button class="mobile-nav-link demo" type="button" id="mobile-demo">Book a demo</button>
+    </div>
+  </header>
+
+  <!-- ── Main (§6) ── -->
+  <main class="chat-main" id="chat-main">
+    <!-- Hero + conversation column -->
+    <section class="conversation-column">
+      <div class="hero" id="hero">
+        <p class="hero-eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Meet Nova</p>
+        <h1 class="hero-heading">Your business, in better conversation.</h1>
+        <p class="hero-supporting">Explore how Nova can help your business handle customer enquiries and support connected workflows—from service information and bookings to product questions and commerce.</p>
+        <p class="hero-intro"><span class="nova-avatar-sm" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18V6l10 12V6"/></svg>
+        </span>I'm Nova's product assistant. Tell me what kind of business you run, or ask me anything about Nova.</p>
       </div>
 
-      <div class="hero-copy">
-        <p class="eyebrow"><i></i> Intelligent customer operations</p>
-        <h1>Turn every conversation into action.</h1>
-        <p class="lede">Nova gives businesses one adaptable assistant for customer questions, bookings, sales, service requests, and support—in English or Roman Urdu.</p>
+      <div class="starter-row" id="starter-row" aria-label="Suggested questions">
+        <button class="starter-chip" type="button" data-prompt="What is Nova?">What is Nova?</button>
+        <button class="starter-chip" type="button" data-prompt="What can Nova automate?">What can Nova automate?</button>
+        <button class="starter-chip" type="button" data-prompt="Can Nova work for my business?">Can Nova work for my business?</button>
+        <button class="starter-chip" type="button" data-prompt="Show me a booking example">Show me a booking example</button>
+        <button class="starter-chip" type="button" data-prompt="I'd like to see a demo">I'd like to see a demo</button>
       </div>
 
-      <div class="capability-grid" aria-label="Nova capabilities">
-        <article><span>01</span><strong>Engage</strong><p>Natural multilingual conversations</p></article>
-        <article><span>02</span><strong>Convert</strong><p>Bookings, orders, and qualified leads</p></article>
-        <article><span>03</span><strong>Remember</strong><p>Safe tenant-scoped customer context</p></article>
-        <article><span>04</span><strong>Operate</strong><p>Validated workflows and handoffs</p></article>
-      </div>
+      <!-- Chat panel (§9) -->
+      <section class="chat-panel" aria-label="Chat with Nova">
+        <header class="chat-panel-header">
+          <div class="assistant-identity">
+            <span class="assistant-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18V6l10 12V6"/></svg>
+            </span>
+            <div class="assistant-meta">
+              <strong>Nova Product Assistant</strong>
+              <p>Here to help you explore Nova</p>
+            </div>
+          </div>
+          <button class="icon-button" id="new-conversation" type="button" aria-label="New conversation" title="New conversation">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </header>
 
-      <div class="signal-card">
-        <div class="signal-icon" aria-hidden="true"><i></i><i></i><i></i></div>
-        <div><strong>Built for real operations</strong><p>Configuration-led. Multi-tenant. Human-ready.</p></div>
-      </div>
-    </aside>
+        <div class="conversation" id="conversation" aria-live="polite" aria-label="Conversation with Nova"></div>
 
-    <section class="chat-panel" aria-label="Chat with Nova">
-      <header class="chat-header">
-        <div class="agent-identity">
-          <span class="agent-avatar" aria-hidden="true">N</span>
-          <div><strong>Nova</strong><p><i></i> Online · Public product guide</p></div>
-        </div>
-        <div class="header-actions">
-          <label class="language-picker" for="language"><span>Language</span><select id="language" aria-label="Conversation language"><option value="auto">Auto</option><option value="english">English</option><option value="roman_urdu">Roman Urdu</option></select></label>
-          <button id="new-chat" class="new-chat" type="button" aria-label="Start a new conversation"><span aria-hidden="true">＋</span> New chat</button>
-        </div>
-      </header>
+        <nav class="suggested-actions" id="suggested-actions" aria-label="Suggested actions" hidden></nav>
 
-      <section id="chat" class="chat" aria-live="polite" aria-label="Conversation with Nova"></section>
+        <!-- Lead capture sheet (§13) -->
+        <section class="demo-sheet" id="demo-sheet" hidden aria-label="Request a demo">
+          <div class="demo-sheet-head">
+            <div>
+              <strong>See Nova in action</strong>
+              <p>Get a walkthrough based on the workflow you want to improve.</p>
+            </div>
+            <button class="icon-button" id="demo-close" type="button" aria-label="Close demo request form">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+          </div>
+          <form id="lead-form" class="lead-form" novalidate>
+            <div class="form-row">
+              <label class="field">
+                <span class="field-label">Name</span>
+                <input type="text" id="lead-name" autocomplete="name" placeholder="Your name" required>
+                <span class="field-error" id="err-name" hidden></span>
+              </label>
+              <label class="field">
+                <span class="field-label">Business name <em>optional</em></span>
+                <input type="text" id="lead-business" autocomplete="organization" placeholder="Your business">
+              </label>
+            </div>
+            <div class="form-row">
+              <label class="field">
+                <span class="field-label">Email or phone</span>
+                <input type="text" id="lead-contact" autocomplete="email" placeholder="you@business.com" required>
+                <span class="field-error" id="err-contact" hidden></span>
+              </label>
+              <label class="field">
+                <span class="field-label">Main workflow <em>optional</em></span>
+                <input type="text" id="lead-workflow" placeholder="e.g. appointment bookings">
+              </label>
+            </div>
+            <label class="consent">
+              <input type="checkbox" id="lead-consent" required>
+              <span>I agree that the Nova team may contact me about this request.</span>
+            </label>
+            <div class="form-actions">
+              <button class="primary-button" id="lead-submit" type="submit">
+                <span>Request a demo</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+              <span class="form-status" id="form-status" role="status" aria-live="polite"></span>
+            </div>
+          </form>
+        </section>
 
-      <nav id="suggestions" class="suggestions" aria-label="Suggested questions"></nav>
-
-      <form id="composer" autocomplete="off">
-        <label class="composer-field" for="message">
-          <textarea id="message" rows="1" maxlength="4000" placeholder="Ask Nova anything about customer automation…" required></textarea>
-          <span>Enter to send · Shift + Enter for a new line</span>
-        </label>
-        <button class="send" type="submit" aria-label="Send message"><span>Send</span><b aria-hidden="true">↗</b></button>
-      </form>
-
-      <footer><span><i></i> Tenant-neutral public demo</span><span>No customer records are accessed here</span></footer>
+        <!-- Composer (§10) -->
+        <form class="composer" id="composer" autocomplete="off">
+          <div class="composer-input">
+            <textarea id="message" rows="1" maxlength="4000" placeholder="Ask Nova about the platform, features, or your business..." aria-label="Message Nova" required></textarea>
+            <button class="send-button" id="send-button" type="submit" aria-label="Send message">
+              <svg class="send-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l16-8-6 16-3-7-7-1z"/></svg>
+            </button>
+          </div>
+          <p class="composer-helper"><span>Ask a question to get started.</span><span class="composer-hint">Enter to send · Shift+Enter for a new line</span></p>
+        </form>
+      </section>
     </section>
+
+    <!-- Capability sidebar (§14, wide desktop only) -->
+    <aside class="capability-sidebar" id="capability-sidebar" aria-label="Explore what Nova can help with">
+      <h2 class="sidebar-title">Explore what Nova can help with</h2>
+      <ul class="capability-list">
+        <li><button class="capability-row" type="button" data-prompt="How does Nova handle customer enquiries?">
+          <span class="cap-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 1 1-3.5-6.6L21 4l-1.4 3.5A7.96 7.96 0 0 1 21 12z"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg></span>
+          <span class="cap-text"><strong>Customer enquiries</strong><em>Answer questions across channels</em></span>
+        </button></li>
+        <li><button class="capability-row" type="button" data-prompt="Can Nova manage bookings?">
+          <span class="cap-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+          <span class="cap-text"><strong>Bookings &amp; service requests</strong><em>Collect and confirm appointments</em></span>
+        </button></li>
+        <li><button class="capability-row" type="button" data-prompt="What product information can Nova provide?">
+          <span class="cap-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h10l6 6v10H4z"/><path d="M14 4v6h6"/></svg></span>
+          <span class="cap-text"><strong>Product &amp; service information</strong><em>Share accurate catalog details</em></span>
+        </button></li>
+        <li><button class="capability-row" type="button" data-prompt="Can Nova show pricing and availability?">
+          <span class="cap-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+          <span class="cap-text"><strong>Pricing &amp; availability</strong><em>Surface approved rates and stock</em></span>
+        </button></li>
+        <li><button class="capability-row" type="button" data-prompt="Can Nova handle commerce workflows?">
+          <span class="cap-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M3 4h2l2.5 12h11l2-8H6"/></svg></span>
+          <span class="cap-text"><strong>Commerce workflows</strong><em>Take orders and route fulfilment</em></span>
+        </button></li>
+      </ul>
+    </aside>
   </main>
+
+  <!-- Footer (§21) -->
+  <footer class="site-footer">
+    <p class="footer-trust">A clearer way to manage customer conversations and business workflows.</p>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="/chat">About Nova</a>
+      <span class="footer-sep" aria-hidden="true">·</span>
+      <a href="/chat">Privacy Policy</a>
+      <span class="footer-sep" aria-hidden="true">·</span>
+      <a href="/chat">Terms</a>
+      <span class="footer-sep" aria-hidden="true">·</span>
+      <a href="/chat">Contact</a>
+    </nav>
+    <p class="footer-note">Trusted product information · No customer records accessed here</p>
+  </footer>
+
   <script src="/assistant/app.js" defer></script>
 </body>
 </html>

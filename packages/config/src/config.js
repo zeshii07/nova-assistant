@@ -22,6 +22,11 @@ function loadConfig() {
   if (!["adaptive", "primary"].includes(nluStrategy)) throw new Error("NOVA_NLU_STRATEGY must be adaptive or primary");
   const semanticRouterMode=String(process.env.NOVA_SEMANTIC_ROUTER_MODE||"on").toLowerCase();
   if(!["off","on"].includes(semanticRouterMode))throw new Error("NOVA_SEMANTIC_ROUTER_MODE must be off or on");
+  // §16/§17 — public assistant LLM generation is OFF by default. The public
+  // assistant is deterministic; an LLM is only used when explicitly enabled AND
+  // the llmRouter has configured providers. Explicit =off always wins.
+  const publicLlmMode=String(process.env.NOVA_PUBLIC_LLM_MODE||"off").toLowerCase();
+  if(!["off","on"].includes(publicLlmMode))throw new Error("NOVA_PUBLIC_LLM_MODE must be off or on");
   const defaultTimezone = process.env.NOVA_DEFAULT_TIMEZONE || "Asia/Karachi";
   try { new Intl.DateTimeFormat("en-US", { timeZone: defaultTimezone }).format(); }
   catch { throw new Error("NOVA_DEFAULT_TIMEZONE must be a valid IANA timezone"); }
@@ -46,6 +51,7 @@ function loadConfig() {
     nluMode,
     nluStrategy,
     semanticRouterMode,
+    publicLlmMode,
     semanticRouterMinConfidence:boundedNumber("NOVA_SEMANTIC_ROUTER_MIN_CONFIDENCE",.72,0,1),
     semanticRouterMinMargin:boundedNumber("NOVA_SEMANTIC_ROUTER_MIN_MARGIN",.08,0,.5),
     semanticRouterMinSimilarity:boundedNumber("NOVA_SEMANTIC_ROUTER_MIN_SIMILARITY",.2,0,1),

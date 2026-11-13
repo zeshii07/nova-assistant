@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "lastReviewedAt": "2026-11-12T00:00:00.000Z",
+  "features": [
+    {
+      "feature_id": "customer_communication_assistant",
+      "display_name": "Customer communication assistant",
+      "description": "A configured assistant that answers routine customer enquiries using approved business information.",
+      "status": "available_with_configuration",
+      "public_visibility": true,
+      "requires_configuration": true,
+      "supported_industries": ["salon", "clinic", "cleaning", "restaurant", "retail", "ecommerce", "real_estate", "consultancy", "training"],
+      "limitations": ["Accuracy depends on the quality and freshness of the approved business information."],
+      "demo_available": true
+    },
+    {
+      "feature_id": "knowledge_based_answers",
+      "display_name": "Knowledge-based answers",
+      "description": "Businesses provide approved FAQs, service descriptions, policies, and procedures so Nova can answer using that business's information.",
+      "status": "available_with_configuration",
+      "public_visibility": true,
+      "requires_configuration": true,
+      "supported_industries": ["salon", "clinic", "cleaning", "restaurant", "retail", "ecommerce", "real_estate", "consultancy", "training"],
+      "limitations": ["Answers are only as accurate as the approved information provided."],
+      "demo_available": true
+    },
+    {
+      "feature_id": "booking_workflows",
+      "display_name": "Booking workflows",
+      "description": "Nova can be configured to collect requested service, preferred date/time, and customer contact details, then pass them through the configured booking workflow.",
+      "status": "available_with_configuration",
+      "public_visibility": true,
+      "requires_configuration": true,
+      "supported_industries": ["salon", "clinic", "cleaning", "restaurant", "consultancy", "training"],
+      "limitations": ["Booking confirmation depends on the connected booking and availability configuration. A booking is only confirmed after the connected workflow confirms it."],
+      "demo_available": true
+    },
+    {
+      "feature_id": "service_catalogue",
+      "display_name": "Service catalogue",
+      "description": "Businesses can organize service information so customers can ask what is offered and what each service includes.",
+      "status": "available_with_configuration",
+      "public_visibility": true,
+      "requires_configuration": true,
+      "supported_industries": ["salon", "clinic", "cleaning", "restaurant", "consultancy", "training"],
+      "limitations": [],
+      "demo_available": true
+    },
+    {
+      "feature_id": "product_catalogue",
+      "display_name": "Product catalogue",
+      "description": "Product-based businesses can make product information available to the assistant.",
+      "status": "available_with_configuration",
+      "public_visibility": true,
+      "requires_configuration": true,
+      "supported_industries": ["retail", "ecommerce"],
+      "limitations": ["Nova does not invent product attributes, stock, or prices. Accurate prices and stock must come from current product records or connected systems."],
+      "demo_available": true
+    },
+    {
+      "feature_id": "pricing_and_availability",
+      "display_name": "Pricing and availability",
+      "description": "Where current pricing and availability records are configured, Nova can use them to answer customer questions.",
+      "status": "available_with_configuration",
+      "public_visibility": true,
+      "requires_configuration": true,
+      "supported_industries": ["salon", "clinic", "cleaning", "restaurant", "retail", "ecommerce"],
+      "limitations": ["Nova distinguishes indicative information from confirmed prices and slots. It never invents prices."],
+      "demo_available": false
+    },
+    {
+      "feature_id": "commerce",
+      "display_name": "Commerce workflows",
+      "description": "Cart, checkout, and order-related capabilities for product-based businesses.",
+      "status": "beta",
+      "public_visibility": true,
+      "requires_configuration": true,
+      "supported_industries": ["retail", "ecommerce"],
+      "limitations": ["Payment processing, refunds, shipping providers, and payment integrations are not claimed unless confirmed. Publish only after the team verifies which functions are implemented and enabled."],
+      "demo_available": false
+    },
+    {
+      "feature_id": "crm",
+      "display_name": "CRM and customer interactions",
+      "description": "Organizes customer enquiries and interactions into a lightweight customer record.",
+      "status": "available_with_configuration",
+      "public_visibility": true,
+      "requires_configuration": true,
+      "supported_industries": ["salon", "clinic", "cleaning", "restaurant", "retail", "ecommerce", "real_estate", "consultancy", "training"],
+      "limitations": ["Nova does not promise a named CRM integration unless listed as supported."],
+      "demo_available": false
+    },
+    {
+      "feature_id": "website_widget",
+      "display_name": "Website widget",
+      "description": "An embeddable chat widget that can be added to a business website.",
+      "status": "available",
+      "public_visibility": true,
+      "requires_configuration": false,
+      "supported_industries": ["salon", "clinic", "cleaning", "restaurant", "retail", "ecommerce", "real_estate", "consultancy", "training"],
+      "limitations": ["Device and browser compatibility must be verified before public claims."],
+      "demo_available": true
+    },
+    {
+      "feature_id": "kiosk",
+      "display_name": "Kiosk experience",
+      "description": "A full-screen kiosk-style experience suitable for tablets and kiosks.",
+      "status": "beta",
+      "public_visibility": true,
+      "requires_configuration": true,
+      "supported_industries": ["salon", "clinic", "restaurant", "retail"],
+      "limitations": ["Device and browser compatibility must be verified before public claims."],
+      "demo_available": false
+    },
+    {
+      "feature_id": "whatsapp_channel",
+      "display_name": "WhatsApp channel",
+      "description": "Customers can chat with the business's Nova assistant on WhatsApp.",
+      "status": "available_with_configuration",
+      "public_visibility": true,
+      "requires_configuration": true,
+      "supported_industries": ["salon", "clinic", "cleaning", "restaurant", "retail", "ecommerce", "real_estate", "consultancy", "training"],
+      "limitations": ["Requires an approved WhatsApp Business account and configuration."],
+      "demo_available": false
+    },
+    {
+      "feature_id": "multilingual_urdu",
+      "display_name": "Urdu and Roman Urdu support",
+      "description": "English, Urdu, and Roman Urdu experiences are included in the project.",
+      "status": "available_with_configuration",
+      "public_visibility": true,
+      "requires_configuration": true,
+      "supported_industries": ["salon", "clinic", "cleaning", "restaurant", "retail", "ecommerce", "real_estate", "consultancy", "training"],
+      "limitations": ["Exact language availability and quality depend on the current deployed configuration. Nova does not promise equal accuracy across languages or dialects."],
+      "demo_available": false
+    }
+  ]
+}

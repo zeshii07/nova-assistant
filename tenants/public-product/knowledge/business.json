@@ -1,0 +1,82 @@
+{
+  "name": "Nova",
+  "description": "Nova is a business automation and AI customer communication platform that helps businesses manage customer conversations and automate configured workflows such as enquiries, bookings, product and service information, availability, and commerce-related interactions.",
+  "shortDescription": "Nova helps businesses respond to customers, answer common questions, and manage customer-facing workflows through an AI-powered assistant.",
+  "valueProposition": "Turn customer conversations into organized business workflows — with one intelligent assistant.",
+  "categories": [
+    "business automation",
+    "AI customer communication",
+    "workflow automation"
+  ],
+  "whoItIsFor": "Small and medium businesses that handle customer conversations across channels — including salons, clinics, cleaning companies, restaurants, retail shops, ecommerce businesses, real estate agencies, consultancies, and training institutes.",
+  "whatItSolves": "Nova helps businesses respond to customers quickly, answer repeated questions consistently, capture enquiries, and turn conversations into structured workflows such as bookings and orders without manual data entry.",
+  "mainFeatures": [
+    {
+      "feature_id": "customer_communication_assistant",
+      "summary": "A configured assistant that answers routine customer enquiries using approved business information."
+    },
+    {
+      "feature_id": "knowledge_based_answers",
+      "summary": "Businesses provide approved FAQs, service descriptions, policies, and procedures so Nova can answer using that business's information."
+    },
+    {
+      "feature_id": "booking_workflows",
+      "summary": "Nova can be configured to collect requested service, preferred date/time, and customer contact details, then pass them through the configured booking workflow."
+    },
+    {
+      "feature_id": "service_catalogue",
+      "summary": "Businesses can organize service information so customers can ask what is offered and what each service includes."
+    },
+    {
+      "feature_id": "product_catalogue",
+      "summary": "Product-based businesses can make product information available to the assistant."
+    },
+    {
+      "feature_id": "pricing_and_availability",
+      "summary": "Where current pricing and availability records are configured, Nova can use them to answer customer questions."
+    },
+    {
+      "feature_id": "commerce",
+      "summary": "Cart, checkout, and order-related capabilities for product-based businesses."
+    },
+    {
+      "feature_id": "crm",
+      "summary": "Organizing customer enquiries and interactions into a lightweight customer record."
+    }
+  ],
+  "languages": {
+    "supported": ["english", "urdu", "roman_urdu"],
+    "note": "The project includes English, Urdu, and Roman Urdu experiences. Exact language availability and quality depend on the current deployed configuration. Nova does not promise equal accuracy across languages or dialects."
+  },
+  "channels": {
+    "supported": ["whatsapp", "website_widget", "kiosk"],
+    "note": "The project includes an embeddable chat widget and a full-screen kiosk-style experience. Current deployment status and device/browser compatibility should be verified before public claims."
+  },
+  "integrations": {
+    "note": "Integration support depends on the software and the integration required. Nova does not promise an integration that may not be supported yet. Specific integrations must be verified against the feature registry before being claimed."
+  },
+  "pricing": {
+    "note": "Pricing depends on the features and setup a business needs. Nova does not publish a fixed public price list. Where current pricing records are configured for a tenant, Nova uses them; otherwise pricing is discussed with the Nova team. Nova must never guess prices."
+  },
+  "security": {
+    "tenantIsolation": "Each business has its own tenant namespace. One business cannot see another business's data. Tenant identity is fixed server-side and never supplied by the browser.",
+    "dataUse": "Approved business information is used to answer that business's customers. Nova does not use one business's information to answer another business's customers.",
+    "abstention": "If Nova does not have a confirmed answer, it says so and offers to pass the question to the team rather than guessing.",
+    "conversationStorage": "Conversations may be stored for service improvement and support, subject to the applicable consent and retention policy. Specific retention periods and data residency claims require approved wording and must not be invented."
+  },
+  "messagingRules": [
+    "Say 'can help automate' rather than 'fully automates everything.'",
+    "Say 'can be configured to' when setup or integration is required.",
+    "Say 'depending on enabled modules and configuration' when availability varies.",
+    "Never imply every feature is enabled for every customer by default.",
+    "Never guarantee increased revenue, zero missed leads, perfect accuracy, or a specific improvement without approved evidence.",
+    "Do not position Nova as a replacement for all human staff.",
+    "Avoid technical jargon in the first response.",
+    "Distinguish live/available features from beta, planned, and unverified capabilities."
+  ],
+  "supportBoundaries": {
+    "publicAssistant": "The public product assistant is not authenticated customer support. Existing customers needing account-specific help are directed to the configured authenticated support route.",
+    "neverAskFor": "The assistant never asks for passwords, API keys, or access tokens.",
+    "noTenantDataFromPublic": "The public assistant never retrieves tenant data from a public session."
+  }
+}

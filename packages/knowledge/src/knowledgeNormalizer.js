@@ -93,19 +93,23 @@ function plainSections(text,{maxChars=1200}={}){
   flush();return sections;
 }
 function normalizeText(name,text){
-  if(String(name).toLowerCase().endsWith('.md'))return markdownSections(text).map((x,i)=>{
+  const isMd=String(name).toLowerCase().endsWith('.md');
+  // v55.0: delegate to the structure-aware chunker when available. It keeps
+  // heading + body together, keeps lists/tables as one chunk, carries parent
+  // heading context, and respects per-kind max-chars defaults.
+  let structureAware=null;
+  try{structureAware=require('./structureAwareChunker').structureAwareChunk;}catch{structureAware=null;}
+  const sections=isMd?markdownSections(text):plainSections(text);
+  const chunks=structureAware?structureAware(text,{kind:'document',sourceName:name}):sections.map(s=>({heading:s.heading,text:s.text,sourceLocation:{lineStart:1,lineEnd:1}}));
+  return chunks.map((x,i)=>{
     const heading=x.heading||null;
     const body=String(x.text||'').trim();
-    const customerText=sanitizeCustomerEvidence(body);
-    const evidenceType=inferEvidenceType(body,heading);
-    return {id:`${name}:md:${i}`,source:name,path:heading,text:customerText||body,evidenceType,customerSafe:Boolean(customerText),tokens:tokens(`${heading||''} ${customerText||body}`)};
-  });
-  return plainSections(text).map((x,i)=>{
-    const heading=x.heading||null,body=String(x.text||'').trim();
     const internal=/\b(agent testing notes?|tester notes?|internal instructions?|instructions? for (?:the )?(?:agent|assistant|tester))\b/i.test(heading||'');
     const customerText=internal?'':sanitizeCustomerEvidence(body);
     const evidenceType=internal?'internal_instruction':inferEvidenceType(body,heading);
-    return {id:`${name}:text:${i}`,source:name,path:heading,text:customerText||body,evidenceType,customerSafe:!internal&&Boolean(customerText),tokens:tokens(`${heading||''} ${customerText||body}`)};
+    const out={id:`${name}:${isMd?'md':'text'}:${i}`,source:name,path:heading,text:customerText||body,evidenceType,customerSafe:!internal&&Boolean(customerText),tokens:tokens(`${heading||''} ${customerText||body}`)};
+    if(x.sourceLocation)out.sourceLocation=x.sourceLocation;
+    return out;
   });
 }
 module.exports={clean,tokens,flatten,chunkText,markdownSections,plainSections,sanitizeCustomerEvidence,inferEvidenceType,normalizeFaqs,normalizeJson,normalizeText};

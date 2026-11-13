@@ -1,12 +1,30 @@
-# Nova Assistant — v53.0
+# Nova Assistant — v59.0
 
 **Multi-tenant SaaS conversation engine** for service businesses. Handles orders, bookings, hotel room reservations, and customer interactions across restaurants, hotels, salons, cleaning services, retail, healthcare, education, and driving schools.
 
 ---
 
-## 🚀 What's New (v40.0 → v53.0)
+## 🚀 What's New (v40.0 → v59.0)
 
-### v53.0 — Production Optimization (Phase 6) — FINAL PHASE
+### v59.0 — Knowledge Engine v2 (Phases 1–6 complete)
+
+The full Knowledge Intelligence Engine v2 upgrade, implemented per the development specification. Nova now evolves from "Customer Question → Document Search → Answer" to "Customer Context → Intent Understanding → Source Selection → Evidence Retrieval / Tool Execution → Validation → Decision → Answer / Clarification / Action / Escalation."
+
+**Phase 1 — Architecture cleanup (v54.0):** Deleted the duplicate `packages/knowledge-engine` (Phase 3 KnowledgeEngine was never wired into the runtime). One authoritative retrieval path: `AssistantService → KnowledgeService → FileKnowledgeRepository → KnowledgeIndex`. Import guard + single-cache assertions.
+
+**Phase 2 — Ingestion improvements (v55.0):** Structure-aware chunker keeps heading+body, lists, and tables together (the 4-tier cancellation policy regression is fixed). Ingestion validation reports (chunk count, sanitized, internal-only, short, contradictions, duplicate detection). Source versioning with `draft/processing/published/disabled/archived/failed` states, `supersedes`, `effectiveFrom/Until`, `approvedBy`.
+
+**Phase 3 — Retrieval intelligence (v56.0):** `IntentRouter` routes pricing/availability/booking/order to structured systems (NOT RAG), RAG for faq/policy/service inquiries. `QueryRewriter` moves the 13 expansion patterns behind a dedicated interface. `EvidenceValidator` produces explicit `{status, evidence, checks{relevant, complete, authoritative, fresh, conflict, customerSafe}}`. `TrainedEmbeddingProvider` adapts the existing multilingual MiniLM models to the `EmbeddingProvider` interface with graceful fallback.
+
+**Phase 4 — Answer intelligence (v57.0):** `AnswerComposer` (LLM + extractive fallback, structured-fact injection for critical values). `ResponseValidator` rejects uncited claims, unsupported money/duration/count/date values, and internal-evidence leaks. `DecisionEngine` maps to `answer/clarify/escalate/refuse`. `CitationBuilder` attaches evidence IDs. `AbstentionHandler` (multilingual en/ur/roman-urdu).
+
+**Phase 5 — Storage & scalability (v58.0):** `PostgresRepository` + pgvector `VectorRepository` + `RedisCache` (pub/sub cross-instance invalidation) + `TenantIsolation`. All degrade gracefully to single-node file mode. `migrations/001_knowledge_schema.sql` + `ROLLBACK.md`. The DH1 test proves instance A's invalidation drops instance B's cache.
+
+**Phase 6 — Admin tools & quality evaluation (v59.0):** 6 new endpoints (`/chunks`, `/playground`, `/test`, `/analytics`, `/evaluate`, `/publish`). `AnalyticsEngine.getKnowledgeDashboard` surfaces retrieval volume, answerable/abstain/clarify/escalate/conflict rates, p95 latency, top sources, failed ingestion jobs. 23-case knowledge evaluation corpus (en + roman-urdu + ur, all 4 outcomes + security + conflict cases) with `runEvaluationCorpus` for CI regression gating.
+
+**Grounded-abstention contract preserved throughout** — Nova never invents business facts. Uploaded documents are treated as untrusted evidence, never as instructions.
+
+### v53.0 — Production Optimization (Phase 6)
 - **Conversation Replay Engine** — records production conversations with PII redaction (phone, email, name, address). Replays against current engine and compares outputs (capability, intent, reply text). Generates diff reports highlighting regressions. Export/import recordings for cross-environment testing
 - **Regression Evaluator** — runs the variation corpus against the engine, compares against saved baselines, identifies new failures (regressions) and new passes (improvements). Tracks accuracy trends across versions
 - **Cost Optimizer** — tracks LLM token costs, per-tenant rate limiting (60 req/min default), caching to avoid redundant API calls, cost-per-conversation estimation, system-wide cost summary

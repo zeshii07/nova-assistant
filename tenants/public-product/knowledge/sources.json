@@ -1,0 +1,41 @@
+[
+  {
+    "id": "SRC-BUSINESS",
+    "kind": "business_profile",
+    "title": "Nova product overview",
+    "file": "knowledge/business.json",
+    "status": "active",
+    "priority": 100,
+    "revision": 1,
+    "tags": [],
+    "metadata": {},
+    "createdAt": "2026-11-12T00:00:00.000Z",
+    "updatedAt": "2026-11-12T00:00:00.000Z"
+  },
+  {
+    "id": "SRC-FAQS",
+    "kind": "faq_collection",
+    "title": "Nova public FAQs",
+    "file": "knowledge/faqs.json",
+    "status": "active",
+    "priority": 80,
+    "revision": 1,
+    "tags": [],
+    "metadata": {},
+    "createdAt": "2026-11-12T00:00:00.000Z",
+    "updatedAt": "2026-11-12T00:00:00.000Z"
+  },
+  {
+    "id": "SRC-DOC-product-facts-md",
+    "kind": "document",
+    "title": "nova-product-facts.md",
+    "file": "knowledge/documents/nova-product-facts.md",
+    "status": "active",
+    "priority": 60,
+    "revision": 1,
+    "tags": [],
+    "metadata": {},
+    "createdAt": "2026-11-12T00:00:00.000Z",
+    "updatedAt": "2026-11-12T00:00:00.000Z"
+  }
+]

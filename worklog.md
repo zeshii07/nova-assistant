@@ -1590,3 +1590,82 @@ Stage Summary:
 - 15 new packages added across all phases (78 → 93 packages)
 - 580+ tests total
 - Fresh zip at /home/z/my-project/download/nova-v53.0.zip
+
+---
+Task ID: v59.0 (Knowledge Engine v2 — all 6 phases)
+Agent: Super Z (main)
+Task: Implement the Nova Knowledge Intelligence Engine v2 per the uploaded development specification.
+
+Work Log:
+
+ALL 6 PHASES COMPLETE — 146 NEW TESTS, 0 REGRESSIONS:
+
+PHASE 1 — ARCHITECTURE CLEANUP (v54.0):
+  - Deleted packages/knowledge-engine (duplicate Phase 3 KnowledgeEngine, never wired into runtime)
+  - Migrated Y1-Y10 tests to tests/sprint54.v54-knowledge-unified-path.regression.test.js (Group Z3)
+  - Import guard (Z1.1/Z1.2): require('packages/knowledge-engine') throws MODULE_NOT_FOUND
+  - Single cache assertion (Z2.1/Z2.2): only FileKnowledgeRepository.cache exists
+  - Added packages/knowledge/AUTHORITY.md (5-tier authority model, 6 enforcement rules)
+  - 16/16 tests pass
+
+PHASE 2 — INGESTION IMPROVEMENTS (v55.0):
+  - packages/knowledge/src/structureAwareChunker.js: heading+body together, lists/tables as one chunk, per-kind maxChars (faq 500, document 1000, policy 1500), sentence-boundary splits, tiny-chunk merge, sourceLocation tracking
+  - packages/knowledge-ingestion/src/validators/ingestionReport.js: validation report (chunkCount, sanitizedCount, internalOnlyCount, shortChunkCount, contradictions, duplicateDetected, blockers)
+  - knowledgeSourceRepository: added version, supersedes, effectiveFrom/Until, approvedBy, contentHash; new publish() method archives previous published version
+  - fileKnowledgeRepository: loads only published/active sources, excludes expired (effectiveUntil in past)
+  - 23/23 tests pass
+
+PHASE 3 — RETRIEVAL INTELLIGENCE (v56.0):
+  - packages/knowledge-retrieval/src/intentRouter.js: 13 deterministic rules, entity extraction (service/date/time/orderId/propertyType), missingFields → clarify, isKnowledgeIntent/isStructuredIntent/isEscalationIntent routing
+  - packages/knowledge-retrieval/src/queryRewriter.js: 13 normalization rules + 13 bounded expansions behind dedicated interface, polarity-preserving, variant building (max 5)
+  - packages/knowledge-retrieval/src/evidenceValidator.js: explicit {status, evidence, checks} schema, fact-signature conflict detection, freshness (effectiveUntil), customerSafe filter
+  - packages/knowledge/src/embeddingProviderInterface.js: EmbeddingProvider contract (embedQuery/embedDocuments/getModelInfo)
+  - packages/knowledge/src/trainedEmbeddingProvider.js: adapts transformer-embeddings (all-MiniLM-L6-v2 + multilingual), language routing (Urdu/Roman-Urdu), graceful fallback to LocalSemantic
+  - 35/35 tests pass
+
+PHASE 4 — ANSWER INTELLIGENCE (v57.0):
+  - packages/knowledge-answer/src/answerComposer.js: LLM composition with [E1] citation parsing, extractive fallback, structured-fact injection (price/slot/booking ID never generated)
+  - packages/knowledge-answer/src/responseValidator.js: rejects uncited claims, missing evidence, unsupported money/duration/count/date values, internal-evidence leaks, unsupported additions
+  - packages/knowledge-answer/src/decisionEngine.js: answer/clarify/escalate/refuse outcomes, refusePatterns for unsafe requests
+  - packages/knowledge-answer/src/citationBuilder.js: attaches sourceId/chunkId/version to claims, audit-safe summarize()
+  - packages/knowledge-answer/src/abstentionHandler.js: clarify templates per missing field, abstain replies in en/ur/roman-urdu
+  - 29/29 tests pass
+
+PHASE 5 — STORAGE & SCALABILITY (v58.0):
+  - packages/knowledge-repository/src/postgresRepository.js: durable source+chunk storage, same interface as FileKnowledgeRepository (config-driven swap), graceful fallback
+  - packages/knowledge-repository/src/vectorRepository.js: pgvector cosine search, embedding-model isolation (never mix incompatible vectors)
+  - packages/knowledge-repository/src/redisCache.js: per-tenant LRU + pub/sub invalidation, TTL self-heal, in-process fallback
+  - packages/knowledge-repository/src/tenantIsolation.js: tenantId validation (injection/traversal prevention), scopedParams, cross-tenant assertion
+  - migrations/001_knowledge_schema.sql: knowledge_sources, knowledge_chunks, knowledge_embeddings (pgvector), ingestion_jobs tables + indexes + RLS
+  - packages/knowledge/ROLLBACK.md: per-phase rollback procedures
+  - DH1 test: instance A publish → instance B drops cache (cross-instance invalidation verified)
+  - 20/20 tests pass
+
+PHASE 6 — ADMIN TOOLS & QUALITY EVALUATION (v59.0):
+  - 6 new endpoints in apps/api/src/server.js: GET /chunks, POST /playground, POST /test, GET /analytics, POST /evaluate, POST /publish
+  - packages/analytics-engine: getKnowledgeDashboard() — retrieval volume, answerable/abstain/clarify/escalate/conflict rates, p95 latency, top sources, failed ingestion jobs
+  - tests/fixtures/knowledge-evaluation-corpus.js: 23 cases (en + roman-urdu + ur), all 4 outcomes, security (prompt injection, cross-tenant), conflict detection, runEvaluationCorpus() with pass/fail/accuracy metrics
+  - analyticsEngine wired into apps/api/src/container.js
+  - 23/23 tests pass
+
+DEFINITION OF DONE (spec §18) — all 18 checkboxes demonstrated by tests:
+  - One authoritative retrieval path (Phase 1 import guard)
+  - Regression coverage (146 new tests + 580+ existing pass)
+  - Structure-aware chunking (AA2: 4-tier policy stays together)
+  - Ingestion validation reports (AB1-AB6)
+  - Source versioning + publication states (AC1-AC7)
+  - Expired/disabled knowledge excluded (BD4)
+  - Tenant isolation tests (DG1-DG5)
+  - Prompt-injection test documents cannot override (sec-001/002/003 corpus)
+  - Pricing/availability use structured systems (BB1/BB2, BD7)
+  - Multilingual retrieval (BE5, corpus clean-003/004/011)
+  - Evidence validation 6 checks (BD1-BD10)
+  - Unsupported questions do not invent facts (Z4.1/Z4.2, CE4)
+  - Clarification + escalation outcomes (CE2/CE3)
+  - Generated claims retain evidence references (CC4, CF1)
+  - Retrieval + answer metrics recorded (EE1-EE7)
+  - Admin can inspect chunks + test answer path (EH1-EH5)
+  - Multi-instance cache invalidation tested (DH1)
+  - Rollback procedures documented (ROLLBACK.md)
+
+TOTAL: 146 new tests across 6 sprint files, 0 regressions in 580+ existing tests.

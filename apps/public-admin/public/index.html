@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nova — Public Assistant Admin</title>
+  <style>
+    :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--bg:#070912;--panel:#0c0f1c;--panel-soft:#111524;--line:rgba(255,255,255,.09);--muted:#9299ae;--violet:#8b5cf6;--cyan:#38d9f5;--green:#4ade80;--red:#f87171;--amber:#fbbf24}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:var(--bg);color:#e9ebf5;padding:24px}
+    body::before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(115deg,rgba(139,92,246,.04),transparent 42%,rgba(56,217,245,.03))}
+    .wrap{max-width:1280px;margin:0 auto;position:relative}
+    header.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.12em;font-size:14px}
+    .brand .mark{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(145deg,var(--violet),#5034c9);color:#fff;font-size:16px}
+    .brand small{color:var(--cyan);font-size:9px;border:1px solid rgba(56,217,245,.3);border-radius:99px;padding:2px 6px;letter-spacing:.08em}
+    .token-bar{display:flex;align-items:center;gap:8px}
+    .token-bar label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+    .token-bar input{background:#101422;border:1px solid var(--line);border-radius:8px;color:#f6f7fb;padding:6px 10px;font-size:12px;width:220px;outline:0}
+    .token-bar input:focus{border-color:rgba(139,92,246,.5)}
+    .grid-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+    .stat-card{padding:18px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(160deg,rgba(139,92,246,.05),rgba(56,217,245,.02))}
+    .stat-card .label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:600}
+    .stat-card .value{font-size:28px;font-weight:800;margin-top:6px;letter-spacing:-.03em}
+    .stat-card .sub{font-size:10px;color:var(--muted);margin-top:4px}
+    .stat-card .value.green{color:var(--green)}.stat-card .value.cyan{color:var(--cyan)}.stat-card .value.amber{color:var(--amber)}.stat-card .value.violet{color:var(--violet)}
+    .panels{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+    .panel{border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}
+    .panel-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);background:rgba(13,16,28,.6)}
+    .panel-head h2{margin:0;font-size:13px;font-weight:700}
+    .panel-head .count{font-size:10px;color:var(--muted);background:rgba(255,255,255,.05);padding:3px 8px;border-radius:99px}
+    .panel-body{max-height:420px;overflow:auto;padding:6px}
+    table{width:100%;border-collapse:collapse;font-size:11px}
+    th{text-align:left;padding:8px 10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:9px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel)}
+    td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top}
+    tr:hover td{background:rgba(139,92,246,.04)}
+    .badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+    .badge.high_intent{background:rgba(74,222,128,.15);color:var(--green)}
+    .badge.qualified{background:rgba(56,217,245,.15);color:var(--cyan)}
+    .badge.interested{background:rgba(251,191,36,.15);color:var(--amber)}
+    .badge.early_research{background:rgba(146,153,174,.15);color:var(--muted)}
+    .badge.demo_requested{background:rgba(139,92,246,.15);color:var(--violet)}
+    .badge.engaged{background:rgba(146,153,174,.12);color:#aab1c6}
+    .badge.open{background:rgba(248,113,113,.15);color:var(--red)}
+    .badge.resolved{background:rgba(74,222,128,.15);color:var(--green)}
+    .truncate{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .muted{color:var(--muted)}
+    .refresh{border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.04);color:#c7cce0;padding:7px 12px;cursor:pointer;font-size:11px;font-weight:600}
+    .refresh:hover{border-color:rgba(139,92,246,.4);color:#fff}
+    .resolve-btn{border:1px solid rgba(74,222,128,.3);border-radius:6px;background:rgba(74,222,128,.08);color:var(--green);padding:3px 8px;cursor:pointer;font-size:9px;font-weight:600}
+    .resolve-btn:hover{background:rgba(74,222,128,.18)}
+    .empty{text-align:center;padding:32px;color:var(--muted);font-size:12px}
+    .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
+    .feature-item{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.02)}
+    .feature-item .fname{font-size:12px;font-weight:700}
+    .feature-item .fdesc{font-size:10px;color:var(--muted);margin:4px 0}
+    .feature-item .fmeta{display:flex;gap:6px;flex-wrap:wrap}
+    .tag{font-size:8px;padding:2px 6px;border-radius:99px;background:rgba(255,255,255,.06);color:#aab1c6}
+    .tag.available{background:rgba(74,222,128,.12);color:var(--green)}
+    .tag.beta{background:rgba(251,191,36,.12);color:var(--amber)}
+    .tag.config{background:rgba(56,217,245,.12);color:var(--cyan)}
+    @media(max-width:900px){.grid-stats{grid-template-columns:1fr 1fr}.panels{grid-template-columns:1fr}}
+    @media(max-width:560px){.grid-stats{grid-template-columns:1fr}.token-bar input{width:140px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand"><span class="mark">N</span> NOVA <small>PUBLIC ADMIN</small></div>
+      <div class="token-bar">
+        <label for="dev-token">Dev Token</label>
+        <input id="dev-token" type="password" placeholder="NOVA_DEV_TOKEN" value="">
+        <button class="refresh" id="load-all">Load all</button>
+      </div>
+    </header>
+
+    <div class="grid-stats" id="stats"></div>
+
+    <div class="panels">
+      <section class="panel">
+        <div class="panel-head"><h2>Leads</h2><span class="count" id="leads-count">0</span></div>
+        <div class="panel-body"><table id="leads-table"><thead><tr><th>ID</th><th>Name</th><th>Business</th><th>Band</th><th>Status</th><th>Contact</th><th>Score</th></tr></thead><tbody id="leads-body"></tbody></table></div>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><h2>Demo Requests</h2><span class="count" id="demos-count">0</span></div>
+        <div class="panel-body"><table id="demos-table"><thead><tr><th>ID</th><th>Lead</th><th>Scenario</th><th>Contact</th><th>Status</th></tr></thead><tbody id="demos-body"></tbody></table></div>
+      </section>
+    </div>
+
+    <div class="panels">
+      <section class="panel">
+        <div class="panel-head"><h2>Unanswered Questions</h2><span class="count" id="unanswered-count">0</span></div>
+        <div class="panel-body"><table id="unanswered-table"><thead><tr><th>Question</th><th>Asked</th><th>Intent</th><th>Status</th><th></th></tr></thead><tbody id="unanswered-body"></tbody></table></div>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><h2>Feature Registry</h2><span class="count" id="features-count">0</span></div>
+        <div class="panel-body"><div class="feature-grid" id="features-grid"></div></div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const tokenInput = $("#dev-token");
+    tokenInput.value = localStorage.getItem("novaDevToken") || "";
+    tokenInput.addEventListener("change", () => localStorage.setItem("novaDevToken", tokenInput.value));
+
+    function headers() { return { "x-nova-dev-token": tokenInput.value, "content-type": "application/json" }; }
+    async function api(path) {
+      const r = await fetch(path, { headers: headers() });
+      if (r.status === 401) { alert("Dev token required. Set NOVA_DEV_TOKEN env var on the server and enter it above."); return null; }
+      return r.json();
+    }
+
+    async function loadSummary() {
+      const [leadSum, unansSum] = await Promise.all([api("/api/public-admin/leads/summary"), api("/api/public-admin/unanswered/summary")]);
+      if (!leadSum || !unansSum) return;
+      const leadByStatus = leadSum.summary.by_status || {};
+      const stats = [
+        { label: "Total Leads", value: leadSum.summary.total, cls: "violet", sub: `${leadByStatus.demo_requested || 0} demo requested` },
+        { label: "Demo Requests", value: leadSum.summary.demo_requests, cls: "cyan", sub: "linked to leads" },
+        { label: "Unanswered (open)", value: unansSum.summary.open, cls: "amber", sub: `${unansSum.summary.total_occurrences} total occurrences` },
+        { label: "Resolved", value: unansSum.summary.resolved, cls: "green", sub: "questions addressed" }
+      ];
+      $("#stats").innerHTML = stats.map(s => `<div class="stat-card"><div class="label">${s.label}</div><div class="value ${s.cls}">${s.value}</div><div class="sub">${s.sub}</div></div>`).join("");
+    }
+
+    async function loadLeads() {
+      const data = await api("/api/public-admin/leads?limit=50");
+      if (!data) return;
+      $("#leads-count").textContent = data.leads.length;
+      $("#leads-body").innerHTML = data.leads.length ? data.leads.map(l => `<tr>
+        <td class="muted">${l.id}</td>
+        <td>${esc(l.name)}</td>
+        <td class="truncate">${esc(l.business_name || "—")}</td>
+        <td><span class="badge ${l.lead_band}">${l.lead_band}</span></td>
+        <td><span class="badge ${l.lead_status}">${l.lead_status}</span></td>
+        <td class="truncate">${esc(l.email || l.phone || "—")}</td>
+        <td>${l.lead_score}</td>
+      </tr>`).join("") : `<tr><td colspan="7" class="empty">No leads yet</td></tr>`;
+    }
+
+    async function loadDemos() {
+      const data = await api("/api/public-admin/demo-requests?limit=50");
+      if (!data) return;
+      $("#demos-count").textContent = data.demo_requests.length;
+      $("#demos-body").innerHTML = data.demo_requests.length ? data.demo_requests.map(d => `<tr>
+        <td class="muted">${d.id}</td>
+        <td class="muted">${d.lead_id}</td>
+        <td class="truncate">${esc(d.requested_scenario || "—")}</td>
+        <td>${esc(d.preferred_contact_method || "—")}</td>
+        <td><span class="badge ${d.status === "requested" ? "demo_requested" : "resolved"}">${d.status}</span></td>
+      </tr>`).join("") : `<tr><td colspan="5" class="empty">No demo requests yet</td></tr>`;
+    }
+
+    async function loadUnanswered() {
+      const data = await api("/api/public-admin/unanswered?limit=50");
+      if (!data) return;
+      $("#unanswered-count").textContent = data.questions.length;
+      $("#unanswered-body").innerHTML = data.questions.length ? data.questions.map(q => `<tr>
+        <td class="truncate">${esc(q.question)}</td>
+        <td>${q.occurrence_count}×</td>
+        <td class="muted">${esc(q.intent || "—")}</td>
+        <td><span class="badge ${q.status}">${q.status}</span></td>
+        <td>${q.status === "open" ? `<button class="resolve-btn" data-id="${q.id}">Resolve</button>` : ""}</td>
+      </tr>`).join("") : `<tr><td colspan="5" class="empty">No unanswered questions</td></tr>`;
+      document.querySelectorAll(".resolve-btn").forEach(btn => btn.addEventListener("click", () => resolveQuestion(btn.dataset.id)));
+    }
+
+    async function resolveQuestion(id) {
+      const r = await fetch("/api/public-admin/unanswered/resolve", { method: "POST", headers: headers(), body: JSON.stringify({ id, resolution: "resolved" }) });
+      const data = await r.json();
+      if (data.ok) { loadUnanswered(); loadSummary(); }
+    }
+
+    async function loadFeatures() {
+      const data = await api("/api/public-admin/feature-registry");
+      if (!data) return;
+      $("#features-count").textContent = data.features.length;
+      $("#features-grid").innerHTML = data.features.map(f => `<div class="feature-item">
+        <div class="fname">${esc(f.display_name)}</div>
+        <div class="fdesc">${esc(f.description)}</div>
+        <div class="fmeta">
+          <span class="tag ${f.status === "available" ? "available" : f.status === "beta" ? "beta" : ""}">${f.status}</span>
+          ${f.requires_configuration ? '<span class="tag config">config</span>' : ""}
+          ${f.demo_available ? '<span class="tag available">demo</span>' : ""}
+        </div>
+      </div>`).join("");
+    }
+
+    function esc(s) { return String(s || "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c])); }
+
+    $("#load-all").addEventListener("click", () => { loadSummary(); loadLeads(); loadDemos(); loadUnanswered(); loadFeatures(); });
+    // Auto-load if token is already saved.
+    if (tokenInput.value) $("#load-all").click();
+  </script>
+</body>
+</html>

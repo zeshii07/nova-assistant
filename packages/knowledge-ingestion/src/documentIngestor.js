@@ -29,7 +29,19 @@ class DocumentIngestor{
   fs.writeFileSync(target,body);
 
   this.knowledgeRepository?.clearCache?.(tenantId);
-  return {tenantId,path:target,format:targetExt.slice(1),originalPath,sourceFormat:ext.slice(1)};
+
+  // v55.0 spec §7.3: produce a validation report describing what happened during
+  // extraction and chunking. Returned alongside the document so the admin can
+  // verify quality before publishing.
+  const validationReport=this.buildValidationReport({
+    fileName:path.basename(filePath),
+    extractedText:body,
+    extractionStatus:body.trim()?'ok':'partial',
+    extractionWarnings:ext==='.pdf'&&!body.trim()?['PDF extraction produced no text; the file may be scanned or image-only.']:[]   ,
+    contentHash:hashContent(body),
+  });
+
+  return {tenantId,path:target,format:targetExt.slice(1),originalPath,sourceFormat:ext.slice(1),validationReport};
  }
  ingestContent({tenantId,text,tenantsDir,name='notes',format='txt'}){
   const fmt=String(format||'txt').toLowerCase().replace(/^\./,'');
@@ -39,7 +51,39 @@ class DocumentIngestor{
   if(fmt==='json')body=JSON.stringify(JSON.parse(body),null,2);
   const target=path.join(base,slug(name)+'.'+fmt); fs.writeFileSync(target,body+'\n');
   this.knowledgeRepository?.clearCache?.(tenantId);
-  return {tenantId,path:target,format:fmt};
+
+  // v55.0 spec §7.3: validation report for pasted content too.
+  const validationReport=this.buildValidationReport({
+    fileName:`${name}.${fmt}`,
+    extractedText:body,
+    extractionStatus:body.trim()?'ok':'failed',
+    extractionWarnings:body.trim()?[]:['Pasted content was empty.'],
+    contentHash:hashContent(body),
+  });
+
+  return {tenantId,path:target,format:fmt,validationReport};
+ }
+ // v55.0: build a validation report from the extracted text by running it
+ // through the structure-aware chunker + the ingestion report builder.
+ buildValidationReport({fileName,extractedText,extractionStatus,extractionWarnings,contentHash}){
+  let chunks=[];
+  try{
+    const {structureAwareChunk}=require('../knowledge/src/structureAwareChunker');
+    const {sanitizeCustomerEvidence}=require('../knowledge/src/knowledgeNormalizer');
+    const kind='document';
+    chunks=structureAwareChunk(extractedText,{kind,sourceName:fileName}).map(c=>{
+      const text=sanitizeCustomerEvidence(c.text)||c.text;
+      return {...c,text,evidenceType:undefined,customerSafe:Boolean(text)};
+    });
+  }catch{chunks=[];}
+  let report;
+  try{
+    const {buildIngestionReport}=require('./validators/ingestionReport');
+    report=buildIngestionReport({fileName,chunks,extractionStatus,extractionWarnings,contentHash,existingHashes:[],publicationStatus:'draft'});
+  }catch{
+    report={fileName,extractionStatus,chunkCount:chunks.length,publicationStatus:'draft',warnings:extractionWarnings||[]};
+  }
+  return report;
  }
  ingestText({tenantId,text,tenantsDir,name='notes'}){
   return this.ingestContent({tenantId,text,tenantsDir,name,format:'txt'});
@@ -205,4 +249,8 @@ function decodeUtf16Be(buf){
   return out.toString('utf16le').replace(/\u0000/g,'');
 }
 
-module.exports={DocumentIngestor,parseCsv,extractPdfText,extractPdfTextFallback,extractPdfTextOperators};
+module.exports={DocumentIngestor,parseCsv,extractPdfText,extractPdfTextFallback,extractPdfTextOperators,hashContent};
+
+function hashContent(text){
+ try{const c=require('crypto');return c.createHash('sha256').update(String(text||'')).digest('hex');}catch{return null;}
+}
