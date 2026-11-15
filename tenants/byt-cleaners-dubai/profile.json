@@ -57,39 +57,26 @@
     "position": "bottom-right",
     "themeColor": "#0ea5e9",
     "language": "auto",
-    "welcomeMessage": "Hi! Welcome to Byt Cleaners Dubai. How can I help you today?",
-    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Cleaning chahiye? Bata dein kya clean karwana hai, main suitable service choose karne mein help karta hoon.",
+    "size": "medium",
+    "welcomeMessage": "Hi! 👋 Welcome to Byt Cleaners Dubai. Tell me what you'd like cleaned — a deep clean, sofa, carpet, or a regular booking — and I'll get you a quote in seconds.",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Byt Cleaners Dubai mein khush aamdeed. Bataiye kya clean karwana hai — deep clean, sofa, carpet ya regular booking — main turant quote de doon.",
     "suggestions": [
-      "What cleaning services do you offer?",
-      "I need a deep cleaning quote",
-      "Book a cleaning for tomorrow"
+      "Get a deep cleaning quote",
+      "Sofa & carpet cleaning prices",
+      "Book a cleaning for tomorrow",
+      "What areas do you serve?"
     ],
     "agentAvatar": "aria",
     "agentName": "Maya",
-    "agentTitle": "Booking Agent",
+    "agentTitle": "Booking Agent — Online now",
     "preChatForm": {
-      "enabled": true,
-      "fields": [
-        {
-          "id": "name",
-          "label": "Your name",
-          "type": "text",
-          "required": true,
-          "placeholder": "John Doe"
-        },
-        {
-          "id": "phone",
-          "label": "Phone (optional)",
-          "type": "tel",
-          "required": false,
-          "placeholder": "+971 50 123 4567"
-        }
-      ]
+      "enabled": false,
+      "fields": []
     },
     "proactiveGreeting": {
       "enabled": true,
-      "delaySeconds": 5,
-      "message": "Hi! 👋 I'm David, your booking agent. Need a cleaning quote or want to schedule a service? I'm here to help.",
+      "delaySeconds": 6,
+      "message": "Hi! 👋 I'm Maya from Byt Cleaners Dubai. Need a quick quote or want to book a cleaning? I'm here — just say hi.",
       "pageRules": []
     }
   },

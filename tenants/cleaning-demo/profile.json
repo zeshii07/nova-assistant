@@ -55,39 +55,26 @@
     "position": "bottom-right",
     "themeColor": "#10b981",
     "language": "auto",
-    "welcomeMessage": "Hi! 👋 I’m the SparkleCare Cleaning Assistant. I can explain our home, deep, furniture, office, laundry and specialised cleaning services, calculate configured prices, and prepare one or more service requests.",
-    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Cleaning chahiye? Bata dein kya clean karwana hai, main suitable service choose karne mein help karta hoon.",
+    "size": "medium",
+    "welcomeMessage": "Hi! 👋 I'm the SparkleCare Cleaning Assistant. Tell me what you'd like cleaned — home, deep, furniture, office, or laundry — and I'll explain your options and get you a quote in seconds.",
+    "welcomeMessageRomanUrdu": "Assalam-o-alaikum! 👋 Main SparkleCare Cleaning Assistant hoon. Bataiye kya clean karwana hai — ghar, deep, furniture, office ya laundry — main turant quote de doon.",
     "suggestions": [
-      "What cleaning services do you offer?",
-      "I need a deep cleaning quote",
-      "Book a cleaning for tomorrow"
+      "Get a deep cleaning quote",
+      "Sofa & carpet cleaning prices",
+      "Book a cleaning for tomorrow",
+      "What services do you offer?"
     ],
     "agentAvatar": "david",
     "agentName": "David",
-    "agentTitle": "Booking Agent",
+    "agentTitle": "Booking Agent — Online now",
     "preChatForm": {
-      "enabled": true,
-      "fields": [
-        {
-          "id": "name",
-          "label": "Your name",
-          "type": "text",
-          "required": true,
-          "placeholder": "John Doe"
-        },
-        {
-          "id": "phone",
-          "label": "Phone (optional)",
-          "type": "tel",
-          "required": false,
-          "placeholder": "+971 50 123 4567"
-        }
-      ]
+      "enabled": false,
+      "fields": []
     },
     "proactiveGreeting": {
       "enabled": true,
-      "delaySeconds": 5,
-      "message": "Hi! 👋 I'm David, your booking agent. Need a cleaning quote or want to schedule a service? I'm here to help.",
+      "delaySeconds": 6,
+      "message": "Hi! 👋 I'm David from SparkleCare Cleaning. Need a quick quote or want to book a cleaning? I'm here — just say hi.",
       "pageRules": []
     }
   },

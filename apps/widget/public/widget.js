@@ -32,6 +32,26 @@
   // Useful for embedding in kiosk contexts where the customer shouldn't have to
   // type a name/phone before chatting.
   const DATA_KIOSK = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-kiosk')) === 'true';
+  // v36: data-skip-prechat is the public-facing equivalent of data-kiosk — it
+  // lets a website owner drop the name/phone pre-chat screen on any tenant
+  // without touching profile.json. Accepts "true" (skip) or "false" (force on).
+  const DATA_SKIP_PRECHAT = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-skip-prechat')) || null;
+  // v36: data-size scales the whole widget. small (legacy) | medium (new default) | large.
+  const DATA_SIZE = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-size')) || null;
+  // v36: data-greeting overrides the proactive (auto-pop) bubble message only,
+  // separate from data-welcome (the first in-panel message).
+  const DATA_GREETING = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-greeting')) || null;
+  // v36: data-offset-x / data-offset-y nudge the bubble away from the viewport
+  // edge (in px). Useful when the widget overlaps a sticky footer or cookie bar.
+  const DATA_OFFSET_X = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-offset-x')) || null;
+  const DATA_OFFSET_Y = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-offset-y')) || null;
+  // v36: data-auto-open opens the panel automatically after data-auto-open-delay ms.
+  const DATA_AUTO_OPEN = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-auto-open')) === 'true';
+  const DATA_AUTO_OPEN_DELAY = parseInt((SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-auto-open-delay')) || '0', 10) || 0;
+  // v36: data-icon overrides the bubble avatar with an inline SVG / emoji / image URL.
+  const DATA_ICON = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-icon')) || null;
+  // v36: data-radius overrides panel corner radius (px). 0 = square.
+  const DATA_RADIUS = (SCRIPT_TAG && SCRIPT_TAG.getAttribute('data-radius')) || null;
 
   if (!TENANT_ID) {
     console.error('[Nova Widget] data-tenant attribute is required. Example: <script src="/widget.js" data-tenant="cleaning-demo"></script>');
@@ -227,6 +247,28 @@
         language: DATA_LANGUAGE || data.language || 'auto',
         welcomeMessage: DATA_WELCOME || data.welcomeMessage || 'Hi! How can I help?'
       };
+      // v36: apply new optional overrides after the base merge so they win.
+      if (DATA_SIZE) state.config.size = DATA_SIZE;
+      if (DATA_GREETING) {
+        state.config.proactiveGreeting = state.config.proactiveGreeting || { enabled: true };
+        state.config.proactiveGreeting.message = DATA_GREETING;
+        state.config.proactiveGreeting.enabled = true;
+      }
+      if (DATA_SKIP_PRECHAT === 'true') {
+        state.config.preChatForm = state.config.preChatForm || { enabled: false, fields: [] };
+        state.config.preChatForm.enabled = false;
+      } else if (DATA_SKIP_PRECHAT === 'false') {
+        state.config.preChatForm = state.config.preChatForm || { enabled: false, fields: [] };
+        state.config.preChatForm.enabled = true;
+      }
+      if (DATA_OFFSET_X) state.config.offsetX = parseInt(DATA_OFFSET_X, 10) || 0;
+      if (DATA_OFFSET_Y) state.config.offsetY = parseInt(DATA_OFFSET_Y, 10) || 0;
+      if (DATA_AUTO_OPEN) {
+        state.config.autoOpen = true;
+        if (DATA_AUTO_OPEN_DELAY) state.config.autoOpenDelayMs = DATA_AUTO_OPEN_DELAY;
+      }
+      if (DATA_ICON) state.config.customIcon = DATA_ICON;
+      if (DATA_RADIUS !== null) state.config.radius = parseInt(DATA_RADIUS, 10);
       state.retries = 0;
       console.info('[Nova Widget] Config loaded successfully:', data.assistantName || data.businessName);
 
@@ -258,9 +300,10 @@
         assistantName: 'Nova', welcomeMessage: 'Hi! How can I help you today?',
         themeColor: DATA_COLOR || '#2d5bd1', position: DATA_POSITION || 'bottom-right',
         language: DATA_LANGUAGE || 'auto', suggestions: [], businessName: '', enabled: true,
+        size: DATA_SIZE || 'medium',
         agent: { avatar: DATA_AVATAR || 'marcus', name: 'Nova', title: 'Assistant', online: true },
-        preChatForm: { enabled: false, fields: [] },
-        proactiveGreeting: { enabled: false, delaySeconds: 5, message: null, pageRules: [] }
+        preChatForm: (DATA_SKIP_PRECHAT === 'true') ? { enabled: false, fields: [] } : { enabled: false, fields: [] },
+        proactiveGreeting: { enabled: DATA_GREETING ? true : false, delaySeconds: 5, message: DATA_GREETING || null, pageRules: [] }
       };
       state.connectionError = classified;
       console.error('[Nova Widget] Config load FAILED. URL:', API_CONFIG, 'Error:', classified);
@@ -387,6 +430,18 @@
     const isSide = position === 'side-panel';
     const sideHorizontal = isSide ? 'right' : (isLeft ? 'left' : 'right');
 
+    // v36: size presets. "small" keeps the legacy compact look; "medium" is the
+    // new default (bigger, more comfortable); "large" is for full-feature pages.
+    const sizeKey = (cfg.size || 'medium').toLowerCase();
+    const SIZE = sizeKey === 'small' ? { bubble: 60, panelW: 360, panelH: 540, bubbleFont: 26, headerPad: '12px 14px', bodyFont: 14, radius: 16 }
+              : sizeKey === 'large'  ? { bubble: 76, panelW: 420, panelH: 640, bubbleFont: 34, headerPad: '15px 18px', bodyFont: 15.5, radius: 18 }
+              :                        { bubble: 68, panelW: 392, panelH: 600, bubbleFont: 30, headerPad: '13px 16px', bodyFont: 14.5, radius: 16 };
+    const offsetX = cfg.offsetX || 0;
+    const offsetY = cfg.offsetY || 0;
+    const edgeX = (isSide ? 0 : (isCenter ? '50%' : (20 + offsetX) + 'px'));
+    const edgeY = (isSide ? 80 : (20 + offsetY));
+    const panelRadius = (cfg.radius !== undefined && cfg.radius !== null) ? cfg.radius : SIZE.radius;
+
     shadow.innerHTML = `
       <style>
         :host, * { box-sizing: border-box; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
@@ -394,16 +449,16 @@
         /* ─── Agent avatar bubble ─── */
         .nova-bubble {
           position: fixed;
-          ${sideHorizontal}: ${isSide ? '0px' : (isCenter ? '50%' : '20px')};
+          ${sideHorizontal}: ${isSide ? '0px' : (isCenter ? '50%' : (20 + offsetX) + 'px')};
           ${isCenter ? 'transform: translateX(-50%);' : ''}
-          bottom: ${isSide ? '80px' : '20px'};
-          width: 64px; height: 64px;
+          bottom: ${isSide ? '80px' : (20 + offsetY) + 'px'};
+          width: ${SIZE.bubble}px; height: ${SIZE.bubble}px;
           border-radius: 50%;
           background: transparent;
           border: none;
           cursor: pointer;
           padding: 0;
-          box-shadow: 0 4px 20px rgba(0,0,0,.25);
+          box-shadow: 0 6px 24px rgba(0,0,0,.28);
           transition: transform .15s, opacity .2s;
           z-index: 2147483647;
         }
@@ -412,7 +467,7 @@
         .nova-bubble svg { width: 100%; height: 100%; border-radius: 50%; display: block; }
         .nova-bubble .online-dot {
           position: absolute; bottom: 2px; ${sideHorizontal === 'right' ? 'right' : 'left'}: 2px;
-          width: 14px; height: 14px; border-radius: 50%;
+          width: ${Math.round(SIZE.bubble * 0.22)}px; height: ${Math.round(SIZE.bubble * 0.22)}px; border-radius: 50%;
           background: #3ddc97; border: 2px solid #fff;
         }
         .nova-bubble .pulse-ring {
@@ -429,14 +484,14 @@
         /* ─── Proactive welcome speech bubble ─── */
         .nova-welcome-bubble {
           position: fixed;
-          ${sideHorizontal}: ${isSide ? '80px' : (isCenter ? '50%' : '94px')};
+          ${sideHorizontal}: ${isSide ? '80px' : (isCenter ? '50%' : (SIZE.bubble + 26 + offsetX) + 'px')};
           ${isCenter ? 'transform: translateX(-50%);' : ''}
-          bottom: ${isSide ? '80px' : '24px'};
-          max-width: 280px;
+          bottom: ${isSide ? '80px' : (24 + offsetY) + 'px'};
+          max-width: 300px;
           background: #fff; color: #1f2937;
-          padding: 12px 16px; border-radius: 14px;
-          box-shadow: 0 4px 20px rgba(0,0,0,.15);
-          font-size: 13px; line-height: 1.5;
+          padding: 13px 16px; border-radius: 14px;
+          box-shadow: 0 6px 24px rgba(0,0,0,.18);
+          font-size: 13.5px; line-height: 1.55;
           z-index: 2147483646;
           opacity: 0; transform: translateY(8px) ${isCenter ? 'translateX(-50%)' : 'none'};
           transition: opacity .3s, transform .3s;
@@ -460,16 +515,16 @@
         /* ─── Chat panel ─── */
         .nova-panel {
           position: fixed;
-          ${isSide ? `right: 0;` : `${sideHorizontal}: 20px;`}
+          ${isSide ? `right: 0;` : `${sideHorizontal}: ${(20 + offsetX)}px;`}
           ${isCenter ? `left: 50%; transform: translateX(-50%);` : ''}
-          bottom: ${isSide ? '0' : '94px'};
-          width: ${isSide ? '380px' : '380px'};
-          max-width: ${isSide ? '380px' : 'calc(100vw - 40px)'};
-          height: ${isSide ? '100vh' : '560px'};
+          bottom: ${isSide ? '0' : (SIZE.bubble + 30 + offsetY) + 'px'};
+          width: ${isSide ? SIZE.panelW + 'px' : SIZE.panelW + 'px'};
+          max-width: ${isSide ? SIZE.panelW + 'px' : 'calc(100vw - 40px)'};
+          height: ${isSide ? '100vh' : SIZE.panelH + 'px'};
           max-height: ${isSide ? '100vh' : 'calc(100vh - 114px)'};
           background: #11182a; color: #e8edf7;
-          border-radius: ${isSide ? '16px 0 0 16px' : '16px'};
-          box-shadow: 0 8px 32px rgba(0,0,0,.4);
+          border-radius: ${isSide ? panelRadius + 'px 0 0 ' + panelRadius + 'px' : panelRadius + 'px'};
+          box-shadow: 0 12px 40px rgba(0,0,0,.45);
           display: flex; flex-direction: column;
           overflow: hidden;
           transform-origin: bottom ${sideHorizontal === 'right' ? 'right' : 'left'};
@@ -479,7 +534,7 @@
         .nova-panel.hidden { opacity: 0; pointer-events: none; transform: ${isCenter ? 'translateX(-50%)' : 'none'} scale(0.92) translateY(8px); }
 
         .nova-header {
-          padding: 12px 14px; background: ${color}; color: #fff;
+          padding: ${SIZE.headerPad}; background: ${color}; color: #fff;
           display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
         }
         .nova-header-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -730,8 +785,20 @@
     inputEl.placeholder = `Message ${agent.name || cfg.assistantName || 'Nova'}…`;
 
     // Set avatars (header + bubble)
+    // v36: data-icon can override the bubble avatar. Accepts: an image URL
+    // (http/https/data:), an emoji/single char, or inline <svg> markup.
     const avatarSvg = getAvatarSvg();
-    if (avatarSvg) {
+    if (cfg.customIcon) {
+      const icon = cfg.customIcon.trim();
+      const isUrl = /^(https?:|data:image)/i.test(icon);
+      const isSvg = icon.startsWith('<svg');
+      const html = isUrl
+        ? `<img src="${icon.replace(/"/g, '&quot;')}" alt="chat" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`
+        : isSvg ? icon
+        : `<span style="display:grid;place-items:center;width:100%;height:100%;font-size:${Math.round(SIZE.bubble*0.42)}px;border-radius:50%;background:${color};color:#fff;line-height:1">${icon.replace(/</g,'&lt;')}</span>`;
+      bubbleAvatar.innerHTML = html;
+      headerAvatar.innerHTML = html;
+    } else if (avatarSvg) {
       headerAvatar.insertAdjacentHTML('afterbegin', avatarSvg);
       bubbleAvatar.innerHTML = avatarSvg;
     }
@@ -1176,6 +1243,13 @@
 
     // Show proactive greeting after delay (if configured + not returning visitor)
     scheduleProactiveGreeting();
+
+    // v36: auto-open the panel after a delay (data-auto-open + data-auto-open-delay).
+    // Skipped for returning visitors with an existing session and for side-panel mode.
+    if (cfg.autoOpen && !isReturningVisitor() && position !== 'side-panel') {
+      const delay = cfg.autoOpenDelayMs || 0;
+      setTimeout(() => { if (!state.open) openPanel(); }, delay);
+    }
   }
 
   function updateConnectionStatus(status) {
