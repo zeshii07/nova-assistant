@@ -161,15 +161,19 @@ class UniversalEngagementEngine {
         return invalid(field,'Please enter the city name only, for example “Lahore”.');
     }
     if(field==='address'){
-      if(text.length<5 || text.length>180)
+      if(text.length<3 || text.length>180)
         return invalid(field,'Please enter a valid full address, for example “House 12, Model Town, Lahore”.');
       if(/^(?:hello|thanks|thank you|yes|no|ok|okay|skip)$/i.test(text))
         return invalid(field,'That does not look like a delivery/service address. Please provide the full address.');
-      const addressEvidence=/\d|\b(?:house|home|apartment|apt|flat|villa|office|shop|unit|room|floor|building|tower|plaza|plot|block|sector|phase|street|road|rd|lane|avenue|ave|boulevard|market|bazar|bazaar|mall|town|village|circle|society|colony|near|opposite|behind|beside|dha|jvc|lahore|karachi|islamabad|rawalpindi|dubai|sharjah|abu dhabi|uae|pakistan)\b/i.test(text);
+      const addressEvidence=/\d|\b(?:house|home|apartment|apt|flat|villa|office|shop|unit|room|floor|building|tower|plaza|plot|block|sector|phase|street|road|rd|lane|avenue|ave|boulevard|market|bazar|bazaar|mall|town|village|circle|society|colony|near|opposite|behind|beside|dha|jvc|lahore|karachi|islamabad|rawalpindi|dubai|sharjah|abu dhabi|uae|pakistan|business bay|marina|jlt|jumeirah|downtown|deira|karama|mirdif|bur dubai|al barsha|silicon oasis|arabian ranches|the palms?|palm jumeirah|motor city|dubai hills|dubai land|dubailand|culture village|city walk|blue waters|dubai marina|dubai mall|mall of the emirates|sheikh zayed|emirates road|hessa street)\b/i.test(text);
+      // Known short area names (e.g. "JLT", "Marina", "Deira") are valid
+      // delivery/service addresses on their own in the UAE — don't require a
+      // house/building number for these.
+      const knownShortArea=/^(?:jlt|marina|deira|karama|mirdif|downtown|jumeirah|business bay|bur dubai|al barsha|jvc|dubai marina)$/i.test(text);
       const addressParts=text.split(/\s+/).filter(Boolean);
       const alphabeticParts=(text.match(/[\p{L}][\p{L}'-]*/gu)||[]).filter((part)=>part.length>=2);
-      const locationOnly=addressParts.length<2&&!/\d|\b(?:house|apartment|apt|flat|villa|office|shop|unit|building|tower|plaza|plot)\b/i.test(text);
-      if(!addressEvidence||locationOnly||alphabeticParts.length<2)
+      const locationOnly=addressParts.length<2&&!/\d|\b(?:house|apartment|apt|flat|villa|office|shop|unit|building|tower|plaza|plot)\b/i.test(text)&&!knownShortArea;
+      if(!addressEvidence||locationOnly||(alphabeticParts.length<2&&!knownShortArea))
         return invalid(field,'That does not look like a complete delivery/service address. Include a house, apartment, building, street, area, or nearby location.');
     }
     if(field==='landmark' && !/^(skip|none|n\/a|nahi|nahin)$/i.test(text)){

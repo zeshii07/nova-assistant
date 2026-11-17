@@ -458,7 +458,11 @@ svg { display: block; }
   .demo-cta span { display: none; }
   .demo-cta { padding: 9px; }
   .menu-toggle { display: flex; }
+  /* Mobile nav is hidden by default and toggled via the [hidden] attribute
+     set by toggleMenu() in app.js. CSS `display: flex` must NOT override
+     [hidden], otherwise the menu is always open and pushes the layout down. */
   .mobile-nav { display: flex; }
+  .mobile-nav[hidden] { display: none; }
 }
 @media (max-width: 767px) {
   .hero-heading { font-size: 30px; }

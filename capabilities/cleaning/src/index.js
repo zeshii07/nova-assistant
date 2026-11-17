@@ -438,10 +438,26 @@ class CleaningCapability extends BaseCapability {
     if (previous.step && context.intelligence?.selected?.intent === "cleaning.scope_update") {
       const e=context.intelligence?.entities||{};
       const service=(await cleaning.listServices()).find(x=>x.id===previous.serviceId);
-      const next={...previous,scopeText:e.scopeText||context.message.text,scopeCount:e.scopeCount||null,scopeUnit:e.scopeUnit||null};
+      // v42.1 fix: the conversation adapter now spreads timeEntities, so
+      // bedrooms/propertyType arrive here. Apply them as canonical booking
+      // fields (not just free-form scopeText) so pricing re-quotes and the
+      // final booking record actually carries the property size.
+      const canonicalUpdates={};
+      if(e.bedrooms!==undefined&&e.bedrooms!==null&&e.bedrooms!=='')canonicalUpdates.bedrooms=Number(e.bedrooms);
+      if(e.propertyType)canonicalUpdates.propertyType=e.propertyType;
+      if(e.propertyCount)canonicalUpdates.propertyCount=e.propertyCount;
+      if(e.units!==undefined&&e.units!==null)canonicalUpdates.units=Number(e.units);
+      const next={...previous,...canonicalUpdates,scopeText:e.scopeText||context.message.text,scopeCount:e.scopeCount||null,scopeUnit:e.scopeUnit||null};
+      // If this scope update supplied bedrooms/propertyType for the current
+      // service, re-quote so the customer sees the price immediately.
+      if(Object.keys(canonicalUpdates).length>0&&previous.quotedService?.serviceId){
+        const recalculated=context.services.pricing.quote({...next,serviceId:previous.quotedService.serviceId,requestedOperationalServiceId:previous.serviceId,text:context.message.text});
+        if(recalculated.ok)next.quotedService=recalculated;
+      }
       const scopeLabel=e.scopeCount&&e.scopeUnit?`${e.scopeCount} ${e.scopeUnit}`:String(e.scopeText||context.message.text).trim();
-      const reply=`Got it — I’ve noted the scope as ${scopeLabel}. ${service?`${service.name} is configured at ${formatPrice(service)}. `:''}${promptFor(previous.step,language,previous.serviceName)}`;
-      return result(reply,language,next,"cleaning_scope_updated",{intent:"CLEANING_SCOPE_UPDATED",payload:{legacyText:reply,scopeText:next.scopeText,pendingField:previous.step}});
+      const priceNote=next.quotedService?.ok?` Based on that, the price is ${currencyAmount(next.quotedService.total,next.quotedService.currency)}. `:(service?`${service.name} is configured at ${formatPrice(service)}. `:'');
+      const reply=`Got it — I’ve noted the scope as ${scopeLabel}.${priceNote}${promptFor(previous.step,language,previous.serviceName)}`;
+      return result(reply,language,next,"cleaning_scope_updated",{intent:"CLEANING_SCOPE_UPDATED",payload:{legacyText:reply,scopeText:next.scopeText,...canonicalUpdates,pendingField:previous.step}});
     }
 
     if (previous.step && context.intelligence?.selected?.intent === "cleaning.requirements_update") {
@@ -1192,7 +1208,12 @@ class CleaningCapability extends BaseCapability {
         return result(reply,language,next,'cleaning_quoted_service_added',{intent:'CLEANING_ADDITIONAL_SERVICES_ADDED',payload:{legacyText:reply,item,pendingField:previous.step}});
       }
       const continuation=bookingContinuation(previous);
-      const semantic={...requirements,...continuation,date:continuation.preferredDate||null,startTime:continuation.preferredTime||continuation.startTime||null};
+      // v42.1: a date/time supplied in the acceptance turn (e.g. "tomorrow"
+      // after a quote) must flow into the booking — merge it on top of the
+      // continuation so nextMissingStep sees it and skips asking again.
+      const carriedDate=context.intelligence?.entities?.date||continuation.preferredDate||null;
+      const carriedTime=context.intelligence?.entities?.startTime||context.intelligence?.entities?.preferredTime||continuation.preferredTime||continuation.startTime||null;
+      const semantic={...requirements,...continuation,date:carriedDate,startTime:carriedTime};
       const next=initialRequestState(context,engagement,semantic,{serviceId:q.operationalServiceId,serviceName:q.serviceName,quotedService:q,total:q.total,currency:q.currency,...serviceRequirementState(service||{})});
       next.priceEnquiry=null;next.quotedServices=null;next.pendingPriceClarification=null;
       next.step=nextMissingStep(next);

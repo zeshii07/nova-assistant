@@ -18,7 +18,7 @@ const crypto = require("crypto");
 const { createInitialState, applyStatePatch } = require("../../state/src/stateSchema");
 
 // §11 — the four response outcomes.
-const OUTCOMES = { ANSWER: "answer", CLARIFY: "clarify", ESCALATE: "escalate", REFUSE: "refuse", LEAD: "lead" };
+const OUTCOMES = { ANSWER: "answer", CLARIFY: "clarify", ESCALATE: "escalate", REFUSE: "refuse", LEAD: "lead", GREETING: "greeting", SMALL_TALK: "small_talk" };
 
 // §14 — map a visitor problem keyword to a recommended feature_id.
 const RECOMMENDATION_MAP = [
@@ -120,7 +120,17 @@ class PublicAssistantService {
 
     // 8. Decide outcome.
     let result;
-    if (classification.intent === "demo_intent" || classification.intent === "purchase_intent") {
+    if (classification.intent === "greeting") {
+      // Friendly greeting — start the conversation warmly without dumping product info.
+      const isUrdu = language === "ur" || language === "roman_urdu";
+      const greetingReply = isUrdu
+        ? "Assalam-o-alaikum! 👋 Main Nova hoon — AI business assistant. Aap apne business ke baare mein bataiye, ya mujhse Nova ki capabilities, bookings, ya customer automation ke baare mein poochein. Aap kya explore karna chahenge?"
+        : "Hello! 👋 I'm Nova, an AI business assistant for customer conversations and automation. Tell me what kind of business you run, or ask me anything about Nova — what it does, how it works, or how it could help your business. What would you like to explore first?";
+      result = { reply: greetingReply, outcome: OUTCOMES.GREETING, confidence: 0.95 };
+    } else if (classification.intent === "small_talk") {
+      // Thanks / how-are-you / goodbye / compliments — friendly short replies.
+      result = { ...this._handleSmallTalk(text, language, classification), outcome: OUTCOMES.SMALL_TALK };
+    } else if (classification.intent === "demo_intent" || classification.intent === "purchase_intent") {
       // Demo / purchase → start lead capture flow (§13).
       result = await this._handleLeadIntent(text, state, sessionId, language, classification, page_context, campaign);
     } else if (classification.intent === "existing_customer_support") {
@@ -287,6 +297,39 @@ class PublicAssistantService {
       ? "Yeh account-specific sawal hai. Main isay public assistant se handle nahi kar sakta. Kripya authenticated support route ka istemal karein. Main aapse kabhi password ya API key nahi mangta."
       : "That looks like an account-specific question, which I'm not able to help with from the public assistant. Please use the configured authenticated support route. I'll never ask for your password or API key.";
     return { outcome: OUTCOMES.ESCALATE, reply };
+  }
+
+  // ─── Small talk (greetings/thanks/bye/compliments) ────────────────
+  // §6.2 — short, friendly, on-brand replies that don't dump product info.
+  _handleSmallTalk(text, language, classification) {
+    const q = String(text || "").toLowerCase();
+    const isUrdu = language === "roman_urdu" || language === "ur";
+    // thanks / appreciation
+    if (/\b(thank\s?you|thanks|shukriya|appreciate)\b/i.test(q)) {
+      const reply = isUrdu
+        ? "Shukriya! 😊 Main yahin hoon jab bhi aap customer automation, bookings, sales, ya support ke baare mein baat karna chahein. Aage kya explore karein?"
+        : "You're very welcome! 😊 I'm here whenever you want to explore customer automation, bookings, sales, or support. What would you like to look at next?";
+      return { reply, outcome: "small_talk", confidence: 0.92 };
+    }
+    // goodbye
+    if (/\b(bye|goodbye|see you|tata|khuda hafiz)\b/i.test(q)) {
+      const reply = isUrdu
+        ? "Khuda hafiz! 👋 Wapas aate hi mujhse koi bhi customer workflow ya business problem poochein jo aap Nova se automate karna chahein."
+        : "Goodbye for now 👋 When you return, ask me about any customer workflow or business problem you'd like Nova to automate.";
+      return { reply, outcome: "small_talk", confidence: 0.92 };
+    }
+    // compliment
+    if (/\b(you'?re\s+(great|amazing|awesome|good|cool)|i\s+like\s+you|nice\s+work)\b/i.test(q)) {
+      const reply = isUrdu
+        ? "Shukriya — yeh bohot pyaari baat hai! 😊 Main isi tarah natural business conversation aur reliable workflows ke beech balance rakhne ke liye bana hoon. Koi practical use case dekhna chahenge?"
+        : "Thank you — that means a lot! 😊 I'm built to make business conversations feel this natural while keeping the underlying work reliable. Want to see a practical use case?";
+      return { reply, outcome: "small_talk", confidence: 0.92 };
+    }
+    // how are you / what's up (default small talk branch)
+    const reply = isUrdu
+      ? "Main bohat accha hoon, shukriya! 😊 Main hamesha taiyar hoon batane ke liye Nova kaise madad kar sakta hai. Kya aap mujhe ek assistant ke taur par explore kar rahe hain, ya kisi booking aur customer-support agent ki talaash mein hain apke business ke liye?"
+      : "I'm doing great, thank you! 😊 I'm always happy to chat and explain how Nova can help. Are you exploring me as an assistant, or as a booking and customer-support agent for your business?";
+    return { reply, outcome: "small_talk", confidence: 0.9 };
   }
 
   // ─── Lead submission (called by the /api/public/lead route) ─────────

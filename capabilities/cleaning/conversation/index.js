@@ -38,19 +38,30 @@ class CleaningConversationAdapter {
     // priced scope back into the deterministic booking workflow. Prefer the
     // latest interrupt quote over an older quote attached to the draft.
     const quoteAcceptance=/\b(?:add this service|book this|book it|book (?:these|both) services|book this (?:quote|quotation)|make (?:a )?booking for this (?:quote|quotation|service)|confirm this service|confirm (?:my|the) booking for this service|i want this service|go ahead|proceed)\b/.test(normalizedText);
+    // v42.1 fix: when a quote is pending and the customer replies with a DATE
+    // ("tomorrow", "on monday", "18/11/2026"), that is an implicit booking
+    // acceptance — they want to schedule the quoted service. Treat it as
+    // quote acceptance and carry the date into the booking workflow.
+    const dateAfterQuote=Boolean(previous.priceEnquiry?.serviceId)&&!quoteAcceptance&&!step&&(
+      /\b(?:tomorrow|today|day after tomorrow|next (?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|week))\b/i.test(normalizedText)
+      || /\b\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?\b/.test(normalizedText)
+      || (timeEntities.date||timeEntities.weekday)
+    );
+    const effectiveQuoteAcceptance=quoteAcceptance||dateAfterQuote;
     const latestQuotedService=previous.priceEnquiry?.quote||previous.quotedService||null;
-    if(quoteAcceptance&&Array.isArray(previous.quotedServices)&&previous.quotedServices.length>1){
-      entities={quotedServices:previous.quotedServices,quotedServiceRequirements:previous.quotedServiceRequirements||{},preserveWorkflow:Boolean(step)};
+    if(effectiveQuoteAcceptance&&Array.isArray(previous.quotedServices)&&previous.quotedServices.length>1){
+      entities={quotedServices:previous.quotedServices,quotedServiceRequirements:previous.quotedServiceRequirements||{},...timeEntities,preserveWorkflow:Boolean(step)};
       candidates.push({intent:'cleaning.quote_bundle_accept',confidence:1,priority:195,entities,reason:'quoted_service_bundle_accept'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'quoted_service_bundle',score:1}]};
     }
-    if(quoteAcceptance&&latestQuotedService&&(!step||latestQuotedService.operationalServiceId!==previous.serviceId||!/\bconfirm\b/.test(normalizedText))){
+    if(effectiveQuoteAcceptance&&latestQuotedService&&(!step||latestQuotedService.operationalServiceId!==previous.serviceId||!/\bconfirm\b/.test(normalizedText))){
       entities={
         quotedService:latestQuotedService,
         quotedServiceRequirements:previous.priceEnquiry?.quote===latestQuotedService
           ? requestScope(previous.priceEnquiry)
           : previous.quotedServiceRequirements||{},
         addToExisting:/\badd this service\b/.test(normalizedText),
+        ...timeEntities,
         preserveWorkflow:Boolean(step)
       };
       candidates.push({intent:'cleaning.quote_accept',confidence:1,priority:195,entities,reason:'quoted_service_accept'});
@@ -69,7 +80,24 @@ class CleaningConversationAdapter {
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:deep?'deep_cleaning':'standard_cleaning',score:1}]};
     }
     if(pendingBookingType&&step==='cleaningType'&&!interruption){
-      entities={...pendingBookingType.scope,...timeEntities,pendingCleaningType:true};
+      // v42.1 fix: if the user supplied a date/time/address/name while we are
+      // still asking Standard vs Deep, don't discard it. Stash these into the
+      // pendingBookingType scope so they survive into the eventual booking,
+      // then re-prompt for the cleaning type. Also: if the user mentioned a
+      // bedroom count, they almost certainly want Deep Cleaning (Standard is
+      // hourly and doesn't use bedrooms) — auto-resolve to deep.
+      const hasBedrooms=/\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:bedrooms?|bed|bhk|bdrooms?|bd|bdrm)\b/i.test(normalizedText);
+      if(hasBedrooms){
+        const propertyType=timeEntities.propertyType||pendingBookingType.scope?.propertyType||(/\b(?:villa|vila|vill|house|home)\b/i.test(normalizedText)?'villa':'apartment');
+        entities={...pendingBookingType.scope,...timeEntities,propertyType,selectedCleaningType:'deep'};
+        candidates.push({intent:'cleaning.booking_type_selected',confidence:1,priority:199,entities,reason:'auto_deep_when_bedrooms_present'});
+        return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'deep_cleaning',score:1}]};
+      }
+      const stashed={...pendingBookingType.scope};
+      if(timeEntities.date){stashed.date=timeEntities.date;stashed.dateText=timeEntities.dateText||message.text;}
+      if(timeEntities.startTime)stashed.startTime=timeEntities.startTime;
+      if(timeEntities.endTime)stashed.endTime=timeEntities.endTime;
+      entities={...stashed,...timeEntities,pendingCleaningType:true,pendingBookingType:{scope:stashed}};
       candidates.push({intent:'cleaning.booking_type_clarification',confidence:1,priority:198,entities,reason:'property_cleaning_booking_type_still_missing'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_type_required',score:1}]};
     }
@@ -410,6 +438,13 @@ class CleaningConversationAdapter {
       || /صفائی|صاف/.test(normalizedText)
       ||Boolean(closestKeywordToken(normalizedText,['cleaning','cleaner','cleaned'],{maxDistance:2,minLength:5}))
       || (propertyContext && /\b(quote|quotation|estimate|what about|how about|price|cost|clean)\b/.test(normalizedText))
+      // v42.1 fix (BUG #1): a message that pairs a property type with an
+      // explicit bedroom count ("apartment has 4 bedrooms", "book a 3 bedroom
+      // apartment", "villa with 5 bedrooms") is unambiguously a cleaning
+      // scope statement for a cleaning-capable tenant. Without this trigger
+      // it fell through to the generic assistant and the bedrooms were lost.
+      || (tenant.capabilities?.includes('cleaning') && propertyContext
+          && /\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:bedrooms?|bed|bhk|bdrooms?|bd|bdrm)\b/i.test(normalizedText))
       // When there's an active priceEnquiry from a previous cleaning quote,
       // ANY follow-up that mentions property scope (bedrooms, apartment,
       // villa, etc.) belongs to the cleaning capability — even without the
@@ -462,7 +497,12 @@ class CleaningConversationAdapter {
       const m=normalizedText.match(/\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(rooms?|shops?|floors?|workspaces?|bedrooms?|bed|bhk|bdrooms?|bd|bdrm|seater|seat|sofa|carpet|rug)\b/i);
       const scopeCount=m?numberFromText(m[1]):null;
       const scopeUnit=m?m[2]:null;
-      entities={pendingField:step,scopeText:message.text,scopeCount,scopeUnit,preserveWorkflow:true};
+      // v42.1 fix: scope_update previously REPLACED timeEntities, silently
+      // dropping the bedrooms/propertyType that extractCleaningContext had
+      // already extracted. Spread timeEntities so the canonical
+      // `bedrooms`/`propertyType` fields survive into the capability handler,
+      // where pricing and the booking record read them.
+      entities={...timeEntities,pendingField:step,scopeText:message.text,scopeCount,scopeUnit,preserveWorkflow:true};
       candidates.push({intent:'cleaning.scope_update',confidence:1,entities,reason:'v42_scope_quantity_or_property_edit'});
       return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_scope_update',score:1}]};
     }
@@ -600,6 +640,18 @@ class CleaningConversationAdapter {
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'pricing',value:'structured_service_quote',score:1}]};
       }
       if(timeEntities.propertyType&&namesOnlyPropertyCleaning&&!propertyCleaningTypeSpecified&&!discussedSpecificService){
+        // v42.1 fix: bedrooms imply Deep Cleaning (Standard is hourly and
+        // never asks for bedroom count). Skip the Standard-vs-Deep prompt and
+        // go straight to booking the deep service so the customer isn't stuck
+        // in a clarification loop on "book a 4 bedroom apartment cleaning".
+        if(timeEntities.bedrooms!==undefined&&timeEntities.bedrooms!==null){
+          const deepServiceId=timeEntities.propertyType==='apartment'?'CLN010':timeEntities.propertyType==='villa'?'CLN011':'CLN002';
+          const allSvcs=await scopedService?.listServices?.()||[];
+          const resolved=allSvcs.find(s=>s.id===deepServiceId)||allSvcs.find(s=>/deep/i.test(s.name||''));
+          entities={...timeEntities,text:normalizedText,serviceId:resolved?.id||null,serviceName:resolved?.name||null,selectedCleaningType:'deep',propertyCleaningTypeSpecified:'deep'};
+          candidates.push({intent:'cleaning.booking_type_selected',confidence:1,priority:199,entities,reason:'auto_deep_from_bedrooms'});
+          return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'deep_cleaning',score:1}]};
+        }
         entities={...timeEntities,text:normalizedText,pendingCleaningType:true};
         candidates.push({intent:'cleaning.booking_type_clarification',confidence:1,priority:198,entities,reason:'property_cleaning_booking_type_missing'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_type_required',score:1}]};
@@ -618,6 +670,15 @@ class CleaningConversationAdapter {
       }
       const resolvedGenericPropertyService=explicitService?.service&&isGenericPropertyCleaningService(explicitService.service);
       if(timeEntities.propertyType&&resolvedGenericPropertyService&&!propertyCleaningTypeSpecified){
+        // v42.1 fix: bedrooms imply Deep Cleaning — auto-resolve (see above).
+        if(timeEntities.bedrooms!==undefined&&timeEntities.bedrooms!==null){
+          const deepServiceId=timeEntities.propertyType==='apartment'?'CLN010':timeEntities.propertyType==='villa'?'CLN011':'CLN002';
+          const allSvcs=await scopedService?.listServices?.()||[];
+          const resolved=allSvcs.find(s=>s.id===deepServiceId)||allSvcs.find(s=>/deep/i.test(s.name||''));
+          entities={...timeEntities,text:normalizedText,serviceId:resolved?.id||null,serviceName:resolved?.name||null,selectedCleaningType:'deep',propertyCleaningTypeSpecified:'deep'};
+          candidates.push({intent:'cleaning.booking_type_selected',confidence:1,priority:199,entities,reason:'auto_deep_from_bedrooms'});
+          return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'deep_cleaning',score:1}]};
+        }
         entities={...timeEntities,text:normalizedText,pendingCleaningType:true};
         candidates.push({intent:'cleaning.booking_type_clarification',confidence:1,priority:198,entities,reason:'property_cleaning_booking_type_missing'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_type_required',score:1}]};
@@ -884,6 +945,15 @@ class CleaningConversationAdapter {
         return {priority:this.priority,candidates,entities,vocabularyMatches:matches};
       }
       if(structuredRequest&&timeEntities.propertyType&&isGenericPropertyCleaningService(found.service)&&!resolveCleaningType(normalizedText)){
+        // v42.1 fix: bedrooms (incl. studio=0) imply Deep Cleaning — auto-resolve.
+        if(timeEntities.bedrooms!==undefined&&timeEntities.bedrooms!==null){
+          const deepServiceId=timeEntities.propertyType==='apartment'?'CLN010':timeEntities.propertyType==='villa'?'CLN011':'CLN002';
+          const allSvcs=await scopedService?.listServices?.()||[];
+          const resolved=allSvcs.find(s=>s.id===deepServiceId)||allSvcs.find(s=>/deep/i.test(s.name||''));
+          entities={...timeEntities,text:normalizedText,serviceId:resolved?.id||found.service.id,serviceName:resolved?.name||found.service.name,selectedCleaningType:'deep',propertyCleaningTypeSpecified:'deep'};
+          candidates.push({intent:'cleaning.booking_type_selected',confidence:1,priority:199,entities,reason:'auto_deep_from_bedrooms'});
+          return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'deep_cleaning',score:1}]};
+        }
         entities={...timeEntities,text:normalizedText,pendingCleaningType:true};
         candidates.push({intent:'cleaning.booking_type_clarification',confidence:1,priority:198,entities,reason:'matched_property_cleaning_type_missing'});
         return {priority:this.priority,candidates,entities,vocabularyMatches:[{type:'workflow',value:'cleaning_type_required',score:1}]};

@@ -18,8 +18,11 @@
   },
   "business": {
     "description": "Professional cleaning services in Dubai",
-    "contact": "+971 50 123 4567",
-    "email": "owner@bytcleaners.ae",
+    "contact": "055 373 0702",
+    "whatsapp": "055 373 0702",
+    "phone": "055 373 0702",
+    "email": "bytalhryacleaning@gmail.com",
+    "website": "https://bytcleaners.wuaze.com",
     "hours": "Mon-Sat, 8 AM - 8 PM",
     "location": "Dubai, UAE"
   },
@@ -83,7 +86,7 @@
   "notifications": {
     "enabled": true,
     "recipientEmails": [
-      "owner@bytcleaners.ae"
+      "bytalhryacleaning@gmail.com"
     ],
     "events": {
       "booking_confirmed": true,

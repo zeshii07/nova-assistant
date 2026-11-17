@@ -566,10 +566,15 @@
         .nova-icon-btn:hover { background: rgba(255,255,255,.3); }
 
         .nova-messages {
-          flex: 1; overflow-y: auto; padding: 14px;
+          flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 14px;
           background: linear-gradient(135deg, #0a0e1a 0%, #0d1228 40%, #0f1530 70%, #0a0f1e 100%);
           display: flex; flex-direction: column; gap: 12px;
           scroll-behavior: smooth;
+          /* Keep touch scrolling inside the message list — never bubble up to
+             the page or the widget frame. Without this, mobile browsers scroll
+             the whole widget / page instead of just the conversation. */
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
           position: relative;
         }
         .nova-messages::before {
@@ -706,7 +711,14 @@
         @keyframes nova-wave { 0%,100% { height: 6px; } 50% { height: 16px; } }
 
         @media (max-width: 480px) {
-          .nova-panel { width: 100vw !important; height: 100dvh !important; max-height: 100dvh !important; bottom: 0 !important; ${sideHorizontal}: 0 !important; ${isCenter ? 'transform: none !important;' : ''} border-radius: 0 !important; }
+          /* Mobile: panel goes full-screen but MUST stay a fixed flex frame so
+             only the message list scrolls — never the whole widget. Reasserting
+             display/flex-direction/overflow here (with the height !important)
+             prevents the panel from collapsing into a block on some WebViews. */
+          .nova-panel { width: 100vw !important; height: 100dvh !important; height: 100vh !important; max-height: 100dvh !important; bottom: 0 !important; ${sideHorizontal}: 0 !important; ${isCenter ? 'transform: none !important;' : ''} border-radius: 0 !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; }
+          .nova-header { flex-shrink: 0 !important; min-height: 0 !important; }
+          .nova-messages { flex: 1 1 0 !important; min-height: 0 !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; overscroll-behavior: contain !important; }
+          .nova-composer { flex-shrink: 0 !important; min-height: 0 !important; }
           .nova-bubble { bottom: 16px !important; ${sideHorizontal === 'right' ? 'right' : 'left'}: ${isCenter ? '50% !important; transform: translateX(-50%) !important;' : '16px !important;'} }
           .nova-welcome-bubble { display: none !important; }
         }

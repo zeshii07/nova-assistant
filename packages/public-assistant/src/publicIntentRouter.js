@@ -13,6 +13,8 @@
 
 // §6 — intent priority (higher wins when multiple match).
 const PRIORITY = [
+  "greeting",
+  "small_talk",
   "security_privacy",
   "existing_customer_support",
   "demo_intent",
@@ -156,6 +158,29 @@ const RULES = [
     patterns: [
       /\bwhat\s+is\s+nova\b/, /\bwho\s+is\s+nova\s+for\b/, /\bwhat\s+problem\b/,
       /\btell\s+me\s+about\s+nova\b/, /\bget\s+started\b/, /\boverview\b/
+    ]
+  },
+  {
+    intent: "greeting",
+    example: "Hi",
+    patterns: [
+      /^\s*(hi|hello|hey|yo|hii+|hay|hola|salam|salaam|assalam(?:o|-)?alaikum|assalamualaikum|assalam)\b/i,
+      /\bgood\s+(morning|afternoon|evening)\b/i,
+      /\bhowdy\b/, /\bgreetings?\b/i, /\bwelcome\s+nova\b/i,
+      // Roman Urdu / casual
+      /\badaab\b/, /\bnamaste\b/, /\bhi\s+there\b/i, /\bhello\s+there\b/i
+    ]
+  },
+  {
+    intent: "small_talk",
+    example: "How are you?",
+    patterns: [
+      /\bhow\s+(are\s+you|are\s+u|r\s+u|do\s+you\s+do)\b/i, /\bhow's\s+it\s+going\b/i,
+      /\bwhat'?s\s+up\b/i, /\bwhats\s+up\b/i, /\bsup\b/i,
+      /\bkese\s+ho\b/i, /\bkaise\s+ho\b/i, /\bkya\s+haal\b/i, /\bkese\s+hain\b/i,
+      /\bthank\s?(you|s)?\b/i, /\bthanks\b/i, /\bshukriya\b/i, /\bappreciate\s+(it|that)\b/i,
+      /\bbye\b/i, /\bgoodbye\b/i, /\bsee\s+you\b/i, /\btata\b/i, /\bkhuda\s+hafiz\b/i,
+      /\byou\s+are\s+(great|amazing|awesome|good|cool)\b/i, /\byou'?re\s+(great|amazing|awesome|good|cool)\b/i, /\bi\s+like\s+you\b/i, /\bnice\s+work\b/i
     ]
   }
 ];
