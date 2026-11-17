@@ -12,7 +12,10 @@ class ValidationEngine {
     }
     if (field === 'phone') return { valid: raw.replace(/\D/g,'').length >= 10, reason:'invalid_phone' };
     if (field === 'time') return {
-      valid:/\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/i.test(raw)||/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/.test(raw),
+      // Accept "11 am", "11 a.m.", "11:00 AM", "21:00", and tolerate
+      // surrounding filler ("I like 11 a.m. that's fine"). The a\.?m\.? form
+      // is required because \bam\b fails on "a.m." (periods break the boundary).
+      valid:/\b\d{1,2}(?::\d{2})?\s*a\.?m\.?|p\.?m\.?\b/i.test(raw)||/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/.test(raw),
       reason:'invalid_time'
     };
     if (field === 'date') return {

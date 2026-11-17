@@ -711,11 +711,22 @@
         @keyframes nova-wave { 0%,100% { height: 6px; } 50% { height: 16px; } }
 
         @media (max-width: 480px) {
-          /* Mobile: panel goes full-screen but MUST stay a fixed flex frame so
-             only the message list scrolls — never the whole widget. Reasserting
-             display/flex-direction/overflow here (with the height !important)
-             prevents the panel from collapsing into a block on some WebViews. */
-          .nova-panel { width: 100vw !important; height: 100dvh !important; height: 100vh !important; max-height: 100dvh !important; bottom: 0 !important; ${sideHorizontal}: 0 !important; ${isCenter ? 'transform: none !important;' : ''} border-radius: 0 !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; }
+          /* Mobile: panel fills the VISIBLE area, not the layout viewport.
+             --nova-vh is set by JS from window.visualViewport so the panel
+             shrinks correctly when the soft keyboard opens — the composer
+             stays visible and only the message list scrolls (like WhatsApp /
+             Telegram). Falls back to 100vh (then 100dvh) if JS hasn't run. */
+          .nova-panel {
+            width: 100vw !important;
+            height: var(--nova-vh, 100vh) !important;
+            height: var(--nova-vh, 100dvh) !important;
+            max-height: var(--nova-vh, 100dvh) !important;
+            bottom: var(--nova-vb, 0px) !important;
+            ${sideHorizontal}: 0 !important;
+            ${isCenter ? 'transform: none !important;' : ''}
+            border-radius: 0 !important;
+            display: flex !important; flex-direction: column !important; overflow: hidden !important;
+          }
           .nova-header { flex-shrink: 0 !important; min-height: 0 !important; }
           .nova-messages { flex: 1 1 0 !important; min-height: 0 !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; overscroll-behavior: contain !important; }
           .nova-composer { flex-shrink: 0 !important; min-height: 0 !important; }
@@ -840,6 +851,18 @@
       sendMessage(text);
     });
     inputEl.addEventListener('input', autoResize);
+    // When the input gains focus on mobile, the soft keyboard animates in and
+    // shrinks the visual viewport. Re-fit the panel a few times to catch the
+    // settled height so the composer stays visible above the keyboard.
+    inputEl.addEventListener('focus', () => {
+      requestAnimationFrame(applyVisualViewport);
+      setTimeout(applyVisualViewport, 300);
+    });
+    inputEl.addEventListener('blur', () => {
+      // Keyboard closing — re-fit to the now-larger visible area.
+      requestAnimationFrame(applyVisualViewport);
+      setTimeout(applyVisualViewport, 300);
+    });
     inputEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -854,6 +877,30 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && state.open) closePanel();
     });
+
+    // ─── Mobile keyboard handling (Visual Viewport API) ───────────────
+    // On mobile, position:fixed + 100dvh anchors the panel to the LAYOUT
+    // viewport, so when the soft keyboard opens the composer (input) ends up
+    // hidden behind it. The Visual Viewport API reports the actually-visible
+    // area (which shrinks when the keyboard appears). We drive two CSS
+    // variables on the panel — --nova-vh (visible height) and --nova-vb
+    // (offset from the top of the layout viewport, for browsers that shift
+    // the viewport up) — so the panel always fits the visible area, the
+    // composer stays reachable, and only the message list scrolls. This is
+    // the same approach WhatsApp/Telegram Web use. No-op on desktop (where
+    // visualViewport.height === window.innerHeight and there's no keyboard).
+    // The function itself is defined at module scope (so openPanel can call
+    // it); here we only register the listeners once on mount.
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', applyVisualViewport);
+      window.visualViewport.addEventListener('scroll', applyVisualViewport);
+      // Also re-apply on orientation change (height/width swap) and window
+      // resize for older browsers without visualViewport events.
+      window.addEventListener('orientationchange', applyVisualViewport);
+      window.addEventListener('resize', applyVisualViewport);
+      // Apply once on mount.
+      applyVisualViewport();
+    }
 
     // Welcome bubble close button
     const closeWelcome = shadow.querySelector('.close-welcome');
@@ -1428,13 +1475,45 @@
     if (state.open) closePanel();
     else openPanel();
   }
+
+  // Fit the panel to the currently-visible viewport (handles the mobile soft
+  // keyboard). Defined at module scope so openPanel() can call it. No-op on
+  // desktop, where visualViewport.height === window.innerHeight.
+  function applyVisualViewport() {
+    const vv = window.visualViewport;
+    if (!vv || !panelEl) return;
+    const vh = Math.round(vv.height);
+    // Offset of the visual viewport from the top of the layout viewport. On
+    // most mobile browsers the page is pushed up by the keyboard, so we pin
+    // the panel to the top of the visible area.
+    const top = Math.round(vv.offsetTop || 0);
+    panelEl.style.setProperty('--nova-vh', vh + 'px');
+    panelEl.style.setProperty('--nova-vb', top + 'px');
+    // Keep the latest message in view after the resize settles.
+    if (state.open && messagesEl) {
+      requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
+    }
+  }
   function openPanel() {
     state.open = true;
     panelEl.classList.remove('hidden');
     bubbleEl.classList.add('hidden');
     hideWelcomeBubble();
     markVisited();
-    setTimeout(() => inputEl.focus(), 100);
+    // Re-fit to the current visible area (covers the case where the keyboard
+    // was dismissed while the panel was closed) then focus the input.
+    applyVisualViewport();
+    setTimeout(() => {
+      inputEl.focus();
+      // Focusing the input opens the keyboard on mobile, which animates over
+      // ~250-300ms. The visualViewport 'resize' event fires when it starts,
+      // but on iOS Safari the final height settles a touch later — so re-fit
+      // a couple of times to catch the settled height and keep the composer
+      // pinned above the keyboard.
+      requestAnimationFrame(applyVisualViewport);
+      setTimeout(applyVisualViewport, 300);
+      setTimeout(applyVisualViewport, 500);
+    }, 100);
   }
   function closePanel() {
     state.open = false;

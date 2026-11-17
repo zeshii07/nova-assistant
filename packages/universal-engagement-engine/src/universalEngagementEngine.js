@@ -293,7 +293,11 @@ class UniversalEngagementEngine {
 
   parseTime(raw) {
     // Preserve ':' for 24-hour clocks while still accepting Urdu/Arabic digits.
-    const value = normalizeUrduDigits(String(raw)).trim().toLowerCase();
+    // Normalize "a.m."/"p.m." (with periods) → "am"/"pm" so the strict regex
+    // matches "11 a.m." — otherwise \bam\b fails on the period-broken word.
+    const value = normalizeUrduDigits(String(raw)).trim().toLowerCase()
+      .replace(/\b(\d{1,2}(?::\d{2})?)\s*a\.?m\.?\b/ig, '$1 am')
+      .replace(/\b(\d{1,2}(?::\d{2})?)\s*p\.?m\.?\b/ig, '$1 pm');
     const window='(?:subah|subha|sabah|savere|sawere|savera|fajr|morning|shaam|sham|evening|dopahar|dopehar|dupehar|afternoon|raat|rat|night|صبح|سویرے|شام|دوپہر|رات)';
     let roman=value.match(new RegExp(`(?:^|\\s)(${window})\\s+(\\d{1,2})(?:(?::|\\s)(\\d{2}))?\\s*(?:bjy|baje|bajay|bajy|بجے)?(?:$|\\s)`,'iu'));
     if(roman){
