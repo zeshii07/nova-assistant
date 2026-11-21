@@ -138,7 +138,7 @@
   }
   function getAvatarSvg() {
     if (!state.avatars || !state.config) return '';
-    const key = state.config.agent?.avatar || 'marcus';
+    const key = state.config.agent?.avatar || 'spark';
     const avatar = state.avatars.get ? state.avatars.get(key) : state.avatars[key];
     return avatar?.svg || '';
   }
@@ -301,7 +301,7 @@
         themeColor: DATA_COLOR || '#2d5bd1', position: DATA_POSITION || 'bottom-right',
         language: DATA_LANGUAGE || 'auto', suggestions: [], businessName: '', enabled: true,
         size: DATA_SIZE || 'medium',
-        agent: { avatar: DATA_AVATAR || 'marcus', name: 'Nova', title: 'Assistant', online: true },
+        agent: { avatar: DATA_AVATAR || 'spark', name: 'Nova', title: 'Assistant', online: true },
         preChatForm: (DATA_SKIP_PRECHAT === 'true') ? { enabled: false, fields: [] } : { enabled: false, fields: [] },
         proactiveGreeting: { enabled: DATA_GREETING ? true : false, delaySeconds: 5, message: DATA_GREETING || null, pageRules: [] }
       };
@@ -561,8 +561,9 @@
           background: rgba(255,255,255,.15); border: none; color: #fff;
           width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
           display: flex; align-items: center; justify-content: center;
-          font-size: 14px; transition: background .12s;
+          font-size: 14px; transition: background .12s; padding: 0;
         }
+        .nova-icon-btn svg { width: 14px; height: 14px; display: block; }
         .nova-icon-btn:hover { background: rgba(255,255,255,.3); }
 
         .nova-messages {
@@ -712,16 +713,22 @@
 
         @media (max-width: 480px) {
           /* Mobile: panel fills the VISIBLE area, not the layout viewport.
-             --nova-vh is set by JS from window.visualViewport so the panel
-             shrinks correctly when the soft keyboard opens — the composer
-             stays visible and only the message list scrolls (like WhatsApp /
-             Telegram). Falls back to 100vh (then 100dvh) if JS hasn't run. */
+             We anchor it to the TOP of the visual viewport with an explicit
+             height (--nova-vh) and top offset (--nova-vt), both set by JS
+             from window.visualViewport. When the soft keyboard opens, the
+             visual viewport shrinks AND shifts up on some browsers (iOS
+             Safari scrolls the page up by the keyboard height). Anchoring
+             with top+height means the panel always covers EXACTLY the
+             visible region — composer stays above the keyboard, header stays
+             at the top, only the message list scrolls (like WhatsApp /
+             Telegram). Falls back to 100vh / top:0 if JS hasn't run. */
           .nova-panel {
             width: 100vw !important;
+            top: var(--nova-vt, 0px) !important;
+            bottom: auto !important;
             height: var(--nova-vh, 100vh) !important;
             height: var(--nova-vh, 100dvh) !important;
             max-height: var(--nova-vh, 100dvh) !important;
-            bottom: var(--nova-vb, 0px) !important;
             ${sideHorizontal}: 0 !important;
             ${isCenter ? 'transform: none !important;' : ''}
             border-radius: 0 !important;
@@ -758,8 +765,12 @@
             </div>
           </div>
           <div class="nova-header-actions">
-            <button type="button" class="nova-icon-btn" id="nova-reset" title="Start new chat" aria-label="Start new chat">↻</button>
-            <button type="button" class="nova-icon-btn" id="nova-close" title="Close" aria-label="Close chat">✕</button>
+            <button type="button" class="nova-icon-btn" id="nova-reset" title="Start new chat" aria-label="Start new chat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            </button>
+            <button type="button" class="nova-icon-btn" id="nova-close" title="Close" aria-label="Close chat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
           </div>
         </div>
 
@@ -1484,11 +1495,12 @@
     if (!vv || !panelEl) return;
     const vh = Math.round(vv.height);
     // Offset of the visual viewport from the top of the layout viewport. On
-    // most mobile browsers the page is pushed up by the keyboard, so we pin
-    // the panel to the top of the visible area.
-    const top = Math.round(vv.offsetTop || 0);
+    // iOS Safari the page scrolls up by the keyboard height, so offsetTop
+    // goes positive — pinning the panel's top there keeps it aligned with
+    // the visible area. Clamp to >= 0 to never render above the screen.
+    const top = Math.max(0, Math.round(vv.offsetTop || 0));
     panelEl.style.setProperty('--nova-vh', vh + 'px');
-    panelEl.style.setProperty('--nova-vb', top + 'px');
+    panelEl.style.setProperty('--nova-vt', top + 'px');
     // Keep the latest message in view after the resize settles.
     if (state.open && messagesEl) {
       requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
@@ -1500,6 +1512,15 @@
     bubbleEl.classList.add('hidden');
     hideWelcomeBubble();
     markVisited();
+    // On mobile, iOS Safari scrolls the page when the keyboard opens. A
+    // fixed panel anchored to the visual viewport then sits mid-page. Scroll
+    // the window back to the top so the layout viewport aligns with the
+    // screen, making --nova-vt (visualViewport.offsetTop) reliable. Only do
+    // this on touch devices to avoid hijacking desktop scroll.
+    if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+    }
     // Re-fit to the current visible area (covers the case where the keyboard
     // was dismissed while the panel was closed) then focus the input.
     applyVisualViewport();
@@ -1519,6 +1540,12 @@
     state.open = false;
     panelEl.classList.add('hidden');
     bubbleEl.classList.remove('hidden');
+    // When closing on mobile, scroll back to the top so the underlying page
+    // isn't left scrolled (iOS sometimes leaves it offset after the keyboard
+    // interaction).
+    if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+      window.scrollTo(0, 0);
+    }
   }
 
   function appendMessageEl(role, text) {
