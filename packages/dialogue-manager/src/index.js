@@ -14,11 +14,13 @@
  *   - Handle corrections mid-flow ("actually, make it Friday")
  *   - Handle interruptions mid-flow ("also, do you have WiFi?")
  *
- * This replaces the workflow ownership logic that was embedded in the
- * ConversationIntelligenceEngine, making it a standalone, testable component.
+ * Phase 2 Sprint 2: now hosts the TaskFrameEngine — the data-driven slot
+ * engine that replaces per-capability slot-walk re-implementation (R8).
  *
  * Architecture rule: NLU identifies intent; Dialogue Manager decides flow.
  */
+
+const { TaskFrameEngine } = require('./taskFrameEngine');
 
 /**
  * Dialogue State
@@ -49,8 +51,13 @@ class DialogueState {
  * Manages the conversation flow independently of NLU.
  */
 class DialogueManager {
-  constructor({ logger = null } = {}) {
+  constructor({ logger = null, taskFrameEngine = null, engagementEngine = null } = {}) {
     this.logger = logger;
+    // Phase 2 Sprint 2: host the data-driven TaskFrameEngine. If an
+    // engagementEngine is provided, the frame engine reuses its parseField /
+    // prompt / nextMissing / parseDeclaredName (the canonical validators used
+    // by booking + cleaning) so the frame definitions and the executors agree.
+    this.taskFrames = taskFrameEngine || new TaskFrameEngine({ engagementEngine, logger });
   }
 
   /**

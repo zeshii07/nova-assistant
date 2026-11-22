@@ -1,7 +1,58 @@
 const { canonicalize, hasConcept } = require('../../universal-vocabulary/src');
+
+/**
+ * @deprecated Phase 3 Sprint 3 — legacy regex-based intent detection.
+ *
+ * This file is the legacy "regex brain" that pre-dates the deterministic
+ * T0/T1/T2 routing engine (T0/T1 in packages/conversation-intelligence, T2 in
+ * packages/dialogue-manager/src/taskFrameEngine.js). The T0 fast-path now
+ * short-circuits greetings / gratitude / goodbye / emoji-only / bare yes-no /
+ * back / help / quick-reply / bare-number turns BEFORE this engine is reached
+ * (see assistantService.handle → `t0_fast_path`), and the T1/T2 adapter +
+ * task-frame pipeline handles every transactional and informational intent
+ * this regex ladder used to own (order, booking, cleaning, ask_hours,
+ * ask_payment, ask_services, ask_contact, ask_location, ask_returns, …).
+ *
+ * Coverage parity with the deterministic engine has been reached, so this
+ * module is RETIRED from the default active path. It is kept on disk only for
+ * comparison and regression testing — it is NOT loaded by the active path
+ * unless a caller explicitly opts in via the env flag below.
+ *
+ * Env gate: NOVA_LEGACY_REGEX_NLU
+ *   • unset / falsy ("", "0", "false", "no", "off")  →  legacy regex path is
+ *     NOT used; assistantService.handle() skips `intentEngine.detect()` and
+ *     falls through to knowledge retrieval / LLM-safe fallback, exactly as
+ *     the T0/T1/T2 path expects.
+ *   • truthy ("1", "true", "yes", "on")  →  legacy regex path is available
+ *     for comparison/regression (the pre-Sprint-3 behavior).
+ *
+ * Default: OFF. To re-enable for A/B comparison:
+ *   NOVA_LEGACY_REGEX_NLU=1 node --test ...
+ *
+ * Do NOT add new intent rules here. New intent coverage belongs in the T0/T1
+ * deterministic tiers or the T2 task-frame catalog.
+ */
+const LEGACY_REGEX_FLAG = 'NOVA_LEGACY_REGEX_NLU';
+const TRUTHY = new Set(['1', 'true', 'yes', 'on']);
+
+/**
+ * Whether the legacy regex intent path is enabled for this process. Reads the
+ * env flag directly (module-level gate) so no edits to container.js / server.js
+ * are required to wire it.
+ * @returns {boolean}
+ */
+function isLegacyRegexEnabled() {
+  const v = process.env[LEGACY_REGEX_FLAG];
+  if (v === undefined || v === null || v === '') return false;
+  return TRUTHY.has(String(v).trim().toLowerCase());
+}
+
 /**
  * Rule-first intent detection for common assistant conversations.
  * Business facts are never inferred here; only the requested topic is detected.
+ *
+ * @deprecated See module docstring — superseded by the T0/T1/T2 engine.
+ * Retired in Phase 3 Sprint 3; gated behind NOVA_LEGACY_REGEX_NLU (default OFF).
  */
 class IntentEngine {
   detect(text) {
@@ -38,4 +89,4 @@ class IntentEngine {
     return { intent, confidence, source: "rules" };
   }
 }
-module.exports = { IntentEngine };
+module.exports = { IntentEngine, isLegacyRegexEnabled, LEGACY_REGEX_FLAG };

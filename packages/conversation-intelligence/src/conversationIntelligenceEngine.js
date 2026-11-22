@@ -12,6 +12,8 @@ const { ClauseSemanticEngine } = require('./clauseSemanticEngine');
 const { TemporalSemanticExtractor } = require('./temporalSemanticExtractor');
 const { UniversalMessageFrame, mergeUniversalEntities, appendResolvedIntents } = require('./universalMessageFrame');
 const { ContextResolutionEngine } = require('./contextResolutionEngine');
+const { T0Engine } = require('./t0Engine');
+const { detectLanguage } = require('./text');
 
 class ConversationIntelligenceEngine {
   constructor({ adapterRegistry, llmInterpreter = null, nluInterpreter = null, aiLanguageLayer = null, semanticRouter = null, semanticRoutePolicy = null, nluDecisionPolicy = null, nluInvocationPolicy = null, logger = null, socialIntelligenceEngine = null, domainResolver = null, tenantAdapterRegistry = null } = {}) {
@@ -42,6 +44,12 @@ class ConversationIntelligenceEngine {
     // references like "book it again" / "same time as last week" / "same address"
     this.contextResolver = new ContextResolutionEngine({ logger });
     this.messageFrames = new UniversalMessageFrame();
+    // Phase 2 Sprint 1: T0 fast-path tier. Sits in front of the adapter/regex
+    // brain and short-circuits greetings / gratitude / yes-no / emoji-only /
+    // back / help / quick-reply / bare-number turns so the heavy adapter
+    // iteration + ML + NLU is skipped for ~30-40% of traffic. On a miss the
+    // existing pipeline runs unchanged.
+    this.t0 = new T0Engine();
   }
 
   async analyze({ tenant, message, state, services = {} }) {
@@ -78,6 +86,52 @@ class ConversationIntelligenceEngine {
     const deterministicInterruption = this.interruptions.detect(message.text, state);
     const pending = workflowStack[workflowStack.length - 1] || null;
     const pendingValidation = pending ? this.validation.validatePending({ field: pending.pendingField, message: message.text }) : { valid:true };
+
+    // Phase 2 Sprint 1: T0 fast-path. For greetings / gratitude / bare yes-no /
+    // emoji-only / back / help / quick-reply / bare-number turns with NO active
+    // workflow slot, skip the heavy adapter iteration + ML + NLU and return the
+    // same `intelligence` shape with nlu.used=false and semanticRouter.used=false.
+    // Guards: never fire when globalCommand already fired, when a workflow is
+    // mid-slot, or on multi-intent messages.
+    const t0 = this.t0.detect({ normalizedText, social, messageFrame, globalCommand, pending, pendingValidation, rawText: message.text });
+    if (t0.hit) {
+      const t0Selected = { capabilityId: 'assistant', priority: 30, intent: t0.intent, confidence: t0.confidence, entities: t0.entities, reason: 't0_fast_path' };
+      const t0Language = detectLanguage(message.text, state.language);
+      const t0TurnFrame = { ...t0.turnFrame, language: t0Language };
+      return {
+        version: '2.0', normalizedText, semantic, clauseSemantics, temporal, messageFrame, domain, social, unsupportedDomain, globalCommand,
+        correction: null, interruption: null, deterministicInterruption: null,
+        goal: { current: state?.context?.goal || null, nextGoal: null, transition: null, override: null },
+        requiresClarification: false, clarificationReason: null,
+        workflow: { stack: workflowStack, current: pending },
+        validation: { pending: pendingValidation },
+        vocabularyMatches: [],
+        candidates: [t0Selected],
+        entities: t0.entities,
+        selected: t0Selected,
+        forcedCapabilityId: 'assistant',
+        semanticRouter: {
+          used: false, accepted: false, decision: 't0_short_circuit', engine: null, model: null, language: t0Language,
+          primaryIntent: null, intents: [], message: null, workflow: null,
+          tenantMatches: [], ambiguity: [], complexity: null, escalation: null,
+          authority: { execution: 'nova_deterministic_core', mayExecute: false },
+          policyDecision: 't0_short_circuit', alignedDeterministicCandidate: true,
+          error: null, timingMs: 0,
+        },
+        nlu: {
+          used: false, validated: false, mode: this.nluInterpreter?.mode || 'off', strategy: null,
+          deterministicFallback: false, executionAuthority: 'nova_deterministic_core',
+          model: null, promptVersion: null, interpretation: null, languageContract: null,
+          decision: 't0_short_circuit', invocationReason: 't0_short_circuit',
+          error: null, httpStatus: null, providerMessage: null, providerErrorType: null,
+          providerRequestId: null, latencyMs: 0,
+        },
+        llm: { used: false, validated: false, interpretation: null },
+        resolvedContext: null,
+        turnFrame: t0TurnFrame,
+        timingMs: Number((performance.now() - started).toFixed(3)),
+      };
+    }
 
     // v46.0: Resolve contextual references ("book it again", "same time",
     // "same address") using recent turns + CRM customer data. The resolved

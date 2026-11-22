@@ -2,6 +2,12 @@ const { BaseCapability } = require("../../../packages/capability-sdk/src/baseCap
 const { createCapabilityResult } = require("../../../packages/capability-sdk/src/capabilityResult");
 const { isConfirmation } = require("../../../packages/conversation-intelligence/src/confirmation");
 const { numberFromText, normalizeText } = require("../../../packages/conversation-intelligence/src/text");
+// Phase 2 Sprint 2: data-driven TaskFrameEngine for slot buffering. Used to
+// preserve date/time/name/phone/address when the generic "book cleaning..."
+// fall-through needs to ask the cleaning TYPE — previously these slots were
+// dropped (R8: salon one-shot works, cleaning one-shot drops everything).
+const { TaskFrameEngine } = require("../../../packages/dialogue-manager/src/taskFrameEngine");
+const _sharedTaskFrameEngine = new TaskFrameEngine({ engagementEngine: null });
 
 /** Service-request capability for cleaning businesses with deterministic live-calendar confirmation. */
 class CleaningCapability extends BaseCapability {
@@ -1453,7 +1459,12 @@ class CleaningCapability extends BaseCapability {
           `I'd love to help you book a cleaning. Which type would you like — Home Cleaning, Deep Cleaning, Sofa Cleaning, Carpet Cleaning, or Office Cleaning?`,
           `Cleaning book karne ke liye batayein kaunsi service chahiye — Home Cleaning, Deep Cleaning, Sofa Cleaning, Carpet Cleaning, ya Office Cleaning?`,
           `صفائی بک کرنے کے لیے بتائیں کون سی سروس چاہیے — ہوم کلیننگ، ڈیپ کلیننگ، صوفہ کلیننگ، کارپٹ کلیننگ، یا آفس کلیننگ؟`);
-        return result(reply, language, { ...previous, step: 'service_selection', pendingDate: hasDate ? extractDateFromText(text) : null, pendingTime: hasTime ? extractTimeFromText(text) : null }, "cleaning_booking_type_clarification", {
+        // Phase 2 Sprint 2 (R8 fix): buffer date/time/name/phone/address via
+        // the TaskFrameEngine so they survive the cleaning-type disambiguation
+        // and are NOT re-asked after the type is picked.
+        const engagement = context.services.engagement;
+        const bufferedScope = bufferCleaningSlots(text, engagement, context.intelligence?.entities || {});
+        return result(reply, language, { ...previous, step: 'service_selection', pendingDate: hasDate ? extractDateFromText(text) : null, pendingTime: hasTime ? extractTimeFromText(text) : null, pendingBookingType: { scope: bufferedScope } }, "cleaning_booking_type_clarification", {
           intent: "CLEANING_BOOKING_TYPE_NEEDED",
           payload: { legacyText: reply, preferLegacyText: true }
         });
@@ -1722,7 +1733,11 @@ class CleaningCapability extends BaseCapability {
           `I'd love to help you book a cleaning. Which type would you like — Home Cleaning, Deep Cleaning, Sofa Cleaning, Carpet Cleaning, or Office Cleaning?`,
           `Cleaning book karne ke liye batayein kaunsi service chahiye — Home Cleaning, Deep Cleaning, Sofa Cleaning, Carpet Cleaning, ya Office Cleaning?`,
           `صفائی بک کرنے کے لیے بتائیں کون سی سروس چاہیے — ہوم کلیننگ، ڈیپ کلیننگ، صوفہ کلیننگ، کارپٹ کلیننگ، یا آفس کلیننگ؟`);
-        return result(reply, language, { ...previous, step: 'service_selection', pendingDate: hasDate ? extractDateFromText(text) : null, pendingTime: hasTime ? extractTimeFromText(text) : null }, "cleaning_booking_type_clarification", {
+        // Phase 2 Sprint 2 (R8 fix): buffer date/time/name/phone/address so
+        // they survive the cleaning-type disambiguation.
+        const engagement = context.services.engagement;
+        const bufferedScope = bufferCleaningSlots(text, engagement, context.intelligence?.entities || {});
+        return result(reply, language, { ...previous, step: 'service_selection', pendingDate: hasDate ? extractDateFromText(text) : null, pendingTime: hasTime ? extractTimeFromText(text) : null, pendingBookingType: { scope: bufferedScope } }, "cleaning_booking_type_clarification", {
           intent: "CLEANING_BOOKING_TYPE_NEEDED",
           payload: { legacyText: reply, preferLegacyText: true }
         });
@@ -1796,6 +1811,40 @@ function result(reply, language, cleaningState, lastIntent, responseModel = null
   return createCapabilityResult({ handled: true, reply, confidence: 0.99, responseModel, statePatch: { language, activePlugin: "cleaning", lastIntent, capabilityState: { cleaning: cleaningState } }, events });
 }
 function localized(language,english,roman,urdu){ return language==="urdu"?urdu:language==="roman_urdu"?roman:english; }
+// Phase 2 Sprint 2: Slot buffering via the data-driven TaskFrameEngine.
+// When the generic "book cleaning..." fall-through needs to ask the cleaning
+// TYPE, this preserves the date/time/name/phone/address the user already
+// volunteered so they are NOT re-asked after the type is picked (R8 fix).
+// Previously only crude `pendingDate`/`pendingTime` strings were stashed and
+// name/phone/address were dropped — so "book cleaning saturday 10am for Ali
+// phone 0501234567" re-asked everything after the type question.
+//
+// Returns a `pendingBookingType.scope`-shaped object (consumed by
+// booking_type_selected at line ~119 via requestFields → initialRequestState).
+function bufferCleaningSlots(text, engagement, contextEntities = {}) {
+  const engine = _sharedTaskFrameEngine;
+  // If the context already extracted rich timeEntities (the conversation
+  // adapter merges extractTimeEntities + extractCleaningContext into
+  // context.intelligence.entities at adapter line 15), prefer those.
+  const fromContext = {};
+  const e = contextEntities || {};
+  if (e.date || e.dateText || e.weekday) fromContext.date = e.date || e.dateText || e.weekday;
+  if (e.startTime || e.time) { fromContext.startTime = e.startTime || null; fromContext.time = e.time || e.startTime || null; }
+  if (e.endTime) fromContext.endTime = e.endTime;
+  if (e.timeFlexible) fromContext.timeFlexible = true;
+  if (e.name) fromContext.name = e.name;
+  if (e.phone) fromContext.phone = e.phone;
+  if (e.email) fromContext.email = e.email;
+  if (e.address) fromContext.address = e.address;
+  if (e.durationHours) fromContext.durationHours = e.durationHours;
+  if (e.cleanerCount) fromContext.cleanerCount = e.cleanerCount;
+  // Then fill any gaps via the frame engine's bufferSlots (uses engagement.parseField).
+  if (engine && engagement?.parseField) {
+    const { buffered } = engine.bufferSlots('cleaning', text, { engagement, allowPast: false });
+    return { ...buffered, ...fromContext }; // context entities win on conflict
+  }
+  return fromContext;
+}
 // v35.2: Lightweight date/time extractors for the booking-type clarification flow.
 // These are intentionally simple — full semantic extraction happens later in the
 // booking workflow once a service is selected.

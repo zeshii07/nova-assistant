@@ -119,23 +119,107 @@ class AssistantService {
       }
       return this.result(this.missingKnowledge(language,context.tenant),language,'knowledge_missing','knowledge_abstention');
     }
-    const detected = this.intentEngine.detect(context.message.text);
-    const fact = this.knowledgeService.answer(detected.intent, context.tenant);
 
-    if (this.isKnownIntent(detected.intent)) {
-      if (fact) {
-        const reply=this.responseEngine.reply({ intent: detected.intent, language, tenant: context.tenant, fact });
+    // Phase 2 Sprint 1: T0 fast-path. When ConversationIntelligenceEngine
+    // short-circuited on a greeting / gratitude / goodbye / emoji-only / bare
+    // yes-no / back / help / quick-reply / bare-number turn, honor the T0
+    // intent directly instead of re-running the intent engine (which would
+    // return "other" for the net-new classes and hit the generic fallback).
+    // Greet/thanks/goodbye map to existing response templates; the net-new
+    // classes get a direct reply here.
+    if (context.intelligence?.selected?.reason === 't0_fast_path') {
+      const t0Intent = forcedIntent;
+      if (t0Intent === 'assistant.greet' || t0Intent === 'assistant.thanks' || t0Intent === 'assistant.goodbye') {
+        const base = t0Intent.replace('assistant.', '');
+        const reply = this.responseEngine.reply({ intent: base, language, tenant: context.tenant });
+        return this.result(reply, language, base, 't0_fast_path');
+      }
+      if (t0Intent === 'assistant.small_talk') {
+        // emoji-only or bare affirmation with no active workflow → friendly ack.
+        const reply = this.responseEngine.reply({ intent: 'small_talk', language, tenant: context.tenant });
+        return this.result(reply, language, 'small_talk', 't0_fast_path');
+      }
+      if (t0Intent === 'conversation.affirm') {
+        const reply = language === 'roman_urdu'
+          ? 'Ji bilkul! Bataiye, main aapki kya madad kar sakta hoon?'
+          : language === 'urdu'
+            ? 'جی بالکل! بتائیے، میں آپ کی کیا مدد کر سکتا ہوں؟'
+            : 'Yes, absolutely! How can I help you?';
+        return this.result(reply, language, 'small_talk', 't0_fast_path');
+      }
+      if (t0Intent === 'conversation.deny') {
+        const reply = language === 'roman_urdu'
+          ? 'Theek hai, koi baat nahi. Jab zaroorat ho to bataiye.'
+          : language === 'urdu'
+            ? 'ٹھیک ہے، کوئی بات نہیں۔ جب ضرورت ہو تو بتائیے۔'
+            : 'No problem at all. Let me know whenever you need help.';
+        return this.result(reply, language, 'small_talk', 't0_fast_path');
+      }
+      if (t0Intent === 'conversation.back') {
+        const reply = language === 'roman_urdu'
+          ? 'Main wapas le aata hoon. Bataiye aap kya karna chahte hain — pichla sawal phir se, ya kuch naya?'
+          : 'Let me take us back. What would you like to do — revisit the last question, or start something new?';
+        return this.result(reply, language, 'small_talk', 't0_fast_path');
+      }
+      if (t0Intent === 'assistant.help') {
+        const domain = context.tenant?.domain || 'this business';
+        const reply = language === 'roman_urdu'
+          ? `Main aapki madad kar sakta hoon: ${domain} ki services/products ke baare mein jaankari, quotation, ya booking/request shuru karna. Bataiye aap kya chahte hain?`
+          : `I can help you with: information about ${domain}'s services or products, getting a quote, or starting a booking/request. What would you like to do?`;
+        return this.result(reply, language, 'small_talk', 't0_fast_path');
+      }
+      if (t0Intent === 'assistant.clarify_bare_number') {
+        const n = context.intelligence?.entities?.bareNumber;
+        const reply = language === 'roman_urdu'
+          ? `Aapne "${n}" likha hai — kya aap quantity batana chahte hain, ya kisi service mein interest rakhte hain? Thora detail dein taake main theek se madad kar sakun.`
+          : `You sent "${n}" — did you mean a quantity, or are you interested in a specific service? A little more detail will help me assist you correctly.`;
+        return this.result(reply, language, 'small_talk', 't0_fast_path');
+      }
+      if (t0Intent && t0Intent.startsWith('qr.')) {
+        // Quick-reply payload: acknowledge the action and ask for the next step.
+        const action = context.intelligence?.entities?.quickReply?.action || t0Intent.slice(3);
+        const reply = language === 'roman_urdu'
+          ? `Aapne "${action}" select kiya. Main is par kaam kar raha hoon — aur kuch jo aap chahte hain?`
+          : `You selected "${action}". I'm on it — anything else you'd like?`;
+        return this.result(reply, language, 'small_talk', 't0_fast_path');
+      }
+    }
+
+    // Phase 3 Sprint 3 — legacy regex retirement.
+    //
+    // The regex-based IntentEngine (packages/assistant/src/intentEngine.js)
+    // is RETIRED from the default active path: the deterministic T0/T1/T2
+    // engine now handles every intent this regex ladder owned (greetings,
+    // thanks, goodbye, ask_hours/payment/services/contact/location/returns,
+    // order, booking, cleaning …). When NOVA_LEGACY_REGEX_NLU is unset (the
+    // default), this entire block is skipped and the assistant falls through
+    // to the knowledge-retrieval / LLM-safe-fallback path below — exactly
+    // what the T0/T1/T2 pipeline expects. When the flag is truthy, the legacy
+    // regex path runs for A/B comparison and regression (pre-Sprint-3
+    // behavior). The gate is read at the module level via isLegacyRegexEnabled,
+    // so container.js / server.js need no edits.
+    const { isLegacyRegexEnabled } = require('./intentEngine');
+    const legacyRegexEnabled = isLegacyRegexEnabled();
+    let detected = null;
+    if (legacyRegexEnabled) {
+      detected = this.intentEngine.detect(context.message.text);
+      const fact = this.knowledgeService.answer(detected.intent, context.tenant);
+
+      if (this.isKnownIntent(detected.intent)) {
+        if (fact) {
+          const reply=this.responseEngine.reply({ intent: detected.intent, language, tenant: context.tenant, fact });
+          return this.result(reply, language, detected.intent, detected.source);
+        }
+        if (this.needsFact(detected.intent)) {
+          const retrieval=this.knowledgeService.retrieve(context.message.text,context.tenant);
+          if(retrieval.answerable){
+            const grounded=await this.groundedKnowledgeAnswer(context,language,retrieval);
+            if(grounded)return this.result(grounded,language,"knowledge_answer","knowledge_retrieval");
+          }
+        }
+        const reply=this.responseEngine.reply({ intent: this.needsFact(detected.intent) ? "missing" : detected.intent, language, tenant: context.tenant });
         return this.result(reply, language, detected.intent, detected.source);
       }
-      if (this.needsFact(detected.intent)) {
-        const retrieval=this.knowledgeService.retrieve(context.message.text,context.tenant);
-        if(retrieval.answerable){
-          const grounded=await this.groundedKnowledgeAnswer(context,language,retrieval);
-          if(grounded)return this.result(grounded,language,"knowledge_answer","knowledge_retrieval");
-        }
-      }
-      const reply=this.responseEngine.reply({ intent: this.needsFact(detected.intent) ? "missing" : detected.intent, language, tenant: context.tenant });
-      return this.result(reply, language, detected.intent, detected.source);
     }
 
     const retrieval = this.knowledgeService.retrieve(context.message.text, context.tenant);
@@ -151,7 +235,7 @@ class AssistantService {
       this.friendlyFallback(context,language),
       language,
       "other",
-      "safe_fallback"
+      legacyRegexEnabled ? "safe_fallback" : "safe_fallback_t012"
     );
   }
 

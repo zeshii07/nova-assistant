@@ -96,6 +96,8 @@ const { BookingService } = require("../../../packages/booking-engine/src/booking
 
 const { OfferingOrderService } = require("../../../packages/offering-order-engine/src/offeringOrderService");
 const { UniversalEngagementEngine } = require("../../../packages/universal-engagement-engine/src/universalEngagementEngine");
+const { TaskFrameEngine } = require("../../../packages/dialogue-manager/src/taskFrameEngine");
+const { DialogueManager } = require("../../../packages/dialogue-manager/src/index");
 const { OfferingConversationAdapter } = require("../../../capabilities/offering/conversation");
 const { BookingConversationAdapter } = require("../../../capabilities/booking/conversation");
 const { UnifiedServiceConversationAdapter } = require("../../../capabilities/booking/conversation/unifiedServiceAdapter");
@@ -130,6 +132,11 @@ async function buildContainer() {
   const leadRepository = new FileLeadRepository({ snapshotFile:path.join(config.operationalDataDir,"leads.json") });
   const leadService = new LeadService({ repository:leadRepository, eventBus, logger });
   const engagementService = new UniversalEngagementEngine();
+  // Phase 2 Sprint 2: data-driven TaskFrameEngine. Reuses engagementService's
+  // parseField / prompt / nextMissing / parseDeclaredName so the frame
+  // definitions and the existing executors agree on slot validation.
+  const taskFrameEngine = new TaskFrameEngine({ engagementEngine: engagementService, logger });
+  const dialogueManager = new DialogueManager({ logger, taskFrameEngine, engagementEngine: engagementService });
   const customerDataBridge = new CustomerDataBridge({ crmService, engagementService, logger });
   const catalogRepository = new FileCatalogRepository({ tenantsDir: config.tenantsDir, logger, controlPlaneRepository });
   const catalogPermissionService = new CatalogPermissionService();
@@ -454,7 +461,28 @@ async function buildContainer() {
   const optimisticVersioning = new OptimisticVersioning({ redisClient, logger });
   const idempotencyGuard = new IdempotencyGuard({ redisClient, logger });
 
-  const executionEngine = new ExecutionEngine({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId: config.defaultTenantId, services: { knowledgeService, llmRouter, memoryService, crmService, leadService, customerDataBridge, catalogService, commerceService, inventoryService, cleaningService, offeringService, bookingService, calendarService, offeringOrderService, engagementService, pricingService, handoffService, availabilityService, promptEngine, productMatcher: productEmbeddingMatcher }, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService, feedbackCollector, distributedLock, optimisticVersioning, idempotencyGuard });
+  const executionEngine = new ExecutionEngine({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId: config.defaultTenantId, services: { knowledgeService, llmRouter, memoryService, crmService, leadService, customerDataBridge, catalogService, commerceService, inventoryService, cleaningService, offeringService, bookingService, calendarService, offeringOrderService, engagementService, taskFrameEngine, dialogueManager, pricingService, handoffService, availabilityService, promptEngine, productMatcher: productEmbeddingMatcher }, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService, feedbackCollector, distributedLock, optimisticVersioning, idempotencyGuard });
+  // ─── Phase 3 Sprint 2: Dashboard metrics aggregator ────────────────────
+  // Captures per-tenant + per-capability fallback %, p95 latency, and LLM
+  // share on every processed turn so production health is observable. The
+  // aggregator also subscribes to the eventBus; the wrapper below feeds it
+  // the richer intelligence.nlu fields the event payload does not carry.
+  const { MetricsAggregator } = require("../../../packages/metrics/src");
+  const metricsAggregator = new MetricsAggregator({ eventBus, logger });
+  const _origProcess = executionEngine.process.bind(executionEngine);
+  executionEngine.process = async (message) => {
+    const res = await _origProcess(message);
+    try {
+      metricsAggregator.recordIntelligence({
+        tenantId: message.tenantId || config.defaultTenantId,
+        capabilityId: res.capabilityId || null,
+        intelligence: res.intelligence || null,
+        latencyMs: res.intelligence?.nlu?.latencyMs ?? null,
+        turnId: res.conversationId ? `${res.conversationId}:${res.state?.version ?? 0}` : null,
+      });
+    } catch (e) { logger.warn("metrics.record_failed", { error: e.message }); }
+    return res;
+  };
   const channelRegistry = new ChannelRegistry().register(new HttpChatAdapter());
   const whatsappConfigRepository = new WhatsAppTenantConfigRepository({ tenantsDir: config.tenantsDir });
   const whatsappCloudClient = new WhatsAppCloudClient({ logger });
@@ -466,6 +494,6 @@ async function buildContainer() {
     executionEngine,
     logger
   });
-  return { config, logger, storage, tenantAdapterRegistry, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, googleOAuthClient, calendarTokenRepository, googleCalendarProvider, businessOwnerAuthService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, leadRepository, leadService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService, mlIntentClassifier, hybridRouter, productEmbeddingMatcher, transformerEmbeddingService, feedbackCollector, onlineLearner, analyticsEngine, emailService, notificationService, notificationLogRepository, publicAssistantService, publicFeatureRegistryService, publicLeadService, publicLeadRepository, publicIntentRouter, publicAssistantPolicy, unansweredQuestionRepository, publicLlmAnswerService };
+  return { config, logger, storage, tenantAdapterRegistry, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, googleOAuthClient, calendarTokenRepository, googleCalendarProvider, businessOwnerAuthService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, leadRepository, leadService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, taskFrameEngine, dialogueManager, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService, mlIntentClassifier, hybridRouter, productEmbeddingMatcher, transformerEmbeddingService, feedbackCollector, onlineLearner, analyticsEngine, emailService, notificationService, notificationLogRepository, publicAssistantService, publicFeatureRegistryService, publicLeadService, publicLeadRepository, publicIntentRouter, publicAssistantPolicy, unansweredQuestionRepository, publicLlmAnswerService, metricsAggregator };
 }
 module.exports = { buildContainer };

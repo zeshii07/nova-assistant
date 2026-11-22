@@ -148,6 +148,16 @@ async function startServer() {
         return sendJson(res, allOk ? 200 : 503, { ok: allOk, ...checks });
       }
 
+      // ─── Phase 3 Sprint 2: Dashboard metrics endpoint ───────────────────
+      // Returns per-tenant + per-capability fallback %, p95 latency, and LLM
+      // share so production health is observable. Read-only; safe to poll.
+      if (req.method === "GET" && url.pathname === "/metrics") {
+        if (!container.metricsAggregator) {
+          return sendJson(res, 503, { ok: false, error: "metrics aggregator not configured" });
+        }
+        return sendJson(res, 200, { ok: true, ...container.metricsAggregator.snapshot() });
+      }
+
       if (whatsappMatch && req.method === "GET") {
         const tenantId = decodeURIComponent(whatsappMatch[1]);
         const result = container.whatsappWebhookService.verifySubscription({
@@ -203,13 +213,81 @@ async function startServer() {
         return sendJson(res,200,{ok:true,tenants});
       }
 
+      // ── /api/assistant/chat — UNIFIED (Phase 2 Sprint 3) ──────────────
+      // Previously this was a separate 200-line regex bot (novaMarketingAssistant.js)
+      // that BYPASSED the rate limiter, the public knowledge base (RAG), the lead
+      // capture flow, the abstention policy, and the policy redactor. H8 root cause:
+      // "two parallel public assistants — keyword matcher that answers when it
+      // should abstain + leaks internal config text, and a separate regex bot with
+      // no rate limit."
+      //
+      // Now this route runs the SAME PublicAssistantService.handleMessage flow as
+      // /api/public/chat (single source of truth): per-IP rate limit, RAG over the
+      // public-product knowledge base with the H2b 0.40 relevance threshold
+      // (abstains instead of guessing), the H8 messagingRules/persona leak
+      // defense (indexing chokepoint + sanitizeEvidence + redactReply +
+      // assertChunkPublic), lead capture, conversation memory, and analytics.
+      //
+      // The legacy {reply, topic, suggestions} response shape is preserved for
+      // backward compatibility (existing /api/assistant/chat clients). The topic
+      // is mapped from the unified `intent`/`outcome`; suggestions from
+      // `suggested_actions`. `replyToNovaVisitor` stays importable so existing
+      // callers (e.g. sprint78 test) that use it directly still work — it is now a
+      // curated topic library, not a parallel routing path.
       if(req.method==="POST"&&url.pathname==="/api/assistant/chat"){
+        const origin = String(req.headers['origin'] || '*');
+        const clientIp = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+        const rl = checkWidgetRateLimit(`public:${clientIp}`);
+        if (!rl.allowed) {
+          res.writeHead(429, {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Access-Control-Allow-Origin': origin,
+            'Retry-After': String(rl.retryAfterSeconds),
+            'X-RateLimit-Limit': '30',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(rl.resetAt)
+          });
+          return res.end(JSON.stringify({ ok:false, error:'Rate limit exceeded. Please slow down.', retryAfterSeconds: rl.retryAfterSeconds }));
+        }
         const body=await readJson(req);
         const text=String(body.text||'').trim();
         if(!text)return sendJson(res,400,{ok:false,error:'text is required'});
         if(text.length>4000)throw new ValidationError('Message is too long. Please keep it under 4,000 characters.');
-        const answer=replyToNovaVisitor(text,{previousTopic:String(body.previousTopic||'').trim()||null,language:String(body.language||'auto')});
-        return sendJson(res,200,{ok:true,conversationId:String(body.conversationId||`nova-${crypto.randomUUID()}`),reply:answer.reply,topic:answer.topic,suggestions:answer.suggestions});
+        // Route through the unified PublicAssistantService flow (single source of truth).
+        const unified = await container.publicAssistantService.handleMessage({
+          conversation_id: body.conversationId || null,
+          message: text,
+          locale: body.language || "en",
+          page_context: null,
+          campaign: null
+        });
+        if (unified.error) {
+          return sendJson(res, unified.status || 400, { ok:false, error: unified.message });
+        }
+        // Map the previousTopic hint into the conversation context if the caller
+        // supplied one (legacy clients threaded topic client-side). The unified
+        // service already tracks last_topic in session memory; this only seeds it
+        // for a fresh conversation so the first "yes" can still context-follow.
+        // Adapt the unified response to the legacy {conversationId, reply, topic, suggestions} shape.
+        const topic = unified.outcome === "greeting" ? "greeting"
+          : unified.outcome === "small_talk" ? "small_talk"
+          : unified.outcome === "lead" ? "get_started"
+          : unified.outcome === "refuse" ? "tenant_boundary"
+          : unified.outcome === "escalate" ? "fallback"
+          : unified.intent || "capabilities";
+        const suggestions = (unified.suggested_actions || []).map((a) => a.label || a.value).filter(Boolean);
+        return sendJson(res, 200, {
+          ok: true,
+          conversationId: unified.conversation_id,
+          reply: unified.reply,
+          topic,
+          suggestions,
+          // Expose the unified outcome/lead_status so new clients can use the
+          // richer contract without breaking old clients that ignore extra keys.
+          outcome: unified.outcome,
+          lead_status: unified.lead_status,
+          language: unified.language
+        });
       }
 
       // ── Public Product Assistant + Lead Capture (Nova Public Product Assistant spec) ──
