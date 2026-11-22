@@ -108,4 +108,30 @@ function damerauLevenshtein(a,b){
   return matrix[left.length][right.length];
 }
 
-module.exports = { normalizeText, words, hasAny, numberFromText, closestKeywordToken, normalizeWeekdayTypos, damerauLevenshtein, normalizeUrduDigits };
+/**
+ * Bug 7 fix (Phase 1 item 7): canonical language detector for the reply path.
+ * Consolidates the 9 divergent detectLanguage copies (commerce/catalog/cleaning
+ * capability-locals + LanguageEngine + ExperienceLanguageEngine + semantic
+ * router + mock NLU + ingestion report + marketing assistant) into ONE shared
+ * helper. Returns "urdu" (Arabic script), "roman_urdu", or "english".
+ *
+ * Detection order:
+ *   1. Arabic-script chars → "urdu"
+ *   2. English location/address words → "english" (guard against "Main Street"
+ *      false-positive matching Roman Urdu "main" = "I")
+ *   3. Roman-Urdu token presence → "roman_urdu"
+ *   4. otherwise → "english"
+ *
+ * The caller passes the CURRENT message text. The caller decides fallback
+ * behaviour; this function is a pure detector (no prior-state consultation).
+ */
+function detectLanguage(raw, fallback) {
+  const text = String(raw || "");
+  if (/[\u0600-\u06FF]/.test(text)) return "urdu";
+  // English-location guard: "123 Main Street Dubai" must NOT be Roman Urdu.
+  if (/\b(street|road|avenue|blvd|building|block|sector|apartment|villa|floor|tower|highway|lane|drive)\b/i.test(text)) return "english";
+  if (/\b(aap|ap|mujhe|mujhy|mujhay|mujy|main|mai|mein|ny|mera|meri|kya|kia|kaise|kaisay|hai|hain|chahiye|chahiy|chaheye|karo|kro|kar dein|karwani|karwana|krani|bata|batao|batain|shukriya|kon sy|kitna|kitni|kitne|kal|aaj|aj|parson|subah|subha|shaam|sham|raat|jumma|hafta waly|bhai|jnab|janab|theek|haan|han|bilkul|safai|saaf)\b/i.test(text)) return "roman_urdu";
+  return fallback || "english";
+}
+
+module.exports = { normalizeText, words, hasAny, numberFromText, closestKeywordToken, normalizeWeekdayTypos, damerauLevenshtein, normalizeUrduDigits, detectLanguage };

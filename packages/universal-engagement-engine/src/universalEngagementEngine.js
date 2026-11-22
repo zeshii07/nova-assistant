@@ -277,9 +277,38 @@ class UniversalEngagementEngine {
       }
     }
     if (!date) {
-      if (/\b(day after tomorrow|parson|parso)\b|پرسوں/.test(text)) date = addDays(today, 2);
-      else if (/\b(tomorrow|kal|agl[aeiy]+ din)\b|کل|اگلے دن/.test(text)) date = addDays(today, 1);
-      else if (/\b(today|aaj|aj)\b|آج/.test(text)) date = today;
+      // H4b fix (Phase 1 item 4): colloquial English aliases + relative
+      // offsets. The canonical parser already handled tomorrow/today/kal/aaj/
+      // parso/day-after-tomorrow + weekdays, but visitors commonly type "tmrw",
+      // "tom", "2morow", "yesterday", "next week", "agla hafta" (next week,
+      // Roman Urdu), "in 3 days", "this weekend". These all failed before,
+      // producing "Please enter a date such as ... tomorrow" even when the
+      // visitor HAD typed a colloquial form of "tomorrow". Resolve them here.
+      //
+      // NOTE: check against `raw` (not the typo-normalized `text`) for the
+      // Roman-Urdu / colloquial phrases, because normalizeWeekdayTypos rewrites
+      // "hafta" → "saturday" (fuzzy weekday correction), which would mis-route
+      // "agla hafta" (next week, +7 days) to the Saturday weekday branch
+      // instead. The raw phrase is what the visitor actually typed.
+      const rawLower = String(raw).toLowerCase();
+      if (/\b(tm(r|o)w|tom|2mo?ro[w]?|2morow|tmrw)\b/i.test(rawLower) || /\b(tomorrow|kal|agl[aeiy]+ din)\b|کل|اگلے دن/.test(rawLower)) date = addDays(today, 1);
+      else if (/\b(day after tomorrow|parson|parso)\b|پرسوں/.test(rawLower)) date = addDays(today, 2);
+      else if (/\btoday|aaj|aj\b|آج/.test(rawLower)) date = today;
+      else if (/\byesterday\b|کل کا دن|پچھلے دن/.test(rawLower)) date = addDays(today, -1);
+      else if (/\bnext\s+week\b|\bagla\s+hafta\b|\bاگلا\s+ہفتہ\b/i.test(rawLower)) date = addDays(today, 7);
+      else if (/\b(in|after)\s+(\d+)\s+(day|din|dinon|days?)\b/i.test(rawLower)) {
+        const dm = rawLower.match(/\b(?:in|after)\s+(\d+)\s+(?:day|din|dinon|days?)\b/i);
+        if (dm) date = addDays(today, Number(dm[1]));
+      }
+      else if (/\b(in|after)\s+(\d+)\s+(week|hafta|haftay|weeks?)\b/i.test(rawLower)) {
+        const wm = rawLower.match(/\b(?:in|after)\s+(\d+)\s+(?:week|hafta|haftay|weeks?)\b/i);
+        if (wm) date = addDays(today, 7 * Number(wm[1]));
+      }
+      else if (/\bthis\s+weekend\b/i.test(rawLower)) {
+        // Next Saturday from today (the conventional "weekend" anchor).
+        const sat = nextWeekday(today, WEEKDAYS.indexOf('saturday'));
+        date = sat;
+      }
       else {
         const weekday=WEEKDAYS.find(x=>new RegExp(`\\b${x}\\b`).test(text));
         if(weekday) date=nextWeekday(today,WEEKDAYS.indexOf(weekday));

@@ -32,6 +32,7 @@
 const {
   normalizeText,
   numberFromText,
+  detectLanguage,
 } = require("../../../packages/conversation-intelligence/src/text");
 const {
   isConfirmation,
@@ -74,7 +75,11 @@ class UnifiedServiceConversationAdapter {
     const text = normalizeText(primaryRaw) || normalizedText || normalizeText(message.text);
     const fullText = normalizedText || normalizeText(message.text);
     const active = state.capabilityState?.booking;
-    const lang = state.language || 'english';
+    // Bug 7 fix (Phase 1 item 7): detect language from the CURRENT message
+    // (with prior state as fallback), instead of always inheriting the prior
+    // turn's stored language. A visitor who switches language mid-conversation
+    // now gets the reply in the current message's language.
+    const lang = detectLanguage(message?.text, state.language) || 'english';
     const tenantDomain = tenant.domain || 'universal';
 
     // ═══════════════════════════════════════════════════════════════
@@ -191,7 +196,7 @@ class UnifiedServiceConversationAdapter {
       const hasCleaning = tenant?.capabilities?.includes('cleaning');
       const safeCleaning = hasCleaning ? c : null;
       try {
-        const serviceResult = this.detectServiceDetail(text, tenant, o, safeCleaning);
+        const serviceResult = await this.detectServiceDetail(text, tenant, o, safeCleaning, services);
         if (serviceResult) {
           if (serviceResult.type === 'detail') {
             return this.pack("service.detail", 0.995, { serviceId: serviceResult.serviceId, serviceName: serviceResult.serviceName }, "service_detail_match", 190);
@@ -277,13 +282,29 @@ class UnifiedServiceConversationAdapter {
   // "book beard grooming tomorrow at 5pm" was misrouted to service.detail
   // because the text contains "beard grooming" (which o.resolve matches).
   // ═══════════════════════════════════════════════════════════════
-  detectServiceDetail(text, tenant, offeringService, cleaningService) {
+  async detectServiceDetail(text, tenant, offeringService, cleaningService, services) {
     // v42.0: Booking-trigger guard — don't intercept messages that look like
     // an actual booking request (they will be handled by detectBookingTrigger).
     const hasBookingTrigger = /\b(?:book|schedule|reserve|reservation|appointment|arrange)\b/i.test(text);
     const hasDateOrTime = /\b(?:today|tomorrow|day after tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next week|kal|parson|parso)\b/i.test(text) ||
                           /\b(?:\d{1,2}\s*(?:am|pm)|\d{1,2}:\d{2}|morning|afternoon|evening|night|subah|shaam)\b/i.test(text);
     if (hasBookingTrigger || hasDateOrTime) return null;
+
+    // Bug 6a fix (Phase 1 item 6): when the tenant has a catalog (e.g. a
+    // restaurant menu) AND the visitor's message matches a catalog PRODUCT,
+    // defer to the catalog capability — a product price/detail question
+    // ("what is the price of biryani?") belongs to the catalog, not the
+    // service-detail/quote flow. The service-detail flow is for SERVICE
+    // offerings (haircut, cleaning) on tenants WITHOUT a retail catalog.
+    // Some tenants mirror menu items as offerings, so offeringService would
+    // match here too — but the catalog is the authoritative source for
+    // product prices, so we yield when a product is found.
+    if (tenant?.capabilities?.includes('catalog') && services?.catalogService) {
+      try {
+        const cat = await services.catalogService.search(tenant.id, text);
+        if (cat && cat.product) return null;
+      } catch (_) { /* best-effort; never block service-detail on it */ }
+    }
 
     // Check if this is a price/quote request
     const isQuote = /\b(?:price|cost|charge|rate|quote|how\s+much|kitna|kitni|kitne|qimat|qeemat)\b/i.test(text);
@@ -369,6 +390,33 @@ class UnifiedServiceConversationAdapter {
       (hasReservation && (hasDate || hasTime || hasAcquisition));
 
     if (!bookingTrigger) return null;
+
+    // Bug 6b fix (Phase 1 item 6): when the trigger fired SOLELY because a
+    // config triggerTerm is a substring of the message (e.g. hotel's "check
+    // in" inside "what time is check in?"), AND the message is an
+    // interrogative question with NO acquisition verb, do NOT start a booking
+    // — let the knowledge base answer it ("check-in is at 2 PM"). The legacy
+    // BookingConversationAdapter had an `informational` guard for this; the
+    // unified adapter replaced it without porting that guard, so questions
+    // like "what time is check in?" were mis-routed to booking.start ("What is
+    // your check-in date?").
+    //
+    // Conditions to SUPPRESS the trigger:
+    //  1. The trigger came ONLY from hasTrigger (not from acquisition+date/time
+    //     or reservation cues — those are genuine booking requests).
+    //  2. The message starts with / contains a question word (what/when/how/
+    //     which/tell me) AND no acquisition verb (book/reserve/schedule/i want
+    //     /i need/can i get). This is the question-vs-request signal.
+    //  3. There is no concrete date/time in the message (a date would make it
+    //     a real booking request like "check in tomorrow").
+    const triggerFromSubstringOnly = hasTrigger && !hasAcquisition && !hasReservation && !(hasDate || hasTime);
+    if (triggerFromSubstringOnly) {
+      const isQuestion = /\b(?:what|when|how|which|tell me|kya|kab|kaisa|kaisi)\b/i.test(fullText);
+      const hasAcquisitionVerb = /\b(?:book|reserve|reserv(?:e|ation)|schedule|arrange|i\s+(?:want|need|would like)|can i\s+(?:get|have|book|reserve))\b/i.test(fullText);
+      if (isQuestion && !hasAcquisitionVerb) {
+        return null; // defer to knowledge / other adapters
+      }
+    }
 
     const entities = {};
     if (serviceMatch) {

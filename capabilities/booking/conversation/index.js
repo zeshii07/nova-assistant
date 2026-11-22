@@ -447,6 +447,14 @@ function extract(text, raw, config, engagement, temporal = {}) {
     e.subject = config.defaultSubject;
   if (temporal?.endTime) e.preferredEndTime = temporal.endTime;
   if (temporal?.timeWindow) e.timeWindow = temporal.timeWindow;
+  // H4a fix (Phase 1 item 4): surface an invalid-clock reason. When a visitor
+  // types an impossible time like "25:90" or "13:99", the temporal extractor
+  // flags it (invalidClockText/invalidClockReason) but the booking flow never
+  // read those flags — the visitor got a generic "please enter a valid time"
+  // with no explanation of WHAT was invalid. Carry them through so the re-ask
+  // prompt can name the bad token (e.g. "25:90 has an invalid hour").
+  if (temporal?.invalidClockText) e.invalidClockText = temporal.invalidClockText;
+  if (temporal?.invalidClockReason) e.invalidClockReason = temporal.invalidClockReason;
   const hair = String(raw || "").match(
     /\bhair\s+(?:is|length\s+is)\s+([\p{L}]+(?:[- ]length)?)\b/iu,
   );

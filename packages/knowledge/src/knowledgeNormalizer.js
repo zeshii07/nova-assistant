@@ -52,8 +52,39 @@ function normalizeFaqs(name,faqs){
     };
   }).filter(x=>x.text);
 }
+// H8 fix (Phase 1 item 2): fields in business.json / documents/*.json that are
+// INTERNAL configuration (instructions TO the assistant, prompt/persona config,
+// messaging rules), not customer-facing facts. These must never be retrievable
+// as answers — a visitor asking "lol" was being shown
+// "messagingRules[6]: Avoid technical jargon in the first response." because
+// the whole business.json was flattened into the index. Tagging these paths as
+// internal_instruction + customerSafe:false makes fileKnowledgeRepository's
+// existing filter (customerSafe!==false && evidenceType!=='internal_instruction')
+// drop them before they can ever be retrieved.
+const INTERNAL_CONFIG_PATH_RE = /^(?:messagingRules|prompts?|persona|instructions|systemPrompt|system_prompt|internalNotes|internal_notes|testerNotes|tester_notes|agentNotes|agent_notes|debugInfo|debug_info|policies|policy)\b(\.|$|\[)/i;
+
+// H8 fix: Markdown/plain-text headings that mark a section as INTERNAL config
+// (instructions TO the assistant), not customer-facing facts. Used by
+// normalizeText to tag the section's chunks as internal_instruction +
+// customerSafe:false so the repository filter drops them. Matches the
+// `## Messaging rules` heading in nova-product-facts.md that leaked
+// "Avoid technical jargon in the first response." to visitors.
+const INTERNAL_HEADING_RE = /^(?:messaging\s*rules?|prompts?|persona|instructions?|system\s*prompts?|internal\s*notes?|tester\s*notes?|agent\s*notes?|debug\s*info|policies?|policy)\b/i;
+
 function normalizeJson(name,value){
-  return flatten(value).map((x,i)=>({id:`${name}:json:${i}`,source:name,path:x.path,text:`${x.path}: ${x.text}`,tokens:tokens(`${x.path} ${x.text}`)}));
+  return flatten(value).map((x,i)=>{
+    const isInternalConfig = INTERNAL_CONFIG_PATH_RE.test(x.path);
+    return {
+      id:`${name}:json:${i}`,source:name,path:x.path,
+      // H8: internal-config fields are stripped of their text so even a leaked
+      // chunk carries no payload; the evidenceType + customerSafe flags ensure
+      // the repository filter drops them entirely.
+      text: isInternalConfig ? '' : `${x.path}: ${x.text}`,
+      tokens: isInternalConfig ? [] : tokens(`${x.path} ${x.text}`),
+      evidenceType: isInternalConfig ? 'internal_instruction' : inferEvidenceType(x.text, x.path),
+      customerSafe: !isInternalConfig,
+    };
+  }).filter(x => x.text);  // drop the emptied internal-config chunks
 }
 function markdownSections(text,{maxChars=1400}={}){
   const lines=String(text||'').split(/\r?\n/),sections=[];let heading='',body=[];
@@ -104,7 +135,17 @@ function normalizeText(name,text){
   return chunks.map((x,i)=>{
     const heading=x.heading||null;
     const body=String(x.text||'').trim();
-    const internal=/\b(agent testing notes?|tester notes?|internal instructions?|instructions? for (?:the )?(?:agent|assistant|tester))\b/i.test(heading||'');
+    // H8 fix (Phase 1 item 2): a Markdown section under an INTERNAL-config
+    // heading (messaging rules, prompts, persona, instructions, system prompt,
+    // tester notes, etc.) is configuration TO the assistant, not a customer
+    // fact. The old regex only caught "agent testing notes|tester notes|
+    // internal instructions", so a `## Messaging rules` section in
+    // nova-product-facts.md was indexed as customer_fact and leaked
+    // "Avoid technical jargon in the first response." to visitors. Tagging
+    // these headings as internal_instruction + customerSafe:false makes the
+    // repository filter drop them entirely.
+    const internal=/\b(agent testing notes?|tester notes?|internal instructions?|instructions? for (?:the )?(?:agent|assistant|tester))\b/i.test(heading||'')
+      || INTERNAL_HEADING_RE.test(String(heading||''));
     const customerText=internal?'':sanitizeCustomerEvidence(body);
     const evidenceType=internal?'internal_instruction':inferEvidenceType(body,heading);
     const out={id:`${name}:${isMd?'md':'text'}:${i}`,source:name,path:heading,text:customerText||body,evidenceType,customerSafe:!internal&&Boolean(customerText),tokens:tokens(`${heading||''} ${customerText||body}`)};

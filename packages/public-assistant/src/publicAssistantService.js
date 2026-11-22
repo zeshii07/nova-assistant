@@ -16,6 +16,7 @@
  */
 const crypto = require("crypto");
 const { createInitialState, applyStatePatch } = require("../../state/src/stateSchema");
+const { PublicOptionResolver } = require("./publicOptionResolver");
 
 // §11 — the four response outcomes.
 const OUTCOMES = { ANSWER: "answer", CLARIFY: "clarify", ESCALATE: "escalate", REFUSE: "refuse", LEAD: "lead", GREETING: "greeting", SMALL_TALK: "small_talk" };
@@ -73,6 +74,12 @@ class PublicAssistantService {
     this.publicTenantId = publicTenantId;
     this.unansweredQuestionRepository = unansweredQuestionRepository;
     this.llmAnswerService = llmAnswerService;
+    // H3 + H5 (Phase 1 items 3 & 5): resolves ordinals / demonstratives
+    // ("first one", "option 2", "wo", "usko", "pehla wala", "dusra") against
+    // state.context.lastShown BEFORE intent classification, so a shorthand
+    // reply picks the option the assistant just displayed instead of falling
+    // through to knowledge retrieval as `unknown`.
+    this.optionResolver = new PublicOptionResolver();
   }
 
   /**
@@ -102,7 +109,19 @@ class PublicAssistantService {
 
     // 5. Detect language + intent (§5.5, §6).
     const language = this._normalizeLocale(locale);
-    const classification = this.intentRouter.classify(text);
+    // H3 + H5 (Phase 1 items 3 & 5): resolve ordinal / demonstrative replies
+    // ("first one", "option 2", "wo", "usko", "dusra", bare "2") against the
+    // options this assistant displayed on the PREVIOUS turn (stored in
+    // state.context.lastShown). If the visitor is referencing an option, feed
+    // that option's value to the classifier as if they had typed it — instead
+    // of letting "first one" classify as `unknown` and fall through to
+    // knowledge retrieval. The ORIGINAL text is still recorded + refused-on
+    // (if unsafe), so this only widens what the router sees; it never bypasses
+    // the policy.
+    const lastShown = state.context?.lastShown || null;
+    const optionResolution = this.optionResolver.resolve(text, lastShown);
+    const routedText = optionResolution.resolved ? optionResolution.value : text;
+    const classification = this.intentRouter.classify(routedText);
 
     // 6. Apply the policy refuse check FIRST (§6 priority: safety wins).
     const refuse = this.policy.evaluateMessage(text);
@@ -149,16 +168,17 @@ class PublicAssistantService {
 
     // 11. Record safe analytics (§19 — no personal data in events).
     await this._recordMessage(state, "assistant", reply, classification.intent, result.outcome);
-    // 12. Update session memory (§15).
-    state = this._updateMemory(state, classification, result, text);
+    // Suggested actions (§5.10) — computed here so we can persist them as
+    // lastShown (H5) for the NEXT turn's ordinal/demonstrative resolution.
+    const suggested = this._suggestedActions(classification, state, language);
+    // 12. Update session memory (§15) — persist lastShown + pending (H5).
+    state = this._updateMemory(state, classification, result, text, { suggested, optionResolution });
     await this._save(state);
     await this._publish("public_chat.answer_generated", {
       session_id: sessionId, intent: classification.intent, outcome: result.outcome,
       industry: classification.industry, retrieval_confidence: result.confidence || null
     });
 
-    // Suggested actions (§5.10).
-    const suggested = this._suggestedActions(classification, state, language);
     return this._response(sessionId, reply, suggested, this._leadStatus(state), classification.intent, result.outcome, startedAt, language, result.lead);
   }
 
@@ -484,7 +504,7 @@ class PublicAssistantService {
     return "not_started";
   }
 
-  _updateMemory(state, classification, result, text) {
+  _updateMemory(state, classification, result, text, extra = {}) {
     const ctx = state.context || {};
     if (classification.industry) ctx.industry = classification.industry;
     if (classification.intent === "industry_use_case" || classification.intent === "feature_discovery") {
@@ -498,6 +518,37 @@ class PublicAssistantService {
     // Track the conversation topic.
     ctx.last_topic = classification.intent;
     ctx.last_industry = classification.industry;
+
+    // H5 (Phase 1 item 5) — persist the options this assistant just displayed,
+    // so the NEXT turn can resolve "first one" / "option 2" / "wo" / "usko"
+    // against them (H3). Only store the label/value/action needed for
+    // resolution (no secrets, no PII — suggested actions are public chips).
+    // Also track `pending`: the assistant just offered choices and is awaiting
+    // a selection. It is cleared when the visitor's message resolved an option
+    // this turn (extra.optionResolution.resolved), so we don't keep a stale
+    // "awaiting choice" state after the visitor has picked.
+    const suggested = Array.isArray(extra.suggested) ? extra.suggested : [];
+    if (suggested.length > 0) {
+      ctx.lastShown = suggested.map((s) => ({ label: s.label, value: s.value, action: s.action }));
+      ctx.lastShownAt = new Date().toISOString();
+      ctx.pending = "option_selection";
+    } else if (extra.optionResolution?.resolved) {
+      // The visitor picked an option this turn and the assistant produced a
+      // terminal answer (no new options offered) — clear the pending state.
+      ctx.lastShown = null;
+      ctx.pending = null;
+    } else if (extra.optionResolution && !extra.optionResolution.resolved && ctx.pending === "option_selection") {
+      // The visitor sent something that was NOT an option reference while a
+      // selection was pending. Keep lastShown for one more turn (the visitor
+      // may still reference it) but don't treat it as a hard pending state.
+      // Expire stale lastShown after 2 turns to avoid resolving against
+      // long-stale options.
+      const ageTurns = (ctx.lastShownAge || 0) + 1;
+      ctx.lastShownAge = ageTurns;
+      if (ageTurns > 2) { ctx.lastShown = null; ctx.pending = null; ctx.lastShownAge = 0; }
+    } else {
+      ctx.lastShownAge = 0;
+    }
     return applyStatePatch(state, { context: ctx });
   }
 

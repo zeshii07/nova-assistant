@@ -45,6 +45,30 @@ function extractSharedEntities(raw,temporal={}){
 
   const name=String(raw).match(/\b(?:my name is|my nme is|name\s*(?:is|:)|call me|mera (?:name|naam))\s+([\p{L}][\p{L} .'-]{1,70}?)(?=\s+(?:and\s+)?(?:my\s+)?(?:phone|contact|number|email|address)\b|\s+(?:and|but|also)\s+(?:i|we|can|please)\b|\s+(?:what|who|where|when|why|how|do|does|is|are|can|could|will|would)\b|[,.!?;\n]|$)/iu);
   if(name&&!/^(?:kia|kya)\s+hai$/i.test(name[1].trim()))out.name=titleCase(name[1].trim());
+  // Bug 8 fix (Phase 1 item 8): fallback name extraction for one-shot booking
+  // phrases like "book a haircut tomorrow at 3pm for Ahmed, 0300-1234567" or
+  // "book deep cleaning tomorrow at 3pm for Ahmed, 0300-1234567". The primary
+  // regex above requires an explicit cue ("my name is"/"call me"/"mera naam"),
+  // so the "for <Name>" pattern was missed and BOTH salon and cleaning asked
+  // "May I have your full name?" even though the visitor supplied it. This
+  // fallback matches "for <Name>" ONLY when a phone number follows in the same
+  // message — the phone is the strong signal that this is a contact for a
+  // booking, not a party size ("for 4") or a duration ("for 2 hours"). The name
+  // must be 2-40 letters (incl. spaces/apostrophes/hyphens) and start with a
+  // capitalised or lowercase letter; pure-digit "for 4" is excluded by the
+  // [\p{L}] first-char requirement.
+  if(!out.name){
+    const phoneForName=String(raw).match(/\bfor\s+([\p{L}][\p{L} .'-]{1,38}?)\s*,?\s*(?:phone|contact|number|mobile)?\s*(?:is|:|=)?\s*(\+?\d[\d ()-]{8,20}\d)\b/iu);
+    if(phoneForName){
+      const candidate=phoneForName[1].trim();
+      // Reject generic booking nouns that follow "for" (party size / duration /
+      // room count) — these are not names.
+      if(!/^(?:tomorrow|today|tonight|party|guests?|people|persons?|seats?|hours?|nights?|days?|rooms?|tables?|persons?|guests?)\b/i.test(candidate)
+         &&!/^(?:kia|kya)\s+hai$/i.test(candidate)){
+        out.name=titleCase(candidate);
+      }
+    }
+  }
   const phone=String(raw).match(/(?:\b(?:phone|contact|number|mobile)\s*(?:is|:|=)?\s*)?(\+?\d[\d ()-]{8,20}\d)\b/i);
   if(phone){const digits=phone[1].replace(/\D/g,'');if(digits.length>=10&&digits.length<=15)out.phone=phone[1].trim().replace(/[ ()-]/g,'');}
   const email=String(raw).match(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i);if(email)out.email=email[0].toLowerCase();

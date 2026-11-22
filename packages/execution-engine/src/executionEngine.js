@@ -229,9 +229,18 @@ class ExecutionEngine {
 
     const match = await this.capabilityRouter.resolve(routingContext);
     if (!match) {
-      const name=tenant.business?.name||tenant.name||'This business';
-      const domain=String(tenant.domain||'business').replace(/_/g,' ');
-      const reply = `I may be missing part of what you mean, but I have not changed or submitted anything. ${name} is a ${domain} business; please mention the product, service, business information, booking, order, or change you need, and I’ll route it to the correct tenant capability.`;
+      // H2a fix (Phase 1 item 1): the old fallback unconditionally said
+      // "I may be missing part of what you mean" with no options and no honest
+      // acknowledgment of whether a request was pending. Now: if a workflow is
+      // pending, re-prompt that slot honestly; otherwise offer 2-3 concrete,
+      // tappable options derived from the tenant's domain. Never claim
+      // something is "paused" when nothing is pending.
+      const reply = noMatchFallback({
+        tenant,
+        state,
+        language: state.language,
+        workflow: state.workflow?.current || null,
+      });
       return this.#finalize({ tenant, message, conversationId, customer, state, stateBefore, capabilityId:null, result:createCapabilityResult({handled:true,reply}), intelligence, logger, processStarted });
     }
 
@@ -521,6 +530,50 @@ function clarificationReply({text,language,tenant,workflow}){
   if(language==='roman_urdu')return `Main request poori tarah samajh nahi saka, is liye maine kuch change ya submit nahi kiya. ${name} ki service/product aur jo action chahiye woh saaf likh dein.${pending?' Aap ka current draft mehfooz hai.':''}`;
   return `I’m not fully sure which ${domain} request you mean, so I haven’t changed or submitted anything. Please name the service or product and the action you want.${continuation}`;
 }
+// H2a fix (Phase 1 item 1): the no-match fallback. Called when no capability
+// claimed the message. Unlike the old generic reply, this never claims a
+// request is "paused" when none is pending. Two honest branches:
+//   - pending workflow → re-prompt that slot (via resumePrompt) + remind the
+//     user the draft is safe;
+//   - no pending workflow → clarify with 2-3 concrete, tappable options
+//     derived from the tenant's domain, so the user always has a next step.
+function noMatchFallback({ tenant, state, language, workflow }) {
+  const name = tenant?.business?.name || tenant?.name || 'this business';
+  const domain = String(tenant?.domain || 'business').toLowerCase();
+  const humanDomainLabel = String(tenant?.domain || 'business').replace(/_/g, ' ');
+  const pending = workflow?.pendingField;
+  const directPrompt = resumePrompt(workflow, language);
+  if (pending && directPrompt) {
+    // Honest: there IS a pending draft, so say so + re-prompt the slot.
+    if (language === 'roman_urdu') return `Main aap ki baat poori tarah samajh nahi saka. Aap ka ${workflow.capabilityId || 'request'} draft mehfooz hai. ${directPrompt}`;
+    if (language === 'urdu') return `میں آپ کی بات پوری طرح نہیں سمجھ سکا۔ آپ کا ${workflow.capabilityId || 'طلب'} ڈرافٹ محفوظ ہے۔ ${directPrompt}`;
+    if (language === 'arabic') return `لم أفهم طلبك بالكامل. مسودة ${workflow.capabilityId || 'طلبك'} محفوظة. ${directPrompt}`;
+    return `I didn't quite catch that. Your ${workflow.capabilityId || 'request'} draft is still safe. ${directPrompt}`;
+  }
+  // No pending workflow → clarify with options. Never claim something is paused.
+  const opts = domainOptions(domain, language);
+  if (language === 'roman_urdu') return `Maaf kijiyega, main samajh nahi saka. ${name} ek ${humanDomainLabel} business hai. Aap yeh mein se koi ek chunein:\n\n${opts}`;
+  if (language === 'urdu') return `معذرت خواہ ہوں، میں سمجھ نہیں پایا۔ ${name} ایک ${humanDomainLabel} کاروبار ہے۔ براہ کرم ان میں سے کوئی ایک منتخب کریں:\n\n${opts}`;
+  if (language === 'arabic') return `عذرًا، لم أفهم. ${name} هو نشاط ${humanDomainLabel}. يرجى اختيار أحد الخيارات التالية:\n\n${opts}`;
+  return `I didn't quite catch that. ${name} is a ${humanDomainLabel} business — here are a few things I can help with right now:\n\n${opts}`;
+}
+// 2-3 concrete, tappable options per domain. Deterministic (no LLM). Used by
+// the no-match fallback so the user always has a specific next step.
+function domainOptions(domain, language) {
+  const lang = language === 'roman_urdu' ? 'roman_urdu' : language === 'urdu' ? 'urdu' : language === 'arabic' ? 'arabic' : 'en';
+  const byDomain = {
+    restaurant: { en: ['1️⃣ Show me the menu', '2️⃣ I want to place an order', '3️⃣ What are your timings?'], roman_urdu: ['1️⃣ Menu dikhao', '2️⃣ Order karna hai', '3️⃣ Timings kya hain?'], urdu: ['1️⃣ مینو دکھائیں', '2️⃣ آرڈر کرنا ہے', '3️⃣ اوقات کیا ہیں؟'], arabic: ['1️⃣ اعرض القائمة', '2️⃣ أريد الطلب', '3️⃣ ما هي المواعيد؟'] },
+    retail: { en: ['1️⃣ Show me your products', '2️⃣ Add an item to my cart', '3️⃣ What are your delivery options?'], roman_urdu: ['1️⃣ Products dikhao', '2️⃣ Cart mein item add karo', '3️⃣ Delivery options kya hain?'], urdu: ['1️⃣ مصنوعات دکھائیں', '2️⃣ کارٹ میں شامل کریں', '3️⃣ ڈیلیوری کے آپشنز کیا ہیں؟'], arabic: ['1️⃣ اعرض المنتجات', '2️⃣ أضف عنصرًا للسلة', '3️⃣ خيارات التوصيل؟'] },
+    grocery: { en: ['1️⃣ Show me available groceries', '2️⃣ Add items to my cart', '3️⃣ What are your delivery areas?'], roman_urdu: ['1️⃣ Groceries dikhao', '2️⃣ Cart mein items add karo', '3️⃣ Delivery areas kya hain?'], urdu: ['1️⃣ کریزی دکھائیں', '2️⃣ کارٹ میں شامل کریں', '3️⃣ ڈیلیوری علاقے کیا ہیں؟'], arabic: ['1️⃣ اعرض البقالة', '2️⃣ أضف للسلة', '3️⃣ مناطق التوصيل؟'] },
+    cleaning: { en: ['1️⃣ Get a cleaning quote', '2️⃣ Book a cleaning', '3️⃣ What services do you offer?'], roman_urdu: ['1️⃣ Cleaning quote lo', '2️⃣ Cleaning book karo', '3️⃣ Konsi services hain?'], urdu: ['1️⃣ کلیننگ کوٹ لیں', '2️⃣ کلیننگ بک کریں', '3️⃣ کونسی سروسز ہیں؟'], arabic: ['1️⃣ احصل على عرض أسعار', '2️⃣ احجز تنظيف', '3️⃣ ما هي الخدمات؟'] },
+    salon: { en: ['1️⃣ Book an appointment', '2️⃣ Show available services', '3️⃣ What are your prices?'], roman_urdu: ['1️⃣ Appointment book karo', '2️⃣ Services dikhao', '3️⃣ Prices kya hain?'], urdu: ['1️⃣ اپوائنٹمنٹ بک کریں', '2️⃣ سروسز دکھائیں', '3️⃣ قیمت کیا ہے؟'], arabic: ['1️⃣ احجز موعدًا', '2️⃣ اعرض الخدمات', '3️⃣ ما هي الأسعار؟'] },
+    real_estate: { en: ['1️⃣ Show available properties', '2️⃣ Book a viewing', '3️⃣ Get a valuation'], roman_urdu: ['1️⃣ Properties dikhao', '2️⃣ Viewing book karo', '3️⃣ Valuation lo'], urdu: ['1️⃣ پراپرٹیز دکھائیں', '2️⃣ ویونگ بک کریں', '3️⃣ ویلیویشن لیں'], arabic: ['1️⃣ اعرض العقارات', '2️⃣ احجز معاينة', '3️⃣ احصل على تقييم'] },
+    healthcare: { en: ['1️⃣ Book an appointment', '2️⃣ See available services', '3️⃣ Ask about timings'], roman_urdu: ['1️⃣ Appointment book karo', '2️⃣ Services dekho', '3️⃣ Timings poocho'], urdu: ['1️⃣ اپوائنٹمنٹ بک کریں', '2️⃣ سروسز دیکھیں', '3️⃣ اوقات پوچھیں'], arabic: ['1️⃣ احجز موعدًا', '2️⃣ اعرض الخدمات', '3️⃣ اسأل عن المواعيد'] },
+    education: { en: ['1️⃣ See available programs', '2️⃣ Admission enquiry', '3️⃣ Ask about fees'], roman_urdu: ['1️⃣ Programs dekho', '2️⃣ Admission enquiry', '3️⃣ Fees poocho'], urdu: ['1️⃣ پروگرام دیکھیں', '2️⃣ ایڈمیشن انکوائری', '3️⃣ فیس پوچھیں'], arabic: ['1️⃣ اعرض البرامج', '2️⃣ استفسار القبول', '3️⃣ اسأل عن الرسوم'] },
+  };
+  const opts = (byDomain[domain] || byDomain.retail)[lang];
+  return opts.join('\n');
+}
 function friendlyField(value){return String(value||'the next detail').replace(/([A-Z])/g,' $1').replace(/_/g,' ').toLowerCase();}
 function resumePrompt(workflow, language) {
   const field = workflow?.pendingField==='confirm'?'confirmation':workflow?.pendingField;
@@ -599,4 +652,4 @@ function isTransientError(error) {
   return false;
 }
 
-module.exports = { ExecutionEngine, isTransientError };
+module.exports = { ExecutionEngine, isTransientError, noMatchFallback, domainOptions };

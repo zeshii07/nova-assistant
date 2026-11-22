@@ -38,6 +38,18 @@ const INTERNAL_INSTRUCTION_PATTERNS = [
   /ignore\s+(previous|prior|all)\s+instructions/i
 ];
 
+// H8 defense-in-depth (Phase 1 item 2): patterns that betray an INTERNAL
+// configuration field leaked into a retrieved chunk. The primary fix is at the
+// indexing chokepoint (normalizeJson tags messagingRules/prompts/persona/etc.
+// as internal_instruction + customerSafe:false so they never enter the index),
+// but a second gate here ensures a leaked chunk can still never reach a
+// visitor. Matches both the dotted-path prefix ("messagingRules[6]: ...") and
+// bare config field names at a line start.
+const INTERNAL_CONFIG_LEAK_PATTERNS = [
+  /^\s*(messagingRules|prompts?|persona|instructions|systemPrompt|system_prompt|internalNotes|internal_notes|testerNotes|tester_notes|agentNotes|agent_notes|debugInfo|debug_info|policies|policy)\b\s*(\[|\]|\.|:)?\s*[0-9]*\s*:?\s+/i,
+  /\bmessagingRules\[\d+\]\s*:/i,
+];
+
 // §20.12 — redact any of these from a public reply, even if they slipped through.
 const SECRET_REDACT_PATTERNS = [
   { id: "api_key_like", pattern: /\b(sk-[a-zA-Z0-9]{16,}|AKIA[0-9A-Z]{16}|[a-zA-Z0-9_-]{32,})\b/g, replacement: "[REDACTED]" },
@@ -94,6 +106,14 @@ class PublicAssistantPolicy {
       for (const p of INTERNAL_INSTRUCTION_PATTERNS) {
         if (p.test(line)) { isInternal = true; flagged = true; break; }
       }
+      // H8 defense-in-depth: strip any line that carries an internal-config
+      // field prefix (messagingRules[N]: ..., persona:, etc.) even if it
+      // slipped past the indexing chokepoint.
+      if (!isInternal) {
+        for (const p of INTERNAL_CONFIG_LEAK_PATTERNS) {
+          if (p.test(line)) { isInternal = true; flagged = true; this.logger?.warn?.("public_assistant.config_leak_blocked", { line: line.slice(0, 80) }); break; }
+        }
+      }
       if (!isInternal) kept.push(line);
     }
     let cleaned = kept.join("\n").trim();
@@ -106,9 +126,16 @@ class PublicAssistantPolicy {
 
   /**
    * §20.12 — redact secrets from a final reply before it is sent to the visitor.
+   * Also strips any internal-config-leak lines that slipped through (H8 defense
+   * in depth).
    */
   redactReply(text) {
     let cleaned = String(text || "");
+    // H8: strip lines carrying an internal-config field prefix.
+    cleaned = cleaned.split(/\n+/).filter((line) => {
+      for (const p of INTERNAL_CONFIG_LEAK_PATTERNS) if (p.test(line)) return false;
+      return true;
+    }).join("\n").trim();
     for (const r of SECRET_REDACT_PATTERNS) {
       cleaned = cleaned.replace(r.pattern, r.replacement);
     }
@@ -131,4 +158,4 @@ class PublicAssistantPolicy {
   }
 }
 
-module.exports = { PublicAssistantPolicy, REFUSE_PATTERNS, INTERNAL_INSTRUCTION_PATTERNS, SECRET_REDACT_PATTERNS };
+module.exports = { PublicAssistantPolicy, REFUSE_PATTERNS, INTERNAL_INSTRUCTION_PATTERNS, INTERNAL_CONFIG_LEAK_PATTERNS, SECRET_REDACT_PATTERNS };

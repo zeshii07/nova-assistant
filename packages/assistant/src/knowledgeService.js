@@ -1,6 +1,15 @@
 /**
  * Provides safe answers from tenant-approved profile and knowledge data only.
  */
+// H2b (Phase 1 item 2): the absolute minimum hybrid score a chunk must clear
+// to be ANSWERED with. Below this, retrieve() returns answerable:false so the
+// caller abstains (clarify/escalate) instead of emitting a barely-related
+// snippet. Tuned from the bug report: junk matches scored 0.19–0.44, real
+// answers score 0.50+. 0.40 keeps strong lexical/semantic matches while
+// dropping the noise. Callers may pass a higher minScore per-query; they cannot
+// go below this floor.
+const ANSWER_CONFIDENCE_FLOOR_DEFAULT = 0.40;
+
 class KnowledgeService {
   constructor({ knowledgeRepository, controlPlaneRepository = null }) {
     this.knowledgeRepository = knowledgeRepository;
@@ -68,7 +77,18 @@ class KnowledgeService {
     matches=this.applyAuthority(query,matches);
     const conflict=this.detectConflict(query,matches);
     const best=matches[0],second=matches[1];
-    const strong=Boolean(best&&best.hybridScore>=minScore&&(best.semanticScore>=minSemantic||best.lexicalScore>=.22));
+    // H2b fix (Phase 1 item 2): an ABSOLUTE confidence floor. The old threshold
+    // (minScore=0.16 + lexicalScore>=0.22 OR semanticScore>=0.12) let through
+    // near-random chunks for low-relevance queries — e.g. "kab khulte ho"
+    // (when do you open) → "categories[2]: workflow automation" at 0.242,
+    // "tell me a joke" → "pricing.note" at 0.214, "2" → "categories[2]" at
+    // 0.384, "lol" → leaked messagingRules at 0.328. A hybrid score below this
+    // floor is not relevant enough to ANSWER with: the caller must abstain
+    // (clarify/escalate) rather than emit a barely-related snippet. The floor
+    // does NOT suppress evidence — matches[] still carries the chunks for
+    // logging/escalation; only `answerable` is gated.
+    const ANSWER_CONFIDENCE_FLOOR = Math.max(minScore, ANSWER_CONFIDENCE_FLOOR_DEFAULT);
+    const strong=Boolean(best && best.hybridScore>=ANSWER_CONFIDENCE_FLOOR && (best.semanticScore>=minSemantic||best.lexicalScore>=.22));
     const margin=completeMatches.length>0 || !second || (best.hybridScore-second.hybridScore)>=minMargin || best.hybridScore>=0.52;
     const complete=Boolean(best&&this.evidenceComplete(query,best));
     return {query,expandedQuery,matches,answerable:strong&&margin&&complete&&!conflict,confidence:best?.hybridScore||0,
@@ -391,7 +411,7 @@ function extractTimingRule(value,hours,kind){
   return cleanPolicyRule(compact.match(fallback)?.[0]||'');
 }
 function cleanPolicyRule(value){return String(value||'').replace(/^\s*•\s*/,'').replace(/\s+/g,' ').trim();}
-module.exports = { KnowledgeService };
+module.exports = { KnowledgeService, ANSWER_CONFIDENCE_FLOOR_DEFAULT };
 function displaySchedule(schedule){
   const days=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
   return days.map(day=>{const intervals=schedule?.[day];if(!Array.isArray(intervals)||!intervals.length)return `${title(day)}: Closed`;return `${title(day)}: ${intervals.map(row=>`${clock(row.open)}-${clock(row.close)}`).join(', ')}`;}).join('; ');

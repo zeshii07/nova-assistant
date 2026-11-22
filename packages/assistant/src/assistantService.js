@@ -157,11 +157,69 @@ class AssistantService {
 
   friendlyFallback(context,language){
     const tenant=context.tenant||{},name=tenant.business?.name||tenant.name||'This business',domain=String(tenant.domain||'business').toLowerCase();
-    if(language==='roman_urdu')return `Main aap ki baat poori tarah samajh nahi saka, lekin aap ka request yahin paused hai. ${name} ke ${humanDomain(domain)} products, services, timings, contact details, prices, booking ya order ke bare mein thori tafseel se batayein, phir main sahi jagah se help karunga.`;
-    if(language==='urdu')return `میں آپ کی بات پوری طرح نہیں سمجھ سکا، لیکن آپ کی موجودہ درخواست محفوظ ہے۔ ${name} کے متعلق مطلوبہ سروس، پروڈکٹ، قیمت، بکنگ یا تبدیلی ذرا واضح کر دیں۔`;
-    if(language==='arabic')return `لم أفهم طلبك بالكامل، لكن طلبك الحالي ما زال محفوظًا. يرجى توضيح الخدمة أو المنتج أو السعر أو الحجز أو التغيير المطلوب لدى ${name}.`;
-    const examples={retail:'a product name, the type of item you want, or what you want to add, remove, or change in your order',grocery:'the fruit or grocery item, quantity, or the cart change you want',cleaning:'the cleaning service, property details, preferred date/time, or the booking change you want',real_estate:'the property reference, area, budget, or viewing/valuation request',healthcare:'the clinic service or appointment information you need',education:'the program, grade, class, or admission information you need'};
-    return `I may be missing part of what you mean, but I’ve kept your current request safely paused. ${name} is a ${humanDomain(domain)} business; please tell me ${examples[domain]||'which business service, product, information, or request you mean'}, and I’ll respond using this tenant’s configured information.`;
+    // H2a fix (Phase 1 item 1): the old fallback unconditionally said
+    // "I've kept your current request safely paused" even when NOTHING was
+    // pending — a false claim. Distinguish the two cases honestly:
+    //   - pending workflow → re-prompt the slot the user was stuck on
+    //   - no pending workflow → clarify-with-options (2-3 concrete, tappable
+    //     options derived from the tenant's domain), never claim something is
+    //     "paused" when it isn't.
+    const pending=this.#pendingSlotLabel(context);
+    if(language==='roman_urdu'){
+      if(pending) return `Main aap ki baat poori tarah samajh nahi saka. Aap pichli ${pending.flow} ke liye ${pending.slot} bhej dein, phir main aage badhta hoon. ${name} ki ${humanDomain(domain)} services ke baare mein aap yeh bhi pooch sakte hain: ${pending.options}.`;
+      return `Maaf kijiyega, main samajh nahi saka. ${name} ek ${humanDomain(domain)} business hai. Aap yeh mein se koi ek chunein: ${this.#domainOptions(domain,'roman_urdu')}.`;
+    }
+    if(language==='urdu'){
+      if(pending) return `میں آپ کی بات پوری طرح نہیں سمجھ سکا۔ براہ کرم اپنی ${pending.flow} کے لیے ${pending.slot} بھیجیں تاکہ میں آگے بڑھ سکوں۔ ${name} کی ${humanDomain(domain)} سروسز کے بارے میں آپ یہ بھی پوچھ سکتے ہیں: ${pending.options}۔`;
+      return `معذرت خواہ ہوں، میں سمجھ نہیں پایا۔ ${name} ایک ${humanDomain(domain)} کاروبار ہے۔ براہ کرم ان میں سے کوئی ایک منتخب کریں: ${this.#domainOptions(domain,'urdu')}۔`;
+    }
+    if(language==='arabic'){
+      if(pending) return `لم أفهم طلبك بالكامل. يرجى إرسال ${pending.slot} لإكمال ${pending.flow}. يمكنك أيضًا السؤال عن خدمات ${name}: ${pending.options}.`;
+      return `عذرًا، لم أفهم. ${name} هو نشاط ${humanDomain(domain)}. يرجى اختيار أحد الخيارات التالية: ${this.#domainOptions(domain,'arabic')}.`;
+    }
+    // English (default)
+    if(pending) return `I didn't quite catch that. To continue your ${pending.flow}, please send the ${pending.slot}. You can also ask about ${name}'s services: ${pending.options}.`;
+    const examples={retail:'a product name, the item you want to add or change, or a question about prices or delivery',grocery:'the fruit or grocery item and quantity, or the cart change you want',cleaning:'the cleaning service, your address, or a preferred date/time',real_estate:'the property reference, area, or budget you have in mind',healthcare:'the clinic service or appointment information you need',education:'the program, grade, or admission information you need'};
+    return `I didn't quite catch that. ${name} is a ${humanDomain(domain)} business — here are a few things I can help with right now:\n\n${this.#domainOptions(domain,'english')}\n\nOr just tell me ${examples[domain]||'what you need'} and I'll take it from there.`;
+  }
+
+  // Map a pending workflow + pendingField to a human slot label + flow name +
+  // a short list of other things the user could ask about. Returns null when
+  // there is no active workflow (the "nothing paused" case).
+  #pendingSlotLabel(context){
+    const wf=context?.state?.workflow?.current;
+    if(!wf||!wf.pendingField) return null;
+    const slotLabels={
+      date:'preferred date',time:'preferred time',name:'full name',phone:'phone number',
+      address:'service address',confirmation:'confirmation (yes/no)',subject:'subject',
+      duration:'duration',bedrooms:'number of bedrooms',confirm:'confirmation (yes/no)',
+      reschedule_time:'new date/time',recurring_days:'recurring days',
+      recurring_service:'service choice',multi_service_clarify:'service choice',
+    };
+    const flowNames={booking:'booking',commerce:'order',cleaning:'cleaning request',catalog:'catalog request',offering:'service selection'};
+    const slot=slotLabels[wf.pendingField]||wf.pendingField.replace(/_/g,' ');
+    const flow=flowNames[wf.capabilityId]||wf.capabilityId||'request';
+    const options=this.#domainOptions(String(context.tenant?.domain||'business').toLowerCase(),'english');
+    return {slot,flow,options};
+  }
+
+  // 2-3 concrete, tappable options derived from the tenant's domain. Used by
+  // the clarify-with-options fallback so the user always has a specific next
+  // step, never just a generic apology.
+  #domainOptions(domain,language){
+    const byDomain={
+      restaurant:{en:['1️⃣ Show me the menu','2️⃣ I want to place an order','3️⃣ What are your timings?'],roman_urdu:['1️⃣ Menu dikhao','2️⃣ Order karna hai','3️⃣ Timings kya hain?'],urdu:['1️⃣ مینو دکھائیں','2️⃣ آرڈر کرنا ہے','3️⃣ اوقات کیا ہیں؟'],arabic:['1️⃣ اعرض القائمة','2️⃣ أريد الطلب','3️⃣ ما هي المواعيد؟']},
+      retail:{en:['1️⃣ Show me your products','2️⃣ Add an item to my cart','3️⃣ What are your delivery options?'],roman_urdu:['1️⃣ Products dikhao','2️⃣ Cart mein item add karo','3️⃣ Delivery options kya hain?'],urdu:['1️⃣ مصنوعات دکھائیں','2️⃣ کارٹ میں شامل کریں','3️⃣ ڈیلیوری کے آپشنز کیا ہیں؟'],arabic:['1️⃣ اعرض المنتجات','2️⃣ أضف عنصرًا للسلة','3️⃣ خيارات التوصيل؟']},
+      grocery:{en:['1️⃣ Show me available groceries','2️⃣ Add items to my cart','3️⃣ What are your delivery areas?'],roman_urdu:['1️⃣ Groceries dikhao','2️⃣ Cart mein items add karo','3️⃣ Delivery areas kya hain?'],urdu:['1️⃣ کریزی دکھائیں','2️⃣ کارٹ میں شامل کریں','3️⃣ ڈیلیوری علاقے کیا ہیں؟'],arabic:['1️⃣ اعرض البقالة','2️⃣ أضف للسلة','3️⃣ مناطق التوصيل؟']},
+      cleaning:{en:['1️⃣ Get a cleaning quote','2️⃣ Book a cleaning','3️⃣ What services do you offer?'],roman_urdu:['1️⃣ Cleaning quote lo','2️⃣ Cleaning book karo','3️⃣ Konsi services hain?'],urdu:['1️⃣ کلیننگ کوٹ لیں','2️⃣ کلیننگ بک کریں','3️⃣ کونسی سروسز ہیں؟'],arabic:['1️⃣ احصل على عرض أسعار','2️⃣ احجز تنظيف','3️⃣ ما هي الخدمات؟']},
+      salon:{en:['1️⃣ Book an appointment','2️⃣ Show available services','3️⃣ What are your prices?'],roman_urdu:['1️⃣ Appointment book karo','2️⃣ Services dikhao','3️⃣ Prices kya hain?'],urdu:['1️⃣ اپوائنٹمنٹ بک کریں','2️⃣ سروسز دکھائیں','3️⃣ قیمت کیا ہے؟'],arabic:['1️⃣ احجز موعدًا','2️⃣ اعرض الخدمات','3️⃣ ما هي الأسعار؟']},
+      real_estate:{en:['1️⃣ Show available properties','2️⃣ Book a viewing','3️⃣ Get a valuation'],roman_urdu:['1️⃣ Properties dikhao','2️⃣ Viewing book karo','3️⃣ Valuation lo'],urdu:['1️⃣ پراپرٹیز دکھائیں','2️⃣ ویونگ بک کریں','3️⃣ ویلیویشن لیں'],arabic:['1️⃣ اعرض العقارات','2️⃣ احجز معاينة','3️⃣ احصل على تقييم']},
+      healthcare:{en:['1️⃣ Book an appointment','2️⃣ See available services','3️⃣ Ask about timings'],roman_urdu:['1️⃣ Appointment book karo','2️⃣ Services dekho','3️⃣ Timings poocho'],urdu:['1️⃣ اپوائنٹمنٹ بک کریں','2️⃣ سروسز دیکھیں','3️⃣ اوقات پوچھیں'],arabic:['1️⃣ احجز موعدًا','2️⃣ اعرض الخدمات','3️⃣ اسأل عن المواعيد']},
+      education:{en:['1️⃣ See available programs','2️⃣ Admission enquiry','3️⃣ Ask about fees'],roman_urdu:['1️⃣ Programs dekho','2️⃣ Admission enquiry','3️⃣ Fees poocho'],urdu:['1️⃣ پروگرام دیکھیں','2️⃣ ایڈمیشن انکوائری','3️⃣ فیس پوچھیں'],arabic:['1️⃣ اعرض البرامج','2️⃣ استفسار القبول','3️⃣ اسأل عن الرسوم']},
+    };
+    const lang=language==='roman_urdu'?'roman_urdu':language==='urdu'?'urdu':language==='arabic'?'arabic':'en';
+    const opts=(byDomain[domain]||byDomain.retail)[lang];
+    return opts.join('\n');
   }
 
   async structuredInformation(context) {

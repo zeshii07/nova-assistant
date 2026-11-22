@@ -4,6 +4,21 @@ class PricingConversationAdapter{
  async analyze({tenant,message,services}){
   if(!tenant.capabilities?.includes('pricing'))return {priority:this.priority,candidates:[],entities:{},vocabularyMatches:[]};
   if(tenant.capabilities?.includes('cleaning'))return {priority:this.priority,candidates:[],entities:{},vocabularyMatches:[]};
+  // Bug 6a fix (Phase 1 item 6): when the tenant has a catalog (e.g. a
+  // restaurant with a food menu) AND the visitor's price question matches a
+  // catalog PRODUCT, defer to the catalog capability — a product price
+  // ("what is the price of biryani?") should be answered from the catalog,
+  // not routed to the service-quote flow (which pushes "would you like to
+  // book it?"). The service-quote flow is for SERVICE pricing ("how much does
+  // a haircut cost?"), where the tenant has offerings but no retail catalog.
+  // We only bail when a product actually matches; if no product matches, the
+  // service-quote path remains the right fallback.
+  if(tenant.capabilities?.includes('catalog') && services?.catalogService){
+    try{
+      const cat=await services.catalogService.search(tenant.id,message.text);
+      if(cat&&cat.product)return {priority:this.priority,candidates:[],entities:{},vocabularyMatches:[]};
+    }catch(_){/* catalog lookup is best-effort; never block pricing on it */}
+  }
   const text=normalizeText(message.text), entities=extract(text);
   const discount=/\b(discount|special offer|best price|reduce|cheaper|kam kar|riayat|رعایت)\b/.test(text);
   const quote=/\b(quote|quotation|estimate|price|cost|how much|charges?|rate|kitna|kitne|kitni|qeemat|قیمت)\b/.test(text);

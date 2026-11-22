@@ -30,7 +30,14 @@ class BookingCapability extends BaseCapability {
     
     const extracted = context.intelligence?.entities || context.intelligence?.selected?.entities || {};
     const selected = context.intelligence?.selected || {};
-    const language = context.state?.language || context.language || "english";
+    // Bug 7 fix (Phase 1 item 7): detect language from the CURRENT message
+    // (with prior state as fallback for empty/uncertain messages), instead of
+    // always inheriting the prior turn's stored language. A visitor who
+    // switches language mid-conversation now gets the reply in the current
+    // message's language. Uses the canonical detectLanguage helper shared
+    // with ExperienceLanguageEngine.
+    const { detectLanguage } = require("../../../packages/conversation-intelligence/src/text");
+    const language = detectLanguage(context.message?.text, context.state?.language || context.language) || "english";
     const tenant = context.tenant;
     const tenantDomain = tenant?.domain || 'universal';
 
@@ -804,6 +811,40 @@ class BookingCapability extends BaseCapability {
       config.defaultSubject &&
       (selected.intent || "").startsWith("booking.")
     ) {
+      // Bug 5 fix (Phase 1 item 5): before silently substituting the
+      // configured defaultSubject (e.g. "Room Reservation") for a visitor
+      // request that named a DIFFERENT, non-existent service ("can i book a
+      // conference room?" / "do you do spa treatments?"), check whether the
+      // visitor explicitly named a service we don't offer. If they did,
+      // emit a clean booking.unavailable_request reply (mirroring the
+      // offering/catalog unavailable outcomes) instead of swallowing the
+      // phrase into a booking. The defaultSubject fallback is still kept for
+      // GENUINE generic booking intents ("book a room", "i want to reserve")
+      // where the visitor did not name a specific unrecognised service.
+      const messageText = String(context.message?.text || "");
+      const requested = detectExplicitServiceRequest(messageText, config);
+      if (requested) {
+        const items = typeof offering.list === "function" ? (offering.list(tenant.id) || []) : [];
+        const names = items.map((x) => x.name).filter(Boolean).join(", ");
+        const lang = language;
+        const reply = lang === "roman_urdu"
+          ? `Maazrat 😊 "${requested}" hamari configured offerings mein available nahi hai${names ? `. Available options: ${names}` : ""}.`
+          : `Sorry 😊 I don't see "${requested}" in this business's configured offerings${names ? `. Available options: ${names}` : ""}.`;
+        return createCapabilityResult({
+          handled: true,
+          reply,
+          responseModel: {
+            intent: "BOOKING_UNAVAILABLE_REQUEST",
+            payload: { legacyText: reply, requested, availableNames: items.map((x) => x.name) },
+          },
+          statePatch: {
+            activePlugin: "booking",
+            lastIntent: "booking_unavailable_request",
+            capabilityState: { booking: stateShape(flow, previous.bookingId || null) },
+          },
+          events: [{ name: "booking.unavailable_request.v1", payload: { requested } }],
+        });
+      }
       flow = engagement.addItem(
         flow,
         {
@@ -876,13 +917,20 @@ class BookingCapability extends BaseCapability {
           context.message.text,
           fieldOptions(pending, config),
         );
-        if (!parsed.valid)
+        if (!parsed.valid) {
+          // H4a fix: name the bad clock token when the visitor typed an
+          // impossible time (e.g. "25:90") — extract() carried the reason
+          // through from the temporal extractor.
+          const clockHint = (pending === "time" && extracted?.invalidClockText)
+            ? `“${extracted.invalidClockText}” isn’t a valid time${extracted.invalidClockReason ? ` — ${extracted.invalidClockReason}` : ""}. `
+            : "";
           return collectingResult(
             config,
             flow,
             pending,
-            `${parsed.message}\n${engagement.prompt(pending, config, context.language)}`,
+            `${clockHint}${parsed.message}\n${engagement.prompt(pending, config, context.language)}`,
           );
+        }
         flow.fields[pending] = parsed.value;
       }
     }
@@ -1020,6 +1068,14 @@ class BookingCapability extends BaseCapability {
     let basePrompt = engagement.prompt(missing, config, context.language);
     if (missing === "time" && flow.metadata.timeWindow)
       basePrompt = `You chose the ${flow.metadata.timeWindow}; please give an exact time. ${basePrompt}`;
+    // H4a fix (Phase 1 item 4): when the visitor typed an impossible clock
+    // (e.g. "25:90", "13:99"), name the bad token in the re-ask instead of a
+    // generic "please enter a valid time". The temporal extractor flagged it;
+    // extract() carried invalidClockText/invalidClockReason through. Without
+    // this, the visitor has no idea WHY their time was rejected.
+    if (missing === "time" && extracted?.invalidClockText) {
+      basePrompt = `“${extracted.invalidClockText}” isn’t a valid time${extracted.invalidClockReason ? ` — ${extracted.invalidClockReason}` : ""}. ${basePrompt}`;
+    }
     const selectedIntro = addedNames.length
       ? `${addedNames.join(", ")} selected 👍\n`
       : "";
@@ -1508,6 +1564,68 @@ function slug(v) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
+}
+// Bug 5 fix (Phase 1 item 5): detect when a visitor EXPLICITLY named a
+// specific service that the business does not offer, so the booking executor
+// can emit booking.unavailable_request instead of silently substituting the
+// configured defaultSubject. Returns the requested noun phrase (string) when
+// the message contains a service-request cue + a noun that is NOT the
+// defaultSubject itself; returns null for genuine generic booking intents
+// ("book a room", "i want to reserve") where defaultSubject substitution is
+// the intended behaviour.
+//
+// Design: only fire on REQUEST cues that name a service DIRECTLY
+// ("do you have X", "do you do X", "can i get X", "i want X", "i need X")
+// where X is a SPECIFIC service noun (not a generic booking noun like
+// "room"/"table"/"reservation"). Cues like "book a room" / "reserve a table"
+// are generic booking actions and are excluded by requiring the cue NOT be a
+// pure booking verb followed by a generic noun — those fall through to the
+// defaultSubject substitution below.
+function detectExplicitServiceRequest(text, config) {
+  const t = String(text || "").trim();
+  if (!t) return null;
+  const defaultSubject = String(config?.defaultSubject || "").toLowerCase().trim();
+
+  // Generic booking nouns that ARE the defaultSubject intent — never treat
+  // these as an explicit unrecognised service.
+  const genericNouns = new Set([
+    "room", "table", "reservation", "appointment", "booking", "stay",
+    "accommodation", "seat", "slot", "service", "cleaner", "cleaning",
+  ]);
+
+  // Request cues where the visitor names a service they want/ask about.
+  // Each pattern captures the noun phrase that follows. Order matters: the
+  // "do you" family is checked first (highest signal), then "i want/need",
+  // then "can i get/have".
+  const cues = [
+    // "do you have/do/offer/provide X" — strongest signal of a lookup.
+    /\b(?:do you|does (?:this|your))\s+(?:have|do|offer|provide|carry|serve)\s+(?:a|an|the)?\s*([a-z][a-z\s'-]{1,40}?)(?=[?.!]|$|\s+(?:please|today|tomorrow)\b)/i,
+    // "can i get/have/book X" — request for a specific thing. "can i book X"
+    // is included because "book" here is part of a QUESTION ("can i..."),
+    // not a generic booking action like "book a room".
+    /\bcan i\s+(?:get|have|book|reserve)\s+(?:a|an|the)?\s*([a-z][a-z\s'-]{1,40}?)(?=[?.!]|$|\s+(?:please|today|tomorrow)\b)/i,
+    // "i want/need X" — but NOT "i want to book/reserve X" (generic action).
+    /\bi\s+(?:want|need|would like)\s+(?!to (?:book|reserve|schedule|arrange))([a-z][a-z\s'-]{1,40}?)(?=[?.!]|$|\s+(?:please|today|tomorrow|for|on|at)\b)/i,
+  ];
+
+  for (const re of cues) {
+    const m = t.match(re);
+    if (!m) continue;
+    let noun = m[1].trim().toLowerCase();
+    // Trim trailing filler.
+    noun = noun.replace(/\s+(please|today|tomorrow)$/i, "").trim();
+    if (!noun) continue;
+    // Skip generic booking nouns (room/table/reservation/...).
+    if (genericNouns.has(noun)) continue;
+    // Skip if the noun IS the defaultSubject (generic booking path).
+    if (defaultSubject && (noun === defaultSubject || defaultSubject.includes(noun) || noun.includes(defaultSubject))) continue;
+    // Skip single-word nouns that are common verbs/adjectives, not services.
+    // (Reduce false positives like "i want help" → "help".)
+    if (!noun.includes(" ") && /^(help|advice|information|details|support|service|quote|price)$/i.test(noun)) continue;
+    // Return the original-cased phrase for a natural reply.
+    return m[1].trim().replace(/\s+(please|today|tomorrow)$/i, "").trim();
+  }
+  return null;
 }
 function validateBookingSchedule(context, flow) {
   if (!flow.fields.date) return null;
