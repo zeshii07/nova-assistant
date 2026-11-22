@@ -63,17 +63,36 @@ class MemoryStateRepository {
   /**
    * v35.3: Acquire a sequential lock for a conversation. Releases
    * automatically after the callback completes.
+   *
+   * C1 fix: the previous implementation could leak the lock and freeze the
+   * whole process. It ran `const promise = (async()=>{...})()` first — which,
+   * when `fn()` threw synchronously, executed the `finally { delete }` BEFORE
+   * `this._locks.set(id, promise)` ran on the next line. The stored promise
+   * was already resolved and the entry was never deleted, so the next caller's
+   * `while (this._locks.has(id)) await this._locks.get(id)` spun on microtasks
+   * forever, starving the event loop (even setTimeout never fired).
+   *
+   * The correct shape is a promise-chain mutex: chain this holder's gate onto
+   * the previous holder's tail, install the tail BEFORE invoking fn (so the
+   * lock always exists while fn runs), and release via the gate's resolver in
+   * a finally that is guaranteed to run exactly once. Synchronous throws from
+   * fn are now safe (await re-throws them through the tail).
    */
   async withLock(conversationId, fn) {
-    while (this._locks.has(conversationId)) {
-      await this._locks.get(conversationId);
+    const prev = this._locks.get(conversationId) || Promise.resolve();
+    let release;
+    const gate = new Promise((resolve) => { release = resolve; });
+    const tail = prev.then(() => gate);
+    this._locks.set(conversationId, tail);
+    await prev;
+    try {
+      return await fn();
+    } finally {
+      release();
+      if (this._locks.get(conversationId) === tail) {
+        this._locks.delete(conversationId);
+      }
     }
-    const promise = (async () => {
-      try { return await fn(); }
-      finally { this._locks.delete(conversationId); }
-    })();
-    this._locks.set(conversationId, promise.catch(() => {}));
-    return promise;
   }
 
   async get(conversationId) {

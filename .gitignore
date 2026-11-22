@@ -5,3 +5,7 @@ node_modules/
 .nova-data/
 .model-cache/
 models/**/*.safetensors
+
+# C3: Nova runtime data dirs — never track customer PII / runtime state
+.nova-feedback/
+.nova-notifications/

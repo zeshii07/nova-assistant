@@ -449,7 +449,15 @@ class CleaningConversationAdapter {
       // ANY follow-up that mentions property scope (bedrooms, apartment,
       // villa, etc.) belongs to the cleaning capability — even without the
       // word "cleaning" — so the quote can be completed.
-      || (Boolean(previous.priceEnquiry?.serviceId) && /\b(?:bedrooms?|bed|bhk|bdrooms?|bd|bdrm|apartment|flat|studio|villa|house|home)\b/.test(normalizedText));
+      || (Boolean(previous.priceEnquiry?.serviceId) && /\b(?:bedrooms?|bed|bhk|bdrooms?|bd|bdrm|apartment|flat|studio|villa|house|home)\b/.test(normalizedText))
+      // v42.2 bugfix: the same applies to furniture services (sofa/carpet/
+      // mattress/curtains). After "sofa cleaning" → "tell me the seating
+      // size", the user replies "5 seater" or "3 metre" — which has no
+      // cleaning keyword, so without this it fell through to the generic
+      // assistant and the scope was lost. Continue the priceEnquiry when a
+      // seater/seat/size/metre mention follows a furniture quote.
+      || (Boolean(previous.priceEnquiry?.serviceId) && /\b(?:seater|seaters|seat|seats|metre|metres|meter|meters|size|small|medium|large|king|queen|single|\d+\s*m\b)/.test(normalizedText)
+            && /sofa|carpet|rug|mattress|curtain|couch|upholstery/i.test(previous.priceEnquiry.serviceName||previous.priceEnquiry.serviceId||''));
     const structuredQuote=priceFollowUp || discountRequested || /\b(quote|quotation|estimate|price|prices|cost|costs|charges?|how much|kitna|kitne|kitni|kitny|kitnay)\b|(?:قیمت|چارجز|کتنے|قیمتیں)/.test(normalizedText);
     const propertyServiceQuestion=!step&&!structuredRequest&&!structuredQuote&&!resolveCleaningType(normalizedText)&&propertyContext&&cleaningDomain
       && /\b(?:do you|can you|could you|would you|is there|have you got)\b[\s\S]{0,45}\b(?:provide|offer|do|have|clean|cleaning|service|available)\b/.test(normalizedText);
@@ -484,6 +492,13 @@ class CleaningConversationAdapter {
     //   - "5 seater sofa" / "7 seater carpet" (sofa/carpet cleaning)
     //   - "actually 4 bedrooms instead of 3" (explicit quantity edit)
     //   - "make it a 7-seater carpet"
+    //
+    // v42.2 bugfix: When the mentioned scope field MATCHES the current pending
+    // step (e.g. user says "4 bedrooms" while step==='bedrooms'), the user is
+    // answering the pending question, not updating scope mid-flight. Treating
+    // it as scope_update kept step pinned to 'bedrooms' forever (the handler
+    // preserves previous.step and re-asks the same question). Route these to
+    // the normal workflow_input fallthrough so the step actually advances.
     const scopeMention=step && (
       /\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:rooms?|shops?|floors?|workspaces?)\b/.test(normalizedText) ||
       /\b(full|complete|entire|whole|ground)\s+floor\b/.test(normalizedText) ||
@@ -493,7 +508,16 @@ class CleaningConversationAdapter {
       /\b(?:change|update|make|actually)\b.*\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:bedrooms?|bed|bhk|seater|seat|sofa|carpet|rug|rooms?|floors?)\b/i.test(normalizedText) ||
       /\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:bedrooms?|bed|bhk|seater|seat|sofa|carpet|rug|rooms?|floors?)\s+(?:instead\s+of|rather\s+than|not)\b/i.test(normalizedText)
     );
-    if(scopeMention && !pricingRequested){
+    // v42.2: detect which scope field the message is supplying, so we can tell
+    // an answer-to-the-pending-question from a genuine mid-flight scope update.
+    const scopeBedroomMention=/\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:bedrooms?|bed|bhk|bdrooms?|bd|bdrm)\b/i.test(normalizedText);
+    const scopeUnitsMention=/\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:rooms?|shops?|floors?|workspaces?)\b/i.test(normalizedText);
+    const scopeSeaterMention=/\b(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*[-\s]?(?:seater|seat)\b/i.test(normalizedText);
+    const mentionsPendingField=
+      (step==='bedrooms'&&scopeBedroomMention)
+      ||(step==='units'&&scopeUnitsMention)
+      ||(step==='serviceVariant'&&scopeSeaterMention);
+    if(scopeMention && !pricingRequested && !mentionsPendingField){
       const m=normalizedText.match(/\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(rooms?|shops?|floors?|workspaces?|bedrooms?|bed|bhk|bdrooms?|bd|bdrm|seater|seat|sofa|carpet|rug)\b/i);
       const scopeCount=m?numberFromText(m[1]):null;
       const scopeUnit=m?m[2]:null;

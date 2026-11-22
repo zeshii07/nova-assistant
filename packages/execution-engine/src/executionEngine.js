@@ -45,7 +45,8 @@ class ExecutionEngine {
         state = applyStatePatch(state, {
           context: { ...state.context, takeover: { active: false, ownerId: null, ownerName: null, takenAt: null, expiresAt: null, autoExpired: true } }
         });
-        await this.stateRepository.save(state);
+        const savedExpired = await this.stateRepository.save(state);
+        if (savedExpired) state = savedExpired;
       }
     }
 
@@ -78,7 +79,8 @@ class ExecutionEngine {
           }
         }
       });
-      await this.stateRepository.save(state);
+      const savedTakeover = await this.stateRepository.save(state);
+      if (savedTakeover) state = savedTakeover;
 
       // Build the reply: if there are unread owner replies, deliver them
       // Otherwise, show "forwarded to team" message
@@ -395,7 +397,14 @@ class ExecutionEngine {
     // re-apply our patch on top of it, and retry the save once. This prevents
     // the customer from losing their place when two messages race.
     try {
-      await this.stateRepository.save(state);
+      // C1 fix: capture the returned saved state. The repository bumps the
+      // stored version to N+1 on save; if we discard the returned state our
+      // local `state.version` stays at N, so any later save in this turn
+      // (e.g. the language-change save below) compares N < N+1 and throws
+      // STALE_STATE — which, before the withLock fix, leaked the lock and
+      // froze the worker. Always thread the saved version forward.
+      const saved = await this.stateRepository.save(state);
+      if (saved) state = saved;
     } catch (saveError) {
       if (saveError?.code === 'STALE_STATE' || /stale state/i.test(String(saveError.message || ''))) {
         logger.warn('state.save.stale_retry', { conversationId, capabilityId });
@@ -410,11 +419,12 @@ class ExecutionEngine {
                 : { ...(fresh.capabilityState || {}), ...(result.statePatch.capabilityState || {}) },
               context: { ...fresh.context, ...(result.statePatch.context || {}), goal: nextGoal, goalHistory, lastMessage: message.text, lastCapability: capabilityId, conversationIntelligence: summarizeIntelligence(intelligence), recentTurns }
             });
-            await this.stateRepository.save(reapply);
-            state = reapply;
+            const savedRetry = await this.stateRepository.save(reapply);
+            if (savedRetry) state = savedRetry;
           } else {
             // No fresh state — save ours directly
-            await this.stateRepository.save(state);
+            const savedRetry = await this.stateRepository.save(state);
+            if (savedRetry) state = savedRetry;
           }
         } catch (retryError) {
           logger.error('state.save.retry_failed', { conversationId, error: retryError.message });
@@ -437,8 +447,12 @@ class ExecutionEngine {
           result.reply = this.socialIntelligenceEngine.polish(result.reply, { social:intelligence?.social || {}, language:experience.language || state.language, capabilityId, selectedIntent:intelligence?.selected?.intent || null, messageText:message.text, relationship:experience.relationship });
         }
         if (experience.language && state.language !== experience.language) {
+          // C1 fix: state now carries the version returned by the first save,
+          // so this second save is not stale. Capture the returned state again
+          // so the language (and bumped version) are threaded forward.
           state = applyStatePatch(state, { language: experience.language });
-          await this.stateRepository.save(state);
+          const savedLang = await this.stateRepository.save(state);
+          if (savedLang) state = savedLang;
         }
       } catch (error) {
         logger.error("experience_render.failed", { capabilityId, error:error.message, stack:error.stack });

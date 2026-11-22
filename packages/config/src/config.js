@@ -13,7 +13,10 @@ function loadConfig() {
   const localDataDir = path.resolve(process.cwd(), process.env.NOVA_LOCAL_DATA_DIR || (testRunToken ? `./.nova-data/test-${process.pid}-${testRunToken}` : "./.nova-data"));
   const storageMode = String(process.env.NOVA_STORAGE_MODE || "memory").toLowerCase();
   if (!["memory", "persistent"].includes(storageMode)) throw new Error("NOVA_STORAGE_MODE must be memory or persistent");
-  const groqNluApiKey = process.env.GROQ_API_KEY || process.env.NOVA_GROQ_NLU_API_KEY || "";
+  // C4 backward-compat: GROQ_API_KEY is the documented name; the older
+  // NOVA_GROQ_NLU_API_KEY alternate is accepted (with a deprecation warning)
+  // so existing deployments keep working. GROQ_API_KEY wins when both are set.
+  const groqNluApiKey = pickWithDeprecation("GROQ_API_KEY", "NOVA_GROQ_NLU_API_KEY", "");
   // A configured provider key opts Nova into adaptive interpretation. Explicit
   // NOVA_NLU_MODE=off always wins, which keeps offline/test deployments cheap.
   const nluMode = String(process.env.NOVA_NLU_MODE || (groqNluApiKey ? "on" : "off")).toLowerCase();
@@ -56,11 +59,11 @@ function loadConfig() {
     semanticRouterMinMargin:boundedNumber("NOVA_SEMANTIC_ROUTER_MIN_MARGIN",.08,0,.5),
     semanticRouterMinSimilarity:boundedNumber("NOVA_SEMANTIC_ROUTER_MIN_SIMILARITY",.2,0,1),
     semanticRouterMaxLocalIntents:boundedInteger("NOVA_SEMANTIC_ROUTER_MAX_LOCAL_INTENTS",2,1,8),
-    groqNluBaseUrl: process.env.NOVA_GROQ_NLU_BASE_URL || "https://api.groq.com/openai/v1",
-    groqNluModel: process.env.NOVA_GROQ_NLU_MODEL || "openai/gpt-oss-20b",
+    groqNluBaseUrl: pickWithDeprecation("NOVA_GROQ_NLU_BASE_URL", "GROQ_NLU_BASE_URL", "https://api.groq.com/openai/v1"),
+    groqNluModel: pickWithDeprecation("NOVA_GROQ_NLU_MODEL", "GROQ_NLU_MODEL", "openai/gpt-oss-20b"),
     groqNluApiKey,
     defaultTimezone,
-    groqNluTimeoutMs: boundedInteger("NOVA_GROQ_NLU_TIMEOUT_MS", 4000, 250, 30000),
+    groqNluTimeoutMs: boundedIntegerWithAlias("NOVA_GROQ_NLU_TIMEOUT_MS", "GROQ_NLU_TIMEOUT_MS", 4000, 250, 30000),
     groqNluFailureCooldownMs: boundedInteger("NOVA_GROQ_NLU_FAILURE_COOLDOWN_MS", 15000, 0, 300000),
     nluMinConfidence: boundedNumber("NOVA_NLU_MIN_CONFIDENCE", 0.78, 0, 1),
     nluInformationThreshold: boundedNumber("NOVA_NLU_INFORMATION_THRESHOLD", 0.86, 0, 1),
@@ -79,5 +82,29 @@ function boundedInteger(name, fallback, min, max) {
   const value = Number(process.env[name] ?? fallback);
   if (!Number.isInteger(value) || value < min || value > max) throw new Error(`${name} must be an integer between ${min} and ${max}`);
   return value;
+}
+// C4 backward-compat: accept the legacy bare GROQ_NLU_* names that older .env
+// files used. The NOVA_-prefixed (canonical) name wins when both are set. Each
+// legacy alias emits a one-line deprecation warning so operators notice and
+// migrate; it never crashes the boot.
+function pickWithDeprecation(canonicalName, legacyName, fallback) {
+  if (process.env[canonicalName] != null && process.env[canonicalName] !== "") return process.env[canonicalName];
+  if (process.env[legacyName] != null && process.env[legacyName] !== "") {
+    console.warn(`[Nova Config] deprecation: ${legacyName} is a legacy alias for ${canonicalName}; please rename it in your .env. Using the legacy value for now.`);
+    return process.env[legacyName];
+  }
+  return fallback;
+}
+function boundedIntegerWithAlias(canonicalName, legacyName, fallback, min, max) {
+  if (process.env[canonicalName] != null && process.env[canonicalName] !== "") {
+    return boundedInteger(canonicalName, fallback, min, max);
+  }
+  if (process.env[legacyName] != null && process.env[legacyName] !== "") {
+    console.warn(`[Nova Config] deprecation: ${legacyName} is a legacy alias for ${canonicalName}; please rename it in your .env. Using the legacy value for now.`);
+    const value = Number(process.env[legacyName]);
+    if (!Number.isInteger(value) || value < min || value > max) throw new Error(`${legacyName} (legacy alias for ${canonicalName}) must be an integer between ${min} and ${max}`);
+    return value;
+  }
+  return fallback;
 }
 module.exports = { loadConfig };

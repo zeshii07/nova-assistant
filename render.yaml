@@ -11,6 +11,14 @@ services:
         value: 22.22.0
       - key: NODE_ENV
         value: production
+      # C2 fix: pin to a single worker while NOVA_STORAGE_MODE is memory.
+      # Each worker keeps its own in-memory conversation state; with more than
+      # one worker, conversation state is not shared and state.json is
+      # overwritten on disk. The server refuses to boot in production with
+      # memory storage + >1 worker. Set NOVA_STORAGE_MODE=persistent (with
+      # DATABASE_URL + REDIS_URL) to safely run multiple workers.
+      - key: NOVA_WORKERS
+        value: "1"
       - key: DEFAULT_TENANT_ID
         value: default
       - key: LOG_LEVEL

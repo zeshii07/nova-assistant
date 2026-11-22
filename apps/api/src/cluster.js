@@ -9,19 +9,38 @@
  *
  * Set NOVA_WORKERS env var to override the worker count.
  * Set NOVA_SINGLE_WORKER=true to force single-process mode (for debugging).
+ *
+ * C2 fix: the master now refuses to start in production with
+ * NOVA_STORAGE_MODE=memory and more than one worker — that configuration loses
+ * conversation state across workers (each worker has its own in-memory map and
+ * overwrites state.json on disk, last writer wins). Pin NOVA_WORKERS=1 or
+ * switch to NOVA_STORAGE_MODE=persistent (Redis + Postgres). A heartbeat
+ * watchdog also restarts workers that freeze (miss N consecutive heartbeats),
+ * which contains a C1-style deadlock even if one slips past the state-layer fix.
  */
 const cluster = require('cluster');
-const os = require('os');
+const {
+  resolveClusterConfig,
+  startWatchdog,
+  startHeartbeat,
+} = require('./clusterManager');
 
-const MAX_WORKERS = 4;
-const desiredWorkers = process.env.NOVA_SINGLE_WORKER === 'true'
-  ? 1
-  : Math.min(Number(process.env.NOVA_WORKERS) || os.cpus().length || 1, MAX_WORKERS);
+const config = resolveClusterConfig();
 
-if (cluster.isPrimary && desiredWorkers > 1) {
-  console.log(`[Nova Cluster] Master ${process.pid} starting ${desiredWorkers} workers...`);
+if (!config.decision.ok) {
+  // Refuse to start in a known-broken configuration rather than silently
+  // corrupting conversation state in production.
+  console.error(`[Nova Cluster] BOOT REFUSED: ${config.decision.error}`);
+  process.exit(1);
+}
+if (config.decision.warn) {
+  console.warn(`[Nova Cluster] ${config.decision.warn}`);
+}
 
-  for (let i = 0; i < desiredWorkers; i++) {
+if (cluster.isPrimary && config.workerCount > 1) {
+  console.log(`[Nova Cluster] Master ${process.pid} starting ${config.workerCount} workers (storage=${config.storageMode})...`);
+
+  for (let i = 0; i < config.workerCount; i++) {
     cluster.fork();
   }
 
@@ -33,6 +52,12 @@ if (cluster.isPrimary && desiredWorkers > 1) {
     console.error(`[Nova Cluster] Worker ${worker.process.pid} died (code=${code}, signal=${signal}). Restarting...`);
     // Restart after a short delay to avoid crash loops
     setTimeout(() => cluster.fork(), 1000);
+  });
+
+  // C2 fix: heartbeat watchdog — restart frozen workers (also contains C1).
+  startWatchdog({
+    heartbeatIntervalMs: config.heartbeatIntervalMs,
+    maxMissedBeats: config.maxMissedBeats,
   });
 
   // Graceful shutdown — forward signals to workers
@@ -51,10 +76,20 @@ if (cluster.isPrimary && desiredWorkers > 1) {
   process.on('SIGINT', () => shutdown('SIGINT'));
 
 } else {
-  // Worker process (or single-process mode) — start the actual server
+  // Worker process (or single-process mode) — start the actual server.
+  // Start the heartbeat so the master can detect a frozen worker.
+  let heartbeatHandle = null;
+  try {
+    heartbeatHandle = startHeartbeat({ intervalMs: config.heartbeatIntervalMs });
+  } catch (err) {
+    console.warn('[Nova Cluster] Could not start worker heartbeat:', err.message);
+  }
   const { startServer } = require('./server');
   startServer().catch((err) => {
     console.error('[Nova] Failed to start server:', err);
     process.exit(1);
+  }).finally(() => {
+    // Keep the heartbeat running for the lifetime of the worker; stop it on exit.
+    process.on('exit', () => heartbeatHandle?.stop());
   });
 }
