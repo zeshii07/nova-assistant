@@ -8,8 +8,16 @@ class UniversalTenantOnboardingService{
  create(spec){
   if(!spec?.name)throw new Error('Tenant name is required');
   const id=spec.id||slug(spec.name); const dir=path.join(this.tenantsDir,id);
-  if(fs.existsSync(dir)&&!spec.overwrite)throw new Error(`Tenant '${id}' already exists`);
-  if(fs.existsSync(dir)&&spec.overwrite)fs.rmSync(dir,{recursive:true,force:true});
+  // Atomic create-vs-exist check. We mkdir the PARENT (recursive, idempotent),
+  // then mkdir the tenant dir NON-recursively — that throws EEXIST atomically if
+  // the dir already exists, closing the TOCTOU gap where two concurrent signups
+  // for the same name both saw existsSync=false and overwrote each other.
+  // overwrite mode still uses the check-then-rm path (acceptable for the dev
+  // onboarding studio, which is single-admin).
+  if(spec.overwrite&&fs.existsSync(dir))fs.rmSync(dir,{recursive:true,force:true});
+  fs.mkdirSync(this.tenantsDir,{recursive:true});
+  try{fs.mkdirSync(dir);} // non-recursive → throws EEXIST atomically if dir exists
+  catch(err){if(err&&err.code==='EEXIST'&&!spec.overwrite)throw new Error(`Tenant '${id}' already exists`);throw err;}
   const offerings=Array.isArray(spec.offerings)?spec.offerings:[];
   const products=offerings.filter(x=>(x.type||'service')==='product');
   const services=offerings.filter(x=>(x.type||'service')!=='product');
@@ -23,7 +31,11 @@ class UniversalTenantOnboardingService{
    status:'active',defaultLanguage:spec.defaultLanguage||'english',capabilities,features:{llmFallback:spec.llmFallback!==false},
    permissions,id,name:spec.name,domain:spec.domain||'generic',
    branding:{assistantName:spec.assistantName||`${spec.name} Assistant`,welcomeMessage:spec.welcomeMessage||`Hello! 😊 I’m the ${spec.assistantName||`${spec.name} Assistant`}. How can I help you today?`},
-   business:{description:spec.description||'',contact:spec.contact||''}
+   business:{description:spec.description||'',contact:spec.contact||''},
+   // billingRequired marks self-serve signups: the engine blocks these tenants
+   // if their trial/subscription is missing or expired. Legacy/operator tenants
+   // omit it and are allowed without a subscription (backward compatibility).
+   ...(spec.billingRequired?{billingRequired:true}:{})
   };
   writeJson(path.join(dir,'profile.json'),profile);
   writeJson(path.join(dir,'knowledge','business.json'),{

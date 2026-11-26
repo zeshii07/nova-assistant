@@ -70,7 +70,13 @@ function loadConfig() {
     nluActionThreshold: boundedNumber("NOVA_NLU_ACTION_THRESHOLD", 0.92, 0, 1),
     nluInvocationThreshold: boundedNumber("NOVA_NLU_INVOCATION_THRESHOLD", 0.86, 0, 1),
     nluAmbiguityMargin: boundedNumber("NOVA_NLU_AMBIGUITY_MARGIN", 0.05, 0, 0.5),
-    nluMaxInputChars: boundedInteger("NOVA_NLU_MAX_INPUT_CHARS", 4000, 256, 12000)
+    nluMaxInputChars: boundedInteger("NOVA_NLU_MAX_INPUT_CHARS", 4000, 256, 12000),
+    // Phase 4 Sprint 1 — Billing. When STRIPE_SECRET_KEY is unset, the StripeClient
+    // runs in mock mode (returns deterministic fakes) so dev + tests work without
+    // credentials. Set both keys in production to enable real Stripe Checkout.
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY || "",
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || "",
+    stripeMockMode: String(process.env.STRIPE_MOCK_MODE || "auto").toLowerCase() // auto|on|off
   });
 }
 function boundedNumber(name, fallback, min, max) {

@@ -1,3 +1,5 @@
+const { FileSubscriptionRepository, StripeClient, PlanService } = require("../../../packages/billing/src");
+const { SelfServeSignupService, OnboardingWizardService } = require("../../../packages/self-serve-onboarding/src");
 const {KnowledgeSourceRepository}=require('../../../packages/knowledge-platform/src/knowledgeSourceRepository');
 const {TenantKnowledgeManager}=require('../../../packages/knowledge-platform/src/tenantKnowledgeManager');
 const {FileServiceAvailabilityRepository}=require('../../../packages/service-availability/src/fileServiceAvailabilityRepository');
@@ -22,6 +24,7 @@ const { UniversalTenantOnboardingService } = require("../../../packages/tenant-o
 const { LanguageEngine } = require("../../../packages/assistant/src/languageEngine");
 const { IntentEngine } = require("../../../packages/assistant/src/intentEngine");
 const { KnowledgeService } = require("../../../packages/assistant/src/knowledgeService");
+const { HealthService } = require("../../../packages/ops/src/healthService");
 const { ResponseEngine } = require("../../../packages/assistant/src/responseEngine");
 const { AssistantService } = require("../../../packages/assistant/src/assistantService");
 const { LlmRouter } = require("../../../packages/llm/src/llmRouter");
@@ -116,6 +119,22 @@ async function buildContainer() {
   const logger = new Logger({ level: config.logLevel, context: { service: "nova-api" } });
   const controlPlaneRepository = new FileControlPlaneRepository({ operationalDataDir: config.operationalDataDir });
   const tenantRepository = new FileTenantRepository({ tenantsDir: config.tenantsDir, logger, controlPlaneRepository });
+  // ─── Phase 4 Sprint 1: Billing ─────────────────────────────────────────
+  // Subscription state lives in tenants/<id>/subscription.json (kept separate
+  // from profile.json). The StripeClient auto-selects mock mode when no key is
+  // configured, so dev + tests run without credentials; production sets
+  // STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET.
+  const subscriptionRepository = new FileSubscriptionRepository({ tenantsDir: config.tenantsDir, logger });
+  const stripeMockMode = config.stripeMockMode === "on" ? true
+    : config.stripeMockMode === "off" ? false
+    : !config.stripeSecretKey; // "auto"
+  const stripeClient = new StripeClient({
+    secretKey: config.stripeSecretKey || null,
+    webhookSecret: config.stripeWebhookSecret || null,
+    logger,
+    mock: stripeMockMode,
+  });
+  const planService = new PlanService({ subscriptionRepository, logger, tenantsDir: config.tenantsDir });
   const storage = await buildStorage({ config, logger });
   const stateRepository = storage.stateRepository;
   const eventBus = new EventBus({ logger });
@@ -230,7 +249,15 @@ async function buildContainer() {
   const { GoogleOAuthClient } = require("../../../packages/calendar-engine/src/googleOAuthClient");
   const { FileCalendarTokenRepository } = require("../../../packages/calendar-engine/src/fileCalendarTokenRepository");
   const { GoogleCalendarProvider } = require("../../../packages/calendar-engine/src/googleCalendarProvider");
+  const { MicrosoftOAuthClient } = require("../../../packages/calendar-engine/src/microsoftOAuthClient");
+  const { MicrosoftGraphCalendarProvider } = require("../../../packages/calendar-engine/src/microsoftGraphCalendarProvider");
+  const { InMemoryNonceStore } = require("../../../packages/auth-engine/src/oauthState");
   const googleOAuthClient = new GoogleOAuthClient({ logger });
+  const microsoftOAuthClient = new MicrosoftOAuthClient({ logger });
+  // Shared nonce store for OAuth state tokens (Google + Microsoft). Single-use,
+  // 10-min TTL — prevents the callback CSRF where an attacker's auth code gets
+  // saved to a victim tenant via a forged `state` param.
+  const oauthNonceStore = new InMemoryNonceStore();
   const calendarTokenRepository = new FileCalendarTokenRepository({
     storageDir: path.resolve(__dirname, "../../../.nova-calendar-tokens"),
     logger
@@ -240,12 +267,23 @@ async function buildContainer() {
     tokenRepository: calendarTokenRepository,
     logger
   });
+  const microsoftGraphCalendarProvider = new MicrosoftGraphCalendarProvider({
+    oauthClient: microsoftOAuthClient,
+    tokenRepository: calendarTokenRepository,
+    logger
+  });
+  // Register every configured external provider. local is handled inside
+  // CalendarService itself; google/microsoft are external adapters. A tenant
+  // picks its provider via tenants/<id>/calendar/config.json → provider field.
+  const externalProviders = {};
+  if (googleOAuthClient.isConfigured()) externalProviders.google = googleCalendarProvider;
+  if (microsoftOAuthClient.isConfigured()) externalProviders.microsoft = microsoftGraphCalendarProvider;
   const calendarService = new CalendarService({
     configRepository: calendarConfigRepository,
     repository: calendarRepository,
     hoursProvider: businessHoursProvider,
     eventBus,
-    providers: googleOAuthClient.isConfigured() ? { google: googleCalendarProvider } : {}
+    providers: externalProviders
   });
   bookingService.calendarService = calendarService;
   cleaningService.calendarService = calendarService;
@@ -461,7 +499,7 @@ async function buildContainer() {
   const optimisticVersioning = new OptimisticVersioning({ redisClient, logger });
   const idempotencyGuard = new IdempotencyGuard({ redisClient, logger });
 
-  const executionEngine = new ExecutionEngine({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId: config.defaultTenantId, services: { knowledgeService, llmRouter, memoryService, crmService, leadService, customerDataBridge, catalogService, commerceService, inventoryService, cleaningService, offeringService, bookingService, calendarService, offeringOrderService, engagementService, taskFrameEngine, dialogueManager, pricingService, handoffService, availabilityService, promptEngine, productMatcher: productEmbeddingMatcher }, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService, feedbackCollector, distributedLock, optimisticVersioning, idempotencyGuard });
+  const executionEngine = new ExecutionEngine({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId: config.defaultTenantId, services: { knowledgeService, llmRouter, memoryService, crmService, leadService, customerDataBridge, catalogService, commerceService, inventoryService, cleaningService, offeringService, bookingService, calendarService, offeringOrderService, engagementService, taskFrameEngine, dialogueManager, pricingService, handoffService, availabilityService, promptEngine, productMatcher: productEmbeddingMatcher }, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService, feedbackCollector, distributedLock, optimisticVersioning, idempotencyGuard, planService });
   // ─── Phase 3 Sprint 2: Dashboard metrics aggregator ────────────────────
   // Captures per-tenant + per-capability fallback %, p95 latency, and LLM
   // share on every processed turn so production health is observable. The
@@ -494,6 +532,29 @@ async function buildContainer() {
     executionEngine,
     logger
   });
-  return { config, logger, storage, tenantAdapterRegistry, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, googleOAuthClient, calendarTokenRepository, googleCalendarProvider, businessOwnerAuthService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, leadRepository, leadService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, taskFrameEngine, dialogueManager, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService, mlIntentClassifier, hybridRouter, productEmbeddingMatcher, transformerEmbeddingService, feedbackCollector, onlineLearner, analyticsEngine, emailService, notificationService, notificationLogRepository, publicAssistantService, publicFeatureRegistryService, publicLeadService, publicLeadRepository, publicIntentRouter, publicAssistantPolicy, unansweredQuestionRepository, publicLlmAnswerService, metricsAggregator };
+  // ─── Phase 4 Sprint 2: Self-serve onboarding ───────────────────────────
+  // Composes the onboarding + billing + auth services so a business can sign
+  // up alone from the landing page. The wizard service handles post-signup
+  // profile edits (hours, FAQs, contact) incrementally without re-onboarding.
+  const selfServeSignupService = new SelfServeSignupService({ onboardingService: tenantOnboardingService, planService, businessOwnerAuthService, tenantRepository, logger });
+  const onboardingWizardService = new OnboardingWizardService({ tenantsDir: config.tenantsDir, tenantRepository, knowledgeRepository, logger });
+  // ─── Roadmap #9: Operational monitoring ────────────────────────────────
+  // Liveness (cheap, for LBs) + readiness (deeper, for operators). Checks the
+  // tenants dir, billing mode, calendar providers, and process health.
+  const healthService = new HealthService({ config, planService, stripeClient, googleOAuthClient, microsoftOAuthClient, logger });
+  return { config, logger, storage, tenantAdapterRegistry, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, googleOAuthClient, microsoftOAuthClient, oauthNonceStore, calendarTokenRepository, googleCalendarProvider, microsoftGraphCalendarProvider, businessOwnerAuthService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, selfServeSignupService, onboardingWizardService, healthService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, leadRepository, leadService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, taskFrameEngine, dialogueManager, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService, mlIntentClassifier, hybridRouter, productEmbeddingMatcher, transformerEmbeddingService, feedbackCollector, onlineLearner, analyticsEngine, emailService, notificationService, notificationLogRepository, publicAssistantService, publicFeatureRegistryService, publicLeadService, publicLeadRepository, publicIntentRouter, publicAssistantPolicy, unansweredQuestionRepository, publicLlmAnswerService, metricsAggregator, subscriptionRepository, stripeClient, planService, selfServeSignupService, onboardingWizardService };
 }
 module.exports = { buildContainer };
+
+// Production singleton: the server calls getContainer() so a second call (e.g.
+// a health-check route, or hot-reload) reuses the same in-memory services
+// instead of colliding on the same on-disk dirs (subscription.json, replays,
+// calendar tokens) with split-brain caches. Tests call buildContainer()
+// directly to get an isolated build against their own temp dirs.
+let _containerPromise = null;
+async function getContainer() {
+  if (_containerPromise) return _containerPromise;
+  _containerPromise = buildContainer();
+  return _containerPromise;
+}
+module.exports.getContainer = getContainer;

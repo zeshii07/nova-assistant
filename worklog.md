@@ -1669,3 +1669,103 @@ DEFINITION OF DONE (spec §18) — all 18 checkboxes demonstrated by tests:
   - Rollback procedures documented (ROLLBACK.md)
 
 TOTAL: 146 new tests across 6 sprint files, 0 regressions in 580+ existing tests.
+
+---
+
+## Sprint P4-1 — Billing + Stripe + Subscription Enforcement (Phase 4 Sprint 1)
+
+**Date:** 2026-11-26
+**Goal:** Add the payment + subscription layer so businesses can pay Nova and the engine enforces who gets to use it.
+
+**Delivered:**
+- `packages/billing/src/plans.js` — plan catalog (starter $29/2000 msgs, growth $79/10000 msgs, scale $199/unlimited) with feature flags per tier.
+- `packages/billing/src/subscriptionRepository.js` — file-backed `FileSubscriptionRepository` mirroring `FileTenantRepository`'s pattern; writes `tenants/<id>/subscription.json` separate from `profile.json`.
+- `packages/billing/src/stripeClient.js` — Stripe wrapper with **mock mode** (no key → deterministic fakes, testable without network/credentials) and real mode (Checkout + Billing Portal + webhook signature verification).
+- `packages/billing/src/planService.js` — enforcement brain: `evaluate()` decides allowed/blocked across all 5 states (trialing/active/past_due/canceled/incomplete) with a 7-day past-due grace + per-plan quota; `applyWebhookEvent()` maps Stripe lifecycle events to state transitions; `recordMessage()` increments the quota counter.
+- `packages/execution-engine/src/executionEngine.js` — enforcement wired at the top of `process()`: blocked tenant gets a brand-safe reply + `capabilityId: billing_blocked`; successful turns count against quota via `recordMessage(tenant.id)` (called inside `#finalize`, which receives `tenant` not `tenantId` — caught + fixed during build).
+- `packages/config/src/config.js` — added `stripeSecretKey`, `stripeWebhookSecret`, `stripeMockMode` (auto|on|off).
+- `apps/api/src/container.js` — wired `subscriptionRepository`, `stripeClient`, `planService`; passes `planService` to `ExecutionEngine`.
+- `apps/api/src/server.js` — routes: `POST /api/billing/webhook` (signature-verified), `GET /api/business/billing/status`, `POST /api/business/billing/checkout`, `POST /api/business/billing/portal`.
+- `tests/sprintP4-1.billing-subscription-enforcement.regression.test.js` — 36 cases.
+
+**Backward compatibility:** tenants without `subscription.json` (byt-cleaners-dubai + all demos) are allowed through unchanged — the billing rollout does not break any running tenant.
+
+**Bug caught + fixed during build:** `recordMessage(tenantId)` initially threw `tenantId is not defined` because the call site landed inside the private `#finalize` method, which receives `tenant` (the profile object) not `tenantId`. Fixed to `tenant.id`. Caught by a direct counter test before the suite was written.
+
+**Tests:** 36/36 P4-1 pass. Full Phase 2+3+4 sweep: 138/138. sprint43 sanity: 273/273. sprint97 persistence: 13/13.
+
+---
+
+## Sprint P4-2 — Self-Serve Onboarding (Phase 4 Sprint 2)
+
+**Date:** 2026-11-26
+**Goal:** Let a business sign up alone from a landing page and land in a working dashboard — no operator hand-holding.
+
+**Delivered:**
+- `packages/self-serve-onboarding/src/industryTemplates.js` — four vertical templates (restaurant, cleaning, salon, retail) that seed a new tenant with sensible default offerings, hours, FAQs, and booking config so the assistant is useful immediately.
+- `packages/self-serve-onboarding/src/signupService.js` — `SelfServeSignupService.signup()` orchestrates: (1) `UniversalTenantOnboardingService.create()` provisions the tenant tree, (2) `PlanService.provisionTrial()` starts a 14-day trial so billing enforcement lets messages through, (3) `BusinessOwnerAuthService.createOwner()` + `loginWithPassword()` creates the first owner and returns a JWT. Returns tenantId + token + trial + nextSteps. Rolls back the tenant on owner-creation failure so no orphans.
+- `packages/self-serve-onboarding/src/onboardingWizardService.js` — post-signup incremental edits (profile, hours, FAQs, completion flag) without re-running full onboarding. Profile edits mirror into `knowledge/business.json` so the assistant cites the updated facts.
+- `apps/api/src/container.js` — wired `selfServeSignupService` + `onboardingWizardService`.
+- `apps/api/src/server.js` — routes: `POST /api/public/signup` (rate-limited via `checkWidgetRateLimit`), `GET /api/public/signup/templates`, and authed wizard routes `GET /api/business/onboarding`, `POST /api/business/onboarding/{profile,faqs,hours,complete}`.
+- `tests/sprintP4-2.self-serve-onboarding.regression.test.js` — 27 cases.
+
+**Design choice:** the signup service owns NO persistence — it composes three existing services, so there's no parallel tenant-creation path and the logic is one testable unit.
+
+**Tests:** 27/27 P4-2 pass. Full Phase 2+3+4 sweep: 165/165. sprint43 sanity: 273/273.
+
+---
+
+## Sprint P4-3 — Google Calendar + Microsoft Graph Adapters (Phase 4 Sprint 3)
+
+**Date:** 2026-11-26
+**Goal:** Close V90 roadmap item 5 (🟡 → ✅): finish the external calendar adapters so booking/salon/cleaning verticals can sync real availability.
+
+**Discovery:** The Google Calendar adapter (`googleCalendarProvider.js`) was ALREADY fully implemented (all 7 contract methods, real googleapis calls). The V90 roadmap's "remain next" was really about Microsoft Graph + test coverage. So this sprint = Microsoft Graph adapter + mock-mode tests for BOTH providers (neither had tests — both needed real OAuth/network).
+
+**Delivered:**
+- `packages/calendar-engine/src/microsoftOAuthClient.js` — Microsoft identity platform OAuth2 client mirroring `GoogleOAuthClient`. Reads `MICROSOFT_CLIENT_ID`/`MICROSOFT_CLIENT_SECRET`/`MICROSOFT_TENANT_ID` (default `common`); `isConfigured()`, `getAuthUrl(state)` (state carries tenantId), `exchangeCode(code)`, `refresh(refreshToken)`, `createClientForTokens(tokens, {onRefresh})` (auto-refreshes expired access tokens, persists via onRefresh callback). Uses native `fetch` (Node 18+).
+- `packages/calendar-engine/src/microsoftGraphCalendarProvider.js` — implements the full 7-method `CalendarProvider` contract against `/me/calendar` on Microsoft Graph. Hold = tentative event tagged `categories: ["NovaHold"]`; confirmHold → busy + `["NovaConfirmed"]`; cancel → `isCancelled: true` + free; listEvents filters to Nova-tagged events. check uses `calendarView` + suggests 3 alternatives.
+- `packages/calendar-engine/src/index.js` — exports the new modules.
+- `apps/api/src/container.js` — instantiates both OAuth clients + both providers; registers every CONFIGURED external provider with `CalendarService` (tenant picks via `calendar/config.json` → `provider`).
+- `apps/api/src/server.js` — Microsoft OAuth routes: `GET /api/admin/calendar/microsoft/auth/:tenantId` (start consent) + `GET /api/admin/calendar/microsoft/callback` (exchange, save tokens, flip config to microsoft).
+- `tests/sprintP4-3.calendar-adapters.regression.test.js` — 16 cases: contract for both providers, MS OAuth config, full hold→confirm→release lifecycle, reschedule/cancel/listEvents, not-connected errors, calendar-service routing. Uses `MockMicrosoftOAuthClient` + `MockTokenRepository` → no network needed.
+
+**Bug caught + fixed during build:** the calendar-service routing tests initially failed because `#normalizeSlot` expects `input.time` (not `startTime`) and `normalizeDate` expects `DD/MM/YYYY` (not ISO). Combined with `test-env.js` freezing the clock at 2026-08-20, my test date 2026-12-01 was ~103 days ahead — past `maxAdvanceDays: 7` — so `#dateIssue` returned `maximum_advance_window` before the provider was ever reached. Fixed by using `27/08/2026` (7 days ahead of the test clock) + the `time` field. Caught by a debug script that printed the actual service return.
+
+**Backward compatibility:** `provider: "local"` tenants (the default + all onboarding templates) are unaffected — the service still handles local capacity itself and only dispatches to an external provider when config names one.
+
+**Tests:** 16/16 P4-3 pass. Full Phase 2+3+4 sweep: 181/181. sprint43 sanity: 273/273.
+
+**Phase 4 status:** P4-1 (billing), P4-2 (self-serve onboarding), P4-3 (calendar adapters) all complete. P4-4 (deploy byt pilot + 2-3 hand-onboarded paid pilots) is ops work, not a code sprint.
+
+---
+
+## Sprint P4-hardening — Post-audit bug fixes + operational monitoring (v72.1)
+
+**Date:** 2026-11-26
+**Goal:** Deep audit the Phase 4 code, fix every bug found, close the last V90 roadmap item (operational monitoring).
+
+**Audit method:** Two parallel general-purpose subagents (read-only). One audited billing + onboarding + calendar provider internals (12 findings). The other audited engine + API integration (12 findings). 18 distinct actionable bugs total.
+
+**Critical security fixes:**
+- OAuth callback CSRF: `state` was `hash:tenantId` with hash never checked → attacker could forge a callback to overwrite a victim tenant's calendar tokens. New `packages/auth-engine/src/oauthState.js` mints signed, single-use, 10-min-TTL HMAC tokens. Both Google + Microsoft callbacks verify before saving. Callbacks also moved to a public section (dev-token gate was blocking the browser redirect in prod).
+- Webhook signature bypass: `STRIPE_MOCK_MODE` auto-enabled when no key → forged `checkout.session.completed` activated any tenant free. Webhook route now hard-fails (503) when mock + prod.
+
+**Critical concurrency fixes:**
+- `recordMessage` race: non-atomic read-modify-write lost increments + overshot cap. Now atomic compare-and-increment via `repo.mutate` (withFileLock + re-read inside lock + cap re-check).
+- Slug TOCTOU: two same-name signups overwrote each other. Now atomic `mkdir` (EEXIST).
+- Webhook non-idempotency: redelivered event reset quota to 0. Now dedupes by event.id (per-tenant rolling log).
+- Subscription save: plain writeFileSync → atomicWriteJson (temp-file + rename).
+
+**Billing correctness fixes:**
+- Trial-provision failure = fatal (was leaving a free-unlimited tenant — better than a real trial!). Signup now rolls back.
+- `billingRequired` flag on self-serve profiles: engine blocks if sub missing/expired; legacy tenants stay allowed (backward compat).
+- Plan upgrade: `customer.subscription.updated` now updates planId + resets quota.
+- Trial expiry: persists trialing→past_due transition (was ephemeral); evaluate() uses injected clock (was Date.now()).
+- Stripe mock IDs: unique per checkout (were session_id=mock colliding).
+
+**Medium fixes:** CORS on signup, recordMessage skips transient-error retries, MS Graph token-refresh race (in-flight memo), NovaHold reaper (lazy delete of abandoned holds), container memoization (getContainer singleton), error-message sanitization on signup.
+
+**Roadmap #9 (operational monitoring):** New `packages/ops/src/healthService.js` (liveness + readiness). Routes: `GET /api/health`, `GET /api/health?deep=1`, `GET /api/admin/metrics`. Closes the last open V90 roadmap item (the PostgreSQL/object-storage migration half needs real infra; file repos are structured to swap behind an interface).
+
+**Tests:** `tests/sprintP4-hardening.regression.test.js` — 17 cases, each would have caught a specific audit bug (race, idempotency, CSRF, trial-failure-fatal, plan-upgrade, billingRequired, slug race, atomic save, mock ID uniqueness). All pass. Full sweep: 198/198 sprint + 273/273 sanity.

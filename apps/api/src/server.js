@@ -3,9 +3,10 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { importBusinessFile } = require("../../../packages/tenant-onboarding/src/businessFileImporter");
-const { buildContainer } = require("./container");
+const { getContainer } = require("./container");
 const packageJson = require("../../../package.json");
 const { ForbiddenError, ValidationError } = require("../../../packages/shared/src/errors");
+const { mintState, verifyState } = require("../../../packages/auth-engine/src/oauthState");
 const { applyStatePatch } = require("../../../packages/state/src/stateSchema");
 const { replyToNovaVisitor } = require("./novaMarketingAssistant");
 // v35.3: Logger import — used for AsyncLocalStorage-based correlation ID propagation
@@ -14,7 +15,7 @@ const { Logger } = require("../../../packages/logger/src/logger");
 const { fileExistenceCache } = require("../../../packages/storage/src/fileExistenceCache");
 
 async function startServer() {
-  const container = await buildContainer();
+  const container = await getContainer();
   const server = http.createServer(async (req, res) => {
     // v35.3: wrap every request in a correlation ID context so all logs
     // emitted during the request lifecycle include `requestId`.
@@ -156,6 +157,134 @@ async function startServer() {
           return sendJson(res, 503, { ok: false, error: "metrics aggregator not configured" });
         }
         return sendJson(res, 200, { ok: true, ...container.metricsAggregator.snapshot() });
+      }
+
+      // ─── Phase 4 Sprint 1: Stripe webhook (signature-verified) ──────────
+      // Stripe calls this endpoint to report subscription lifecycle events
+      // (checkout completed, invoice paid, subscription updated/deleted). The
+      // raw body is required for signature verification in real mode; in mock
+      // mode the body is parsed as-is (tests inject events directly).
+      //
+      // Security: mock mode skips signature verification, so it is FORBIDDEN in
+      // production — an attacker could forge a checkout.session.completed and
+      // activate any tenant for free. The container auto-enables mock when no
+      // STRIPE_SECRET_KEY is set; we hard-fail the webhook here if mock mode
+      // is on AND NODE_ENV is production, so a misconfigured prod deploy fails
+      // closed instead of processing unauthenticated events.
+      if (req.method === "POST" && url.pathname === "/api/billing/webhook") {
+        if (!container.planService || !container.stripeClient) {
+          return sendJson(res, 503, { ok: false, error: "billing not configured" });
+        }
+        if (container.stripeClient.isMockMode && container.stripeClient.isMockMode() && process.env.NODE_ENV === "production") {
+          container.logger?.error?.("billing.webhook_rejected_mock_in_prod", {});
+          return sendJson(res, 503, { ok: false, error: "Stripe is in mock mode; webhooks are disabled in production. Set STRIPE_SECRET_KEY." });
+        }
+        const rawBody = await readRaw(req);
+        const signature = req.headers["stripe-signature"] || "";
+        let event;
+        try {
+          event = container.stripeClient.constructWebhookEvent(rawBody, signature);
+        } catch (err) {
+          return sendJson(res, 400, { ok: false, error: "Invalid signature" });
+        }
+        const applied = container.planService.applyWebhookEvent(event);
+        // 200 even for irrelevant events — Stripe expects ACK on all valid events.
+        return sendJson(res, 200, { received: true, applied });
+      }
+
+      // ─── Roadmap #9: Health endpoints (public, for load balancers) ────────
+      // GET /api/health        → cheap liveness (200 if the process is up)
+      // GET /api/health?deep=1 → readiness (checks tenants dir, billing, calendar)
+      // These are intentionally unauthenticated so a load balancer can probe
+      // them without credentials; they expose no tenant data.
+      if (req.method === "GET" && url.pathname === "/api/health") {
+        if (!container.healthService) return sendJson(res, 200, { status: "ok" });
+        const deep = url.searchParams.get("deep") === "1";
+        const result = deep ? container.healthService.readiness() : container.healthService.liveness();
+        // Unhealthy readiness → 503 so the LB pulls the instance out of rotation.
+        const status = result.status === "unhealthy" ? 503 : 200;
+        return sendJson(res, status, result);
+      }
+
+      // ─── Phase 4 hardening: PUBLIC OAuth callbacks (Google + Microsoft) ────
+      // These MUST be public: the provider redirects the user's browser here
+      // after consent, and the browser has no dev token. Security comes from
+      // the signed, single-use `state` token (oauthState.js) — without it an
+      // attacker could forge a callback to overwrite a victim tenant's tokens.
+      // The state is minted by the authed initiation route above and verified
+      // here; a replay or tamper throws and the callback returns 400.
+      if (req.method === "GET" && url.pathname === "/api/admin/calendar/callback") {
+        const code = url.searchParams.get('code');
+        const state = url.searchParams.get('state') || '';
+        const oauthError = url.searchParams.get('error');
+        if (oauthError) {
+          return sendHtml(res, 400, `<h1>Authorization failed</h1><p>Google returned an error: ${escHtml(oauthError)}</p><p><a href="/admin">Back to dashboard</a></p>`);
+        }
+        let tenantId;
+        try {
+          const verified = verifyState(state, container.oauthNonceStore);
+          tenantId = verified.tenantId;
+        } catch (err) {
+          container.logger?.warn?.('google_calendar.state_invalid', { error: err.message });
+          return sendHtml(res, 400, `<h1>Authorization failed</h1><p>The security token was invalid or expired. Please start the connection again from the dashboard.</p><p><a href="/admin">Back to dashboard</a></p>`);
+        }
+        if (!code) {
+          return sendHtml(res, 400, '<h1>Missing authorization code</h1><p>No code was returned by Google.</p>');
+        }
+        try {
+          const tokens = await container.googleOAuthClient.exchangeCode(code);
+          container.calendarTokenRepository.save(tenantId, tokens);
+          const configPath = path.join(container.config.tenantsDir, tenantId, "calendar", "config.json");
+          if (fs.existsSync(configPath)) {
+            const calConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            calConfig.provider = 'google';
+            calConfig.enabled = true;
+            fs.writeFileSync(configPath, JSON.stringify(calConfig, null, 2) + '\n', 'utf8');
+            container.calendarConfigRepository.clear(tenantId);
+          }
+          container.logger.info('google_calendar.connected', { tenantId });
+          return sendHtml(res, 200, `<h1>✅ Google Calendar connected!</h1><p>Tenant <strong>${escHtml(tenantId)}</strong> is now connected. Nova can check real availability and create calendar events.</p><p><a href="/admin">Back to dashboard</a></p>`);
+        } catch (err) {
+          container.logger.error('google_calendar.oauth_failed', { tenantId, error: err.message });
+          return sendHtml(res, 500, `<h1>Connection failed</h1><p>Google did not grant access. Please try again from the dashboard.</p><p><a href="/admin">Back to dashboard</a></p>`);
+        }
+      }
+
+      if (req.method === "GET" && url.pathname === "/api/admin/calendar/microsoft/callback") {
+        const code = url.searchParams.get('code');
+        const state = url.searchParams.get('state') || '';
+        const oauthError = url.searchParams.get('error');
+        if (oauthError) {
+          return sendHtml(res, 400, `<h1>Authorization failed</h1><p>Microsoft returned an error: ${escHtml(oauthError)}</p><p><a href="/admin">Back to dashboard</a></p>`);
+        }
+        let tenantId;
+        try {
+          const verified = verifyState(state, container.oauthNonceStore);
+          tenantId = verified.tenantId;
+        } catch (err) {
+          container.logger?.warn?.('microsoft_calendar.state_invalid', { error: err.message });
+          return sendHtml(res, 400, `<h1>Authorization failed</h1><p>The security token was invalid or expired. Please start the connection again from the dashboard.</p><p><a href="/admin">Back to dashboard</a></p>`);
+        }
+        if (!code) {
+          return sendHtml(res, 400, '<h1>Missing authorization code</h1><p>No code was returned by Microsoft.</p>');
+        }
+        try {
+          const tokens = await container.microsoftOAuthClient.exchangeCode(code);
+          container.calendarTokenRepository.save(tenantId, tokens);
+          const configPath = path.join(container.config.tenantsDir, tenantId, "calendar", "config.json");
+          if (fs.existsSync(configPath)) {
+            const calConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            calConfig.provider = 'microsoft';
+            calConfig.enabled = true;
+            fs.writeFileSync(configPath, JSON.stringify(calConfig, null, 2) + '\n', 'utf8');
+            container.calendarConfigRepository.clear(tenantId);
+          }
+          container.logger.info('microsoft_calendar.connected', { tenantId });
+          return sendHtml(res, 200, `<h1>✅ Microsoft Calendar connected!</h1><p>Tenant <strong>${escHtml(tenantId)}</strong> is now connected. Nova can check real availability and create calendar events.</p><p><a href="/admin">Back to dashboard</a></p>`);
+        } catch (err) {
+          container.logger.error('microsoft_calendar.oauth_failed', { tenantId, error: err.message });
+          return sendHtml(res, 500, `<h1>Connection failed</h1><p>Microsoft did not grant access. Please try again from the dashboard.</p><p><a href="/admin">Back to dashboard</a></p>`);
+        }
       }
 
       if (whatsappMatch && req.method === "GET") {
@@ -427,6 +556,58 @@ async function startServer() {
           return sendJson(res, 200, { ok:false, error_code: demo.error_code });
         }
         return sendJson(res, 200, { ok:true, success:true, demo_id: demo.demo_id, status: demo.status });
+      }
+
+      // ─── Phase 4 Sprint 2: Self-serve signup (public, rate-limited, CORS) ──
+      // A business signs up from the landing page. Provisions the tenant tree,
+      // starts a 14-day trial, creates the first owner, returns a JWT so they
+      // land straight in the dashboard. Rate-limited per IP to deter abuse.
+      // CORS: the signup form is typically on a different origin (marketing
+      // site) than the API, so every response must echo the Origin header —
+      // without it the browser blocks the response and the signup silently
+      // orphans the tenant on disk.
+      if (req.method === "POST" && url.pathname === "/api/public/signup") {
+        const origin = String(req.headers['origin'] || '*');
+        const corsSignup = (res, status, body) => { res.setHeader('Access-Control-Allow-Origin', origin); res.setHeader('Vary', 'Origin'); return sendJson(res, status, body); };
+        const clientIp = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+        const rl = checkWidgetRateLimit(`signup:${clientIp}`);
+        if (!rl.allowed) {
+          return corsSignup(res, 429, { ok:false, error:'Too many signup attempts. Please wait a few minutes.', retryAfterSeconds: rl.retryAfterSeconds });
+        }
+        if (!container.selfServeSignupService) {
+          return corsSignup(res, 503, { ok:false, error:'Self-serve signup is not configured.' });
+        }
+        let body;
+        try { body = await readJson(req); } catch { return corsSignup(res, 400, { ok:false, error:'Invalid request body.' }); }
+        try {
+          const result = container.selfServeSignupService.signup({
+            businessName: body.businessName,
+            email: body.email,
+            password: body.password,
+            ownerName: body.ownerName,
+            industry: body.industry,
+            planId: body.planId,
+            overrides: body.overrides,
+            ip: clientIp,
+          });
+          return corsSignup(res, 201, { ok:true, ...result });
+        } catch (err) {
+          // Sanitize: only surface known user-facing messages, not raw internals.
+          const msg = err.message || '';
+          const safe = /already exists|is required|Unknown industry|at least 6|couldn't start your free trial|Could not create owner/i.test(msg)
+            ? msg
+            : 'Signup failed. Please check your details and try again.';
+          return corsSignup(res, 400, { ok:false, error: safe });
+        }
+      }
+
+      // List available industry templates for the signup form (CORS-enabled).
+      if (req.method === "GET" && url.pathname === "/api/public/signup/templates") {
+        const origin = String(req.headers['origin'] || '*');
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
+        const { listTemplates } = require("../../../packages/self-serve-onboarding/src");
+        return sendJson(res, 200, { ok:true, templates: listTemplates() });
       }
 
       if (req.method === "GET" && url.pathname === "/api/public/starters") {
@@ -985,6 +1166,16 @@ async function startServer() {
       // UI doesn't have to fan out to dozens of dev endpoints per page load.
       if (url.pathname.startsWith("/api/admin/") && !authorizeDeveloperRequest(req)) {
         return sendJson(res, 401, { ok:false, error:"Admin token is required" });
+      }
+
+      // ─── Roadmap #9: Operational metrics (authed; dev-token gate) ─────────
+      // Wraps the MetricsAggregator snapshot + the health readiness check so an
+      // operator can see turn rates, fallback rates, latency, and subsystem
+      // status in one call. Used by the admin dashboard's ops panel.
+      if (req.method === "GET" && url.pathname === "/api/admin/metrics") {
+        const metrics = container.metricsAggregator?.snapshot?.() || { tenants: {} };
+        const health = container.healthService?.readiness?.() || { status: "unknown" };
+        return sendJson(res, 200, { ok: true, metrics, health });
       }
 
       if (req.method === "GET" && url.pathname === "/api/admin/overview") {
@@ -1950,7 +2141,12 @@ async function startServer() {
 
       // ─── End v34.1 endpoints ───────────────────────────────────────────
 
-      // ─── v31.0 Google Calendar OAuth & management endpoints ────────────────
+      // ─── v31.0 Google Calendar OAuth initiation (authed; dev-token gate) ────
+      // Starts the consent flow for a tenant. The dashboard (which holds the
+      // dev token) calls this; we mint a signed, single-use state token that
+      // the public callback (below the gate) verifies. The callback itself is
+      // registered in the public section so Google's browser redirect isn't
+      // blocked by the dev-token gate.
       const calendarAuthMatch = url.pathname.match(/^\/api\/admin\/calendar\/auth\/([^/]+)$/);
       if (req.method === "GET" && calendarAuthMatch) {
         const tenantId = decodeURIComponent(calendarAuthMatch[1]);
@@ -1959,42 +2155,23 @@ async function startServer() {
         if (!container.googleOAuthClient?.isConfigured?.()) {
           return sendJson(res, 503, { ok:false, error:'Google Calendar is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET env vars.' });
         }
-        const authUrl = container.googleOAuthClient.getAuthUrl(tenantId);
+        const state = mintState(tenantId, container.oauthNonceStore);
+        const authUrl = container.googleOAuthClient.getAuthUrl(state);
         return sendJson(res, 200, { ok:true, tenantId, authUrl });
       }
 
-      // OAuth callback — Google redirects here after owner grants permission
-      const calendarCallbackMatch = url.pathname === "/api/admin/calendar/callback";
-      if (calendarCallbackMatch) {
-        const code = url.searchParams.get('code');
-        const state = url.searchParams.get('state') || '';
-        const error = url.searchParams.get('error');
-        if (error) {
-          return sendHtml(res, 400, `<h1>Authorization failed</h1><p>Google returned an error: ${escHtml(error)}</p><p><a href="/admin">Back to dashboard</a></p>`);
+      // ─── Phase 4 Sprint 3: Microsoft Graph Calendar OAuth initiation ──────
+      const microsoftAuthMatch = url.pathname.match(/^\/api\/admin\/calendar\/microsoft\/auth\/([^/]+)$/);
+      if (req.method === "GET" && microsoftAuthMatch) {
+        const tenantId = decodeURIComponent(microsoftAuthMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        if (!container.microsoftOAuthClient?.isConfigured?.()) {
+          return sendJson(res, 503, { ok:false, error:'Microsoft Calendar is not configured. Set MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET env vars.' });
         }
-        if (!code) {
-          return sendHtml(res, 400, '<h1>Missing authorization code</h1><p>No code was returned by Google.</p>');
-        }
-        // Extract tenantId from state (format: hash:tenantId)
-        const tenantId = state.includes(':') ? state.split(':').slice(1).join(':') : state;
-        try {
-          const tokens = await container.googleOAuthClient.exchangeCode(code);
-          container.calendarTokenRepository.save(tenantId, tokens);
-          // Update tenant's calendar config to use Google provider
-          const configPath = path.join(container.config.tenantsDir, tenantId, "calendar", "config.json");
-          if (fs.existsSync(configPath)) {
-            const calConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-            calConfig.provider = 'google';
-            calConfig.enabled = true;
-            fs.writeFileSync(configPath, JSON.stringify(calConfig, null, 2) + '\n', 'utf8');
-            container.calendarConfigRepository.clear(tenantId);
-          }
-          container.logger.info('google_calendar.connected', { tenantId });
-          return sendHtml(res, 200, `<h1>✅ Google Calendar connected!</h1><p>Tenant <strong>${escHtml(tenantId)}</strong> is now connected. Nova can check real availability and create calendar events.</p><p><a href="/admin">Back to dashboard</a></p>`);
-        } catch (err) {
-          container.logger.error('google_calendar.oauth_failed', { tenantId, error: err.message });
-          return sendHtml(res, 500, `<h1>Connection failed</h1><p>${escHtml(err.message)}</p><p><a href="/admin">Back to dashboard</a></p>`);
-        }
+        const state = mintState(tenantId, container.oauthNonceStore);
+        const authUrl = container.microsoftOAuthClient.getAuthUrl(state);
+        return sendJson(res, 200, { ok:true, tenantId, authUrl });
       }
 
       // Calendar status — is this tenant connected to Google Calendar?
@@ -2403,6 +2580,104 @@ async function startServer() {
       // Get current owner info
       if (req.method === "GET" && url.pathname === "/api/business/me") {
         return sendJson(res, 200, { ok:true, owner: req._businessOwner });
+      }
+
+      // ─── Phase 4 Sprint 1: Billing (authed; uses req._businessOwner.tenantId) ──
+      // Subscription status — for the business dashboard's billing widget.
+      if (req.method === "GET" && url.pathname === "/api/business/billing/status") {
+        const tenantId = req._businessOwner.tenantId;
+        return sendJson(res, 200, { ok: true, ...container.planService.getStatus(tenantId) });
+      }
+
+      // Create a Stripe Checkout Session — the business upgrades/pays here.
+      if (req.method === "POST" && url.pathname === "/api/business/billing/checkout") {
+        const tenantId = req._businessOwner.tenantId;
+        const body = await readJson(req);
+        const planId = body.planId || "starter";
+        const plan = container.planService && require("../../../packages/billing/src").getPlan(planId);
+        if (!plan) return sendJson(res, 400, { ok: false, error: `Unknown plan: ${planId}` });
+        const origin = String(req.headers["origin"] || `http://${req.headers["host"]}`);
+        const session = await container.stripeClient.createCheckoutSession({
+          tenantId,
+          planId,
+          customerId: container.subscriptionRepository.get(tenantId)?.stripeCustomerId || null,
+          successUrl: `${origin}/business/billing?success=true`,
+          cancelUrl: `${origin}/business/billing?canceled=true`,
+        });
+        return sendJson(res, 200, { ok: true, url: session.url, sessionId: session.id });
+      }
+
+      // Create a Stripe Billing Portal session — manage card/plan/invoices.
+      if (req.method === "POST" && url.pathname === "/api/business/billing/portal") {
+        const tenantId = req._businessOwner.tenantId;
+        const sub = container.subscriptionRepository.get(tenantId);
+        if (!sub || !sub.stripeCustomerId) {
+          return sendJson(res, 400, { ok: false, error: "No Stripe customer found. Subscribe first." });
+        }
+        const origin = String(req.headers["origin"] || `http://${req.headers["host"]}`);
+        const session = await container.stripeClient.createPortalSession({
+          customerId: sub.stripeCustomerId,
+          returnUrl: `${origin}/business/billing`,
+        });
+        return sendJson(res, 200, { ok: true, url: session.url });
+      }
+
+      // ─── Phase 4 Sprint 2: Onboarding wizard (authed; uses req._businessOwner.tenantId) ──
+      // Get the current onboarding state for the wizard UI.
+      if (req.method === "GET" && url.pathname === "/api/business/onboarding") {
+        const tenantId = req._businessOwner.tenantId;
+        try {
+          return sendJson(res, 200, { ok: true, ...container.onboardingWizardService.getState(tenantId) });
+        } catch (err) {
+          return sendJson(res, 404, { ok: false, error: err.message });
+        }
+      }
+
+      // Update business profile (name, contact, hours, location, description).
+      if (req.method === "POST" && url.pathname === "/api/business/onboarding/profile") {
+        const tenantId = req._businessOwner.tenantId;
+        const body = await readJson(req);
+        try {
+          const result = container.onboardingWizardService.updateProfile(tenantId, body);
+          return sendJson(res, 200, result);
+        } catch (err) {
+          return sendJson(res, 400, { ok: false, error: err.message });
+        }
+      }
+
+      // Update FAQs.
+      if (req.method === "POST" && url.pathname === "/api/business/onboarding/faqs") {
+        const tenantId = req._businessOwner.tenantId;
+        const body = await readJson(req);
+        try {
+          const result = container.onboardingWizardService.updateFaqs(tenantId, Array.isArray(body.faqs) ? body.faqs : body);
+          return sendJson(res, 200, result);
+        } catch (err) {
+          return sendJson(res, 400, { ok: false, error: err.message });
+        }
+      }
+
+      // Update business hours.
+      if (req.method === "POST" && url.pathname === "/api/business/onboarding/hours") {
+        const tenantId = req._businessOwner.tenantId;
+        const body = await readJson(req);
+        try {
+          const result = container.onboardingWizardService.updateHours(tenantId, body.hours);
+          return sendJson(res, 200, result);
+        } catch (err) {
+          return sendJson(res, 400, { ok: false, error: err.message });
+        }
+      }
+
+      // Mark onboarding complete.
+      if (req.method === "POST" && url.pathname === "/api/business/onboarding/complete") {
+        const tenantId = req._businessOwner.tenantId;
+        try {
+          const result = container.onboardingWizardService.complete(tenantId);
+          return sendJson(res, 200, result);
+        } catch (err) {
+          return sendJson(res, 400, { ok: false, error: err.message });
+        }
       }
 
       // Today overview — conversations, leads, bookings, revenue today

@@ -6,13 +6,30 @@ const { appendGoalHistory, transitionGoal } = require("../../conversation-intell
 
 /** Coordinates tenant, state, conversation intelligence, capability routing, humanization, events, replay and persistence. */
 class ExecutionEngine {
-  constructor({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId, services = {}, humanizationEngine = null, socialIntelligenceEngine = null, conversationIntelligenceEngine = null, replayService = null }) {
-    Object.assign(this, { tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId, services, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService });
+  constructor({ tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId, services = {}, humanizationEngine = null, socialIntelligenceEngine = null, conversationIntelligenceEngine = null, replayService = null, planService = null }) {
+    Object.assign(this, { tenantRepository, stateRepository, capabilityRouter, eventBus, logger, defaultTenantId, services, humanizationEngine, socialIntelligenceEngine, conversationIntelligenceEngine, replayService, planService });
   }
 
   async process(message) {
     const processStarted = performance.now();
     const tenantId = message.tenantId || this.defaultTenantId;
+
+    // ─── Phase 4 Sprint 1: Subscription enforcement ────────────────────
+    // Before doing any work, check the tenant's billing status. A blocked
+    // tenant gets a graceful billing-issue reply instead of normal processing.
+    // Legacy tenants (no subscription.json) are allowed through — backward
+    // compatibility so existing pilots + tests aren't broken by the billing
+    // rollout. The counter is only incremented for ALLOWED, processed turns.
+    if (this.planService) {
+      const decision = this.planService.evaluate(tenantId);
+      if (!decision.allowed) {
+        const conversationId = createConversationId(tenantId, message.channel, message.customerId);
+        const reply = this._billingBlockReply(decision.reason);
+        this.logger?.warn?.("subscription.blocked", { tenantId, reason: decision.reason, conversationId });
+        return { conversationId, reply, state: null, capabilityId: "billing_blocked", intelligence: null, replayId: null, experience: null, billingBlocked: true, billingReason: decision.reason };
+      }
+    }
+
     const tenant = this.tenantRepository.getById(tenantId);
     const conversationId = createConversationId(tenantId, message.channel, message.customerId);
     let state = await this.stateRepository.get(conversationId);
@@ -509,7 +526,33 @@ class ExecutionEngine {
         logger.error("replay.record_failed", { capabilityId, error:error.message });
       }
     }
+    // Phase 4 Sprint 1: count this turn against the tenant's billing quota.
+    // Only successful (non-blocked) turns are counted. recordMessage is now
+    // async (atomic locked increment) so we await it. We SKIP counting for
+    // transient-error retries (metadata.error) — a flaky upstream shouldn't
+    // burn a tenant's quota with zero successful turns. Clarifications and
+    // no-match fallbacks DO count: they're real customer-facing turns that
+    // consumed engine resources. #finalize receives `tenant` (the loaded
+    // profile), so the id is tenant.id.
+    if (this.planService) {
+      const isTransientError = !!result?.metadata?.error;
+      if (!isTransientError) {
+        try { await this.planService.recordMessage(tenant.id); } catch (e) { logger.warn("subscription.record_failed", { error: e.message }); }
+      } else {
+        logger?.debug?.("subscription.record_skipped_error", { capabilityId, error: result?.metadata?.error });
+      }
+    }
     return { conversationId, reply:result.reply, state, capabilityId, intelligence, replayId, experience:experience ? { intent:experience.semantic.intent, language:experience.language, relationship:experience.relationship } : null };
+  }
+
+  /**
+   * Phase 4 Sprint 1 — the reply shown when a tenant is billing-blocked.
+   * Customer-facing and brand-safe: never exposes internal billing codes, just
+   * a friendly "we'll be right back" message so the business's customers aren't
+   * confused while the owner fixes the subscription.
+   */
+  _billingBlockReply(reason) {
+    return "Thanks for reaching out! We're unable to respond right now but will be back shortly. Please try again in a little while, or contact the business directly.";
   }
 }
 function summarizeIntelligence(value){ if(!value)return null; return { selected:value.selected,entities:value.entities,messageFrame:value.messageFrame,workflow:value.workflow,goal:value.goal ? { current:value.goal.current,nextGoal:value.goal.nextGoal,transition:value.goal.transition,override:value.goal.override } : null,correction:value.correction,interruption:value.interruption,globalCommand:value.globalCommand,requiresClarification:value.requiresClarification,clarificationReason:value.clarificationReason,resolvedContext:value.resolvedContext||null,nlu:value.nlu ? {used:value.nlu.used,validated:value.nlu.validated,mode:value.nlu.mode,strategy:value.nlu.strategy,deterministicFallback:value.nlu.deterministicFallback,executionAuthority:value.nlu.executionAuthority,model:value.nlu.model,promptVersion:value.nlu.promptVersion,decision:value.nlu.decision,invocationReason:value.nlu.invocationReason,error:value.nlu.error,httpStatus:value.nlu.httpStatus,providerMessage:value.nlu.providerMessage,providerErrorType:value.nlu.providerErrorType,providerRequestId:value.nlu.providerRequestId,latencyMs:value.nlu.latencyMs,languageContract:value.nlu.languageContract}:null}; }
