@@ -35,6 +35,31 @@ const { withFileLock, atomicWriteJson, readJsonSync } = require('../../storage/s
 const JWT_SECRET = process.env.NOVA_JWT_SECRET || crypto.randomBytes(32).toString('hex');
 const JWT_EXPIRY_DAYS = 7;
 const BCRYPT_ROUNDS = 10;
+// Allowed owner roles. 'admin' can manage co-owners; 'owner' is the default
+// working role. Any other value is rejected at create/update time so an admin
+// can't mint an arbitrary 'superadmin' role that some future route might trust.
+const ALLOWED_ROLES = new Set(['owner', 'admin']);
+const RESET_TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+// Hash a reset token with SHA-256 for storage. We never persist the raw token,
+// so a leak of owners.json doesn't grant password-reset capability. SHA-256 is
+// sufficient here (the token is 256-bit random, so a rainbow table is
+// infeasible) and faster than bcrypt for a high-volume compare path.
+function hashToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+// Constant-time string compare (both inputs must be same-length hex digests).
+function tokensEqual(a, b) {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ab, bb);
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase().trim());
+}
 
 class BusinessOwnerAuthService {
   constructor({ tenantsDir, logger = null }) {
@@ -64,6 +89,7 @@ class BusinessOwnerAuthService {
   createOwner({ tenantId, email, password, name, role = 'owner' }) {
     if (!email || !password) throw new Error('Email and password are required');
     if (password.length < 6) throw new Error('Password must be at least 6 characters');
+    if (!ALLOWED_ROLES.has(role)) throw new Error(`Invalid role '${role}'. Allowed: owner, admin`);
     const owners = this._loadOwners(tenantId);
     if (owners.find(o => o.email.toLowerCase() === email.toLowerCase())) {
       throw new Error('An owner with this email already exists');
@@ -78,7 +104,7 @@ class BusinessOwnerAuthService {
     };
     owners.push(owner);
     this._saveOwners(tenantId, owners);
-    this.logger?.info?.('business_owner.created', { tenantId, ownerId: owner.id, email: owner.email });
+    this.logger?.info?.('business_owner.created', { tenantId, ownerId: owner.id, email: owner.email, role });
     return { ...owner, passwordHash: undefined }; // never return the hash
   }
 
@@ -135,15 +161,158 @@ class BusinessOwnerAuthService {
     if (!owner) throw new Error(`No account found with email "${email}"`);
     owner.passwordHash = bcrypt.hashSync(newPassword, BCRYPT_ROUNDS);
     owner.passwordResetAt = new Date().toISOString();
+    owner.resetTokenHash = null;        // invalidate any pending self-serve token
+    owner.resetTokenExpires = null;
     this._saveOwners(tenantId, owners);
     this.logger?.info?.('business_owner.password_reset', { tenantId, ownerId: owner.id, email: owner.email });
     return { ok: true, ownerId: owner.id, email: owner.email, name: owner.name };
+  }
+
+  // ─── Self-serve password recovery (forgot password) ────────────────
+  // Issues a single-use, 30-minute reset token for an owner identified by
+  // email + tenantId. Returns the token so the caller (route) can deliver it
+  // — by email in production, or by returning it directly in dev mode.
+  //
+  // SECURITY: only a SHA-256 HASH of the token is stored in owners.json
+  // (never the plaintext), so a leak of owners.json does not grant reset
+  // capability. The plaintext token is returned once and lives only in the
+  // email/route response.
+  issuePasswordResetToken({ tenantId, email }) {
+    if (!email) throw new Error('Email is required');
+    const owners = this._loadOwners(tenantId);
+    const owner = owners.find(o => o.email.toLowerCase() === email.toLowerCase().trim());
+    // SECURITY: do NOT reveal whether the email exists. Return a generic ok
+    // even if the owner isn't found, so an attacker can't enumerate accounts.
+    if (!owner) return { ok: true, token: null };
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = Date.now() + RESET_TOKEN_TTL_MS;
+    owner.resetTokenHash = hashToken(token);   // store the HASH, not the token
+    owner.resetTokenExpires = new Date(expires).toISOString();
+    this._saveOwners(tenantId, owners);
+    this.logger?.info?.('business_owner.reset_token_issued', { tenantId, ownerId: owner.id, email: owner.email });
+    return { ok: true, token, ownerId: owner.id, email: owner.email };
+  }
+
+  // Consume a reset token + set a new password. Throws on invalid/expired/used
+  // token. Single-use: the token hash is cleared on success. Token comparison
+  // is constant-time (timingSafeEqual over the fixed-length hex hashes).
+  consumePasswordResetToken({ tenantId, token, newPassword }) {
+    if (!token || !newPassword) throw new Error('Token and new password are required');
+    if (newPassword.length < 6) throw new Error('Password must be at least 6 characters');
+    const tokenHash = hashToken(token);
+    const owners = this._loadOwners(tenantId);
+    const owner = owners.find(o => o.resetTokenHash && tokensEqual(o.resetTokenHash, tokenHash));
+    if (!owner) throw new Error('Invalid or already-used reset token');
+    if (!owner.resetTokenExpires || new Date(owner.resetTokenExpires).getTime() < Date.now()) {
+      owner.resetTokenHash = null; owner.resetTokenExpires = null;
+      this._saveOwners(tenantId, owners);
+      throw new Error('Reset token has expired. Please request a new one.');
+    }
+    owner.passwordHash = bcrypt.hashSync(newPassword, BCRYPT_ROUNDS);
+    owner.passwordResetAt = new Date().toISOString();
+    owner.resetTokenHash = null;            // single-use
+    owner.resetTokenExpires = null;
+    this._saveOwners(tenantId, owners);
+    this.logger?.info?.('business_owner.password_reset_via_token', { tenantId, ownerId: owner.id, email: owner.email });
+    return { ok: true, ownerId: owner.id, email: owner.email, name: owner.name };
+  }
+
+  // Self-serve password change: requires the CURRENT password (re-auth) so a
+  // hijacked session can't silently change the password. Returns the owner
+  // (hash stripped) on success; throws on wrong current password.
+  updatePassword({ tenantId, ownerId, currentPassword, newPassword }) {
+    if (!ownerId || !currentPassword || !newPassword) throw new Error('ownerId, currentPassword, and newPassword are required');
+    if (newPassword.length < 6) throw new Error('New password must be at least 6 characters');
+    if (currentPassword === newPassword) throw new Error('New password must be different from the current password');
+    const owners = this._loadOwners(tenantId);
+    const owner = owners.find(o => o.id === ownerId);
+    if (!owner) throw new Error('Owner not found');
+    if (!bcrypt.compareSync(currentPassword, owner.passwordHash)) {
+      throw new Error('Current password is incorrect');
+    }
+    owner.passwordHash = bcrypt.hashSync(newPassword, BCRYPT_ROUNDS);
+    owner.passwordResetAt = new Date().toISOString();
+    owner.resetTokenHash = null; owner.resetTokenExpires = null;
+    this._saveOwners(tenantId, owners);
+    this.logger?.info?.('business_owner.password_changed', { tenantId, ownerId: owner.id });
+    // Re-issue the JWT so any session derived from a leaked old token is
+    // invalidated (the new password proves continued control). The client
+    // stores the new token.
+    const token = this._issueJWT(owner, tenantId);
+    return { ok: true, ownerId: owner.id, email: owner.email, name: owner.name, token };
+  }
+
+  // Self-serve email change: requires the CURRENT password (re-auth) to prevent
+  // a hijacked session from silently changing the email (which is the recovery
+  // channel). Enforces email uniqueness within the tenant.
+  updateEmail({ tenantId, ownerId, currentPassword, newEmail }) {
+    if (!ownerId || !currentPassword || !newEmail) throw new Error('ownerId, currentPassword, and newEmail are required');
+    const normalized = newEmail.toLowerCase().trim();
+    if (!isValidEmail(normalized)) throw new Error('New email is not a valid email address');
+    const owners = this._loadOwners(tenantId);
+    const owner = owners.find(o => o.id === ownerId);
+    if (!owner) throw new Error('Owner not found');
+    if (!bcrypt.compareSync(currentPassword, owner.passwordHash)) {
+      throw new Error('Current password is incorrect');
+    }
+    if (owners.some(o => o.id !== ownerId && o.email.toLowerCase() === normalized)) {
+      throw new Error('Another owner on this tenant already uses that email');
+    }
+    const oldEmail = owner.email;
+    owner.email = normalized;
+    this._saveOwners(tenantId, owners);
+    this.logger?.info?.('business_owner.email_changed', { tenantId, ownerId: owner.id, oldEmail, newEmail: normalized });
+    // Re-issue the JWT so its payload carries the NEW email — otherwise
+    // /api/business/me would return the stale old email until re-login.
+    const token = this._issueJWT(owner, tenantId);
+    return { ok: true, ownerId: owner.id, email: normalized, name: owner.name, token };
   }
 
   // v33.1: List all owners for a tenant (for admin dashboard)
   listOwners({ tenantId }) {
     const owners = this._loadOwners(tenantId);
     return owners.map(o => ({ id: o.id, email: o.email, name: o.name, role: o.role, createdAt: o.createdAt, passwordResetAt: o.passwordResetAt || null }));
+  }
+
+  // Add an additional owner to a tenant. Called by an authenticated owner
+  // (self-serve "Team" page) or by an admin. Enforces email uniqueness.
+  addOwner({ tenantId, email, password, name, role = 'owner' }) {
+    return this.createOwner({ tenantId, email, password, name, role });
+  }
+
+  // Remove an owner from a tenant. Refuses to remove the LAST owner so a
+  // tenant can never be locked out. Returns the removed owner (hash stripped).
+  removeOwner({ tenantId, ownerId }) {
+    if (!ownerId) throw new Error('ownerId is required');
+    const owners = this._loadOwners(tenantId);
+    if (owners.length <= 1) {
+      throw new Error('Cannot remove the last owner. Add another owner first, or suspend the tenant instead.');
+    }
+    const idx = owners.findIndex(o => o.id === ownerId);
+    if (idx === -1) throw new Error('Owner not found');
+    const [removed] = owners.splice(idx, 1);
+    this._saveOwners(tenantId, owners);
+    this.logger?.info?.('business_owner.removed', { tenantId, ownerId: removed.id, email: removed.email });
+    return { ok: true, ownerId: removed.id, email: removed.email, name: removed.name };
+  }
+
+  // Admin-driven email update (no current-password check — the admin is
+  // already authenticated by the dev token). Used by the admin panel.
+  adminUpdateEmail({ tenantId, ownerId, newEmail }) {
+    if (!ownerId || !newEmail) throw new Error('ownerId and newEmail are required');
+    const normalized = newEmail.toLowerCase().trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) throw new Error('New email is not a valid email address');
+    const owners = this._loadOwners(tenantId);
+    const owner = owners.find(o => o.id === ownerId);
+    if (!owner) throw new Error('Owner not found');
+    if (owners.some(o => o.id !== ownerId && o.email.toLowerCase() === normalized)) {
+      throw new Error('Another owner on this tenant already uses that email');
+    }
+    const oldEmail = owner.email;
+    owner.email = normalized;
+    this._saveOwners(tenantId, owners);
+    this.logger?.info?.('business_owner.email_changed_admin', { tenantId, ownerId: owner.id, oldEmail, newEmail: normalized });
+    return { ok: true, ownerId: owner.id, email: normalized, name: owner.name };
   }
 
   // ─── JWT ───────────────────────────────────────────────────────────

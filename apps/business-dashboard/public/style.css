@@ -52,6 +52,8 @@ button:hover{background:var(--border)}
 button.primary{background:var(--accent);border-color:var(--accent-strong);color:#fff;font-weight:600}
 button.primary:hover{background:var(--accent-strong)}
 button.danger{border-color:var(--bad);color:var(--bad)}
+button.sm{padding:4px 10px;font-size:11px}
+.data-table{font-size:12px}
 input,select,textarea{background:var(--surface-3);color:var(--text);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:9px 11px;font-size:13px;font-family:inherit;width:100%}
 .login-container{display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:20px}
 .login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;max-width:400px;width:100%}

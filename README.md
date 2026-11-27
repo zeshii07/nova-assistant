@@ -1,12 +1,75 @@
-# Nova Assistant — v72.1
+# Nova Assistant — v72.2
 
 **Multi-tenant SaaS conversation engine** for service businesses. Handles orders, bookings, hotel room reservations, and customer interactions across restaurants, hotels, salons, cleaning services, retail, healthcare, education, and driving schools.
 
 ---
 
-## 🚀 What's New (v40.0 → v72.0)
+## 🚀 What's New (v40.0 → v72.2)
 
-### v72.0 — Production-Readiness: Billing + Self-Serve (Phase 4, in progress)
+### v72.2 — Owner account management (password recovery, email change, team management)
+
+Business owners could sign up and log in, but if they forgot their password or
+email there was **no recovery path** — and the "additional owners" feature the
+dashboard mentioned didn't exist. This sprint closes those gaps with a full
+self-serve + admin-driven account-management layer.
+
+**Self-serve password recovery (forgot password)**
+- `POST /api/business/forgot-password` (public, rate-limited, anti-enumeration)
+  issues a single-use, 30-minute reset token and emails a reset link. In dev
+  (no SMTP) the link is returned directly for testing.
+- `POST /api/business/reset-password` (public, rate-limited) consumes the token
+  and sets a new password.
+- Login page gains a "Forgot password?" link + form; a reset link lands on a
+  dedicated reset-password page (`/business/reset-password?token=…`).
+- **Security:** only a SHA-256 *hash* of the token is stored in `owners.json`
+  (never the plaintext), so a leak of the file doesn't grant reset capability.
+  Token comparison is constant-time. The route fires the email
+  send asynchronously so response latency is identical for known vs unknown
+  emails (closes the account-enumeration timing leak).
+
+**Self-serve account settings**
+- `PUT /api/business/password` — change your own password (requires current
+  password re-auth). Re-issues the JWT so a leaked old token is invalidated.
+- `PUT /api/business/email` — change your own email (requires current password
+  re-auth, since email is the recovery channel). Re-issues the JWT carrying the
+  new email so `/api/business/me` shows it immediately.
+- The Settings page gains "Change password" and "Change email" forms.
+
+**Team / co-owner management (self-serve)**
+- `GET /api/business/owners` — list the owners on your tenant.
+- `POST /api/business/owners` — invite a co-owner (set their temp password).
+- `DELETE /api/business/owners/:ownerId` — remove a co-owner. The last owner
+  can never be removed (lockout protection).
+- A new "Team" nav item in the business dashboard lists co-owners + an
+  add-member form.
+
+**Admin operator controls**
+- The admin panel's tenant list gains a "👥 Owners" button on each card that
+  opens a per-tenant owner-management modal: list owners, add an owner, reset a
+  password, change an owner's email, remove an owner.
+- `POST /api/admin/owners/:tenantId` (add), `PUT /api/admin/owners/:tenantId/:ownerId/email`
+  (update email), `DELETE /api/admin/owners/:tenantId/:ownerId` (remove) — all
+  behind the existing dev-token gate.
+
+**Security hardening (post-review)**
+- Reset tokens are hashed at rest (SHA-256), compared with `timingSafeEqual`.
+- Owner roles are validated against an allow-list (`owner`, `admin`) — an admin
+  can't mint an arbitrary `superadmin` role that a future route might trust.
+- Password + email changes re-issue the JWT so the client's stored token stays
+  current (no stale-email display after a change).
+- The reset-password route is rate-limited per IP (bounds brute-force probing).
+- Error messages are sanitized — raw filesystem errors never reach the client.
+- Admin reset invalidates any pending self-serve token (no token-reuse window).
+
+**Tests:** `tests/sprintP4-4.owner-account-management.regression.test.js` — 28
+cases covering token issue/consume/expiry/single-use/cross-tenant, anti-
+enumeration, re-auth on change, email uniqueness, role validation, token
+hashing, JWT re-issue, last-owner protection, and admin flows. All pass. Full
+sweep: 124/124 Phase-4 tests + 273/273 sanity.
+
+---
+
+### v72.0 — Production-Readiness: Billing + Self-Serve (Phase 4)
 
 Phase 4 turns Nova from "works for a hand-onboarded pilot" into a pitchable,
 self-serve SaaS. Each sprint closes one GTM gap; the engine itself is stable

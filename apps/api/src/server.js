@@ -1871,6 +1871,59 @@ async function startServer() {
       }
       // ─── End v33.1 Admin owner management ───────────────────────────────
 
+      // ─── Extended admin owner management (add / email / remove) ──────────
+      // Add an owner to a tenant (admin-driven). Lets an operator provision a
+      // second owner without the self-serve register flow.
+      const adminAddOwnerMatch = url.pathname.match(/^\/api\/admin\/owners\/([^/]+)$/);
+      if (req.method === "POST" && adminAddOwnerMatch) {
+        const tenantId = decodeURIComponent(adminAddOwnerMatch[1]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const body = await readJson(req);
+        const { email, password, name, role } = body;
+        if (!email || !password) return sendJson(res, 400, { ok:false, error:'email and password are required' });
+        try {
+          const owner = container.businessOwnerAuthService.addOwner({ tenantId, email, password, name, role });
+          return sendJson(res, 201, { ok:true, owner, message:`Owner ${email} added to ${tenantId}.` });
+        } catch (err) {
+          return sendJson(res, 400, { ok:false, error: err.message });
+        }
+      }
+
+      // Update an owner's email (admin-driven — no current-password check).
+      const adminOwnerEmailMatch = url.pathname.match(/^\/api\/admin\/owners\/([^/]+)\/([^/]+)\/email$/);
+      if (req.method === "PUT" && adminOwnerEmailMatch) {
+        const tenantId = decodeURIComponent(adminOwnerEmailMatch[1]);
+        const ownerId = decodeURIComponent(adminOwnerEmailMatch[2]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const body = await readJson(req);
+        const { newEmail } = body;
+        if (!newEmail) return sendJson(res, 400, { ok:false, error:'newEmail is required' });
+        try {
+          const result = container.businessOwnerAuthService.adminUpdateEmail({ tenantId, ownerId, newEmail });
+          return sendJson(res, 200, { ok:true, ...result, message:`Email updated to ${result.email}.` });
+        } catch (err) {
+          return sendJson(res, 400, { ok:false, error: err.message });
+        }
+      }
+
+      // Remove an owner (admin-driven). Refuses the last owner.
+      const adminOwnerDeleteMatch = url.pathname.match(/^\/api\/admin\/owners\/([^/]+)\/([^/]+)$/);
+      if (req.method === "DELETE" && adminOwnerDeleteMatch) {
+        const tenantId = decodeURIComponent(adminOwnerDeleteMatch[1]);
+        const ownerId = decodeURIComponent(adminOwnerDeleteMatch[2]);
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        try {
+          const result = container.businessOwnerAuthService.removeOwner({ tenantId, ownerId });
+          return sendJson(res, 200, { ok:true, ...result, message:`Removed owner ${result.email}.` });
+        } catch (err) {
+          return sendJson(res, 400, { ok:false, error: err.message });
+        }
+      }
+      // ─── End extended admin owner management ────────────────────────────
+
       // ─── v34.1: Voice Profile endpoints (voice cloning prep) ────────────
       // GET: retrieve voice profile for a tenant
       // POST: save voice profile (voice name, rate, pitch from browser TTS settings)
@@ -2571,7 +2624,84 @@ async function startServer() {
       }
 
       // All other /api/business/* endpoints require auth
-      if (url.pathname.startsWith("/api/business/") && url.pathname !== "/api/business/login" && url.pathname !== "/api/business/register") {
+      // ─── Self-serve password recovery (public, rate-limited) ────────────
+      // Request a reset link. NEVER reveals whether the email exists (anti-
+      // enumeration): returns the same generic ok whether or not the owner was
+      // found. In dev (no SMTP configured) the token is returned in the response
+      // so the flow can be tested without a mailbox; in prod the link is emailed
+      // and the token is omitted from the response.
+      if (req.method === "POST" && url.pathname === "/api/business/forgot-password") {
+        const body = await readJson(req);
+        const { tenantId, email } = body;
+        if (!tenantId || !email) return sendJson(res, 400, { ok:false, error:'tenantId and email are required' });
+        // Validate tenant exists (this IS allowed to 404 — a non-existent tenant
+        // isn't account-enumeration of a real tenant).
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        const clientIp = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+        const rl = checkWidgetRateLimit(`forgot:${clientIp}`);
+        if (!rl.allowed) return sendJson(res, 429, { ok:false, error:'Too many requests. Please wait a few minutes.' });
+        try {
+          const result = container.businessOwnerAuthService.issuePasswordResetToken({ tenantId, email });
+          // Deliver the reset link by email. We fire-and-forget the SMTP send
+          // (no await) so the response latency is identical whether or not an
+          // owner was found — closing the account-enumeration timing leak that
+          // an awaited SMTP round-trip would create.
+          if (result.token && container.emailService) {
+            const proto = req.headers['x-forwarded-proto'] || 'https';
+            const host = req.headers['host'] || 'localhost';
+            const resetUrl = `${proto}://${host}/business/reset-password?tenant=${encodeURIComponent(tenantId)}&token=${result.token}`;
+            const isDev = !container.emailService.configured;
+            container.emailService.send({
+              to: result.email,
+              subject: 'Reset your Nova business dashboard password',
+              text: `Hello,\n\nWe received a request to reset your Nova dashboard password. Open this link within 30 minutes to choose a new password:\n\n${resetUrl}\n\nIf you didn't request this, you can safely ignore this email — your password hasn't changed.\n\n— The Nova team`,
+              html: `<p>Hello,</p><p>We received a request to reset your Nova dashboard password. Click the link below within 30 minutes to choose a new password:</p><p><a href="${resetUrl}">Reset my password</a></p><p style="color:#666;font-size:12px">Or copy this link: ${resetUrl}</p><p>If you didn't request this, you can safely ignore this email — your password hasn't changed.</p><p>— The Nova team</p>`,
+            }).catch(e => container.logger?.error?.('business.forgot_password_email_failed', { tenantId, error: e.message }));
+            // Dev mode only: SMTP isn't configured, so surface the link for testing.
+            return sendJson(res, 200, { ok:true, message:'If an account exists for that email, a reset link has been sent.', ...(isDev ? { devToken: result.token, devNote: 'SMTP not configured — the reset link is included here for local testing.' } : {}) });
+          }
+          // No email service OR no owner found — same generic message + latency.
+          return sendJson(res, 200, { ok:true, message:'If an account exists for that email, a reset link has been sent.' });
+        } catch (err) {
+          container.logger?.error?.('business.forgot_password_failed', { tenantId, error: err.message });
+          return sendJson(res, 400, { ok:false, error: 'Could not process the request. Please try again.' });
+        }
+      }
+
+      // Consume a reset token + set a new password (public — the token is the
+      // auth). Single-use, 30-min TTL.
+      if (req.method === "POST" && url.pathname === "/api/business/reset-password") {
+        const body = await readJson(req);
+        const { tenantId, token, newPassword } = body;
+        if (!tenantId || !token || !newPassword) return sendJson(res, 400, { ok:false, error:'tenantId, token, and newPassword are required' });
+        try { container.tenantRepository.getById(tenantId); }
+        catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
+        // Rate-limit token-consume attempts per IP so a leaked-token attacker
+        // can't brute-force validity probes (the 256-bit token makes blind
+        // brute-force infeasible, but the throttle bounds log noise + bcrypt CPU).
+        const clientIp = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+        const rl = checkWidgetRateLimit(`reset:${clientIp}`);
+        if (!rl.allowed) return sendJson(res, 429, { ok:false, error:'Too many requests. Please wait a few minutes.' });
+        try {
+          const result = container.businessOwnerAuthService.consumePasswordResetToken({ tenantId, token, newPassword });
+          return sendJson(res, 200, { ok:true, ...result, message:'Your password has been reset. You can now log in.' });
+        } catch (err) {
+          // Surface only the user-facing token messages; hide any FS-internal error.
+          const msg = err.message || '';
+          const safe = /Invalid or already-used|expired|at least 6 characters|required/i.test(msg) ? msg : 'Reset failed. The link may be invalid or expired.';
+          container.logger?.warn?.('business.reset_password_failed', { tenantId, error: msg });
+          return sendJson(res, 400, { ok:false, error: safe });
+        }
+      }
+
+      // All other /api/business/* endpoints require auth. The public routes
+      // (login, register, forgot-password, reset-password) are excluded.
+      if (url.pathname.startsWith("/api/business/")
+          && url.pathname !== "/api/business/login"
+          && url.pathname !== "/api/business/register"
+          && url.pathname !== "/api/business/forgot-password"
+          && url.pathname !== "/api/business/reset-password") {
         const authPayload = container.businessOwnerAuthService.requireAuth(req);
         if (!authPayload) return sendJson(res, 401, { ok:false, error:'Authentication required. Please log in.' });
         req._businessOwner = authPayload; // attach for downstream handlers
@@ -2580,6 +2710,85 @@ async function startServer() {
       // Get current owner info
       if (req.method === "GET" && url.pathname === "/api/business/me") {
         return sendJson(res, 200, { ok:true, owner: req._businessOwner });
+      }
+
+      // ─── Self-serve account management (authed) ────────────────────────
+      // Change own password — requires the current password (re-auth) so a
+      // hijacked session can't silently change it. A fresh JWT is returned so
+      // the client replaces its stored token (the new password invalidates the
+      // old token's effective session control).
+      if (req.method === "PUT" && url.pathname === "/api/business/password") {
+        const body = await readJson(req);
+        const { currentPassword, newPassword } = body;
+        try {
+          const result = container.businessOwnerAuthService.updatePassword({
+            tenantId: req._businessOwner.tenantId,
+            ownerId: req._businessOwner.sub,
+            currentPassword, newPassword,
+          });
+          return sendJson(res, 200, { ok:true, message:'Your password has been changed.', token: result.token });
+        } catch (err) {
+          const msg = err.message || '';
+          const safe = /Current password is incorrect|different from the current|at least 6 characters|required|Owner not found/i.test(msg) ? msg : 'Could not change password.';
+          return sendJson(res, 400, { ok:false, error: safe });
+        }
+      }
+
+      // Change own email — requires the current password (re-auth) since email
+      // is the recovery channel. A fresh JWT (carrying the new email) is
+      // returned so /api/business/me shows the updated email immediately.
+      if (req.method === "PUT" && url.pathname === "/api/business/email") {
+        const body = await readJson(req);
+        const { currentPassword, newEmail } = body;
+        try {
+          const result = container.businessOwnerAuthService.updateEmail({
+            tenantId: req._businessOwner.tenantId,
+            ownerId: req._businessOwner.sub,
+            currentPassword, newEmail,
+          });
+          return sendJson(res, 200, { ok:true, message:'Your email has been updated.', email: result.email, token: result.token });
+        } catch (err) {
+          const msg = err.message || '';
+          const safe = /Current password is incorrect|already uses that email|not a valid email|required|Owner not found/i.test(msg) ? msg : 'Could not update email.';
+          return sendJson(res, 400, { ok:false, error: safe });
+        }
+      }
+
+      // ─── Team / co-owner management (authed owner) ─────────────────────
+      // List the owners on this tenant (the dashboard's "Team" page).
+      if (req.method === "GET" && url.pathname === "/api/business/owners") {
+        const owners = container.businessOwnerAuthService.listOwners({ tenantId: req._businessOwner.tenantId });
+        return sendJson(res, 200, { ok:true, owners, currentOwnerId: req._businessOwner.sub });
+      }
+
+      // Add a co-owner (an authenticated owner invites a teammate).
+      if (req.method === "POST" && url.pathname === "/api/business/owners") {
+        const body = await readJson(req);
+        const { email, password, name } = body;
+        if (!email || !password) return sendJson(res, 400, { ok:false, error:'email and password are required' });
+        try {
+          const owner = container.businessOwnerAuthService.addOwner({
+            tenantId: req._businessOwner.tenantId, email, password, name,
+          });
+          return sendJson(res, 201, { ok:true, owner });
+        } catch (err) {
+          return sendJson(res, 400, { ok:false, error: err.message });
+        }
+      }
+
+      // Remove a co-owner. Refuses to remove the last owner. An owner can
+      // remove themselves (a graceful self-exit) but not the last one.
+      const bizOwnerDeleteMatch = url.pathname.match(/^\/api\/business\/owners\/([^/]+)$/);
+      if (req.method === "DELETE" && bizOwnerDeleteMatch) {
+        const targetOwnerId = decodeURIComponent(bizOwnerDeleteMatch[1]);
+        try {
+          const result = container.businessOwnerAuthService.removeOwner({
+            tenantId: req._businessOwner.tenantId, ownerId: targetOwnerId,
+          });
+          return sendJson(res, 200, { ok:true, ...result, message:`Removed owner ${result.email}.` });
+        } catch (err) {
+          return sendJson(res, 400, { ok:false, error: err.message });
+        }
       }
 
       // ─── Phase 4 Sprint 1: Billing (authed; uses req._businessOwner.tenantId) ──

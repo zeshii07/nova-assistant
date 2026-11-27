@@ -34,6 +34,12 @@ async function api(path, options = {}) {
 
 // ─── Login / Logout ───────────────────────────────────────
 function renderLogin() {
+  // Detect a ?reset=1 / ?token=... URL so a reset link lands on the reset form.
+  const params = new URLSearchParams(window.location.search);
+  const resetTenant = params.get('tenant') || localStorage.getItem('novaBusinessTenant') || '';
+  const resetToken = params.get('token');
+  if (resetToken) { renderResetPassword(resetTenant, resetToken); return; }
+
   app.innerHTML = `
     <div class="login-container">
       <div class="login-card">
@@ -48,6 +54,16 @@ function renderLogin() {
           <input id="loginPassword" type="password" placeholder="Your password">
           <button type="submit" class="primary">Log in</button>
         </form>
+        <p style="margin-top:12px;font-size:12px;text-align:right">
+          <a href="#" id="forgotLink" style="color:var(--accent-strong)">Forgot password?</a>
+        </p>
+        <div id="forgotForm" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <label>Tenant ID</label>
+          <input id="forgotTenant" placeholder="byt-cleaners-dubai">
+          <label>Email</label>
+          <input id="forgotEmail" type="email" placeholder="owner@business.com">
+          <button type="button" id="forgotBtn" class="primary" style="margin-top:8px">Send reset link</button>
+        </div>
         <p style="margin-top:16px;font-size:11px;color:var(--text-faint)">
           Don't have an account? Ask your Nova operator to create one for you,
           or register below if this is the first owner for this tenant.
@@ -86,6 +102,37 @@ function renderLogin() {
     }
   });
 
+  $('forgotLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    const form = $('forgotForm');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    if (form.style.display === 'block') {
+      $('forgotTenant').value = $('loginTenant').value || '';
+      $('forgotEmail').value = $('loginEmail').value || '';
+    }
+  });
+
+  $('forgotBtn')?.addEventListener('click', async () => {
+    const tenantId = $('forgotTenant').value.trim();
+    const email = $('forgotEmail').value.trim();
+    if (!tenantId || !email) { $('loginError').textContent = 'Tenant ID and email are required.'; return; }
+    $('loginError').style.color = 'var(--text-dim)';
+    $('loginError').textContent = 'Sending…';
+    const r = await api('/api/business/forgot-password', { method: 'POST', body: JSON.stringify({ tenantId, email }) });
+    if (r.ok) {
+      $('loginError').style.color = 'var(--ok)';
+      $('loginError').textContent = r.message || 'If that account exists, a reset link has been sent.';
+      if (r.devToken) {
+        // Dev mode: SMTP not configured. Show the reset link directly so the
+        // flow is testable. Production never returns devToken.
+        $('loginError').innerHTML = `${esc(r.message)}<br><span style="font-size:11px;color:var(--text-faint)">${esc(r.devNote || '')}</span><br><a href="/business/reset-password?tenant=${encodeURIComponent(tenantId)}&token=${encodeURIComponent(r.devToken)}" style="word-break:break-all">Open reset link →</a>`;
+      }
+    } else {
+      $('loginError').style.color = 'var(--bad)';
+      $('loginError').textContent = r.error || 'Request failed';
+    }
+  });
+
   $('showRegister').addEventListener('click', () => {
     const form = $('registerForm');
     form.style.display = form.style.display === 'none' ? 'block' : 'none';
@@ -108,6 +155,43 @@ function renderLogin() {
   });
 }
 
+// ─── Reset password (lands here from a reset link) ─────────
+function renderResetPassword(tenant, token) {
+  app.innerHTML = `
+    <div class="login-container">
+      <div class="login-card">
+        <h1>Set a new password</h1>
+        <p style="font-size:12px;color:var(--text-dim)">For tenant <strong>${esc(tenant)}</strong></p>
+        <form id="resetForm">
+          <label>New password (min 6 chars)</label>
+          <input id="resetPassword" type="password" placeholder="Choose a new password">
+          <label>Confirm new password</label>
+          <input id="resetPassword2" type="password" placeholder="Re-enter the new password">
+          <button type="submit" class="primary">Reset password</button>
+        </form>
+        <div id="resetMsg" style="margin-top:12px;font-size:12px"></div>
+        <p style="margin-top:16px;font-size:12px"><a href="/business" style="color:var(--accent-strong)">← Back to login</a></p>
+      </div>
+    </div>
+  `;
+  $('resetForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const p1 = $('resetPassword').value;
+    const p2 = $('resetPassword2').value;
+    if (p1.length < 6) { $('resetMsg').style.color = 'var(--bad)'; $('resetMsg').textContent = 'Password must be at least 6 characters.'; return; }
+    if (p1 !== p2) { $('resetMsg').style.color = 'var(--bad)'; $('resetMsg').textContent = 'Passwords do not match.'; return; }
+    const r = await api('/api/business/reset-password', { method: 'POST', body: JSON.stringify({ tenantId: tenant, token, newPassword: p1 }) });
+    if (r.ok) {
+      $('resetMsg').style.color = 'var(--ok)';
+      $('resetMsg').innerHTML = `${esc(r.message || 'Password reset.')} <a href="/business" style="color:var(--accent-strong)">Log in →</a>`;
+      $('resetForm').style.display = 'none';
+    } else {
+      $('resetMsg').style.color = 'var(--bad)';
+      $('resetMsg').textContent = r.error || 'Reset failed. The link may have expired.';
+    }
+  });
+}
+
 function logout() {
   state.token = null;
   state.owner = null;
@@ -125,6 +209,7 @@ const ROUTES = {
   voice: { title: 'Voice Studio', render: renderVoiceStudio },
   kiosk: { title: 'Kiosk & QR', render: renderKiosk },
   notifications: { title: 'Notifications', render: renderNotifications },
+  team: { title: 'Team', render: renderTeam },
   settings: { title: 'Settings', render: renderSettings }
 };
 
@@ -994,6 +1079,58 @@ async function renderKiosk() {
   });
 }
 
+// ─── Team (co-owner management) ───────────────────────────
+async function renderTeam() {
+  const view = $('view');
+  view.innerHTML = `<div class="card"><h3>Team members</h3><p id="teamLoading" style="color:var(--text-dim)">Loading…</p></div>
+    <div class="card"><h3>Add a team member</h3><p style="font-size:12px;color:var(--text-dim)">They'll be able to log in and manage this business alongside you.</p>
+      <form id="addOwnerForm">
+        <label>Name</label><input id="newOwnerName" placeholder="Jane Smith">
+        <label>Email</label><input id="newOwnerEmail" type="email" placeholder="jane@business.com">
+        <label>Temporary password (min 6 chars)</label><input id="newOwnerPassword" type="password" placeholder="They can change this after logging in">
+        <button type="submit" class="primary">Add team member</button>
+      </form>
+      <div id="addOwnerMsg" style="margin-top:8px;font-size:12px"></div>
+    </div>`;
+  const r = await api('/api/business/owners');
+  const card = view.querySelector('.card');
+  if (!r.ok) {
+    card.innerHTML = `<h3>Team members</h3><p style="color:var(--bad)">${esc(r.error || 'Could not load owners.')}</p>`;
+  } else {
+    const currentId = r.currentOwnerId;
+    const rows = r.owners.map(o => `
+      <tr>
+        <td>${esc(o.name || '—')} ${o.id === currentId ? '<span class="badge neutral">you</span>' : ''}</td>
+        <td>${esc(o.email)}</td>
+        <td>${esc(o.role)}</td>
+        <td>${fmtDate(o.createdAt)}</td>
+        <td>${o.id === currentId ? '' : `<button class="danger sm" data-remove="${esc(o.id)}">Remove</button>`}</td>
+      </tr>`).join('');
+    card.innerHTML = `<h3>Team members</h3>
+      <table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Added</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+      <p style="margin-top:8px;font-size:12px;color:var(--text-dim)">${r.owners.length} owner${r.owners.length === 1 ? '' : 's'}. The last owner cannot be removed.</p>`;
+    card.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const oid = btn.getAttribute('data-remove');
+        if (!confirm('Remove this team member? They will lose access immediately.')) return;
+        const rr = await api(`/api/business/owners/${encodeURIComponent(oid)}`, { method: 'DELETE' });
+        if (rr.ok) { renderTeam(); } else { alert(rr.error || 'Could not remove owner.'); }
+      });
+    });
+  }
+  $('addOwnerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = $('newOwnerEmail').value.trim();
+    const password = $('newOwnerPassword').value;
+    const name = $('newOwnerName').value.trim();
+    if (!email || !password) return;
+    const rr = await api('/api/business/owners', { method: 'POST', body: JSON.stringify({ email, password, name }) });
+    const msg = $('addOwnerMsg');
+    if (rr.ok) { msg.style.color = 'var(--ok)'; msg.textContent = `Added ${email}. They can now log in.`; renderTeam(); }
+    else { msg.style.color = 'var(--bad)'; msg.textContent = rr.error || 'Could not add owner.'; }
+  });
+}
+
 // ─── Settings ─────────────────────────────────────────────
 async function renderSettings() {
   const view = $('view');
@@ -1004,6 +1141,30 @@ async function renderSettings() {
       <p><strong>Email:</strong> ${esc(state.owner?.email || '—')}</p>
       <p><strong>Tenant:</strong> ${esc(state.owner?.tenantId || '—')}</p>
       <p><strong>Role:</strong> ${esc(state.owner?.role || 'owner')}</p>
+    </div>
+    <div class="card">
+      <h3>Change password</h3>
+      <p style="font-size:12px;color:var(--text-dim)">Enter your current password to confirm the change.</p>
+      <form id="changePwForm">
+        <label>Current password</label>
+        <input id="curPw" type="password" placeholder="Your current password">
+        <label>New password (min 6 chars)</label>
+        <input id="newPw" type="password" placeholder="Choose a new password">
+        <button type="submit" class="primary">Change password</button>
+      </form>
+      <div id="changePwMsg" style="margin-top:8px;font-size:12px"></div>
+    </div>
+    <div class="card">
+      <h3>Change email</h3>
+      <p style="font-size:12px;color:var(--text-dim)">Your email is also your recovery channel — confirm with your current password.</p>
+      <form id="changeEmailForm">
+        <label>Current password</label>
+        <input id="emailCurPw" type="password" placeholder="Your current password">
+        <label>New email</label>
+        <input id="newEmail" type="email" placeholder="new-email@business.com">
+        <button type="submit" class="primary">Update email</button>
+      </form>
+      <div id="changeEmailMsg" style="margin-top:8px;font-size:12px"></div>
     </div>
     <div class="card">
       <h3>Widget Embed Snippet</h3>
@@ -1021,6 +1182,39 @@ async function renderSettings() {
       <p><a href="/widget-test" target="_blank" style="color:var(--accent-strong)">Widget Test Page ↗</a></p>
     </div>
   `;
+  $('changePwForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const currentPassword = $('curPw').value;
+    const newPassword = $('newPw').value;
+    const r = await api('/api/business/password', { method: 'PUT', body: JSON.stringify({ currentPassword, newPassword }) });
+    const msg = $('changePwMsg');
+    if (r.ok) {
+      msg.style.color = 'var(--ok)'; msg.textContent = r.message || 'Password changed.';
+      $('curPw').value = ''; $('newPw').value = '';
+      // The server re-issued the JWT (new password) — replace the stored token
+      // so subsequent requests use the fresh one.
+      if (r.token) { state.token = r.token; localStorage.setItem('novaBusinessToken', r.token); }
+    } else { msg.style.color = 'var(--bad)'; msg.textContent = r.error || 'Could not change password.'; }
+  });
+  $('changeEmailForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const currentPassword = $('emailCurPw').value;
+    const newEmail = $('newEmail').value.trim();
+    const r = await api('/api/business/email', { method: 'PUT', body: JSON.stringify({ currentPassword, newEmail }) });
+    const msg = $('changeEmailMsg');
+    if (r.ok) {
+      msg.style.color = 'var(--ok)'; msg.textContent = r.message || 'Email updated.';
+      state.owner.email = r.email;
+      localStorage.setItem('novaBusinessEmail', r.email);
+      // The server re-issued the JWT carrying the new email — replace the
+      // stored token so /api/business/me returns the updated email.
+      if (r.token) { state.token = r.token; localStorage.setItem('novaBusinessToken', r.token); }
+      $('emailCurPw').value = ''; $('newEmail').value = '';
+      // Refresh the header so the new email shows.
+      const me = await api('/api/business/me');
+      if (me.ok) { state.owner = me.owner; renderDashboard(); }
+    } else { msg.style.color = 'var(--bad)'; msg.textContent = r.error || 'Could not update email.'; }
+  });
 }
 
 // ─── Boot ─────────────────────────────────────────────────

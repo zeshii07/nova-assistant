@@ -629,6 +629,9 @@ async function renderTenants() {
             ${t.notificationsEnabled ? badge('notifications', 'ok') : badge('notifications off', 'warn')}
           </div>
           ${t.stats ? `<div class="muted" style="font-size:11px;margin-top:6px">Leads: ${t.stats.leads || 0} · Notifications: ${t.stats.notifications || 0}</div>` : ''}
+          <div class="card-actions" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+            <button class="sm" data-owners="${esc(t.id)}" title="Manage owner logins, reset passwords, add/remove owners">👥 Owners</button>
+          </div>
         </div>`).join('')}
     </div>
   `;
@@ -638,6 +641,13 @@ async function renderTenants() {
       $('tenantSelect').value = id;
       state.tenant = id;
       navigate('conversations');
+    });
+    // The "Owners" button opens a management modal; stop it from triggering the
+    // card's navigation handler.
+    const ownersBtn = el.querySelector('[data-owners]');
+    if (ownersBtn) ownersBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openOwnersModal(ownersBtn.getAttribute('data-owners'));
     });
   });
   // Wire search + filter
@@ -654,6 +664,94 @@ async function renderTenants() {
   };
   search.addEventListener('input', applyFilter);
   filter.addEventListener('change', applyFilter);
+}
+
+// ─── Owner management modal (admin) ────────────────────────────────
+// Per-tenant owner management: list owners, add an owner, reset a password,
+// update an email, remove an owner. Rendered as a fixed overlay so it works
+// from anywhere in the admin panel.
+async function openOwnersModal(tenantId) {
+  // Build the overlay shell, then populate the owner list async.
+  const overlay = document.createElement('div');
+  overlay.className = 'owners-modal-overlay';
+  overlay.innerHTML = `
+    <div class="owners-modal">
+      <div class="owners-modal-head">
+        <h3>Owner logins — <span id="omTenant">${esc(tenantId)}</span></h3>
+        <button class="om-close" title="Close">✕</button>
+      </div>
+      <div id="omBody"><p class="hint">Loading owners…</p></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('.om-close').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  const body = overlay.querySelector('#omBody');
+  const refresh = async () => {
+    const r = await api(`/api/admin/owners/${encodeURIComponent(tenantId)}`);
+    if (!r.ok) { body.innerHTML = `<p class="bad">${esc(r.error || 'Could not load owners.')}</p>`; return; }
+    const rows = (r.owners || []).map(o => `
+      <div class="om-owner" data-oid="${esc(o.id)}">
+        <div><strong>${esc(o.name || '—')}</strong> <span class="muted">${esc(o.email)}</span></div>
+        <div class="muted" style="font-size:11px">Role: ${esc(o.role)} · Added ${fmtDate(o.createdAt)}${o.passwordResetAt ? ` · Last reset ${fmtDate(o.passwordResetAt)}` : ''}</div>
+        <div class="om-owner-actions">
+          <button class="sm" data-act="reset" data-email="${esc(o.email)}">Reset password</button>
+          <button class="sm" data-act="email" data-oid="${esc(o.id)}" data-email="${esc(o.email)}">Change email</button>
+          <button class="sm danger" data-act="remove" data-oid="${esc(o.id)}" data-email="${esc(o.email)}">Remove</button>
+        </div>
+      </div>`).join('') || '<p class="hint">No owner logins. Add one below.</p>';
+    body.innerHTML = `
+      <div class="om-list">${rows}</div>
+      <hr style="border:0;border-top:1px solid var(--border);margin:16px 0">
+      <h4 style="margin:0 0 8px">Add an owner</h4>
+      <div class="om-add">
+        <input id="omAddName" placeholder="Name">
+        <input id="omAddEmail" type="email" placeholder="email@business.com">
+        <input id="omAddPw" type="password" placeholder="Temp password (min 6)">
+        <button class="primary sm" id="omAddBtn">Add</button>
+      </div>
+      <div id="omMsg" style="margin-top:8px;font-size:12px"></div>`;
+    // Wire per-owner actions
+    body.querySelectorAll('[data-act]').forEach(btn => {
+      btn.addEventListener('click', () => handleOwnerAction(btn, tenantId, refresh));
+    });
+    // Wire add-owner
+    body.querySelector('#omAddBtn').addEventListener('click', async () => {
+      const email = body.querySelector('#omAddEmail').value.trim();
+      const password = body.querySelector('#omAddPw').value;
+      const name = body.querySelector('#omAddName').value.trim();
+      const msg = body.querySelector('#omMsg');
+      if (!email || !password) { msg.className = 'bad'; msg.textContent = 'Email and password are required.'; return; }
+      const rr = await api(`/api/admin/owners/${encodeURIComponent(tenantId)}`, { method: 'POST', body: JSON.stringify({ email, password, name }) });
+      if (rr.ok) { msg.className = 'ok'; msg.textContent = `Added ${email}.`; refresh(); }
+      else { msg.className = 'bad'; msg.textContent = rr.error || 'Could not add owner.'; }
+    });
+  };
+  await refresh();
+}
+
+async function handleOwnerAction(btn, tenantId, refresh) {
+  const act = btn.getAttribute('data-act');
+  const oid = btn.getAttribute('data-oid');
+  const email = btn.getAttribute('data-email');
+  if (act === 'reset') {
+    const np = prompt(`Enter a new temporary password for ${email} (min 6 chars):`);
+    if (!np) return;
+    const r = await api(`/api/admin/owners/${encodeURIComponent(tenantId)}/reset-password`, { method: 'POST', body: JSON.stringify({ email, newPassword: np }) });
+    if (r.ok) alert(`Password reset for ${email}.\n\nShare the new password with the owner securely. They can change it after logging in.`);
+    else alert(r.error || 'Reset failed.');
+  } else if (act === 'email') {
+    const ne = prompt(`Enter the new email for ${email}:`, email);
+    if (!ne || ne === email) return;
+    const r = await api(`/api/admin/owners/${encodeURIComponent(tenantId)}/${encodeURIComponent(oid)}/email`, { method: 'PUT', body: JSON.stringify({ newEmail: ne }) });
+    if (r.ok) { alert(`Email updated to ${r.email}.`); refresh(); }
+    else alert(r.error || 'Update failed.');
+  } else if (act === 'remove') {
+    if (!confirm(`Remove owner ${email}? They will lose access immediately.`)) return;
+    const r = await api(`/api/admin/owners/${encodeURIComponent(tenantId)}/${encodeURIComponent(oid)}`, { method: 'DELETE' });
+    if (r.ok) refresh();
+    else alert(r.error || 'Could not remove owner.');
+  }
 }
 
 // ─── 3. Conversations / Replays ────────────────────────────────────

@@ -1769,3 +1769,31 @@ TOTAL: 146 new tests across 6 sprint files, 0 regressions in 580+ existing tests
 **Roadmap #9 (operational monitoring):** New `packages/ops/src/healthService.js` (liveness + readiness). Routes: `GET /api/health`, `GET /api/health?deep=1`, `GET /api/admin/metrics`. Closes the last open V90 roadmap item (the PostgreSQL/object-storage migration half needs real infra; file repos are structured to swap behind an interface).
 
 **Tests:** `tests/sprintP4-hardening.regression.test.js` — 17 cases, each would have caught a specific audit bug (race, idempotency, CSRF, trial-failure-fatal, plan-upgrade, billingRequired, slug race, atomic save, mock ID uniqueness). All pass. Full sweep: 198/198 sprint + 273/273 sanity.
+
+---
+
+## Sprint P4-4 — Owner account management (v72.2)
+
+**Date:** 2026-11-27
+**Goal:** Add password recovery, email change, and team/co-owner management — the basic account features that were missing (a forgotten password or email meant a support ticket; the dashboard advertised "additional owners" but had no UI for it).
+
+**Audit first:** a read-only subagent mapped the exact state — `BusinessOwnerAuthService` had `createOwner`/`resetPassword`/`listOwners` but no self-serve recovery, no email update, no owner removal, no reset-token flow. Two admin endpoints existed (`listOwners`, `reset-password`) but were wired to NO UI. The business dashboard had no forgot-password link, no change-password/email forms, no Team page. The admin panel had no per-tenant owner management.
+
+**Implemented:**
+- **Auth service** (`packages/auth-engine/src/businessOwnerAuthService.js`): `issuePasswordResetToken`, `consumePasswordResetToken`, `updatePassword`, `updateEmail`, `addOwner`, `removeOwner`, `adminUpdateEmail`. Plus helpers: `hashToken` (SHA-256), `tokensEqual` (timingSafeEqual), `isValidEmail`, `ALLOWED_ROLES` set.
+- **Business routes** (`apps/api/src/server.js`): `POST /api/business/forgot-password` (public, rate-limited, anti-enumeration, async email send), `POST /api/business/reset-password` (public, rate-limited), `PUT /api/business/password`, `PUT /api/business/email`, `GET/POST/DELETE /api/business/owners`.
+- **Admin routes**: `POST /api/admin/owners/:tenantId` (add), `PUT /api/admin/owners/:tenantId/:ownerId/email`, `DELETE /api/admin/owners/:tenantId/:ownerId` — all behind the dev-token gate.
+- **Business dashboard** (`apps/business-dashboard/public/app.js`): forgot-password link + form on login; dedicated reset-password page (reads `?token=`); "Change password" + "Change email" forms in Settings (store the re-issued JWT); new "Team" nav route with co-owner list + add-member form + remove (last-owner protected).
+- **Admin panel** (`apps/admin-dashboard/public/app.js`): "👥 Owners" button on each tenant card opens a per-tenant owner-management modal (list, add, reset password, change email, remove).
+
+**Deep bug review (second subagent) found 13 issues; fixed the real ones:**
+- CRITICAL: reset token was stored in plaintext + compared with `===`. Now stored as a SHA-256 hash, compared with `timingSafeEqual`. A leak of `owners.json` no longer grants reset capability.
+- HIGH: forgot-password had an account-enumeration timing leak (awaited SMTP only for known emails). Now fire-and-forget — response latency is identical.
+- MEDIUM: change-password/email didn't re-issue the JWT → `/api/business/me` showed stale email. Now re-issues; the client stores the fresh token.
+- MEDIUM: `createOwner`/`addOwner` accepted any role string → admin could mint `superadmin`. Now validated against `{owner, admin}`.
+- MEDIUM: reset-password route had no rate limit. Now per-IP throttled.
+- LOW: catch blocks returned raw `err.message` (incl. FS paths). Now sanitized to user-facing messages; FS errors logged server-side.
+- Admin `resetPassword` now also clears any pending self-serve token (no token-reuse window).
+- (The "team permission" findings — any owner can add/remove co-owners — are by design per the user's request for owner-driven team management; the last-owner guard prevents lockout. Role validation prevents privilege escalation via arbitrary roles.)
+
+**Tests:** `tests/sprintP4-4.owner-account-management.regression.test.js` — 28 cases: token issue/consume/expiry/single-use/cross-tenant, anti-enumeration, re-auth on change, email uniqueness + normalization, role validation, token hashing (plaintext-not-persisted + hash-not-usable-as-token), JWT re-issue (password + email), last-owner protection, admin flows. All pass. Full sweep: 124/124 Phase-4 + 273/273 sanity.
