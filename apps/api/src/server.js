@@ -2165,10 +2165,15 @@ async function startServer() {
       // v35.3: Server-side QR code endpoints (no external API)
       // GET /api/qr/{tenantId}.png → QR code PNG
       // GET /api/qr/{tenantId}.svg → QR code SVG
+      // ?download=1 → send Content-Disposition: attachment so browsers save
+      //   the file instead of opening/rendering it. Used by the dashboard's
+      //   "Download QR Code" buttons. The same endpoint serves both the inline
+      //   <img> preview (no query) and the download (with query).
       const qrImageMatch = url.pathname.match(/^\/api\/qr\/([^/]+)\.(png|svg)$/);
       if (req.method === "GET" && qrImageMatch) {
         const tenantId = decodeURIComponent(qrImageMatch[1]);
         const format = qrImageMatch[2];
+        const wantsDownload = url.searchParams.get('download') === '1';
         try { container.tenantRepository.getById(tenantId); }
         catch { return sendText(res, 404, 'Unknown tenant'); }
         const novaOrigin = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers['host'] || 'localhost:3000'}`;
@@ -2176,19 +2181,31 @@ async function startServer() {
         try {
           const { generateQrMatrix, qrMatrixToSvg, qrMatrixToPng } = require('../../../packages/qr-engine/src/qrCode');
           const matrix = generateQrMatrix(kioskUrl);
+          // Use a higher scale for downloads so the printed QR stays crisp at
+          // large sizes; the inline preview stays small for fast page load.
+          const scale = wantsDownload ? 16 : 8;
           if (format === 'svg') {
             const svg = qrMatrixToSvg(matrix, { scale: 10, margin: 4 });
-            res.writeHead(200, { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=86400' });
+            const headers = { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=86400' };
+            if (wantsDownload) {
+              headers['Content-Disposition'] = `attachment; filename="nova-kiosk-${tenantId}.svg"`;
+            }
+            res.writeHead(200, headers);
             res.end(svg);
             return;
           } else {
-            const png = qrMatrixToPng(matrix, { scale: 8, margin: 4 });
-            res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400', 'Content-Length': png.length });
+            const png = qrMatrixToPng(matrix, { scale, margin: 4 });
+            const headers = { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400', 'Content-Length': png.length };
+            if (wantsDownload) {
+              headers['Content-Disposition'] = `attachment; filename="nova-kiosk-${tenantId}.png"`;
+            }
+            res.writeHead(200, headers);
             res.end(png);
             return;
           }
         } catch (err) {
-          return sendText(res, 500, 'QR generation failed: ' + err.message);
+          container.logger?.error?.('qr.generation_failed', { tenantId, error: err.message });
+          return sendText(res, 500, 'QR generation failed.');
         }
       }
 

@@ -1797,3 +1797,24 @@ TOTAL: 146 new tests across 6 sprint files, 0 regressions in 580+ existing tests
 - (The "team permission" findings — any owner can add/remove co-owners — are by design per the user's request for owner-driven team management; the last-owner guard prevents lockout. Role validation prevents privilege escalation via arbitrary roles.)
 
 **Tests:** `tests/sprintP4-4.owner-account-management.regression.test.js` — 28 cases: token issue/consume/expiry/single-use/cross-tenant, anti-enumeration, re-auth on change, email uniqueness + normalization, role validation, token hashing (plaintext-not-persisted + hash-not-usable-as-token), JWT re-issue (password + email), last-owner protection, admin flows. All pass. Full sweep: 124/124 Phase-4 + 273/273 sanity.
+
+---
+
+## Sprint P4-5 — QR code fix (v72.3)
+
+**Date:** 2026-11-27
+**Goal:** The kiosk QR code rendered as "half a QR" that mobile cameras couldn't scan, and the download buttons didn't work.
+
+**Diagnosis (with code, not guesses):**
+1. Ran the hand-rolled `generateQrMatrix` on a sample URL → matrix was structurally complete (no nulls, correct finders/alignment, 33×33 for v4). So the "half QR" wasn't a rendering gap.
+2. Decoded the generated PNG with `pngjs` (fine — PNG bytes are valid) then scanned it with `jsQR` (a reference QR decoder) → **FAILED to decode**. So the matrix itself was invalid, not the PNG.
+3. Decoded the hardcoded format-info constant `0x77e4` against the QR spec: it XORs with the mask `0x5412` to yield EC level **H** + mask pattern **6**. But the encoder applies only ONE fixed mask (the `(r+c)%2===0` toggle = mask 0) and encodes data with EC level **M** (the `EC_CODEWORDS_PER_BLOCK_M` table). The format-info bits **lied** to scanners: they announced "EC=H, mask=6" while the actual data was "EC=M, mask=0". A scanner undoes the wrong mask with the wrong EC, fails, refuses to decode. Confirmed root cause.
+4. Download bug: buttons used `window.open(qrImgUrl + '&download=1')` — `&` instead of `?` (malformed query on a `.png` path), and `window.open` renders the image in a tab rather than saving it.
+
+**Fix:**
+- **Rendering:** replaced the hand-rolled encoder with the `qrcode` npm library (correct mask selection across all 8 masks via penalty scoring, correct format-info bits, full Reed-Solomon). Preserved the public API (`generateQrMatrix`/`qrMatrixToSvg`/`qrMatrixToPng`) so the route handler is unchanged. PNG rendering via `pngjs`. Added `qrcode` + `pngjs` as real dependencies, `jsqr` as a devDependency (for the test).
+- **Download:** `/api/qr/:tenant.{png,svg}` now honors `?download=1` with `Content-Disposition: attachment; filename="nova-kiosk-<tenant>.<ext>"` + a 16× scale for crisp prints. The dashboard buttons use `fetch`→blob→object-URL (reliable save, respects the server filename) for both PNG and SVG.
+
+**Verification:** every generated QR decodes via jsQR — short URL, 91-char URL with query params, and the SVG path (re-rendered as PNG). HTTP endpoint serves a decodable PNG inline (no Content-Disposition) and with `?download=1` sets the right Content-Disposition + filename for both formats.
+
+**Tests:** `tests/sprintP4-5.qr-code.regression.test.js` — 8 cases (module-level decode for short/long/validate/SVG/PNG-signature + HTTP inline/download/SVG-download/404). All pass. Full sweep: 132/132 Phase-4 + 273/273 sanity — no regressions. (Note: the test forces `process.exit(0)` in `test.after` because the server's background timers keep the event loop alive — a pre-existing condition shared with sprint90's server-bootstrapping tests.)

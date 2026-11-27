@@ -1,10 +1,54 @@
-# Nova Assistant — v72.2
+# Nova Assistant — v72.3
 
 **Multi-tenant SaaS conversation engine** for service businesses. Handles orders, bookings, hotel room reservations, and customer interactions across restaurants, hotels, salons, cleaning services, retail, healthcare, education, and driving schools.
 
 ---
 
-## 🚀 What's New (v40.0 → v72.2)
+## 🚀 What's New (v40.0 → v72.3)
+
+### v72.3 — QR code fix (scannable + downloadable)
+
+The kiosk QR code rendered as "half a QR" and mobile cameras couldn't scan it;
+the download buttons also didn't work. Both are fixed.
+
+**Root cause of the unscannable QR:** the hand-rolled QR encoder (v35.3) produced
+structurally-complete matrices, but the format-information bits were a hardcoded
+magic constant (`0x77e4`) that **lied to scanners** — it advertised EC level H +
+mask pattern 6, while the data was actually encoded with EC level M and a single
+fixed mask (pattern 0). A scanner reads the format info, tries to undo the wrong
+mask with the wrong error-correction level, fails, and refuses to decode. Some
+phone cameras showed partial recognition then gave up — the reported symptom.
+
+**Root cause of the broken download:** the buttons used `window.open(url +
+'&download=1')` — which (a) appended `&download=1` to a `.png` path with no
+preceding `?` (malformed query), and (b) opened the image in a new tab instead of
+triggering a save.
+
+**Fixes:**
+- **Rendering:** replaced the hand-rolled encoder with the battle-tested
+  [`qrcode`](https://www.npmjs.com/package/qrcode) library, which implements
+  correct mask selection (penalty-rule scoring across all 8 masks), correct
+  format-info bits, and full Reed-Solomon error correction. The public API
+  (`generateQrMatrix` / `qrMatrixToSvg` / `qrMatrixToPng`) is preserved, so the
+  route handler is unchanged. PNG rendering now uses `pngjs`. **Every generated
+  QR is verified to decode via `jsQR`** (a reference decoder) in the test suite —
+  short URLs, long URLs with query params, and the SVG path.
+- **Download:** the `/api/qr/:tenant.{png,svg}` endpoint now honors `?download=1`
+  with a `Content-Disposition: attachment; filename="nova-kiosk-<tenant>.png"`
+  header (and uses a higher 16× scale for crisp prints). The dashboard's download
+  buttons now use `fetch`→blob→object-URL, which reliably saves the file and
+  respects the server's filename — for both PNG and SVG.
+- Inline preview (the `<img>` on the Kiosk page) is unchanged: no
+  Content-Disposition, 8× scale, fast page load.
+
+**Tests:** `tests/sprintP4-5.qr-code.regression.test.js` — 8 cases: short URL
+decodes, long URL with query params decodes (higher QR versions), SVG is
+well-formed + shares the correct matrix, input validation, PNG signature +
+dimensions, HTTP endpoint serves a decodable PNG inline, `?download=1` sets
+Content-Disposition with the right filename (PNG + SVG), unknown tenant 404s.
+Full sweep: 132/132 Phase-4 tests + 273/273 sanity — no regressions.
+
+---
 
 ### v72.2 — Owner account management (password recovery, email change, team management)
 

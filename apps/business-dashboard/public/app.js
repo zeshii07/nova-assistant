@@ -1061,7 +1061,10 @@ async function renderKiosk() {
     </div>
   `;
 
-  // Wire copy / download
+  // Wire copy / download. Downloads use fetch→blob→object-URL so the browser
+  // saves the file (window.open would just render the image in a new tab, and
+  // on some browsers SVGs open as text). The `?download=1` query tells the
+  // server to set Content-Disposition: attachment + a filename.
   $('copyKioskUrl')?.addEventListener('click', () => {
     navigator.clipboard.writeText(kioskUrl).then(() => {
       $('copyKioskUrl').textContent = 'Copied!';
@@ -1071,12 +1074,30 @@ async function renderKiosk() {
       setTimeout(() => { $('copyKioskUrl').textContent = 'Copy'; }, 1800);
     });
   });
-  $('downloadQrBtn')?.addEventListener('click', () => {
-    window.open(qrImgUrl + '&download=1', '_blank');
-  });
-  $('downloadQrSvgBtn')?.addEventListener('click', () => {
-    window.open(qrSvgUrl, '_blank');
-  });
+  async function downloadQr(url, fallbackName) {
+    try {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const blob = await r.blob();
+      // Prefer the server's filename from Content-Disposition; fall back to a
+      // sensible name derived from the format.
+      const cd = r.headers.get('content-disposition') || '';
+      const nameMatch = cd.match(/filename="?([^"]+)"?/i);
+      const filename = nameMatch ? nameMatch[1] : fallbackName;
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objUrl);
+    } catch (e) {
+      alert('Could not download the QR code. ' + e.message);
+    }
+  }
+  $('downloadQrBtn')?.addEventListener('click', () => downloadQr(qrImgUrl + '?download=1', 'nova-kiosk-qr.png'));
+  $('downloadQrSvgBtn')?.addEventListener('click', () => downloadQr(qrSvgUrl + '?download=1', 'nova-kiosk-qr.svg'));
 }
 
 // ─── Team (co-owner management) ───────────────────────────
