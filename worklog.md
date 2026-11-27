@@ -1818,3 +1818,74 @@ TOTAL: 146 new tests across 6 sprint files, 0 regressions in 580+ existing tests
 **Verification:** every generated QR decodes via jsQR — short URL, 91-char URL with query params, and the SVG path (re-rendered as PNG). HTTP endpoint serves a decodable PNG inline (no Content-Disposition) and with `?download=1` sets the right Content-Disposition + filename for both formats.
 
 **Tests:** `tests/sprintP4-5.qr-code.regression.test.js` — 8 cases (module-level decode for short/long/validate/SVG/PNG-signature + HTTP inline/download/SVG-download/404). All pass. Full sweep: 132/132 Phase-4 + 273/273 sanity — no regressions. (Note: the test forces `process.exit(0)` in `test.after` because the server's background timers keep the event loop alive — a pre-existing condition shared with sprint90's server-bootstrapping tests.)
+
+---
+
+## Sprint P5 — Production persistence: Redis + PostgreSQL (v73.0)
+
+**Date:** 2026-11-27
+**Goal:** Make Nova's data consistent across server restarts and deploys so it's safe in production.
+
+**Diagnosis (Explore agent inventory of the full storage layer):**
+Nova already had a `NOVA_STORAGE_MODE=persistent` switch with `pg` + `redis`
+wired for 5 repos + conversation state — but three stores were still **pure
+in-memory** (lost on restart, unsafe across instances): OAuth state nonces,
+WhatsApp message dedup, login rate-limit counters. The knowledge Postgres
+schema was written but never applied (`migrate.js` only scanned
+`database/migrations/`, not `migrations/`), and there was a table-name
+collision on `knowledge_sources` between the v7 stub and the v58 pgvector
+schema.
+
+**Changes:**
+1. `packages/auth-engine/src/redisNonceStore.js` (new) — `RedisNonceStore`
+   with the same `record`/`consume`/`prune` API as `InMemoryNonceStore`. Redis
+   path: `SET NX EX` + `GETDEL` (atomic single-use). Fails CLOSED on Redis
+   error (rejects the OAuth flow). In-memory fallback when no client.
+2. `packages/channel/src/whatsapp/redisProcessedMessageStore.js` (new) —
+   `RedisProcessedMessageStore` with async `has`/`add`. Redis path: `SET NX EX`
+   (atomic insert-if-absent) + `EXISTS`. Fails OPEN on Redis error (process the
+   message; commerce/booking idempotency is the second line). Webhook call
+   sites now `await` the async calls.
+3. `packages/auth-engine/src/rateLimiter.js` (new) — `InMemoryRateLimiter`
+   (extracted from the auth service's old `_failedAttempts` logic) +
+   `RedisRateLimiter` (atomic `INCR` + `EXPIRE` fixed-window). Fails OPEN on
+   Redis error (don't lock out all logins).
+4. `packages/auth-engine/src/businessOwnerAuthService.js` — constructor takes
+   an injected `rateLimiter` (defaults to `InMemoryRateLimiter`).
+   `login`/`loginWithPassword` are now `async`. Removed the dead
+   `_isRateLimited`/`_recordFailedAttempt`/`_clearFailedAttempts` helpers.
+5. `apps/api/src/container.js` — extracts `redisClient` once after
+   `buildStorage()`; in persistent mode constructs `RedisNonceStore` /
+   `RedisProcessedMessageStore` / `RedisRateLimiter`, in memory mode the
+   in-memory fallbacks. Wired the rate limiter into `BusinessOwnerAuthService`
+   + the processed store into `WhatsAppWebhookService`.
+6. `packages/self-serve-onboarding/src/signupService.js` — `signup()` is now
+   `async` (awaits the async `loginWithPassword`). Server route + test callers
+   updated.
+7. `packages/ops/src/healthService.js` — `readiness()` is now async + probes
+   Redis (`PING`) and PostgreSQL (`SELECT 1`) in persistent mode. Failed probes
+   are warnings (degraded), not unhealthy. Wired `storage` into the constructor.
+8. `database/migrations/003_v73_knowledge_reconcile.sql` (new) — drops the v7
+   `knowledge_sources` stub (detected via the `evidence_type` column guard)
+   and creates the full pgvector knowledge schema + RLS. Idempotent.
+   `migrations/001_knowledge_schema.sql` marked superseded.
+9. `.env.persistence.example` — now documents `NOVA_JWT_SECRET` +
+   `NOVA_OAUTH_STATE_SECRET` as REQUIRED (the defaults are per-process random,
+   which logs everyone out on restart).
+10. `PRODUCTION_PERSISTENCE.md` (new) — operator runbook: what changed, what to
+    do (provision, set env, migrate, verify), what's covered vs deferred,
+    rollback.
+
+**Tests:** `sprintP5-1` (19 cases: Redis-path logic via FakeRedisClient,
+in-memory fallback, fail-open/closed, async auth integration, HealthService
+probes) + `sprintP5-2` (1 case: memory-mode store selection). Updated
+`sprintP4-2` + `sprintP4-4` for the now-async `login`/`loginWithPassword`/
+`signup` (transform scripts in `scripts/transform-p4-{2,4}-test.py`). Full
+sweep: 152/152 P4+P5, 273/273 sanity — no regressions.
+
+**Verification approach:** no Redis/Postgres binary in the sandbox, so the
+Redis-path logic is tested against a `FakeRedisClient` implementing the exact
+command surface (NX/EX, GETDEL atomicity, INCR post-increment count, TTL
+sweep). This validates every Redis command issued. Live-integration tests
+against real Redis/Postgres should be added to CI once provisioned (skip if
+env unset).

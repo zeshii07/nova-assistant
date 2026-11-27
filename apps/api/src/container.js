@@ -17,7 +17,7 @@ const { FileTenantRepository } = require("../../../packages/tenant/src/tenantRep
 const { buildStorage } = require("../../../packages/storage/src/storageFactory");
 const { ChannelRegistry } = require("../../../packages/channel/src/channelRegistry");
 const { HttpChatAdapter } = require("../../../packages/channel/src/httpChatAdapter");
-const { WhatsAppTenantConfigRepository, ProcessedMessageStore, WhatsAppCloudClient, WhatsAppWebhookService } = require("../../../packages/channel/src/whatsapp");
+const { WhatsAppTenantConfigRepository, ProcessedMessageStore, RedisProcessedMessageStore, WhatsAppCloudClient, WhatsAppWebhookService } = require("../../../packages/channel/src/whatsapp");
 const { FileKnowledgeRepository } = require("../../../packages/knowledge/src/fileKnowledgeRepository");
 const { DocumentIngestor } = require("../../../packages/knowledge-ingestion/src/documentIngestor");
 const { UniversalTenantOnboardingService } = require("../../../packages/tenant-onboarding/src/universalTenantOnboardingService");
@@ -137,6 +137,13 @@ async function buildContainer() {
   const planService = new PlanService({ subscriptionRepository, logger, tenantsDir: config.tenantsDir });
   const storage = await buildStorage({ config, logger });
   const stateRepository = storage.stateRepository;
+  // v73.0: in persistent mode, the connected redis client is shared across all
+  // the short-lived/low-latency stores that must survive restarts + work across
+  // instances: OAuth nonces, login rate-limit counters, WhatsApp message dedup.
+  // (conversation state + the distributed lock already use it via storage.redis.)
+  // In memory mode this is null and each store falls back to its in-memory impl.
+  const redisClient = storage?.redis?.client || null;
+  if (redisClient) logger.info("storage.redis.shared_client_connected");
   const eventBus = new EventBus({ logger });
   const inventoryRepository = storage.inventoryRepository;
   const inventoryService = new InventoryService({ repository:inventoryRepository, defaultTtlSeconds:config.inventoryReservationTtlSeconds, eventBus, logger });
@@ -252,12 +259,19 @@ async function buildContainer() {
   const { MicrosoftOAuthClient } = require("../../../packages/calendar-engine/src/microsoftOAuthClient");
   const { MicrosoftGraphCalendarProvider } = require("../../../packages/calendar-engine/src/microsoftGraphCalendarProvider");
   const { InMemoryNonceStore } = require("../../../packages/auth-engine/src/oauthState");
+  const { RedisNonceStore } = require("../../../packages/auth-engine/src/redisNonceStore");
+  const { InMemoryRateLimiter, RedisRateLimiter } = require("../../../packages/auth-engine/src/rateLimiter");
   const googleOAuthClient = new GoogleOAuthClient({ logger });
   const microsoftOAuthClient = new MicrosoftOAuthClient({ logger });
   // Shared nonce store for OAuth state tokens (Google + Microsoft). Single-use,
   // 10-min TTL — prevents the callback CSRF where an attacker's auth code gets
   // saved to a victim tenant via a forged `state` param.
-  const oauthNonceStore = new InMemoryNonceStore();
+  // v73.0: Redis-backed in persistent mode so a token minted by one instance
+  // can be consumed by another's callback (and survives restart); in-memory
+  // fallback otherwise. Same record/consume API either way.
+  const oauthNonceStore = redisClient
+    ? new RedisNonceStore({ client: redisClient, logger })
+    : new InMemoryNonceStore();
   const calendarTokenRepository = new FileCalendarTokenRepository({
     storageDir: path.resolve(__dirname, "../../../.nova-calendar-tokens"),
     logger
@@ -455,8 +469,13 @@ async function buildContainer() {
 
   // v32.0: Business Owner Authentication — per-tenant email+password auth
   // for the Business Manager Dashboard. Owners see ONLY their tenant's data.
+  // v73.0: rate limiter is Redis-backed in persistent mode (survives restart +
+  // shared across instances); in-memory fallback otherwise. 5/minute per IP.
   const { BusinessOwnerAuthService } = require("../../../packages/auth-engine/src/businessOwnerAuthService");
-  const businessOwnerAuthService = new BusinessOwnerAuthService({ tenantsDir: config.tenantsDir, logger });
+  const loginRateLimiter = redisClient
+    ? new RedisRateLimiter({ client: redisClient, max: 5, windowMs: 60000, logger })
+    : new InMemoryRateLimiter({ max: 5, windowMs: 60000 });
+  const businessOwnerAuthService = new BusinessOwnerAuthService({ tenantsDir: config.tenantsDir, logger, rateLimiter: loginRateLimiter });
 
   // v21.0: Online Learning & Feedback Loop
   const feedbackCollector = new FeedbackCollector({ logger, storageDir: path.resolve(__dirname, "../../../.nova-feedback") });
@@ -494,7 +513,8 @@ async function buildContainer() {
   // modify the same conversation state.
   // Idempotency guard prevents duplicate processing of retried webhooks.
   // All three use Redis when available, with in-memory fallbacks.
-  const redisClient = storage?.redis?.client || null;
+  // (redisClient is extracted once near buildStorage() above so the OAuth
+  // nonce store, login rate limiter, and WhatsApp dedup store can share it.)
   const distributedLock = new DistributedLock({ redisClient, logger });
   const optimisticVersioning = new OptimisticVersioning({ redisClient, logger });
   const idempotencyGuard = new IdempotencyGuard({ redisClient, logger });
@@ -524,7 +544,12 @@ async function buildContainer() {
   const channelRegistry = new ChannelRegistry().register(new HttpChatAdapter());
   const whatsappConfigRepository = new WhatsAppTenantConfigRepository({ tenantsDir: config.tenantsDir });
   const whatsappCloudClient = new WhatsAppCloudClient({ logger });
-  const whatsappProcessedStore = new ProcessedMessageStore();
+  // v73.0: WhatsApp message dedup is Redis-backed in persistent mode (survives
+  // restart + atomic across instances so a retried webhook can't be processed
+  // twice); in-memory fallback otherwise. 24h dedup window.
+  const whatsappProcessedStore = redisClient
+    ? new RedisProcessedMessageStore({ client: redisClient, logger })
+    : new ProcessedMessageStore();
   const whatsappWebhookService = new WhatsAppWebhookService({
     configRepository: whatsappConfigRepository,
     processedStore: whatsappProcessedStore,
@@ -541,7 +566,7 @@ async function buildContainer() {
   // ─── Roadmap #9: Operational monitoring ────────────────────────────────
   // Liveness (cheap, for LBs) + readiness (deeper, for operators). Checks the
   // tenants dir, billing mode, calendar providers, and process health.
-  const healthService = new HealthService({ config, planService, stripeClient, googleOAuthClient, microsoftOAuthClient, logger });
+  const healthService = new HealthService({ config, planService, stripeClient, googleOAuthClient, microsoftOAuthClient, storage, logger });
   return { config, logger, storage, tenantAdapterRegistry, inventoryRepository, inventoryService, calendarConfigRepository, calendarRepository, calendarService, googleOAuthClient, microsoftOAuthClient, oauthNonceStore, calendarTokenRepository, googleCalendarProvider, microsoftGraphCalendarProvider, businessOwnerAuthService, knowledgeRepository, knowledgeService, documentIngestor, knowledgeSourceRepository, tenantKnowledgeManager, controlPlaneRepository, controlPlaneAccessPolicy, tenantControlPlaneService, tenantOnboardingService, selfServeSignupService, onboardingWizardService, healthService, llmRouter, groqNluClient, remoteNluInterpreter, aiLanguageLayer, semanticRouter, semanticRoutePolicy, nluDecisionPolicy, nluInvocationPolicy, socialIntelligenceEngine, domainSchemaRegistry, domainResolver, tenantRepository, stateRepository, memoryRepository, memoryPermissionService, memoryService, crmRepository, crmPermissionService, crmService, leadRepository, leadService, customerDataBridge, catalogRepository, catalogPermissionService, catalogService, commerceRepository, commercePermissionService, commerceService, cleaningServiceRepository, cleaningRequestRepository, cleaningPermissionService, cleaningService, offeringRepository, offeringService, bookingConfigRepository, bookingRepository, bookingService, offeringOrderRepository, offeringOrderService, engagementService, taskFrameEngine, dialogueManager, pricingRepository, pricingService, handoffService, availabilityRuleRepository, businessHoursProvider, availabilityService, humanizationEngine, templateEngine, personaEngine, policyEngine, promptEngine, eventBus, permissionService, registry, loader, capabilityRouter, conversationAdapterRegistry, conversationIntelligenceEngine, replayRepository, replayService, executionEngine, conversationOrchestrator: executionEngine, channelRegistry, whatsappConfigRepository, whatsappCloudClient, whatsappProcessedStore, whatsappWebhookService, mlIntentClassifier, hybridRouter, productEmbeddingMatcher, transformerEmbeddingService, feedbackCollector, onlineLearner, analyticsEngine, emailService, notificationService, notificationLogRepository, publicAssistantService, publicFeatureRegistryService, publicLeadService, publicLeadRepository, publicIntentRouter, publicAssistantPolicy, unansweredQuestionRepository, publicLlmAnswerService, metricsAggregator, subscriptionRepository, stripeClient, planService, selfServeSignupService, onboardingWizardService };
 }
 module.exports = { buildContainer };

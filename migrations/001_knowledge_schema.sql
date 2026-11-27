@@ -1,6 +1,13 @@
 -- Nova Knowledge Engine v2 — Phase 5 Schema
 -- migrations/001_knowledge_schema.sql
 --
+-- ⚠️  SUPERSEDED (v73.0): this schema is now applied via
+-- database/migrations/003_v73_knowledge_reconcile.sql, which `npm run
+-- db:migrate` picks up automatically (this file's directory is NOT scanned by
+-- migrate.js). This file is kept for historical reference + manual `psql -f`
+-- application on pre-v73 databases. Do NOT run both — 003 reconciles the
+-- table-name collision with 001_v7_core.sql's knowledge_sources stub.
+--
 -- Spec reference: §10 Storage and scalability
 --
 -- This migration creates the durable knowledge schema in PostgreSQL. It is

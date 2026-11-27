@@ -32,7 +32,7 @@ async function ensureMigrationsTable(db) {
   await db.query(`
     CREATE TABLE IF NOT EXISTS nova_schema_migrations (
       version text PRIMARY KEY,
-      filename text NOT NULL,
+      filename text,
       applied_at timestamptz NOT NULL DEFAULT now()
     );
   `);

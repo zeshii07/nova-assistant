@@ -31,6 +31,7 @@ const bcrypt = require('bcryptjs');  // v33.0.1: switched from bcrypt to bcryptj
 const fs = require('fs');
 const path = require('path');
 const { withFileLock, atomicWriteJson, readJsonSync } = require('../../storage/src/atomicWrite');
+const { InMemoryRateLimiter } = require('./rateLimiter');
 
 const JWT_SECRET = process.env.NOVA_JWT_SECRET || crypto.randomBytes(32).toString('hex');
 const JWT_EXPIRY_DAYS = 7;
@@ -62,11 +63,14 @@ function isValidEmail(email) {
 }
 
 class BusinessOwnerAuthService {
-  constructor({ tenantsDir, logger = null }) {
+  constructor({ tenantsDir, logger = null, rateLimiter = null } = {}) {
     this.tenantsDir = tenantsDir;
     this.logger = logger;
-    // Rate limiting: 5 failed attempts per minute per IP
-    this._failedAttempts = new Map(); // ip → { count, windowStart }
+    // v73.0: rate limiting is delegated to an injected limiter so it can be
+    // backed by Redis in persistent mode (survives restart + multi-instance).
+    // Default to the in-memory limiter for backward compatibility (dev/tests
+    // and any direct construction without a container).
+    this.rateLimiter = rateLimiter || new InMemoryRateLimiter({ max: 5, windowMs: 60000 });
   }
 
   // ─── Owner credential storage ──────────────────────────────────────
@@ -109,39 +113,41 @@ class BusinessOwnerAuthService {
   }
 
   // ─── Authentication ─────────────────────────────────────────────────
-  login({ tenantId, email, ip = 'unknown' }) {
-    // Rate limit check
-    if (this._isRateLimited(ip)) {
+  async login({ tenantId, email, ip = 'unknown' }) {
+    // Rate limit check (Redis-backed in persistent mode; in-memory fallback).
+    const { limited } = await this.rateLimiter.check(ip);
+    if (limited) {
       return { ok: false, error: 'Too many login attempts. Please wait a minute.' };
     }
     const owners = this._loadOwners(tenantId);
     const owner = owners.find(o => o.email.toLowerCase() === email.toLowerCase().trim());
     if (!owner) {
-      this._recordFailedAttempt(ip);
+      await this.rateLimiter.hit(ip);
       return { ok: false, error: 'Invalid email or password' };
     }
     // Note: password verification happens in loginWithPassword
     return { ok: true, owner };
   }
 
-  loginWithPassword({ tenantId, email, password, ip = 'unknown' }) {
-    if (this._isRateLimited(ip)) {
+  async loginWithPassword({ tenantId, email, password, ip = 'unknown' }) {
+    const { limited } = await this.rateLimiter.check(ip);
+    if (limited) {
       return { ok: false, error: 'Too many login attempts. Please wait a minute.' };
     }
     const owners = this._loadOwners(tenantId);
     const owner = owners.find(o => o.email.toLowerCase() === email.toLowerCase().trim());
-    
+
     // v33.1: Distinguish between "email not found" and "wrong password"
     // so the business owner knows what went wrong.
     if (!owner) {
-      this._recordFailedAttempt(ip);
+      await this.rateLimiter.hit(ip);
       return { ok: false, error: `No account found with email "${email}". Check the email or contact your Nova administrator to create an account.` };
     }
     if (!bcrypt.compareSync(password, owner.passwordHash)) {
-      this._recordFailedAttempt(ip);
+      await this.rateLimiter.hit(ip);
       return { ok: false, error: 'Incorrect password. Please try again, or contact your Nova administrator to reset your password.' };
     }
-    this._clearFailedAttempts(ip);
+    await this.rateLimiter.clear(ip);
     const token = this._issueJWT(owner, tenantId);
     this.logger?.info?.('business_owner.login', { tenantId, ownerId: owner.id });
     return {
@@ -349,29 +355,10 @@ class BusinessOwnerAuthService {
   }
 
   // ─── Rate limiting ─────────────────────────────────────────────────
-  _isRateLimited(ip) {
-    const entry = this._failedAttempts.get(ip);
-    if (!entry) return false;
-    if (Date.now() - entry.windowStart > 60000) {
-      this._failedAttempts.delete(ip);
-      return false;
-    }
-    return entry.count >= 5;
-  }
-
-  _recordFailedAttempt(ip) {
-    const entry = this._failedAttempts.get(ip) || { count: 0, windowStart: Date.now() };
-    if (Date.now() - entry.windowStart > 60000) {
-      entry.count = 0;
-      entry.windowStart = Date.now();
-    }
-    entry.count += 1;
-    this._failedAttempts.set(ip, entry);
-  }
-
-  _clearFailedAttempts(ip) {
-    this._failedAttempts.delete(ip);
-  }
+  // v73.0: rate limiting is delegated to this.rateLimiter (in-memory fallback
+  // or Redis-backed, injected by the container). The previous _isRateLimited /
+  // _recordFailedAttempt / _clearFailedAttempts helpers are removed — login()
+  // and loginWithPassword() call rateLimiter.check/hit/clear directly.
 
   // ─── Middleware for Express-style handlers ─────────────────────────
   requireAuth(req) {

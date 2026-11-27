@@ -50,7 +50,7 @@ test("forgot password: unknown email returns ok + null token (anti-enumeration)"
   assert.equal(r.token, null, "no token must be issued for an unknown email");
 });
 
-test("reset password: consumes a valid token + sets the new password", () => {
+test("reset password: consumes a valid token + sets the new password", async () => {
   const tenantId = "rp-valid";
   makeTenant(tenantId);
   svc.createOwner({ tenantId, email: "owner@rp.com", password: "oldpass123", name: "Owner" });
@@ -58,10 +58,10 @@ test("reset password: consumes a valid token + sets the new password", () => {
   const r = svc.consumePasswordResetToken({ tenantId, token, newPassword: "newpass456" });
   assert.equal(r.ok, true);
   // The new password must work at login.
-  const login = svc.loginWithPassword({ tenantId, email: "owner@rp.com", password: "newpass456" });
+  const login = await svc.loginWithPassword({ tenantId, email: "owner@rp.com", password: "newpass456" });
   assert.equal(login.ok, true);
   // The old password must NOT work.
-  const oldLogin = svc.loginWithPassword({ tenantId, email: "owner@rp.com", password: "oldpass123" });
+  const oldLogin = await svc.loginWithPassword({ tenantId, email: "owner@rp.com", password: "oldpass123" });
   assert.equal(oldLogin.ok, false);
 });
 
@@ -75,7 +75,7 @@ test("reset password: a token is single-use (second consume fails)", () => {
   assert.throws(() => svc.consumePasswordResetToken({ tenantId, token, newPassword: "another789" }), /Invalid or already-used/i);
 });
 
-test("reset password: a token issued for tenant A cannot reset tenant B's password", () => {
+test("reset password: a token issued for tenant A cannot reset tenant B's password", async () => {
   const tenantA = "rp-cross-a", tenantB = "rp-cross-b";
   makeTenant(tenantA); makeTenant(tenantB);
   svc.createOwner({ tenantId: tenantA, email: "a@cross.com", password: "passA123", name: "A" });
@@ -84,7 +84,7 @@ test("reset password: a token issued for tenant A cannot reset tenant B's passwo
   // Try to consume tenant A's token against tenant B — must fail.
   assert.throws(() => svc.consumePasswordResetToken({ tenantId: tenantB, token, newPassword: "hijacked1" }), /Invalid or already-used/i);
   // Tenant B's password is unchanged.
-  assert.equal(svc.loginWithPassword({ tenantId: tenantB, email: "b@cross.com", password: "passB123" }).ok, true);
+  assert.equal((await svc.loginWithPassword({ tenantId: tenantB, email: "b@cross.com", password: "passB123" })).ok, true);
 });
 
 test("reset password: a garbage token is rejected", () => {
@@ -107,7 +107,7 @@ test("reset password: admin reset invalidates any pending self-serve token", () 
 // ═══════════════════════════════════════════════════════════════════════════
 // (b) Self-serve change password / change email (re-auth required)
 // ═══════════════════════════════════════════════════════════════════════════
-test("change password: requires the correct current password", () => {
+test("change password: requires the correct current password", async () => {
   const tenantId = "cp-reauth";
   makeTenant(tenantId);
   const owner = svc.createOwner({ tenantId, email: "o@cp.com", password: "rightpass1", name: "O" });
@@ -115,7 +115,7 @@ test("change password: requires the correct current password", () => {
   assert.throws(() => svc.updatePassword({ tenantId, ownerId: owner.id, currentPassword: "wrongpass1", newPassword: "newpass456" }), /Current password is incorrect/i);
   // Correct current password → succeeds.
   svc.updatePassword({ tenantId, ownerId: owner.id, currentPassword: "rightpass1", newPassword: "newpass456" });
-  assert.equal(svc.loginWithPassword({ tenantId, email: "o@cp.com", password: "newpass456" }).ok, true);
+  assert.equal((await svc.loginWithPassword({ tenantId, email: "o@cp.com", password: "newpass456" })).ok, true);
 });
 
 test("change password: rejects same-as-current password", () => {
@@ -125,15 +125,15 @@ test("change password: rejects same-as-current password", () => {
   assert.throws(() => svc.updatePassword({ tenantId, ownerId: owner.id, currentPassword: "samepass1", newPassword: "samepass1" }), /different from the current/i);
 });
 
-test("change email: requires the correct current password", () => {
+test("change email: requires the correct current password", async () => {
   const tenantId = "ce-reauth";
   makeTenant(tenantId);
   const owner = svc.createOwner({ tenantId, email: "old@ce.com", password: "rightpass1", name: "O" });
   assert.throws(() => svc.updateEmail({ tenantId, ownerId: owner.id, currentPassword: "wrong", newEmail: "new@ce.com" }), /Current password is incorrect/i);
   svc.updateEmail({ tenantId, ownerId: owner.id, currentPassword: "rightpass1", newEmail: "new@ce.com" });
   // Login with the NEW email (old must fail).
-  assert.equal(svc.loginWithPassword({ tenantId, email: "new@ce.com", password: "rightpass1" }).ok, true);
-  assert.equal(svc.loginWithPassword({ tenantId, email: "old@ce.com", password: "rightpass1" }).ok, false);
+  assert.equal((await svc.loginWithPassword({ tenantId, email: "new@ce.com", password: "rightpass1" })).ok, true);
+  assert.equal((await svc.loginWithPassword({ tenantId, email: "old@ce.com", password: "rightpass1" })).ok, false);
 });
 
 test("change email: rejects an invalid email address", () => {
@@ -151,12 +151,12 @@ test("change email: rejects a duplicate email (already used by a co-owner)", () 
   assert.throws(() => svc.updateEmail({ tenantId, ownerId: o1.id, currentPassword: "pass1234", newEmail: "two@cd.com" }), /already uses that email/i);
 });
 
-test("change email: normalizes to lowercase", () => {
+test("change email: normalizes to lowercase", async () => {
   const tenantId = "ce-norm";
   makeTenant(tenantId);
   const owner = svc.createOwner({ tenantId, email: "o@cn.com", password: "pass1234", name: "O" });
   svc.updateEmail({ tenantId, ownerId: owner.id, currentPassword: "pass1234", newEmail: "  Mixed@CN.COM  " });
-  assert.equal(svc.loginWithPassword({ tenantId, email: "mixed@cn.com", password: "pass1234" }).ok, true);
+  assert.equal((await svc.loginWithPassword({ tenantId, email: "mixed@cn.com", password: "pass1234" })).ok, true);
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -171,13 +171,13 @@ test("team: listOwners strips the password hash", () => {
   assert.equal(owners[0].passwordHash, undefined, "listOwners must never expose the hash");
 });
 
-test("team: addOwner creates a login-able co-owner", () => {
+test("team: addOwner creates a login-able co-owner", async () => {
   const tenantId = "tm-add";
   makeTenant(tenantId);
   svc.createOwner({ tenantId, email: "first@ta.com", password: "pass1234", name: "First" });
   svc.addOwner({ tenantId, email: "second@ta.com", password: "pass5678", name: "Second" });
   assert.equal(svc.listOwners({ tenantId }).length, 2);
-  assert.equal(svc.loginWithPassword({ tenantId, email: "second@ta.com", password: "pass5678" }).ok, true);
+  assert.equal((await svc.loginWithPassword({ tenantId, email: "second@ta.com", password: "pass5678" })).ok, true);
 });
 
 test("team: addOwner rejects a duplicate email", () => {
@@ -187,7 +187,7 @@ test("team: addOwner rejects a duplicate email", () => {
   assert.throws(() => svc.addOwner({ tenantId, email: "dup@td.com", password: "pass5678", name: "D2" }), /already exists/i);
 });
 
-test("team: removeOwner deletes a co-owner", () => {
+test("team: removeOwner deletes a co-owner", async () => {
   const tenantId = "tm-remove";
   makeTenant(tenantId);
   svc.createOwner({ tenantId, email: "keep@tr.com", password: "pass1234", name: "Keep" });
@@ -195,23 +195,23 @@ test("team: removeOwner deletes a co-owner", () => {
   svc.removeOwner({ tenantId, ownerId: second.id });
   assert.equal(svc.listOwners({ tenantId }).length, 1);
   // The removed owner can no longer log in.
-  assert.equal(svc.loginWithPassword({ tenantId, email: "gone@tr.com", password: "pass5678" }).ok, false);
+  assert.equal((await svc.loginWithPassword({ tenantId, email: "gone@tr.com", password: "pass5678" })).ok, false);
 });
 
-test("team: removeOwner REFUSES to remove the last owner (lockout protection)", () => {
+test("team: removeOwner REFUSES to remove the last owner (lockout protection)", async () => {
   const tenantId = "tm-last";
   makeTenant(tenantId);
   const only = svc.createOwner({ tenantId, email: "only@tl.com", password: "pass1234", name: "Only" });
   assert.throws(() => svc.removeOwner({ tenantId, ownerId: only.id }), /Cannot remove the last owner/i);
   // The owner is still there + can still log in.
   assert.equal(svc.listOwners({ tenantId }).length, 1);
-  assert.equal(svc.loginWithPassword({ tenantId, email: "only@tl.com", password: "pass1234" }).ok, true);
+  assert.equal((await svc.loginWithPassword({ tenantId, email: "only@tl.com", password: "pass1234" })).ok, true);
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
 // (d) Admin owner management
 // ═══════════════════════════════════════════════════════════════════════════
-test("admin: adminUpdateEmail changes an owner's email without a password check", () => {
+test("admin: adminUpdateEmail changes an owner's email without a password check", async () => {
   const tenantId = "ad-email";
   makeTenant(tenantId);
   const owner = svc.createOwner({ tenantId, email: "old@ae.com", password: "pass1234", name: "O" });
@@ -219,7 +219,7 @@ test("admin: adminUpdateEmail changes an owner's email without a password check"
   const r = svc.adminUpdateEmail({ tenantId, ownerId: owner.id, newEmail: "new@ae.com" });
   assert.equal(r.email, "new@ae.com");
   // Login works with the new email + the ORIGINAL password (admin didn't touch it).
-  assert.equal(svc.loginWithPassword({ tenantId, email: "new@ae.com", password: "pass1234" }).ok, true);
+  assert.equal((await svc.loginWithPassword({ tenantId, email: "new@ae.com", password: "pass1234" })).ok, true);
 });
 
 test("admin: adminUpdateEmail rejects a duplicate email", () => {
@@ -242,13 +242,13 @@ test("admin: admin removeOwner works (and still protects the last owner)", () =>
   assert.throws(() => svc.removeOwner({ tenantId, ownerId: first.id }), /Cannot remove the last owner/i);
 });
 
-test("admin: resetPassword lets the owner log in with the new password immediately", () => {
+test("admin: resetPassword lets the owner log in with the new password immediately", async () => {
   const tenantId = "ad-reset";
   makeTenant(tenantId);
   svc.createOwner({ tenantId, email: "o@ar2.com", password: "oldpass123", name: "O" });
   svc.resetPassword({ tenantId, email: "o@ar2.com", newPassword: "adminset1" });
-  assert.equal(svc.loginWithPassword({ tenantId, email: "o@ar2.com", password: "adminset1" }).ok, true);
-  assert.equal(svc.loginWithPassword({ tenantId, email: "o@ar2.com", password: "oldpass123" }).ok, false);
+  assert.equal((await svc.loginWithPassword({ tenantId, email: "o@ar2.com", password: "adminset1" })).ok, true);
+  assert.equal((await svc.loginWithPassword({ tenantId, email: "o@ar2.com", password: "oldpass123" })).ok, false);
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

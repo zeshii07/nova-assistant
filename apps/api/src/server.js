@@ -200,7 +200,8 @@ async function startServer() {
       if (req.method === "GET" && url.pathname === "/api/health") {
         if (!container.healthService) return sendJson(res, 200, { status: "ok" });
         const deep = url.searchParams.get("deep") === "1";
-        const result = deep ? container.healthService.readiness() : container.healthService.liveness();
+        // readiness() is async (v73.0: probes Redis/Postgres connectivity).
+        const result = deep ? await container.healthService.readiness() : container.healthService.liveness();
         // Unhealthy readiness → 503 so the LB pulls the instance out of rotation.
         const status = result.status === "unhealthy" ? 503 : 200;
         return sendJson(res, status, result);
@@ -580,7 +581,7 @@ async function startServer() {
         let body;
         try { body = await readJson(req); } catch { return corsSignup(res, 400, { ok:false, error:'Invalid request body.' }); }
         try {
-          const result = container.selfServeSignupService.signup({
+          const result = await container.selfServeSignupService.signup({
             businessName: body.businessName,
             email: body.email,
             password: body.password,
@@ -2612,7 +2613,7 @@ async function startServer() {
         try { container.tenantRepository.getById(tenantId); }
         catch { return sendJson(res, 404, { ok:false, error:'Unknown tenant' }); }
         const clientIp = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
-        const result = container.businessOwnerAuthService.loginWithPassword({ tenantId, email, password, ip: clientIp });
+        const result = await container.businessOwnerAuthService.loginWithPassword({ tenantId, email, password, ip: clientIp });
         if (!result.ok) return sendJson(res, 401, { ok:false, error: result.error });
         return sendJson(res, 200, { ok:true, token: result.token, owner: result.owner });
       }

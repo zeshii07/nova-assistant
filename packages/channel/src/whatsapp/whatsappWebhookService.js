@@ -27,11 +27,13 @@ class WhatsAppWebhookService {
     const messages = parseWhatsAppWebhook(payload, tenantId);
     const results = [];
     for (const message of messages) {
-      if (this.processedStore.has(message.messageId)) {
+      // processedStore.has/add are async in the Redis-backed path (and return
+      // a plain boolean in the in-memory fallback path). Await works for both.
+      if (await this.processedStore.has(message.messageId)) {
         this.logger?.info("whatsapp.duplicate_ignored", { tenantId, messageId: message.messageId });
         continue;
       }
-      this.processedStore.add(message.messageId);
+      await this.processedStore.add(message.messageId);
       try {
         if (config.markRead) await this.cloudClient.markRead(config, message.messageId);
         const result = await this.executionEngine.process(message);

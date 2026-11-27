@@ -16,12 +16,13 @@ const os = require("os");
 const startTime = Date.now();
 
 class HealthService {
-  constructor({ config, planService = null, stripeClient = null, googleOAuthClient = null, microsoftOAuthClient = null, logger = null }) {
+  constructor({ config, planService = null, stripeClient = null, googleOAuthClient = null, microsoftOAuthClient = null, storage = null, logger = null }) {
     this.config = config;
     this.planService = planService;
     this.stripeClient = stripeClient;
     this.googleOAuthClient = googleOAuthClient;
     this.microsoftOAuthClient = microsoftOAuthClient;
+    this.storage = storage; // v73.0: storage bundle (db + redis clients) for connectivity probes
     this.logger = logger;
   }
 
@@ -39,8 +40,13 @@ class HealthService {
    * Returns a degraded status (still 200, but with warnings) if a non-critical
    * subsystem is misconfigured, and an unhealthy status (503-worthy) only if
    * the tenants dir is missing/unwritable.
+   *
+   * v73.0: now async + probes Redis + PostgreSQL connectivity when a storage
+   * bundle is wired (persistent mode). A failed probe is a WARNING (degraded),
+   * not unhealthy — the LB still routes traffic so the operator can debug, and
+   * because memory-mode deploys have no Redis/PG to probe.
    */
-  readiness() {
+  async readiness() {
     const checks = {};
     const warnings = [];
 
@@ -72,6 +78,50 @@ class HealthService {
       google: this.googleOAuthClient?.isConfigured?.() || false,
       microsoft: this.microsoftOAuthClient?.isConfigured?.() || false,
     };
+
+    // v73.0: Redis + PostgreSQL connectivity (persistent mode only). In memory
+    // mode storage is null and these checks are omitted. A failed probe is a
+    // warning (degraded), not unhealthy, so the LB keeps routing while ops
+    // investigates — losing Redis mid-flight is recoverable (in-memory
+    // fallbacks) and shouldn't take the instance out of rotation.
+    checks.storage = { mode: this.storage?.mode || "memory" };
+    if (this.storage?.mode === "persistent") {
+      // Redis ping (best-effort, 1s timeout).
+      try {
+        const redisClient = this.storage?.redis?.client;
+        if (redisClient && typeof redisClient.ping === "function") {
+          const pong = await Promise.race([
+            redisClient.ping(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 1000)),
+          ]);
+          checks.storage.redis = { ok: pong === "PONG", reply: pong };
+          if (pong !== "PONG") warnings.push("Redis ping returned an unexpected reply.");
+        } else {
+          checks.storage.redis = { ok: false, error: "redis client not connected" };
+          warnings.push("Redis client not connected — conversation state + dedup fall back to in-memory.");
+        }
+      } catch (e) {
+        checks.storage.redis = { ok: false, error: e.message };
+        warnings.push(`Redis probe failed: ${e.message}. Fallbacks are active but multi-instance safety is degraded.`);
+      }
+      // PostgreSQL SELECT 1 (best-effort, 1s timeout).
+      try {
+        const db = this.storage?.db;
+        if (db && typeof db.query === "function") {
+          await Promise.race([
+            db.query("SELECT 1 AS ok"),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 1000)),
+          ]);
+          checks.storage.postgres = { ok: true };
+        } else {
+          checks.storage.postgres = { ok: false, error: "pg client not connected" };
+          warnings.push("PostgreSQL client not connected — CRM/commerce/booking fall back to in-memory.");
+        }
+      } catch (e) {
+        checks.storage.postgres = { ok: false, error: e.message };
+        warnings.push(`PostgreSQL probe failed: ${e.message}. Relational repos are unavailable.`);
+      }
+    }
 
     // Process health.
     checks.process = {

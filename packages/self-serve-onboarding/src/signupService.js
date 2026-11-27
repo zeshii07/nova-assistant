@@ -44,7 +44,7 @@ class SelfServeSignupService {
    * @returns {{ ok:true, tenantId, token, owner, trial, nextSteps }}
    * @throws  Error with a user-facing message on validation/failure.
    */
-  signup(input) {
+  async signup(input) {
     const { businessName, email, password, ownerName, industry, planId = DEFAULT_PLAN_ID, overrides = {}, ip = "unknown" } = input || {};
     if (!businessName) throw new Error("Business name is required");
     if (!email) throw new Error("Email is required");
@@ -96,7 +96,7 @@ class SelfServeSignupService {
     }
 
     // 5. Issue a JWT so they land in the dashboard immediately.
-    const login = this.businessOwnerAuthService.loginWithPassword({ tenantId, email, password, ip });
+    const login = await this.businessOwnerAuthService.loginWithPassword({ tenantId, email, password, ip });
     if (!login.ok) {
       // Should not happen — we just created the owner — but handle gracefully.
       this.logger?.error?.("signup.login_failed_after_create", { tenantId, email, error: login.error });

@@ -93,8 +93,8 @@ test("templates: unknown template returns null", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 // 2. Signup — happy path
 // ═══════════════════════════════════════════════════════════════════════════
-test("signup: happy path provisions tenant + trial + owner + JWT", () => {
-  const r = signup({ businessName: "Happy Path Cleaners", email: "happy@test.com", industry: "cleaning" });
+test("signup: happy path provisions tenant + trial + owner + JWT", async () => {
+  const r = await signup({ businessName: "Happy Path Cleaners", email: "happy@test.com", industry: "cleaning" });
   assert.equal(r.ok, true);
   assert.ok(r.tenantId, "tenantId must be returned");
   assert.equal(r.tenantId, "happy-path-cleaners");
@@ -109,37 +109,37 @@ test("signup: happy path provisions tenant + trial + owner + JWT", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 // 3. Signup — validation
 // ═══════════════════════════════════════════════════════════════════════════
-test("signup: rejects missing business name", () => {
-  assert.throws(() => container.selfServeSignupService.signup({ email: "a@b.com", password: "secret123", industry: "cleaning" }), /business name/i);
+test("signup: rejects missing business name", async () => {
+  await assert.rejects(() => container.selfServeSignupService.signup({ email: "a@b.com", password: "secret123", industry: "cleaning" }), /business name/i);
 });
 
-test("signup: rejects missing email", () => {
-  assert.throws(() => container.selfServeSignupService.signup({ businessName: "X", password: "secret123", industry: "cleaning" }), /email/i);
+test("signup: rejects missing email", async () => {
+  await assert.rejects(() => container.selfServeSignupService.signup({ businessName: "X", password: "secret123", industry: "cleaning" }), /email/i);
 });
 
-test("signup: rejects missing password", () => {
-  assert.throws(() => container.selfServeSignupService.signup({ businessName: "X", email: "a@b.com", industry: "cleaning" }), /password/i);
+test("signup: rejects missing password", async () => {
+  await assert.rejects(() => container.selfServeSignupService.signup({ businessName: "X", email: "a@b.com", industry: "cleaning" }), /password/i);
 });
 
-test("signup: rejects missing industry", () => {
-  assert.throws(() => container.selfServeSignupService.signup({ businessName: "X", email: "a@b.com", password: "secret123" }), /industry/i);
+test("signup: rejects missing industry", async () => {
+  await assert.rejects(() => container.selfServeSignupService.signup({ businessName: "X", email: "a@b.com", password: "secret123" }), /industry/i);
 });
 
-test("signup: rejects unknown industry with a helpful message", () => {
-  assert.throws(() => signup({ industry: "spaceship-repair" }), /Unknown industry/i);
+test("signup: rejects unknown industry with a helpful message", async () => {
+  await assert.rejects(() => signup({ industry: "spaceship-repair" }), /Unknown industry/i);
 });
 
-test("signup: rejects short password (auth service enforces >=6)", () => {
-  assert.throws(() => signup({ password: "123" }), /at least 6/i);
+test("signup: rejects short password (auth service enforces >=6)", async () => {
+  await assert.rejects(() => signup({ password: "123" }), /at least 6/i);
 });
 
-test("signup: rejects duplicate business name with a clear message", () => {
-  signup({ businessName: "Duplicate Cleaners", email: "d1@test.com" });
-  assert.throws(() => signup({ businessName: "Duplicate Cleaners", email: "d2@test.com" }), /already exists/i);
+test("signup: rejects duplicate business name with a clear message", async () => {
+  await signup({ businessName: "Duplicate Cleaners", email: "d1@test.com" });
+  await assert.rejects(() => signup({ businessName: "Duplicate Cleaners", email: "d2@test.com" }), /already exists/i);
 });
 
-test("signup: rejects duplicate email within same tenant", () => {
-  const r = signup({ businessName: "Dup Email Co", email: "shared@test.com" });
+test("signup: rejects duplicate email within same tenant", async () => {
+  const r = await signup({ businessName: "Dup Email Co", email: "shared@test.com" });
   // Second signup with same email but different business name should still work
   // (different tenant). But creating a second owner on the SAME tenant with the
   // same email must fail — exercised at the auth service level.
@@ -150,7 +150,7 @@ test("signup: rejects duplicate email within same tenant", () => {
 // 4. Signup — tenant is immediately usable
 // ═══════════════════════════════════════════════════════════════════════════
 test("signup: new tenant is immediately usable (trial lets engine process)", async () => {
-  const r = signup({ businessName: "Usable Cleaners", email: "usable@test.com", industry: "cleaning" });
+  const r = await signup({ businessName: "Usable Cleaners", email: "usable@test.com", industry: "cleaning" });
   const reply = await container.executionEngine.process({ tenantId: r.tenantId, customerId: "u1", channel: "p4s2-test", text: "hello, do you do deep cleaning?" });
   assert.notEqual(reply.capabilityId, "billing_blocked");
   assert.equal(reply.billingBlocked, undefined);
@@ -159,8 +159,8 @@ test("signup: new tenant is immediately usable (trial lets engine process)", asy
 // ═══════════════════════════════════════════════════════════════════════════
 // 5. Signup — tenant files are written
 // ═══════════════════════════════════════════════════════════════════════════
-test("signup: writes profile.json, subscription.json, knowledge, offerings", () => {
-  const r = signup({ businessName: "Files Written Co", email: "files@test.com", industry: "salon" });
+test("signup: writes profile.json, subscription.json, knowledge, offerings", async () => {
+  const r = await signup({ businessName: "Files Written Co", email: "files@test.com", industry: "salon" });
   assert.ok(readTenantFile(r.tenantId, "profile.json"), "profile.json must exist");
   assert.ok(readTenantFile(r.tenantId, "subscription.json"), "subscription.json must exist");
   assert.ok(readTenantFile(r.tenantId, "knowledge/business.json"), "knowledge/business.json must exist");
@@ -171,8 +171,8 @@ test("signup: writes profile.json, subscription.json, knowledge, offerings", () 
   assert.equal(profile.status, "active");
 });
 
-test("signup: subscription.json has trialing status + starter plan", () => {
-  const r = signup({ businessName: "Sub Check Co", email: "subcheck@test.com", industry: "restaurant" });
+test("signup: subscription.json has trialing status + starter plan", async () => {
+  const r = await signup({ businessName: "Sub Check Co", email: "subcheck@test.com", industry: "restaurant" });
   const sub = readTenantFile(r.tenantId, "subscription.json");
   assert.equal(sub.status, "trialing");
   assert.equal(sub.planId, "starter");
@@ -182,8 +182,8 @@ test("signup: subscription.json has trialing status + starter plan", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 // 6. Wizard — getState
 // ═══════════════════════════════════════════════════════════════════════════
-test("wizard: getState returns full snapshot", () => {
-  const r = signup({ businessName: "Wizard State Co", email: "wizstate@test.com", industry: "cleaning" });
+test("wizard: getState returns full snapshot", async () => {
+  const r = await signup({ businessName: "Wizard State Co", email: "wizstate@test.com", industry: "cleaning" });
   const state = container.onboardingWizardService.getState(r.tenantId);
   assert.equal(state.tenantId, r.tenantId);
   assert.equal(state.businessName, "Wizard State Co");
@@ -199,8 +199,8 @@ test("wizard: getState throws for unknown tenant", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 // 7. Wizard — updateProfile
 // ═══════════════════════════════════════════════════════════════════════════
-test("wizard: updateProfile edits name/contact/hours and mirrors to knowledge", () => {
-  const r = signup({ businessName: "Profile Edit Co", email: "profile@test.com", industry: "cleaning" });
+test("wizard: updateProfile edits name/contact/hours and mirrors to knowledge", async () => {
+  const r = await signup({ businessName: "Profile Edit Co", email: "profile@test.com", industry: "cleaning" });
   container.onboardingWizardService.updateProfile(r.tenantId, {
     name: "Profile Edit Co (Updated)",
     contact: "+1-555-9999",
@@ -225,8 +225,8 @@ test("wizard: updateProfile edits name/contact/hours and mirrors to knowledge", 
 // ═══════════════════════════════════════════════════════════════════════════
 // 8. Wizard — updateFaqs
 // ═══════════════════════════════════════════════════════════════════════════
-test("wizard: updateFaqs replaces the FAQ list and filters invalid entries", () => {
-  const r = signup({ businessName: "Faq Co", email: "faq@test.com", industry: "salon" });
+test("wizard: updateFaqs replaces the FAQ list and filters invalid entries", async () => {
+  const r = await signup({ businessName: "Faq Co", email: "faq@test.com", industry: "salon" });
   const result = container.onboardingWizardService.updateFaqs(r.tenantId, [
     { question: "Do you take walk-ins?", answer: "Yes, subject to availability." },
     { question: "", answer: "this should be filtered out" }, // invalid
@@ -238,16 +238,16 @@ test("wizard: updateFaqs replaces the FAQ list and filters invalid entries", () 
   assert.equal(faqs[0].question, "Do you take walk-ins?");
 });
 
-test("wizard: updateFaqs rejects non-array", () => {
-  const r = signup({ businessName: "Faq Bad Co", email: "faqbad@test.com", industry: "salon" });
+test("wizard: updateFaqs rejects non-array", async () => {
+  const r = await signup({ businessName: "Faq Bad Co", email: "faqbad@test.com", industry: "salon" });
   assert.throws(() => container.onboardingWizardService.updateFaqs(r.tenantId, { not: "an array" }), /array/i);
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 9. Wizard — updateHours
 // ═══════════════════════════════════════════════════════════════════════════
-test("wizard: updateHours reflects in both knowledge and profile", () => {
-  const r = signup({ businessName: "Hours Co", email: "hours@test.com", industry: "restaurant" });
+test("wizard: updateHours reflects in both knowledge and profile", async () => {
+  const r = await signup({ businessName: "Hours Co", email: "hours@test.com", industry: "restaurant" });
   container.onboardingWizardService.updateHours(r.tenantId, "Daily 11-23");
   const kb = readTenantFile(r.tenantId, "knowledge/business.json");
   assert.equal(kb.hours, "Daily 11-23");
@@ -258,8 +258,8 @@ test("wizard: updateHours reflects in both knowledge and profile", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 // 10. Wizard — complete
 // ═══════════════════════════════════════════════════════════════════════════
-test("wizard: complete sets onboardingCompletedAt", () => {
-  const r = signup({ businessName: "Complete Co", email: "complete@test.com", industry: "cleaning" });
+test("wizard: complete sets onboardingCompletedAt", async () => {
+  const r = await signup({ businessName: "Complete Co", email: "complete@test.com", industry: "cleaning" });
   const result = container.onboardingWizardService.complete(r.tenantId);
   assert.equal(result.ok, true);
   assert.ok(result.completedAt);
@@ -270,19 +270,19 @@ test("wizard: complete sets onboardingCompletedAt", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 // 11. Each industry template produces a usable tenant
 // ═══════════════════════════════════════════════════════════════════════════
-test("vertical smoke: restaurant signup → usable tenant with booking config", () => {
-  const r = signup({ businessName: "Resty Cafe", email: "resty@test.com", industry: "restaurant" });
+test("vertical smoke: restaurant signup → usable tenant with booking config", async () => {
+  const r = await signup({ businessName: "Resty Cafe", email: "resty@test.com", industry: "restaurant" });
   assert.ok(readTenantFile(r.tenantId, "booking/config.json"), "restaurant needs booking config");
 });
 
-test("vertical smoke: salon signup → usable tenant with offerings", () => {
-  const r = signup({ businessName: "Salon Vibe", email: "salon@test.com", industry: "salon" });
+test("vertical smoke: salon signup → usable tenant with offerings", async () => {
+  const r = await signup({ businessName: "Salon Vibe", email: "salon@test.com", industry: "salon" });
   const offerings = readTenantFile(r.tenantId, "offerings/items.json");
   assert.ok(offerings.length >= 2, "salon needs at least 2 services");
 });
 
-test("vertical smoke: retail signup → usable tenant with catalog (no booking)", () => {
-  const r = signup({ businessName: "Shop Mart", email: "shop@test.com", industry: "retail" });
+test("vertical smoke: retail signup → usable tenant with catalog (no booking)", async () => {
+  const r = await signup({ businessName: "Shop Mart", email: "shop@test.com", industry: "retail" });
   assert.ok(readTenantFile(r.tenantId, "catalog/products.json"), "retail needs a product catalog");
   // Retail template disables calendar (calendarEnabled:false) so the onboarding
   // service correctly skips writing calendar/config.json — no booking for retail.
@@ -293,7 +293,7 @@ test("vertical smoke: retail signup → usable tenant with catalog (no booking)"
 test("vertical smoke: each new tenant processes a message without billing block", async () => {
   const industries = ["restaurant", "cleaning", "salon", "retail"];
   for (const ind of industries) {
-    const r = signup({ businessName: `Smoke ${ind} ${Math.random().toString(36).slice(2, 6)}`, email: `smoke-${ind}-${Math.random().toString(36).slice(2, 6)}@test.com`, industry: ind });
+    const r = await signup({ businessName: `Smoke ${ind} ${Math.random().toString(36).slice(2, 6)}`, email: `smoke-${ind}-${Math.random().toString(36).slice(2, 6)}@test.com`, industry: ind });
     const reply = await container.executionEngine.process({ tenantId: r.tenantId, customerId: `smoke-${ind}`, channel: "p4s2-test", text: "hello" });
     assert.notEqual(reply.capabilityId, "billing_blocked", `${ind} tenant must not be blocked`);
   }

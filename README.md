@@ -1,10 +1,67 @@
-# Nova Assistant — v72.3
+# Nova Assistant — v73.0
 
 **Multi-tenant SaaS conversation engine** for service businesses. Handles orders, bookings, hotel room reservations, and customer interactions across restaurants, hotels, salons, cleaning services, retail, healthcare, education, and driving schools.
 
 ---
 
-## 🚀 What's New (v40.0 → v72.3)
+## 🚀 What's New (v40.0 → v73.0)
+
+### v73.0 — Production persistence (Redis + PostgreSQL)
+
+Nova is now safe to run in production with restarts and deploys: the three
+stores that used to be **pure in-memory** (lost on every restart, unsafe across
+instances) now use **Redis** when `NOVA_STORAGE_MODE=persistent` is set, with
+in-memory fallback otherwise. See
+[PRODUCTION_PERSISTENCE.md](./PRODUCTION_PERSISTENCE.md) for the full runbook.
+
+**What's now durable across restarts + multi-instance:**
+- **OAuth state nonces** (Google/Microsoft calendar consent) — Redis `SET NX EX`
+  + `GETDEL`. A flow started on instance A can finish on instance B's callback.
+- **WhatsApp message dedup** — Redis `SET NX EX` (atomic). A retried webhook
+  landing on a different instance (or after a restart) is no longer processed
+  twice → no duplicate replies/orders/bookings.
+- **Login rate-limit counters** — Redis `INCR` + `EXPIRE` (atomic fixed-window).
+  Brute-force protection no longer resets on every deploy; 5 fails/min is
+  enforced across all instances.
+
+These join the stores already Redis/Postgres-backed in persistent mode
+(conversation state, CRM, commerce, bookings, cleaning requests, offering
+orders, distributed locks). All three new stores **fail safe** on Redis
+outage: nonces reject (fail closed), dedup + rate-limit allow (fail open) so
+Nova keeps serving degraded rather than 500ing.
+
+**Other changes in v73.0:**
+- `BusinessOwnerAuthService.login`/`loginWithPassword` are now `async` (the
+  rate limiter may be Redis-backed). The 2 call sites (server route +
+  self-serve signup) + the affected tests were updated.
+- `HealthService.readiness()` is now async + probes Redis (`PING`) and
+  PostgreSQL (`SELECT 1`) connectivity in persistent mode. Failed probes are
+  **warnings (degraded)**, not unhealthy, so the LB keeps routing while you
+  debug.
+- Migration `database/migrations/003_v73_knowledge_reconcile.sql` reconciles a
+  table-name collision: `001_v7_core.sql`'s unused `knowledge_sources` stub is
+  dropped and the full pgvector knowledge schema (`knowledge_sources`,
+  `knowledge_chunks`, `knowledge_embeddings`, `ingestion_jobs` + RLS) is
+  created. `npm run db:migrate` now applies it (it was silently never applied
+  before — `migrate.js` only scanned `database/migrations/`).
+- `.env.persistence.example` now documents the two REQUIRED secrets
+  (`NOVA_JWT_SECRET`, `NOVA_OAUTH_STATE_SECRET`) that must be stable in prod.
+
+**Tests:** `sprintP5-1.redis-persistence.regression.test.js` (19 cases —
+Redis-path logic via a FakeRedisClient, in-memory fallback, fail-open/closed,
+async auth integration, HealthService probes) +
+`sprintP5-2.container-wiring.regression.test.js` (1 case — memory-mode store
+selection). Full sweep: **152/152** Phase-4 + Phase-5 tests, **273/273** sanity
+— no regressions.
+
+**What's deferred** (works single-instance; needs more work for horizontal
+scaling): tenant profiles, owner accounts, subscriptions, calendar state,
+inventory, knowledge files, notifications/feedback/leads still use filesystem
+JSON. They survive restarts (files persist) but aren't multi-instance safe due
+to in-process locks + per-process read caches. See the "What's covered vs
+deferred" section of the runbook.
+
+---
 
 ### v72.3 — QR code fix (scannable + downloadable)
 
