@@ -141,8 +141,10 @@ test("Tenant boundary: 'book a cleaning' does not enter the cleaning tenant work
 // ── Backward compatibility: legacy response shape is preserved ──────────────
 
 test("Backward compat: the route handler maps unified → legacy {conversationId, reply, topic, suggestions} shape", async () => {
-  // Read the server.js route handler to verify the legacy-shape adapter is present.
-  const server = fs.readFileSync(path.join(__dirname, "../apps/api/src/server.js"), "utf8");
+  // Read the route handler to verify the legacy-shape adapter is present.
+  // (v74.2: the handler moved from server.js into routes/widget.js during
+  // the Express migration; the assertions check the same verbatim code.)
+  const server = fs.readFileSync(path.join(__dirname, "../apps/api/src/routes/widget.js"), "utf8");
   // The route still exists.
   assert.match(server, /\/api\/assistant\/chat/);
   // It routes through publicAssistantService.handleMessage (single source of truth).
