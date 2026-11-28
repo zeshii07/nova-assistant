@@ -3181,11 +3181,17 @@ async function startServer() {
         });
         await container.stateRepository.save(state);
         // v73.1: broadcast takeover start so the dashboard inbox updates live.
+        // v73.2: ALSO broadcast to the customer so their widget's persistent
+        // socket starts takeover polling immediately — even if they are idle
+        // between messages. Previously the customer only learned of takeover
+        // on their NEXT message, which meant owner replies sat queued.
         try {
-          container.realtimeBridge?.broadcastToTenant(tenantId, 'takeover.changed.v1', {
+          const takeoverPayload = {
             tenantId, conversationId, customerId, active: true,
             ownerName: req._businessOwner.name, takenAt: state.context.takeover.takenAt
-          });
+          };
+          container.realtimeBridge?.broadcastToTenant(tenantId, 'takeover.changed.v1', takeoverPayload);
+          container.realtimeBridge?.broadcastToCustomer(tenantId, customerId, 'takeover.changed.v1', takeoverPayload);
         } catch (e) { container.logger?.warn?.('realtime.takeover_broadcast_failed', { error: e.message }); }
         return sendJson(res, 200, { ok:true, takeover: state.context.takeover });
       }
@@ -3209,11 +3215,14 @@ async function startServer() {
           }}
         });
         await container.stateRepository.save(state);
-        // v73.1: broadcast takeover release.
+        // v73.1: broadcast takeover release. v73.2: also to the customer so
+        // their widget stops polling + closes the takeover socket immediately.
         try {
-          container.realtimeBridge?.broadcastToTenant(tenantId, 'takeover.changed.v1', {
+          const releasePayload = {
             tenantId, conversationId, customerId, active: false, releasedAt: state.context.takeover.releasedAt
-          });
+          };
+          container.realtimeBridge?.broadcastToTenant(tenantId, 'takeover.changed.v1', releasePayload);
+          container.realtimeBridge?.broadcastToCustomer(tenantId, customerId, 'takeover.changed.v1', releasePayload);
         } catch (e) { container.logger?.warn?.('realtime.release_broadcast_failed', { error: e.message }); }
         return sendJson(res, 200, { ok:true, message: 'Takeover released. Nova will resume auto-replying.' });
       }

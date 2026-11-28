@@ -885,13 +885,18 @@
       // Mobile browsers require a user gesture for TTS — the splash tap counts
       // when customer taps Start Conversation. But on desktop / installed PWA,
       // we can speak immediately on load.
+      // v73.2 FIX: Set _welcomeSpoken SYNCHRONOUSLY (not inside the setTimeout)
+      // so startChat() — which may fire within the 600ms window when the
+      // customer taps Start quickly — sees the flag already true and does NOT
+      // speak the welcome a second time. The previous code set the flag inside
+      // the timeout, causing the duplicate "Welcome to..." voice message.
       if (!state._welcomeSpoken && state.voiceEnabled) {
+        state._welcomeSpoken = true; // claim it NOW, before the deferred speak
         // Defer 600ms so the splash animation completes + audio element preloads
         setTimeout(() => {
           const agentNameStr = c.agent?.name || biz;
           const spokenWelcome = `Welcome to ${biz}. I'm ${agentNameStr}, your assistant. How can I help you today?`;
           speakReply(spokenWelcome);
-          state._welcomeSpoken = true;
         }, 600);
       }
     }
@@ -1062,6 +1067,13 @@
       if (state.voiceSampleAudio && !state.voiceSampleAudio.paused) {
         try { state.voiceSampleAudio.pause(); state.voiceSampleAudio.currentTime = 0; } catch {}
       }
+      // v73.2: Voice policy — Nova replies with VOICE only when the customer's
+      // LAST inbound message came from the mic. If this sendMessage() call was
+      // not triggered by rec.onresult (which sets the flag), it's a text-typed
+      // message → clear the flag so the reply stays text-only.
+      if (state._lastInputWasVoice === undefined) state._lastInputWasVoice = false;
+      const replyShouldSpeak = state._lastInputWasVoice;
+      state._lastInputWasVoice = false; // reset; next message sets it again only if mic
       inputEl.value = '';
       autoResize();
       updateActionButton();
@@ -1106,7 +1118,10 @@
         } else {
           const replyText = data.reply || data.text || data.message || '';
           appendMessage('bot', replyText);
-          speakReply(replyText);
+          // v73.2: Speak the reply ONLY when the customer's last message was
+          // voice. Text chat stays text — no unprompted TTS while the customer
+          // is silently reading the screen.
+          if (replyShouldSpeak) speakReply(replyText);
           if (attempt > 0) showBanner('✓ Replied after retry.', 'ok');
         }
         agentStatus.textContent = 'Online · Tap to chat';
@@ -1228,6 +1243,10 @@
         inputEl.value = t;
         autoResize();
         updateActionButton();
+        // v73.2: This message came from the MIC. Mark it so Nova's reply is
+        // spoken aloud (voice-in → voice-out). Text-typed messages keep the
+        // reply as text only — see sendMessage().
+        state._lastInputWasVoice = true;
         // Auto-send after a brief delay so user sees what was transcribed
         setTimeout(() => sendMessage(), 350);
       };
@@ -1359,7 +1378,14 @@
       // Send a fresh greeting request
       const welcome = state.config?.welcomeMessage || `Hi! I'm your ${state.config?.businessName || 'Nova'} assistant. How can I help you today?`;
       appendMessage('bot', welcome);
-      if (state.voiceEnabled) speakReply(welcome);
+      // v73.2: reset the welcome-spoken flag for the new session, then speak
+      // the welcome ONCE. Guard against double-speak: only speak if voice is
+      // enabled AND we haven't already spoken it for this fresh session.
+      state._welcomeSpoken = false;
+      if (state.voiceEnabled && !state._welcomeSpoken) {
+        state._welcomeSpoken = true;
+        speakReply(welcome);
+      }
     }
 
     // ─── Idle timeout (5 min) ─────────────────────────────────
@@ -1420,10 +1446,15 @@
       // splash load. The previous logic always spoke the welcome on startChat,
       // causing a double welcome ("Welcome to..." on splash, then again when
       // the customer tapped Start Conversation).
+      // v73.2 FIX: Set _welcomeSpoken SYNCHRONOUSLY before scheduling the
+      // speak, so the splash-load path (applyBranding) and this path can't
+      // both pass the guard and double-speak. The previous code set the flag
+      // inside the setTimeout, leaving a 300ms window where both paths could
+      // see it as false and both schedule a speak.
       if (!state._welcomeSpoken) {
+        state._welcomeSpoken = true;
         setTimeout(() => {
           speakReply(spokenWelcome);
-          state._welcomeSpoken = true;
         }, 300);
       }
       // Focus input on desktop, but not mobile (avoid keyboard popup)

@@ -321,11 +321,24 @@
     if (state._voiceSampleAudio && !state._voiceSampleAudio.paused) {
       try { state._voiceSampleAudio.pause(); state._voiceSampleAudio.currentTime = 0; } catch {}
     }
+    // v73.2: Voice policy — Nova replies with VOICE only when the customer's
+    // LAST inbound message came from the mic. If this sendMessage() call was
+    // not triggered by speechRecognition.onresult (which sets the flag), it's
+    // a text-typed message → clear the flag so the reply stays text-only.
+    // The flag is read below before calling _speakText.
+    if (state._lastInputWasVoice === undefined) state._lastInputWasVoice = false;
+    const replyShouldSpeak = state._lastInputWasVoice;
+    state._lastInputWasVoice = false; // reset; next message sets it again only if mic
     if (state.inFlight) { state.queue.push(text); return; }
     if (!state.customerId) {
       const saved = loadSession();
       state.customerId = saved?.customerId || generateCustomerId();
     }
+    // v73.2: Now that we have a customerId, open the persistent customer
+    // WebSocket (idempotent — no-op if already open). This is what lets the
+    // business owner's takeover + replies reach the customer even while the
+    // customer is idle between messages.
+    ensurePersistentCustomerSocket();
     state.messages.push({ role: 'user', text: text.trim(), ts: Date.now() });
     renderMessages();
     saveSession();
@@ -378,8 +391,10 @@
       updateConnectionStatus('connected');
       state.retries = 0;
 
-      // v33.1: Speak Nova's reply aloud if voice is enabled
-      if (data.reply && state._speakText) {
+      // v33.1: Speak Nova's reply aloud ONLY when the customer's last message
+      // was voice (mic input). v73.2: text-typed messages get a text reply —
+      // no unprompted TTS while the customer is silently reading the chat.
+      if (data.reply && replyShouldSpeak && state._speakText) {
         state._speakText(data.reply);
       }
 
@@ -993,6 +1008,10 @@
             inputEl.value = '';
             autoResize();
             updateActionButton();
+            // v73.2: This message came from the MIC. Mark it so Nova's reply
+            // is spoken aloud (voice-in → voice-out). Text-typed messages keep
+            // the reply as text only — see sendMessage().
+            state._lastInputWasVoice = true;
             sendMessage(text);
           }
         }
@@ -1800,6 +1819,101 @@
     }
   }
 
+  // ─── v73.2: Persistent customer WebSocket ──────────────────────────
+  // The takeover WS above (connectTakeoverSocket) only opens AFTER the
+  // customer has already sent a message and the server told us takeover is
+  // active. But if the business owner takes over while the customer is
+  // SILENT (not typing), the customer never learns — no poll, no WS, owner
+  // replies queue until the customer sends another message. This persistent
+  // socket fixes that: it opens once we have a customerId (after the first
+  // message) and stays open for the page lifetime. It handles:
+  //   - takeover.changed.v1 → start/stop takeover polling (and rendering)
+  //     even when the customer is not actively sending messages.
+  //   - owner.reply.v1 → render the owner's reply IMMEDIATELY in the chat,
+  //     deduped by replyId (so the poll fallback doesn't double-render it).
+  // It reconnects with backoff on close and survives transient drops.
+  let _custWs = null;
+  let _custWsReconnect = null;
+  let _custWsBackoff = 2000;
+  const _seenReplyIds = new Set();
+
+  function ensurePersistentCustomerSocket() {
+    if (_custWs) return;                       // already connected
+    if (!state.customerId) return;             // no session yet
+    if (!('WebSocket' in window)) return;      // unsupported
+    let ws;
+    try {
+      const proto = NOVA_ORIGIN.startsWith('https') ? 'wss' : 'ws';
+      const wsOrigin = NOVA_ORIGIN.replace(/^https?:/, proto + ':');
+      ws = new WebSocket(`${wsOrigin}/ws`);
+    } catch (e) { scheduleCustReconnect(); return; }
+    _custWs = ws;
+
+    ws.onopen = () => {
+      _custWsBackoff = 2000; // reset backoff on success
+      ws.send(JSON.stringify({
+        type: 'auth', role: 'customer',
+        token: state.customerId, tenantId: TENANT_ID
+      }));
+    };
+
+    ws.onmessage = (ev) => {
+      let msg;
+      try { msg = JSON.parse(ev.data); } catch { return; }
+      if (msg.type === 'auth' && msg.ok) {
+        ws.send(JSON.stringify({ type: 'subscribe', events: ['owner.reply.v1', 'takeover.changed.v1'] }));
+        return;
+      }
+      if (msg.type === 'event' && msg.name === 'owner.reply.v1' && msg.payload) {
+        const r = msg.payload;
+        // Dedupe by replyId (server generates a unique one per reply).
+        if (r.replyId && _seenReplyIds.has(r.replyId)) return;
+        if (r.replyId) _seenReplyIds.add(r.replyId);
+        // Also dedupe by timestamp as a safety net (older servers).
+        const dup = state.messages.some(m => m.role === 'nova' && m.ts === r.timestamp);
+        if (dup) return;
+        state.messages.push({ role: 'nova', text: `👤 ${r.ownerName}: ${r.text}`, ts: r.timestamp || Date.now() });
+        renderMessages();
+        saveSession();
+        if (bubbleEl && !state.open) bubbleEl.classList.add('show-pulse');
+        // Confirm delivery so the poll fallback doesn't re-send it.
+        fetch(`${NOVA_ORIGIN}/api/chat/reply/delivered`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ tenantId: TENANT_ID, customerId: state.customerId, replyId: r.replyId, timestamp: r.timestamp })
+        }).catch(() => {});
+        return;
+      }
+      if (msg.type === 'event' && msg.name === 'takeover.changed.v1' && msg.payload) {
+        if (msg.payload.active === true) {
+          // Owner just took over — start polling + takeover WS even if the
+          // customer was idle. This is the key fix: previously the customer
+          // only found out about takeover on their NEXT message.
+          startTakeoverPolling(msg.payload.ownerName || 'Agent');
+        } else if (msg.payload.active === false) {
+          stopTakeoverPolling();
+        }
+        return;
+      }
+    };
+
+    ws.onclose = () => {
+      _custWs = null;
+      scheduleCustReconnect();
+    };
+    ws.onerror = () => { try { ws.close(); } catch {} };
+  }
+
+  function scheduleCustReconnect() {
+    if (_custWsReconnect) return;
+    const delay = _custWsBackoff;
+    _custWsBackoff = Math.min(_custWsBackoff * 1.7, 30000); // cap 30s
+    _custWsReconnect = setTimeout(() => {
+      _custWsReconnect = null;
+      ensurePersistentCustomerSocket();
+    }, delay);
+  }
+
   // ─── Boot ─────────────────────────────────────────────────────────
   async function boot() {
     await loadConfig();
@@ -1809,6 +1923,14 @@
     }
     await loadAvatars();
     mountWidget();
+    // v73.2: If the customer has an existing session, open the persistent WS
+    // immediately so takeover + owner replies work without the customer
+    // having to send a new message first.
+    const saved = loadSession();
+    if (saved?.customerId) {
+      state.customerId = saved.customerId;
+      ensurePersistentCustomerSocket();
+    }
   }
 
   if (document.readyState === 'loading') {
