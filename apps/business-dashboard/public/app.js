@@ -252,73 +252,242 @@ function renderDashboard() {
   ROUTES[state.route].render();
 }
 
-// ─── Overview ─────────────────────────────────────────────
+// ─── Overview (v73.1: KPI cards + Chart.js bar/donut/line) ────
+let overviewCharts = {}; // chart instances, destroyed on re-render
+
 async function renderOverview() {
   const view = $('view');
   view.textContent = 'Loading…';
-  const d = await api('/api/business/overview');
+  // Fetch overview + grouped inbox in parallel so we can chart conversation activity.
+  const [d, inbox] = await Promise.all([
+    api('/api/business/overview'),
+    api('/api/business/conversations/grouped').catch(() => ({ conversations: [] }))
+  ]);
   if (!d.ok) { view.innerHTML = `<div class="card"><p style="color:var(--bad)">${esc(d.error)}</p></div>`; return; }
 
+  // Destroy old chart instances before re-rendering (prevents canvas reuse errors).
+  Object.values(overviewCharts).forEach(c => { try { c.destroy(); } catch {} });
+  overviewCharts = {};
+
   const s = d.stats;
+  const convos = inbox.conversations || [];
+
+  // KPI cards — multicolor kinds
   const kpis = [
-    { label: 'Conversations Today', value: s.conversationsToday, kind: 'accent' },
-    { label: 'Total Conversations', value: s.conversationsTotal, kind: '' },
-    { label: 'Total Leads', value: s.leads, kind: '' },
-    { label: 'New Leads', value: s.newLeads, kind: 'ok' },
-    { label: 'Hot Leads', value: s.hotLeads, kind: 'bad' },
-    { label: 'Converted', value: s.convertedLeads, kind: 'ok' },
-    { label: 'Unread Notifications', value: s.unreadNotifications, kind: s.unreadNotifications > 0 ? 'warn' : '' },
-    { label: 'Bookings Today', value: s.bookingsToday, kind: 'accent' }
+    { label: 'Conversations Today', value: s.conversationsToday, kind: 'accent', icon: '💬' },
+    { label: 'Total Conversations', value: s.conversationsTotal, kind: 'purple', icon: '📊' },
+    { label: 'Total Leads', value: s.leads, kind: 'blue', icon: '🎯' },
+    { label: 'New Leads', value: s.newLeads, kind: 'ok', icon: '✨' },
+    { label: 'Hot Leads', value: s.hotLeads, kind: 'bad', icon: '🔥' },
+    { label: 'Converted', value: s.convertedLeads, kind: 'ok', icon: '✅' },
+    { label: 'Unread Notifications', value: s.unreadNotifications, kind: s.unreadNotifications > 0 ? 'warn' : 'neutral', icon: '🔔' },
+    { label: 'Bookings Today', value: s.bookingsToday, kind: 'accent', icon: '📅' }
   ];
+
+  // Lead-funnel data for the donut chart
+  const leadFunnel = {
+    new: s.newLeads || 0,
+    hot: s.hotLeads || 0,
+    converted: s.convertedLeads || 0,
+    other: Math.max(0, (s.leads || 0) - (s.newLeads || 0) - (s.hotLeads || 0) - (s.convertedLeads || 0))
+  };
+
+  // Conversation-status data for the bar chart
+  const needsHumanCount = convos.filter(c => c.needsHuman).length;
+  const takeoverCount = convos.filter(c => c.takeoverActive).length;
+  const idleCount = convos.length - needsHumanCount - takeoverCount;
+
+  // 7-day activity sparkline data (derived from conversation lastSeen timestamps)
+  const last7Days = [];
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const dt = new Date(today);
+    dt.setDate(today.getDate() - i);
+    const key = dt.toISOString().split('T')[0];
+    const count = convos.filter(c => c.lastSeen && c.lastSeen.startsWith(key)).length;
+    last7Days.push({ label: dt.toLocaleDateString([], { weekday: 'short' }), count });
+  }
 
   view.innerHTML = `
     <div class="kpi-grid">
-      ${kpis.map(k => `<div class="kpi ${k.kind}"><div class="label">${esc(k.label)}</div><div class="value">${esc(k.value)}</div></div>`).join('')}
+      ${kpis.map(k => `
+        <div class="kpi ${k.kind}">
+          <div class="kpi-icon">${k.icon}</div>
+          <div class="label">${esc(k.label)}</div>
+          <div class="value">${esc(k.value)}</div>
+        </div>`).join('')}
     </div>
-    <div class="card">
-      <h3>Business Info</h3>
-      <p><strong>${esc(d.tenant.name)}</strong> (${esc(d.tenant.id)})</p>
-      <p style="margin-top:4px;color:var(--text-dim);font-size:12px">Domain: ${esc(d.tenant.domain)} · Capabilities: ${d.tenant.capabilities.join(', ')}</p>
+
+    <div class="chart-grid">
+      <div class="card chart-card">
+        <h3>📈 7-Day Conversation Activity</h3>
+        <canvas id="activityChart" height="180"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3>🎯 Lead Funnel</h3>
+        <canvas id="leadDonut" height="180"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3>💬 Conversation Status</h3>
+        <canvas id="statusBar" height="180"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3>🏢 Business Info</h3>
+        <p style="font-size:14px"><strong>${esc(d.tenant.name)}</strong></p>
+        <p style="margin-top:4px;color:var(--text-dim);font-size:12px">Tenant: <code>${esc(d.tenant.id)}</code></p>
+        <p style="margin-top:4px;color:var(--text-dim);font-size:12px">Domain: ${esc(d.tenant.domain || '—')}</p>
+        <div style="margin-top:12px">
+          <strong style="font-size:12px;color:var(--text-dim)">Capabilities</strong>
+          <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">
+            ${d.tenant.capabilities.map(c => `<span class="badge info">${esc(c)}</span>`).join('')}
+          </div>
+        </div>
+      </div>
     </div>
   `;
+
+  // Render charts (deferred so the canvases exist in DOM)
+  setTimeout(() => drawOverviewCharts(last7Days, leadFunnel, { idle: idleCount, needsHuman: needsHumanCount, takeover: takeoverCount }), 0);
 }
 
-// ─── Inbox (v33.0: with conversation detail + takeover/reply) ────
+function drawOverviewCharts(activityData, leadFunnel, statusData) {
+  if (typeof Chart === 'undefined') return; // Chart.js not loaded
+  const colors = {
+    accent: '#4773e5', purple: '#a855f7', blue: '#3b82f6', ok: '#3ddc97',
+    warn: '#f5b54a', bad: '#ff6b6b', info: '#5ec5f5', neutral: '#64748b'
+  };
+  const grid = 'rgba(146,160,189,0.12)';
+  const tick = '#91a0bd';
+
+  // 1. Line chart — 7-day activity
+  const actx = document.getElementById('activityChart');
+  if (actx) {
+    const grad = actx.getContext('2d').createLinearGradient(0, 0, 0, 180);
+    grad.addColorStop(0, 'rgba(71,115,229,0.45)');
+    grad.addColorStop(1, 'rgba(71,115,229,0.02)');
+    overviewCharts.activity = new Chart(actx, {
+      type: 'line',
+      data: {
+        labels: activityData.map(d => d.label),
+        datasets: [{
+          label: 'Conversations',
+          data: activityData.map(d => d.count),
+          borderColor: colors.accent,
+          backgroundColor: grad,
+          fill: true,
+          tension: 0.35,
+          pointBackgroundColor: colors.accent,
+          pointBorderColor: '#fff',
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          borderWidth: 2.5
+        }]
+      },
+      options: chartOptions(grid, tick, { legend: false })
+    });
+  }
+
+  // 2. Donut chart — lead funnel
+  const dctx = document.getElementById('leadDonut');
+  if (dctx) {
+    overviewCharts.leadDonut = new Chart(dctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['New', 'Hot', 'Converted', 'Other'],
+        datasets: [{
+          data: [leadFunnel.new, leadFunnel.hot, leadFunnel.converted, leadFunnel.other],
+          backgroundColor: [colors.ok, colors.bad, colors.accent, colors.neutral],
+          borderColor: '#11182a',
+          borderWidth: 3,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: {
+          legend: { position: 'bottom', labels: { color: tick, padding: 12, font: { size: 11 } } }
+        }
+      }
+    });
+  }
+
+  // 3. Bar chart — conversation status
+  const bctx = document.getElementById('statusBar');
+  if (bctx) {
+    overviewCharts.statusBar = new Chart(bctx, {
+      type: 'bar',
+      data: {
+        labels: ['Idle', 'Needs Human', 'Takeover'],
+        datasets: [{
+          label: 'Conversations',
+          data: [statusData.idle, statusData.needsHuman, statusData.takeover],
+          backgroundColor: [colors.info, colors.bad, colors.warn],
+          borderRadius: 6,
+          maxBarThickness: 56
+        }]
+      },
+      options: chartOptions(grid, tick, { legend: false })
+    });
+  }
+}
+
+function chartOptions(grid, tick, { legend = true } = {}) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: legend, labels: { color: tick } } },
+    scales: {
+      x: { grid: { color: grid, drawBorder: false }, ticks: { color: tick, font: { size: 11 } } },
+      y: { grid: { color: grid, drawBorder: false }, ticks: { color: tick, font: { size: 11 } }, beginAtZero: true }
+    }
+  };
+}
+
+// ─── Inbox (v73.1: grouped by conversation, live via WS, handoff alerts) ────
 async function renderInbox() {
   const view = $('view');
   view.textContent = 'Loading conversations…';
-  const d = await api('/api/business/conversations');
+  const d = await api('/api/business/conversations/grouped');
   if (!d.ok) { view.innerHTML = `<div class="card"><p style="color:var(--bad)">${esc(d.error)}</p></div>`; return; }
 
   const convos = d.conversations || [];
+  state.inboxConversations = convos; // cache for WS live-update
+
   if (convos.length === 0) {
     view.innerHTML = `<div class="card"><div class="empty"><strong>No conversations yet</strong>Conversations will appear here when customers chat with your widget.</div></div>`;
     return;
   }
 
+  const needsHumanCount = d.needsHumanCount || 0;
+  const takeoverCount = d.takeoverCount || 0;
+
   view.innerHTML = `
+    <div class="inbox-summary-bar">
+      <div class="summary-chip accent"><span class="num">${convos.length}</span><span class="lbl">Total</span></div>
+      <div class="summary-chip bad"><span class="num">${needsHumanCount}</span><span class="lbl">Needs Human</span></div>
+      <div class="summary-chip warn"><span class="num">${takeoverCount}</span><span class="lbl">Takeover Active</span></div>
+      <div class="summary-chip ok" style="margin-left:auto"><span class="num"><span id="inboxLiveDot" class="live-dot"></span></span><span class="lbl">Live</span></div>
+    </div>
     <div class="card">
-      <h3>Recent Conversations (${convos.length})</h3>
-      <p class="hint" style="margin-bottom:10px;font-size:12px;color:var(--text-dim)">Click a conversation to view details, reply, or take over from Nova.</p>
-      <table>
-        <thead><tr><th>Date</th><th>Customer</th><th>Message</th><th>Channel</th><th>Capability</th><th></th></tr></thead>
-        <tbody>
-          ${convos.slice(0, 50).map(c => `
-            <tr style="cursor:pointer" data-customer="${esc(c.customerId || '')}">
-              <td class="muted" style="font-size:11px">${esc(fmtDate(c.createdAt))}</td>
-              <td>${esc(c.customerId || '—')}</td>
-              <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.message?.text || c.customerText || '—')}</td>
-              <td>${badge(esc(c.channel || 'widget'), 'info')}</td>
-              <td>${c.capabilityId ? badge(esc(c.capabilityId), c.capabilityId === 'human_takeover' ? 'warn' : 'neutral') : '—'}</td>
-              <td><button class="small" style="padding:4px 8px;font-size:11px">View →</button></td>
-            </tr>`).join('')}
+      <h3 style="display:flex;align-items:center;gap:10px">Conversations
+        ${needsHumanCount > 0 ? `<span class="alert-pill"><span>⚠</span> ${needsHumanCount} need human attention</span>` : ''}
+      </h3>
+      <p class="hint" style="margin-bottom:10px;font-size:12px;color:var(--text-dim)">One row per conversation. Messages auto-update live. Click a row to view the full thread, reply, or take over.</p>
+      <table class="inbox-table">
+        <thead><tr>
+          <th>Last Activity</th><th>Customer</th><th>Last Message</th><th>Msgs</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody id="inboxBody">
+          ${convos.map(c => inboxRowHtml(c)).join('')}
         </tbody>
       </table>
     </div>
   `;
 
   // Wire row clicks to show conversation detail
-  document.querySelectorAll('[data-customer]').forEach(row => {
+  document.querySelectorAll('#inboxBody [data-customer]').forEach(row => {
     row.addEventListener('click', () => {
       const customerId = row.dataset.customer;
       if (customerId) showConversationDetail(customerId);
@@ -326,8 +495,59 @@ async function renderInbox() {
   });
 }
 
+// Render a single inbox row. Extracted so WS live-update can swap a row
+// without re-rendering the whole table.
+function inboxRowHtml(c) {
+  const flags = [];
+  if (c.needsHuman) flags.push(`<span class="badge bad" title="Customer asked for human support">⚠ Human</span>`);
+  if (c.takeoverActive) flags.push(`<span class="badge warn" title="Takeover active">🎯 Takeover</span>`);
+  if (c.lastCapabilityId && c.lastCapabilityId !== 'human_takeover') {
+    flags.push(`<span class="badge info">${esc(c.lastCapabilityId)}</span>`);
+  }
+  const statusHtml = flags.length ? flags.join(' ') : `<span class="badge neutral">idle</span>`;
+  return `
+    <tr style="cursor:pointer" data-customer="${esc(c.customerId || '')}" class="${c.needsHuman ? 'row-needs-human' : ''} ${c.takeoverActive ? 'row-takeover' : ''}">
+      <td class="muted" style="font-size:11px;white-space:nowrap">${esc(fmtDate(c.lastSeen))}</td>
+      <td style="font-weight:600">${esc(c.customerId || '—')}</td>
+      <td style="max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.lastMessage || '—')}</td>
+      <td class="muted" style="text-align:center">${esc(c.messageCount || 0)}</td>
+      <td>${statusHtml}</td>
+      <td><button class="small" style="padding:4px 10px;font-size:11px">View →</button></td>
+    </tr>`;
+}
+
+// v73.1: Live-update a single inbox row when a WS event arrives, without
+// re-fetching the whole list. Used by the WS handler in novaRealtime().
+function liveUpdateInboxRow(customerId, patch) {
+  if (!state.inboxConversations) return;
+  const idx = state.inboxConversations.findIndex(c => c.customerId === customerId);
+  if (idx === -1) {
+    // New conversation — refresh the whole list to pick it up.
+    if (state.route === 'inbox') renderInbox();
+    return;
+  }
+  Object.assign(state.inboxConversations[idx], patch);
+  // Re-sort: needsHuman first, then most recent.
+  state.inboxConversations.sort((a, b) => {
+    if (a.needsHuman !== b.needsHuman) return a.needsHuman ? -1 : 1;
+    return (b.lastSeen || '').localeCompare(a.lastSeen || '');
+  });
+  if (state.route === 'inbox') {
+    const body = document.getElementById('inboxBody');
+    if (body) body.innerHTML = state.inboxConversations.map(c => inboxRowHtml(c)).join('');
+    // Re-wire clicks
+    document.querySelectorAll('#inboxBody [data-customer]').forEach(row => {
+      row.addEventListener('click', () => {
+        const cid = row.dataset.customer;
+        if (cid) showConversationDetail(cid);
+      });
+    });
+  }
+}
+
 // v33.0: Conversation detail view with takeover/reply/release
 async function showConversationDetail(customerId) {
+  state.detailCustomerId = customerId; // v73.1: used by WS handler to live-refresh
   const view = $('view');
   view.textContent = 'Loading conversation…';
   const d = await api(`/api/business/conversation/${encodeURIComponent(customerId)}`);
@@ -1238,6 +1458,163 @@ async function renderSettings() {
   });
 }
 
+// ─── v73.1: Realtime WebSocket client ─────────────────────
+// Connects to /ws on the same origin, authenticates with the business JWT,
+// and dispatches inbound events to the right UI handler (inbox live-update,
+// overview refresh, handoff toast, takeover banner). Falls back gracefully
+// if WS is unavailable (older deployments, network blocks) — the dashboard
+// still works via manual refresh.
+const realtime = {
+  ws: null,
+  reconnectTimer: null,
+  authed: false,
+  reconnectDelayMs: 2000
+};
+
+function realtimeUrl() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${proto}//${location.host}/ws`;
+}
+
+function connectRealtime() {
+  if (!state.token) return;
+  try {
+    realtime.ws = new WebSocket(realtimeUrl());
+  } catch (e) {
+    scheduleReconnect();
+    return;
+  }
+
+  realtime.ws.onopen = () => {
+    realtime.ws.send(JSON.stringify({ type: 'auth', role: 'business', token: state.token }));
+  };
+
+  realtime.ws.onmessage = (ev) => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch { return; }
+    if (msg.type === 'auth' && msg.ok) {
+      realtime.authed = true;
+      // Subscribe to the event types we care about.
+      realtime.ws.send(JSON.stringify({ type: 'subscribe', events: [
+        'message.received.v1', 'message.processed.v1', 'handoff.alert.v1',
+        'owner.reply.v1', 'takeover.changed.v1', 'stats.refresh.v1'
+      ]}));
+      updateLiveDot(true);
+      return;
+    }
+    if (msg.type === 'event') handleRealtimeEvent(msg);
+  };
+
+  realtime.ws.onclose = () => {
+    realtime.authed = false;
+    updateLiveDot(false);
+    scheduleReconnect();
+  };
+
+  realtime.ws.onerror = () => { try { realtime.ws.close(); } catch {} };
+}
+
+function scheduleReconnect() {
+  if (realtime.reconnectTimer) return;
+  realtime.reconnectTimer = setTimeout(() => {
+    realtime.reconnectTimer = null;
+    if (state.token) connectRealtime();
+  }, realtime.reconnectDelayMs);
+}
+
+function updateLiveDot(connected) {
+  const dot = document.getElementById('inboxLiveDot');
+  if (dot) dot.classList.toggle('connected', connected);
+}
+
+// Central event dispatcher. Each event type updates the relevant UI.
+function handleRealtimeEvent({ name, payload }) {
+  switch (name) {
+    case 'message.received.v1':
+      // A customer sent a new message — bump the inbox row + refresh overview.
+      if (payload?.customerId) {
+        liveUpdateInboxRow(payload.customerId, {
+          lastMessage: payload.message?.text || '',
+          lastSeen: new Date().toISOString(),
+          messageCount: (state.inboxConversations?.find(c => c.customerId === payload.customerId)?.messageCount || 0) + 1
+        });
+      }
+      if (state.route === 'overview') renderOverview();
+      break;
+
+    case 'message.processed.v1':
+      // Nova finished processing — update the last capability + maybe refresh overview.
+      if (payload?.customerId) {
+        liveUpdateInboxRow(payload.customerId, {
+          lastCapabilityId: payload.capabilityId || null,
+          lastSeen: new Date().toISOString()
+        });
+      }
+      break;
+
+    case 'handoff.alert.v1':
+      // Customer asked for a human — flag the conversation + show a toast.
+      if (payload?.customerId) {
+        liveUpdateInboxRow(payload.customerId, { needsHuman: true, handoffId: payload.handoffId });
+      }
+      showHandoffToast(payload);
+      break;
+
+    case 'takeover.changed.v1':
+      // Takeover started/released — update the row.
+      if (payload?.customerId) {
+        liveUpdateInboxRow(payload.customerId, {
+          takeoverActive: payload.active === true,
+          takeoverOwner: payload.active ? payload.ownerName : null,
+          needsHuman: payload.active ? false : undefined
+        });
+      }
+      break;
+
+    case 'owner.reply.v1':
+      // An owner (maybe us, maybe a teammate) replied — refresh the detail view if open.
+      if (state.route === 'inbox' && state.detailCustomerId === payload?.customerId) {
+        showConversationDetail(payload.customerId);
+      }
+      break;
+
+    case 'stats.refresh.v1':
+      if (state.route === 'overview') renderOverview();
+      break;
+  }
+}
+
+// Toast notification for human-handoff alerts. Auto-dismisses after 8s but
+// can be clicked to jump straight to the conversation.
+function showHandoffToast(payload) {
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-handoff';
+  toast.innerHTML = `
+    <div class="toast-icon">⚠️</div>
+    <div class="toast-body">
+      <div class="toast-title">Human support requested</div>
+      <div class="toast-msg">Customer <strong>${esc(payload?.customerId || 'unknown')}</strong> wants to talk to a person.</div>
+      ${payload?.triggerMessage ? `<div class="toast-quote">"${esc(payload.triggerMessage.slice(0, 80))}${payload.triggerMessage.length > 80 ? '…' : ''}"</div>` : ''}
+    </div>
+    <button class="toast-action">View →</button>
+  `;
+  toast.querySelector('.toast-action').addEventListener('click', () => {
+    toast.remove();
+    state.route = 'inbox';
+    renderDashboard();
+    setTimeout(() => showConversationDetail(payload?.customerId), 100);
+  });
+  container.appendChild(toast);
+  setTimeout(() => { toast.classList.add('toast-out'); setTimeout(() => toast.remove(), 300); }, 8000);
+}
+
 // ─── Boot ─────────────────────────────────────────────────
 async function boot() {
   if (!state.token) { renderLogin(); return; }
@@ -1246,6 +1623,7 @@ async function boot() {
   if (me.ok) {
     state.owner = me.owner;
     renderDashboard();
+    connectRealtime(); // v73.1: open WS after auth confirmed
   } else {
     state.token = null;
     localStorage.removeItem('novaBusinessToken');

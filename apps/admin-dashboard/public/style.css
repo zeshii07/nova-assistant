@@ -20,6 +20,13 @@
   --warn:#f5b54a;
   --bad:#ff6b6b;
   --info:#5ec5f5;
+  /* v73.1: extended multicolor palette for charts + KPI kinds */
+  --purple:#a855f7;
+  --blue:#3b82f6;
+  --pink:#ec4899;
+  --teal:#14b8a6;
+  --orange:#f97316;
+  --indigo:#6366f1;
   --radius:10px;
   --radius-sm:8px;
   --sidebar-w:240px;
@@ -223,6 +230,22 @@ button.small{padding:5px 9px;font-size:12px}
 .kpi.ok{border-left:3px solid var(--ok)}
 .kpi.warn{border-left:3px solid var(--warn)}
 .kpi.bad{border-left:3px solid var(--bad)}
+/* v73.1: extended multicolor KPI kinds */
+.kpi.purple{border-left:3px solid var(--purple)}
+.kpi.blue{border-left:3px solid var(--blue)}
+.kpi.info{border-left:3px solid var(--info)}
+.kpi.neutral{border-left:3px solid var(--text-faint)}
+
+/* v73.1: chart grid for overview */
+.chart-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:16px;
+  margin-bottom:18px;
+}
+.chart-card{min-height:280px}
+.chart-card canvas{max-height:220px}
+.chart-card h3{display:flex;align-items:center;gap:8px}
 
 /* Two-column grid */
 .grid-2{
@@ -430,6 +453,7 @@ pre.tight{max-height:280px;padding:10px}
   .view{padding:14px}
   .grid-2{grid-template-columns:1fr}
   .grid-3{grid-template-columns:1fr}
+  .chart-grid{grid-template-columns:1fr}
   .row{grid-template-columns:1fr}
   .row .value{font-size:12px;word-break:break-all}
   .tenant-picker select{min-width:140px;max-width:200px}

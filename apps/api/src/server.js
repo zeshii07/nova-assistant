@@ -13,6 +13,8 @@ const { replyToNovaVisitor } = require("./novaMarketingAssistant");
 const { Logger } = require("../../../packages/logger/src/logger");
 // v36.0: File existence cache — avoids redundant fs.existsSync on hot paths
 const { fileExistenceCache } = require("../../../packages/storage/src/fileExistenceCache");
+// v73.1: Realtime WebSocket bridge — pushes EventBus events to dashboards/widget.
+const { RealtimeBridge } = require("../../../packages/realtime/src/realtimeBridge");
 
 async function startServer() {
   const container = await getContainer();
@@ -2945,6 +2947,82 @@ async function startServer() {
         return sendJson(res, 200, { ok:true, conversations: tenantReplays });
       }
 
+      // v73.1: Grouped inbox — one row per conversation (grouped by customerId),
+      // not one row per message turn. Includes needsHuman flag derived from
+      // state.context.handoff.status === 'open' and active takeover flag. This
+      // is what the dashboard inbox table renders; the legacy endpoint above is
+      // kept for backward compatibility.
+      if (req.method === "GET" && url.pathname === "/api/business/conversations/grouped") {
+        const tenantId = req._businessOwner.tenantId;
+        const limit = Number(url.searchParams.get("limit") || 500);
+        const replays = await container.replayService.list({ limit });
+        const tenantReplays = replays.filter(r => r.tenantId === tenantId);
+
+        // Group by customerId (the de-facto conversation key).
+        const grouped = new Map();
+        for (const r of tenantReplays) {
+          const key = r.customerId || 'unknown';
+          if (!grouped.has(key)) {
+            grouped.set(key, {
+              customerId: key,
+              conversationId: r.conversationId,
+              channel: r.channel || 'widget',
+              firstSeen: r.createdAt,
+              lastSeen: r.createdAt,
+              messageCount: 0,
+              lastMessage: '',
+              lastCapabilityId: null,
+              needsHuman: false,
+              takeoverActive: false
+            });
+          }
+          const g = grouped.get(key);
+          g.messageCount += 1;
+          // Keep the latest by createdAt.
+          if (!g.lastSeen || (r.createdAt && r.createdAt > g.lastSeen)) {
+            g.lastSeen = r.createdAt;
+            g.lastMessage = r.message?.text || r.customerText || '';
+            g.lastCapabilityId = r.capabilityId || null;
+          }
+          if (!g.firstSeen || (r.createdAt && r.createdAt < g.firstSeen)) g.firstSeen = r.createdAt;
+          // If any turn triggered human_takeover, flag it.
+          if (r.capabilityId === 'human_takeover') g.hasTakeoverHistory = true;
+        }
+
+        // Enrich with live state (handoff + takeover flags) for each conversation.
+        const conversations = [];
+        for (const g of grouped.values()) {
+          try {
+            const convId = g.conversationId || `${tenantId}:widget:${g.customerId}`;
+            const state = await container.stateRepository.get(convId);
+            if (state) {
+              g.needsHuman = state.context?.handoff?.status === 'open';
+              g.takeoverActive = Boolean(state.context?.takeover?.active);
+              if (g.takeoverActive) {
+                g.takeoverOwner = state.context.takeover.ownerName;
+                g.takeoverTakenAt = state.context.takeover.takenAt;
+              }
+              g.handoffId = state.context?.handoff?.id || null;
+            }
+          } catch { /* state may not exist for very old conversations */ }
+          conversations.push(g);
+        }
+
+        // Sort: needsHuman first, then most recent.
+        conversations.sort((a, b) => {
+          if (a.needsHuman !== b.needsHuman) return a.needsHuman ? -1 : 1;
+          return (b.lastSeen || '').localeCompare(a.lastSeen || '');
+        });
+
+        return sendJson(res, 200, {
+          ok: true,
+          conversations,
+          total: conversations.length,
+          needsHumanCount: conversations.filter(c => c.needsHuman).length,
+          takeoverCount: conversations.filter(c => c.takeoverActive).length
+        });
+      }
+
       // Leads
       if (req.method === "GET" && url.pathname === "/api/business/leads") {
         const tenantId = req._businessOwner.tenantId;
@@ -3058,7 +3136,25 @@ async function startServer() {
           });
         }
 
-        return sendJson(res, 200, { ok:true, message: 'Reply stored. Customer will see it on their next message or poll.', takeover: state.context.takeover });
+        // v73.1: Push the owner reply to the customer IMMEDIATELY over WebSocket
+        // (instead of waiting for the customer's next poll). The /api/chat/poll
+        // endpoint remains as a fallback for clients without WS. The customer's
+        // widget, on receiving this event, renders the reply and marks it
+        // delivered via a follow-up HTTP call so the server's `delivered` flag
+        // is consistent across both delivery paths.
+        const replyPayload = {
+          tenantId, conversationId, customerId,
+          text: text.trim(),
+          timestamp: ownerReplies[ownerReplies.length - 1].timestamp,
+          ownerName: req._businessOwner.name,
+          replyId: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+        };
+        try {
+          container.realtimeBridge?.broadcastToCustomer(tenantId, customerId, 'owner.reply.v1', replyPayload);
+          container.eventBus?.publish('owner.reply.v1', replyPayload, { tenantId, conversationId, capabilityId: 'human_takeover' });
+        } catch (e) { container.logger?.warn?.('realtime.owner_reply_push_failed', { error: e.message }); }
+
+        return sendJson(res, 200, { ok:true, message: 'Reply sent to customer.', takeover: state.context.takeover, reply: replyPayload });
       }
 
       // ─── v33.0: Takeover control endpoints ──────────────────────────
@@ -3084,6 +3180,13 @@ async function startServer() {
           }}
         });
         await container.stateRepository.save(state);
+        // v73.1: broadcast takeover start so the dashboard inbox updates live.
+        try {
+          container.realtimeBridge?.broadcastToTenant(tenantId, 'takeover.changed.v1', {
+            tenantId, conversationId, customerId, active: true,
+            ownerName: req._businessOwner.name, takenAt: state.context.takeover.takenAt
+          });
+        } catch (e) { container.logger?.warn?.('realtime.takeover_broadcast_failed', { error: e.message }); }
         return sendJson(res, 200, { ok:true, takeover: state.context.takeover });
       }
 
@@ -3106,6 +3209,12 @@ async function startServer() {
           }}
         });
         await container.stateRepository.save(state);
+        // v73.1: broadcast takeover release.
+        try {
+          container.realtimeBridge?.broadcastToTenant(tenantId, 'takeover.changed.v1', {
+            tenantId, conversationId, customerId, active: false, releasedAt: state.context.takeover.releasedAt
+          });
+        } catch (e) { container.logger?.warn?.('realtime.release_broadcast_failed', { error: e.message }); }
         return sendJson(res, 200, { ok:true, message: 'Takeover released. Nova will resume auto-replying.' });
       }
 
@@ -3353,6 +3462,33 @@ async function startServer() {
           replies: undelivered.map(r => ({ text: r.text, timestamp: r.timestamp, ownerName: r.ownerName }))
         });
       }
+
+      // v73.1: Mark owner replies as delivered (called by the customer widget
+      // when it receives a reply over WebSocket). Prevents the poll fallback
+      // from re-delivering the same reply to a client that already saw it via WS.
+      if (req.method === "POST" && url.pathname === "/api/chat/reply/delivered") {
+        const body = await readJson(req);
+        const { tenantId, customerId, replyId, timestamp } = body;
+        if (!customerId) return sendJson(res, 400, { ok:false, error:'customerId is required' });
+        const convId = `${tenantId || container.config.defaultTenantId}:widget:${customerId}`;
+        const state = await container.stateRepository.get(convId);
+        if (!state) return sendJson(res, 200, { ok:true }); // no state = nothing to mark
+        const takeover = state.context?.takeover || {};
+        const ownerReplies = takeover.ownerReplies || [];
+        // Mark any undelivered reply matching the timestamp as delivered.
+        const updatedReplies = ownerReplies.map(r => {
+          if (r.delivered) return r;
+          if (timestamp && r.timestamp === timestamp) return { ...r, delivered: true };
+          return r;
+        });
+        if (updatedReplies.some((r, i) => r.delivered !== ownerReplies[i]?.delivered)) {
+          const updatedState = applyStatePatch(state, {
+            context: { ...state.context, takeover: { ...takeover, ownerReplies: updatedReplies } }
+          });
+          await container.stateRepository.save(updatedState);
+        }
+        return sendJson(res, 200, { ok:true });
+      }
       // ─── End v33.0 Customer polling ──────────────────────────────────
 
       // ─── End v32.0 Business Manager Dashboard endpoints ───────────────────
@@ -3373,6 +3509,20 @@ async function startServer() {
 
   server.listen(container.config.port, () => container.logger.info("api.started", { port: container.config.port }));
 
+  // v73.1: Attach the realtime WebSocket bridge to the SAME http.Server.
+  // Render exposes only one port, so WS upgrades must share it. The bridge
+  // subscribes to EventBus '*' and pushes filtered events to dashboard/widget
+  // clients. businessOwnerAuthService lets it verify JWTs on connect.
+  const realtimeBridge = new RealtimeBridge({
+    server,
+    eventBus: container.eventBus,
+    logger: container.logger,
+    businessOwnerAuthService: container.businessOwnerAuthService
+  });
+  realtimeBridge.startHeartbeat(30000);
+  container.realtimeBridge = realtimeBridge;
+  container.logger.info('realtime.started', { path: '/ws' });
+
   // v36.0: Graceful shutdown — stop accepting new connections, finish in-flight
   // requests, then exit. Render sends SIGTERM 30s before killing the process.
   let shuttingDown = false;
@@ -3380,6 +3530,8 @@ async function startServer() {
     if (shuttingDown) return;
     shuttingDown = true;
     container.logger.info('api.shutting_down', { signal });
+    // v73.1: close the realtime bridge first so WS clients get a clean 1001.
+    try { container.realtimeBridge?.close(); } catch (e) { container.logger.warn('realtime.close_failed', { error: e.message }); }
     server.close(() => {
       container.logger.info('api.closed', {});
       process.exit(0);

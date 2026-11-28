@@ -164,16 +164,17 @@ async function renderOverview() {
   ]);
   if (!overviewRes.ok) return showError(overviewRes);
   state.overview = overviewRes.overview;
+  if (typeof destroyAdminCharts === 'function') destroyAdminCharts(); // v73.1: free old canvases
 
   const o = state.overview;
   const storage = healthRes?.storage || {};
   const kpis = [
     { label: 'Version', value: `v${o.version}`, kind: 'accent', delta: `Uptime ${fmtUptime(o.uptimeSeconds)}` },
-    { label: 'Tenants', value: o.tenantCount, kind: '', delta: `${o.tenantIds.join(', ').slice(0, 60) || '—'}` },
-    { label: 'Capabilities', value: o.capabilityCount, kind: '', delta: o.capabilityIds.join(', ') },
+    { label: 'Tenants', value: o.tenantCount, kind: 'purple', delta: `${o.tenantIds.join(', ').slice(0, 60) || '—'}` },
+    { label: 'Capabilities', value: o.capabilityCount, kind: 'blue', delta: o.capabilityIds.join(', ') },
     { label: 'ML Classifier', value: o.mlTrained ? 'Trained' : 'Idle', kind: o.mlTrained ? 'ok' : 'warn', delta: o.mlVersion },
-    { label: 'Storage Mode', value: o.storageMode || 'file', kind: '', delta: `${o.postgres ? 'PG ' : ''}${o.redis ? 'Redis' : ''}`.trim() || 'local files' },
-    { label: 'Memory (RSS)', value: `${o.memoryMb} MB`, kind: '', delta: 'Process resident set' }
+    { label: 'Storage Mode', value: o.storageMode || 'file', kind: o.storageMode === 'persistent' ? 'ok' : 'neutral', delta: `${o.postgres ? 'PG ' : ''}${o.redis ? 'Redis' : ''}`.trim() || 'local files' },
+    { label: 'Memory (RSS)', value: `${o.memoryMb} MB`, kind: 'info', delta: 'Process resident set' }
   ];
 
   // Capability health table
@@ -203,6 +204,22 @@ async function renderOverview() {
         </div>`).join('')}
     </div>
 
+    <!-- v73.1: Charts row — capability health bar + storage status donut + system sparkline -->
+    <div class="chart-grid">
+      <div class="card chart-card">
+        <h3>Capability Health Distribution</h3>
+        <canvas id="adminCapChart" height="180"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3>Storage & Persistence</h3>
+        <canvas id="adminStorageChart" height="180"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3>System Snapshot</h3>
+        <canvas id="adminSystemChart" height="180"></canvas>
+      </div>
+    </div>
+
     <div class="grid-2">
       <div class="card">
         <h3>Capability Health</h3>
@@ -221,6 +238,86 @@ async function renderOverview() {
         <pre class="tight">${json(o.onlineLearnerLastRun)}</pre>
       </div>` : ''}
   `;
+
+  // v73.1: draw the overview charts. Deferred so the canvases exist in DOM.
+  setTimeout(() => drawAdminOverviewCharts(o, storage, capHealthRows), 0);
+}
+
+// v73.1: chart instances, destroyed on re-render to avoid canvas reuse errors.
+let _adminCharts = {};
+function destroyAdminCharts() {
+  Object.values(_adminCharts).forEach(c => { try { c.destroy(); } catch {} });
+  _adminCharts = {};
+}
+
+function drawAdminOverviewCharts(o, storage, capHealthRows) {
+  if (typeof Chart === 'undefined') return;
+  destroyAdminCharts();
+  const colors = { accent:'#4773e5', ok:'#3ddc97', warn:'#f5b54a', bad:'#ff6b6b', info:'#5ec5f5', purple:'#a855f7', blue:'#3b82f6', neutral:'#64748b' };
+  const grid = 'rgba(146,160,189,0.12)', tick = '#91a0bd';
+  const baseOpts = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: tick, font: { size: 11 } } } },
+    scales: {
+      x: { grid: { color: grid }, ticks: { color: tick, font: { size: 10 } } },
+      y: { grid: { color: grid }, ticks: { color: tick, font: { size: 10 } }, beginAtZero: true }
+    }
+  };
+
+  // 1. Capability health bar — count healthy vs degraded vs down.
+  const caps = (o.capabilityHealth || []);
+  const healthy = caps.filter(h => h.ok !== false && !h.error).length;
+  const degraded = caps.filter(h => h.ok === false || h.error).length;
+  const capCtx = document.getElementById('adminCapChart');
+  if (capCtx) {
+    _adminCharts.cap = new Chart(capCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Healthy', 'Degraded'],
+        datasets: [{ label: 'Capabilities', data: [healthy, degraded], backgroundColor: [colors.ok, colors.bad], borderRadius: 6, maxBarThickness: 50 }]
+      },
+      options: { ...baseOpts, plugins: { legend: { display: false } } }
+    });
+  }
+
+  // 2. Storage donut — PG/Redis/local presence.
+  const storageSegs = [];
+  const storageLabels = [];
+  if (storage.postgres) { storageSegs.push(1); storageLabels.push('PostgreSQL'); }
+  if (storage.redis) { storageSegs.push(1); storageLabels.push('Redis'); }
+  if (!storage.postgres && !storage.redis) { storageSegs.push(1); storageLabels.push('Local files'); }
+  const remaining = Math.max(0, 3 - storageSegs.length);
+  if (remaining > 0) { storageSegs.push(remaining); storageLabels.push('Not configured'); }
+  const storageCtx = document.getElementById('adminStorageChart');
+  if (storageCtx) {
+    _adminCharts.storage = new Chart(storageCtx, {
+      type: 'doughnut',
+      data: {
+        labels: storageLabels,
+        datasets: [{ data: storageSegs, backgroundColor: [colors.accent, colors.bad, colors.neutral, colors.warn], borderColor: '#11182a', borderWidth: 3, hoverOffset: 8 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { color: tick, padding: 10, font: { size: 11 } } } } }
+    });
+  }
+
+  // 3. System snapshot — horizontal bar of tenants, capabilities, memory.
+  const sysCtx = document.getElementById('adminSystemChart');
+  if (sysCtx) {
+    _adminCharts.system = new Chart(sysCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Tenants', 'Capabilities', 'Memory (MB)'],
+        datasets: [{
+          label: 'Count',
+          data: [o.tenantCount || 0, o.capabilityCount || 0, o.memoryMb || 0],
+          backgroundColor: [colors.purple, colors.blue, colors.info],
+          borderRadius: 6,
+          maxBarThickness: 40
+        }]
+      },
+      options: { ...baseOpts, indexAxis: 'y', plugins: { legend: { display: false } } }
+    });
+  }
 }
 
 // ─── 2. Tenants ────────────────────────────────────────────────────

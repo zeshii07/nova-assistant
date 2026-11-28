@@ -1696,6 +1696,12 @@
     // Poll immediately, then every 5 seconds
     poll();
     _takeoverPollTimer = setInterval(poll, 5000);
+
+    // v73.1: ALSO open a WebSocket for immediate delivery. The poll above
+    // stays as a fallback for browsers/networks that block WS. When a reply
+    // arrives via WS, we render it AND tell the server it's delivered so the
+    // poll doesn't double-deliver it.
+    connectTakeoverSocket(ownerName);
   }
 
   function stopTakeoverPolling() {
@@ -1703,10 +1709,94 @@
       clearInterval(_takeoverPollTimer);
       _takeoverPollTimer = null;
     }
+    // v73.1: close the takeover WebSocket too.
+    disconnectTakeoverSocket();
     // Restore header if config is loaded
     if (connectionStatusEl && state.config) {
       const agent = state.config.agent || {};
       connectionStatusEl.innerHTML = `<span class="conn-dot"></span> ${agent.title || 'Assistant'}`;
+    }
+  }
+
+  // ─── v73.1: WebSocket for immediate owner-reply delivery ────────────
+  // Connects to /ws as role=customer with the customerId as the token. The
+  // server filters events so this socket only receives owner.reply.v1 and
+  // takeover.changed.v1 for THIS customer's conversation. On owner.reply.v1,
+  // the reply is rendered immediately and a POST /api/chat/reply/delivered
+  // confirms receipt so the poll fallback doesn't re-render it.
+  let _takeoverWs = null;
+  let _takeoverWsReconnect = null;
+
+  function connectTakeoverSocket(ownerName) {
+    if (_takeoverWs) return; // already connected
+    if (!state.customerId) return;
+    let ws;
+    try {
+      const proto = NOVA_ORIGIN.startsWith('https') ? 'wss' : 'ws';
+      const wsOrigin = NOVA_ORIGIN.replace(/^https?:/, proto + ':');
+      ws = new WebSocket(`${wsOrigin}/ws`);
+    } catch (e) {
+      return; // WS unavailable — poll fallback still works
+    }
+    _takeoverWs = ws;
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({
+        type: 'auth', role: 'customer',
+        token: state.customerId, tenantId: TENANT_ID
+      }));
+    };
+
+    ws.onmessage = (ev) => {
+      let msg;
+      try { msg = JSON.parse(ev.data); } catch { return; }
+      if (msg.type === 'auth' && msg.ok) {
+        ws.send(JSON.stringify({ type: 'subscribe', events: ['owner.reply.v1', 'takeover.changed.v1'] }));
+        return;
+      }
+      if (msg.type === 'event' && msg.name === 'owner.reply.v1' && msg.payload) {
+        const r = msg.payload;
+        // Avoid double-render: check we don't already have this reply by timestamp.
+        const dup = state.messages.some(m => m.role === 'nova' && m.ts === r.timestamp);
+        if (dup) return;
+        state.messages.push({ role: 'nova', text: `👤 ${r.ownerName}: ${r.text}`, ts: r.timestamp || Date.now() });
+        renderMessages();
+        saveSession();
+        if (bubbleEl && !state.open) bubbleEl.classList.add('show-pulse');
+        // Confirm delivery so the poll fallback doesn't re-send it.
+        fetch(`${NOVA_ORIGIN}/api/chat/reply/delivered`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ tenantId: TENANT_ID, customerId: state.customerId, replyId: r.replyId, timestamp: r.timestamp })
+        }).catch(() => {});
+      }
+      if (msg.type === 'event' && msg.name === 'takeover.changed.v1' && msg.payload) {
+        if (msg.payload.active === false) {
+          // Owner released — stop polling + close socket.
+          stopTakeoverPolling();
+        }
+      }
+    };
+
+    ws.onclose = () => {
+      _takeoverWs = null;
+      // Reconnect if takeover might still be active (poll will tell us if not).
+      if (_takeoverPollTimer && !_takeoverWsReconnect) {
+        _takeoverWsReconnect = setTimeout(() => {
+          _takeoverWsReconnect = null;
+          if (_takeoverPollTimer) connectTakeoverSocket(ownerName);
+        }, 3000);
+      }
+    };
+
+    ws.onerror = () => { try { ws.close(); } catch {} };
+  }
+
+  function disconnectTakeoverSocket() {
+    if (_takeoverWsReconnect) { clearTimeout(_takeoverWsReconnect); _takeoverWsReconnect = null; }
+    if (_takeoverWs) {
+      try { _takeoverWs.close(); } catch {}
+      _takeoverWs = null;
     }
   }
 

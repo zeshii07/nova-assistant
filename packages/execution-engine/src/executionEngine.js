@@ -387,6 +387,18 @@ class ExecutionEngine {
         ? `Human support request create kar di gayi hai.${ref} Aapka current conversation context bhi handover ke sath rahega.`
         : `Your human-support request has been created.${ref} I’ll keep the current conversation context attached to the handoff.`;
       patch = { lastIntent:"human_handoff_requested", context:{...(state.context||{}),handoff:{id:handoff?.id||null,status:"open"}} };
+      // v73.1: emit a dedicated alert event so the business dashboard can show
+      // a toast + flag the conversation in real time. handoff.requested.v1 (fired
+      // inside HandoffService.create) is consumed by the email notifier; this
+      // separate event is the UI-facing signal.
+      try {
+        await this.eventBus?.publish('handoff.alert.v1', {
+          tenantId: tenant.id, conversationId, customerId: message.customerId,
+          handoffId: handoff?.id || null, reason: 'customer_requested',
+          triggerMessage: message.text, channel: message.channel || 'widget',
+          createdAt: new Date().toISOString()
+        }, { tenantId: tenant.id, conversationId, source: 'execution-engine' });
+      } catch { /* non-fatal — handoff already recorded in state */ }
     }
     const result = createCapabilityResult({ handled:true, reply, statePatch:patch, metadata:{globalCommand:command} });
     return this.#finalize({ tenant, message, conversationId, customer, state, stateBefore, capabilityId:"system", result, intelligence, logger, processStarted });
