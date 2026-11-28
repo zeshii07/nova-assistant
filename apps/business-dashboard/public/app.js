@@ -272,16 +272,20 @@ async function renderOverview() {
   const s = d.stats;
   const convos = inbox.conversations || [];
 
-  // KPI cards — multicolor kinds
-  const kpis = [
-    { label: 'Conversations Today', value: s.conversationsToday, kind: 'accent', icon: '💬' },
-    { label: 'Total Conversations', value: s.conversationsTotal, kind: 'purple', icon: '📊' },
-    { label: 'Total Leads', value: s.leads, kind: 'blue', icon: '🎯' },
-    { label: 'New Leads', value: s.newLeads, kind: 'ok', icon: '✨' },
-    { label: 'Hot Leads', value: s.hotLeads, kind: 'bad', icon: '🔥' },
-    { label: 'Converted', value: s.convertedLeads, kind: 'ok', icon: '✅' },
-    { label: 'Unread Notifications', value: s.unreadNotifications, kind: s.unreadNotifications > 0 ? 'warn' : 'neutral', icon: '🔔' },
-    { label: 'Bookings Today', value: s.bookingsToday, kind: 'accent', icon: '📅' }
+  // v73.3: overview no longer renders a grid of identical KPI cards.
+  // Primary metrics → one connected stat strip; secondary → inline pills.
+  const conversionRate = s.leads > 0 ? Math.round((s.convertedLeads / s.leads) * 100) : 0;
+  const primaryStats = [
+    { label: 'Conversations Today', value: s.conversationsToday, kind: 'v-accent', icon: '💬', sub: `of ${s.conversationsTotal} all-time` },
+    { label: 'Total Leads', value: s.leads, kind: 'v-purple', icon: '🎯', sub: `${s.newLeads} new · ${s.hotLeads} hot` },
+    { label: 'Converted', value: s.convertedLeads, kind: 'v-ok', icon: '✅', sub: `${conversionRate}% conversion rate` },
+    { label: 'Bookings Today', value: s.bookingsToday, kind: 'v-teal', icon: '📅', sub: 'scheduled visits' }
+  ];
+  const miniStats = [
+    { value: s.conversationsTotal, label: 'total conversations', color: 'var(--purple)' },
+    { value: s.newLeads, label: 'new leads', color: 'var(--info)' },
+    { value: s.hotLeads, label: 'hot leads', color: 'var(--bad)' },
+    { value: s.unreadNotifications, label: 'unread alerts', color: s.unreadNotifications > 0 ? 'var(--warn)' : 'var(--text-faint)' }
   ];
 
   // Lead-funnel data for the donut chart
@@ -292,10 +296,21 @@ async function renderOverview() {
     other: Math.max(0, (s.leads || 0) - (s.newLeads || 0) - (s.hotLeads || 0) - (s.convertedLeads || 0))
   };
 
-  // Conversation-status data for the bar chart
+  // Conversation-status segments for the segmented progress bar
   const needsHumanCount = convos.filter(c => c.needsHuman).length;
   const takeoverCount = convos.filter(c => c.takeoverActive).length;
   const idleCount = convos.length - needsHumanCount - takeoverCount;
+  const totalConvos = convos.length;
+  const segs = [
+    { cls: 'idle', label: 'Idle · Nova auto-reply', count: idleCount, color: 'linear-gradient(90deg,#5ec5f5,#38bdf8)' },
+    { cls: 'needs', label: 'Needs human', count: needsHumanCount, color: 'linear-gradient(90deg,#ff6b6b,#f43f5e)' },
+    { cls: 'takeover', label: 'Takeover active', count: takeoverCount, color: 'linear-gradient(90deg,#f5b54a,#fbbf24)' }
+  ];
+  const segBarHtml = totalConvos > 0
+    ? segs.map(g => `<div class="seg ${g.cls}" style="width:${((g.count / totalConvos) * 100).toFixed(1)}%" title="${g.count} ${g.label}"></div>`).join('')
+    : `<div class="seg idle" style="width:100%"></div>`;
+  const segLegendHtml = segs.map(g =>
+    `<span class="l"><i style="background:${g.color}"></i><b>${g.count}</b> ${g.label}</span>`).join('');
 
   // 7-day activity sparkline data (derived from conversation lastSeen timestamps)
   const last7Days = [];
@@ -309,36 +324,53 @@ async function renderOverview() {
   }
 
   view.innerHTML = `
-    <div class="kpi-grid">
-      ${kpis.map(k => `
-        <div class="kpi ${k.kind}">
-          <div class="kpi-icon">${k.icon}</div>
-          <div class="label">${esc(k.label)}</div>
-          <div class="value">${esc(k.value)}</div>
+    <div class="stat-strip">
+      ${primaryStats.map(k => `
+        <div class="stat ${k.kind}">
+          <div class="stat-icon">${k.icon}</div>
+          <div style="min-width:0">
+            <div class="stat-num">${esc(k.value)}</div>
+            <div class="stat-lbl">${esc(k.label)}</div>
+            <div class="stat-sub">${esc(k.sub)}</div>
+          </div>
         </div>`).join('')}
     </div>
 
-    <div class="chart-grid">
-      <div class="card chart-card">
+    <div class="mini-stats">
+      ${miniStats.map(m => `
+        <span class="mini-stat" style="color:${m.color}">
+          <span class="dot" style="background:currentColor"></span>
+          <b>${esc(m.value)}</b><span>${esc(m.label)}</span>
+        </span>`).join('')}
+    </div>
+
+    <div class="split">
+      <div class="card">
         <h3>📈 7-Day Conversation Activity</h3>
-        <canvas id="activityChart" height="180"></canvas>
+        <div class="chart-host"><canvas id="activityChart"></canvas></div>
       </div>
-      <div class="card chart-card">
+      <div class="card">
         <h3>🎯 Lead Funnel</h3>
-        <canvas id="leadDonut" height="180"></canvas>
+        <div class="chart-host"><canvas id="leadDonut"></canvas></div>
       </div>
-      <div class="card chart-card">
-        <h3>💬 Conversation Status</h3>
-        <canvas id="statusBar" height="180"></canvas>
+    </div>
+
+    <div class="split">
+      <div class="card seg-panel">
+        <div class="seg-head">
+          <span class="seg-title">💬 Conversation Status</span>
+          <span class="seg-total">${totalConvos} conversation${totalConvos === 1 ? '' : 's'}</span>
+        </div>
+        <div class="seg-bar">${segBarHtml}</div>
+        <div class="seg-legend">${segLegendHtml}</div>
       </div>
-      <div class="card chart-card">
-        <h3>🏢 Business Info</h3>
-        <p style="font-size:14px"><strong>${esc(d.tenant.name)}</strong></p>
-        <p style="margin-top:4px;color:var(--text-dim);font-size:12px">Tenant: <code>${esc(d.tenant.id)}</code></p>
-        <p style="margin-top:4px;color:var(--text-dim);font-size:12px">Domain: ${esc(d.tenant.domain || '—')}</p>
-        <div style="margin-top:12px">
-          <strong style="font-size:12px;color:var(--text-dim)">Capabilities</strong>
-          <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">
+      <div class="profile-plate">
+        <div class="profile-banner"></div>
+        <div class="profile-body">
+          <div class="profile-avatar">🏢</div>
+          <div class="profile-name">${esc(d.tenant.name)}</div>
+          <div class="profile-meta">Tenant <code>${esc(d.tenant.id)}</code> · ${esc(d.tenant.domain || 'no domain set')}</div>
+          <div class="cap-tags">
             ${d.tenant.capabilities.map(c => `<span class="badge info">${esc(c)}</span>`).join('')}
           </div>
         </div>
@@ -464,11 +496,23 @@ async function renderInbox() {
   const takeoverCount = d.takeoverCount || 0;
 
   view.innerHTML = `
-    <div class="inbox-summary-bar">
-      <div class="summary-chip accent"><span class="num">${convos.length}</span><span class="lbl">Total</span></div>
-      <div class="summary-chip bad"><span class="num">${needsHumanCount}</span><span class="lbl">Needs Human</span></div>
-      <div class="summary-chip warn"><span class="num">${takeoverCount}</span><span class="lbl">Takeover Active</span></div>
-      <div class="summary-chip ok" style="margin-left:auto"><span class="num"><span id="inboxLiveDot" class="live-dot"></span></span><span class="lbl">Live</span></div>
+    <div class="status-rail">
+      <div class="rail-seg" style="color:var(--accent-strong)">
+        <span class="r-dot" style="background:currentColor"></span>
+        <div><b>${convos.length}</b><span>Total Conversations</span></div>
+      </div>
+      <div class="rail-seg" style="color:var(--bad)">
+        <span class="r-dot" style="background:currentColor"></span>
+        <div><b>${needsHumanCount}</b><span>Needs Human</span></div>
+      </div>
+      <div class="rail-seg" style="color:var(--warn)">
+        <span class="r-dot" style="background:currentColor"></span>
+        <div><b>${takeoverCount}</b><span>Takeover Active</span></div>
+      </div>
+      <div class="rail-seg rail-live" style="color:var(--ok);margin-left:auto">
+        <span class="live-dot" id="inboxLiveDot"></span>
+        <div><b>Live</b><span>Realtime</span></div>
+      </div>
     </div>
     <div class="card">
       <h3 style="display:flex;align-items:center;gap:10px">Conversations

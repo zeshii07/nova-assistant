@@ -1,10 +1,52 @@
 /* ============================================================
-   Nova Widget — Pre-built Agent Avatars (v29.0)
-   10 professional SVG portraits. No image hosting needed.
+   Nova Widget — Pre-built Agent Avatars (v73.2)
+   10 professional SVG portraits + technology-oriented agent icons.
    Avatars are selected by name; tenant config sets which one to use.
+   The default is 'nova' — an animated agent orb (orbit rings +
+   particles + AI spark core). Face portraits remain available for
+   tenants that explicitly choose them.
    ============================================================ */
 
 window.NOVA_AVATARS = {
+  // 0. Nova Agent Orb — the DEFAULT. A technology/agent-oriented mark:
+  //    deep indigo→violet→cyan gradient field, two atom-style orbit
+  //    rings, two particles slowly orbiting the core (SMIL animation),
+  //    and a white→cyan AI spark at the center with a glowing core dot.
+  'nova': {
+    name: 'Nova',
+    title: 'AI Agent',
+    svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg-nova" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#312e81"/><stop offset="0.55" stop-color="#6d28d9"/><stop offset="1" stop-color="#155e75"/>
+        </linearGradient>
+        <radialGradient id="glow-nova" cx="0.5" cy="0.45" r="0.62">
+          <stop offset="0" stop-color="#a5b4fc" stop-opacity="0.9"/><stop offset="0.5" stop-color="#7c3aed" stop-opacity="0.25"/><stop offset="1" stop-color="#0c0a1d" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="spark-nova" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#67e8f9"/>
+        </linearGradient>
+      </defs>
+      <rect width="100" height="100" rx="50" fill="url(#bg-nova)"/>
+      <circle cx="50" cy="50" r="47" fill="url(#glow-nova)"/>
+      <g fill="none" stroke-width="1.1">
+        <ellipse cx="50" cy="50" rx="35" ry="13.5" stroke="#a5f3fc" opacity="0.42" transform="rotate(-22 50 50)"/>
+        <ellipse cx="50" cy="50" rx="35" ry="13.5" stroke="#e0e7ff" opacity="0.28" transform="rotate(58 50 50)"/>
+      </g>
+      <g fill="#e0f2fe">
+        <g><circle cx="50" cy="15" r="2.8" opacity="0.95"/>
+          <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="11s" repeatCount="indefinite"/></g>
+        <g><circle cx="85" cy="50" r="2.2" opacity="0.8"/>
+          <animateTransform attributeName="transform" type="rotate" from="140 50 50" to="500 50 50" dur="17s" repeatCount="indefinite"/></g>
+      </g>
+      <path d="M50 24 L56 44 L76 50 L56 56 L50 76 L44 56 L24 50 L44 44 Z" fill="url(#spark-nova)"/>
+      <circle cx="50" cy="50" r="5.5" fill="#0e7490" stroke="#ffffff" stroke-width="1.6"/>
+      <circle cx="24" cy="26" r="1.4" fill="#ffffff" opacity="0.7"/>
+      <circle cx="76" cy="72" r="1.2" fill="#ffffff" opacity="0.55"/>
+      <circle cx="72" cy="20" r="1" fill="#ffffff" opacity="0.5"/>
+    </svg>`
+  },
+
   // 1. Friendly female customer service rep
   'aria': {
     name: 'Aria',

@@ -11,11 +11,8 @@
    ============================================================ */
 
 :root{
-  /* Base surfaces (dark) */
+  /* Base surfaces (dark) — v73.3: flat base; the aurora layers add the color */
   --bg:#0a0e1a;
-  --bg-grad:radial-gradient(1200px 600px at 80% -10%, rgba(20,184,166,.10), transparent 60%),
-            radial-gradient(900px 500px at -10% 110%, rgba(168,85,247,.08), transparent 60%),
-            linear-gradient(180deg, #0a0e1a 0%, #0b1020 100%);
   --surface:#11182a;
   --surface-2:#0e1527;
   --surface-3:#172139;
@@ -80,14 +77,41 @@
   --shadow-lg:0 12px 40px rgba(0,0,0,.45);
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;
   color:var(--text);
-  background:var(--bg);
-  background-image:var(--bg-grad);
+  background:linear-gradient(180deg,#0a0e1a 0%,#0b1020 55%,#0d1226 100%);
   background-attachment:fixed;
 }
 
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;min-height:100%;max-width:100%;overflow-x:hidden}
 body{font-size:14px;line-height:1.5}
+
+/* ─── v73.3: Animated aurora background (teal/violet, distinct from
+   the business dashboard's indigo/pink) ──────────────────────────── */
+body::before,body::after{
+  content:"";position:fixed;z-index:-1;border-radius:50%;
+  filter:blur(90px);pointer-events:none;
+}
+body::before{
+  width:58vw;height:58vw;top:-20vw;right:-14vw;
+  background:radial-gradient(circle, rgba(20,184,166,.28) 0%, rgba(99,102,241,.16) 42%, transparent 70%);
+  animation:aurora-drift-1 28s ease-in-out infinite alternate;
+}
+body::after{
+  width:50vw;height:50vw;bottom:-18vw;left:-12vw;
+  background:radial-gradient(circle, rgba(168,85,247,.20) 0%, rgba(6,182,212,.12) 45%, transparent 70%);
+  animation:aurora-drift-2 36s ease-in-out infinite alternate;
+}
+@keyframes aurora-drift-1{
+  from{transform:translate(0,0) scale(1)}
+  to{transform:translate(-7vw,5vw) scale(1.18)}
+}
+@keyframes aurora-drift-2{
+  from{transform:translate(0,0) scale(1)}
+  to{transform:translate(6vw,-5vw) scale(1.12)}
+}
+@media (prefers-reduced-motion: reduce){
+  body::before,body::after{animation:none}
+}
 
 /* ─── App shell ──────────────────────────────────────────────────── */
 .app-shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100dvh}
@@ -222,18 +246,105 @@ body{font-size:14px;line-height:1.5}
 }
 .error-card strong{display:block;margin-bottom:6px;color:var(--bad)}
 
+/* ─── v73.3: Glassy panels (replaces the boxy "simple card" look) ─── */
 .card{
-  background:linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
-  border:1px solid var(--border);border-radius:var(--radius);
-  padding:20px;margin-bottom:16px;transition:border-color .15s,box-shadow .15s;
+  background:linear-gradient(180deg, rgba(23,33,57,.78) 0%, rgba(14,21,39,.88) 100%);
+  border:1px solid var(--border);border-radius:14px;
+  padding:20px;margin-bottom:16px;
+  position:relative;overflow:hidden;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  box-shadow:0 8px 28px rgba(2,6,18,.35);
+  transition:border-color .18s,box-shadow .18s,transform .18s;
 }
-.card:hover{border-color:var(--border-strong);box-shadow:var(--shadow-sm)}
+.card::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg, transparent 0%, rgba(20,184,166,.8) 22%, rgba(99,102,241,.6) 50%, rgba(168,85,247,.5) 74%, transparent 100%);
+}
+.card:hover{
+  border-color:var(--border-strong);
+  box-shadow:0 12px 36px rgba(2,6,18,.5);
+  transform:translateY(-2px);
+}
 .card h3{
   margin:0 0 14px;font-size:12px;color:var(--text);text-transform:uppercase;
   letter-spacing:.08em;font-weight:700;display:flex;align-items:center;gap:8px;
   padding-bottom:10px;border-bottom:1px solid var(--border);
 }
 .card .hint{margin:0;color:var(--text-faint);font-size:11px;line-height:1.5}
+
+/* ─── v73.3: Stat strip — the hero metrics band ────────────────────── */
+.stat-strip{
+  display:grid;grid-template-columns:repeat(6,1fr);
+  border-radius:var(--radius-lg);
+  background:linear-gradient(135deg, rgba(23,33,57,.88) 0%, rgba(14,21,39,.92) 100%);
+  border:1px solid var(--border);
+  position:relative;overflow:hidden;
+  margin-bottom:16px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  box-shadow:0 10px 34px rgba(2,6,18,.4);
+}
+.stat-strip::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg, #14b8a6, #6366f1, #a855f7, #ec4899, #f97316, #14b8a6);
+}
+.stat{
+  padding:18px 18px;position:relative;
+  display:flex;align-items:flex-start;gap:12px;
+  min-width:0;
+}
+.stat + .stat::before{
+  content:"";position:absolute;left:0;top:18%;bottom:18%;width:1px;
+  background:linear-gradient(180deg, transparent, var(--border-strong) 30%, var(--border-strong) 70%, transparent);
+}
+.stat .stat-icon{
+  width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  display:grid;place-items:center;font-size:17px;
+  box-shadow:0 4px 14px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.22);
+}
+.stat .stat-num{
+  font-size:22px;font-weight:800;letter-spacing:-0.02em;line-height:1.05;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.stat .stat-lbl{
+  font-size:10px;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--text-faint);font-weight:700;margin-top:5px;
+}
+.stat .stat-sub{font-size:10px;color:var(--text-dim);margin-top:4px;line-height:1.35;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat.v-accent .stat-icon{background:linear-gradient(135deg,#14b8a6,#0d9488)}
+.stat.v-purple .stat-icon{background:linear-gradient(135deg,#a855f7,#7c3aed)}
+.stat.v-blue   .stat-icon{background:linear-gradient(135deg,#38bdf8,#3b82f6)}
+.stat.v-ok     .stat-icon{background:linear-gradient(135deg,#34d399,#059669)}
+.stat.v-bad    .stat-icon{background:linear-gradient(135deg,#ff6b6b,#e11d48)}
+.stat.v-warn   .stat-icon{background:linear-gradient(135deg,#fbbf24,#d97706)}
+.stat.v-teal   .stat-icon{background:linear-gradient(135deg,#2dd4bf,#0d9488)}
+.stat.v-pink   .stat-icon{background:linear-gradient(135deg,#f472b6,#db2777)}
+.stat.v-orange .stat-icon{background:linear-gradient(135deg,#fb923c,#ea580c)}
+.stat.v-cyan   .stat-icon{background:linear-gradient(135deg,#22d3ee,#0891b2)}
+.stat.v-indigo .stat-icon{background:linear-gradient(135deg,#818cf8,#4f46e5)}
+.stat.v-neutral .stat-icon{background:linear-gradient(135deg,#94a3b8,#64748b)}
+
+/* ─── v73.3: Mini stats — inline metric pills ─────────────────────── */
+.mini-stats{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.mini-stat{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:9px 15px;border-radius:11px;
+  background:linear-gradient(135deg, rgba(23,33,57,.82) 0%, rgba(14,21,39,.86) 100%);
+  border:1px solid var(--border);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  transition:border-color .15s,transform .12s;
+}
+.mini-stat:hover{border-color:var(--border-strong);transform:translateY(-1px)}
+.mini-stat .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px currentColor}
+.mini-stat b{font-size:15px;font-weight:800;letter-spacing:-0.01em}
+.mini-stat span{font-size:11px;color:var(--text-dim)}
+
+/* ─── v73.3: Asymmetric split + chart host ────────────────────────── */
+.split{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.split.reverse{grid-template-columns:1fr 2fr}
+.split-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.chart-host{position:relative;height:235px;margin-top:4px}
+.chart-host canvas{max-width:100%}
 
 /* ─── KPI grid (multicolor) ──────────────────────────────────────── */
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px}
@@ -483,7 +594,19 @@ button.sm.danger{background:transparent;border-color:var(--bad);color:var(--bad)
 hr{border:0;border-top:1px solid var(--border);margin:16px 0}
 
 /* ─── Responsive ─────────────────────────────────────────────────── */
-@media(max-width:1024px){.grid-3{grid-template-columns:1fr 1fr}}
+@media(max-width:1024px){
+  .grid-3{grid-template-columns:1fr 1fr}
+  .split-3{grid-template-columns:1fr 1fr}
+  .stat-strip{grid-template-columns:repeat(3,1fr)}
+  .stat + .stat::before{display:none}
+  .stat{border-bottom:1px solid var(--border)}
+  .stat:nth-child(3n+1)::before,
+  .stat:nth-child(3n+2)::before{
+    content:"";position:absolute;left:0;top:14%;bottom:14%;width:1px;
+    background:linear-gradient(180deg,transparent,var(--border-strong),transparent);
+  }
+  .stat:nth-last-child(-n+3){border-bottom:0}
+}
 @media(max-width:900px){
   .app-shell{grid-template-columns:1fr}
   .sidebar{position:sticky;top:0;height:auto;z-index:30;border-right:none;border-bottom:1px solid var(--border)}
@@ -499,6 +622,7 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
   .row{grid-template-columns:1fr}
   .row .value{font-size:12px;word-break:break-all}
   .tenant-picker select{min-width:140px;max-width:200px}
+  .split,.split.reverse,.split-3{grid-template-columns:1fr}
 }
 @media(max-width:560px){
   .header-actions{width:100%}
@@ -506,4 +630,19 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
   .tenant-picker select,.token-field input{width:100%;min-width:0}
   .kpi-grid{grid-template-columns:1fr 1fr}
   .kpi .value{font-size:22px}
+  /* v73.3: compact new components */
+  .stat-strip{grid-template-columns:1fr 1fr}
+  .stat{padding:13px 14px;gap:9px}
+  .stat:nth-child(3n+1)::before,.stat:nth-child(3n+2)::before{display:none}
+  .stat:nth-child(even)::before{
+    content:"";position:absolute;left:0;top:14%;bottom:14%;width:1px;
+    background:linear-gradient(180deg,transparent,var(--border-strong),transparent);
+  }
+  .stat:nth-last-child(-n+2){border-bottom:0}
+  .stat .stat-icon{width:32px;height:32px;font-size:15px;border-radius:9px}
+  .stat .stat-num{font-size:18px}
+  .stat .stat-sub{display:none}
+  .mini-stat{padding:7px 12px}
+  .mini-stat b{font-size:13px}
+  .chart-host{height:190px}
 }

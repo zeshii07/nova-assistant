@@ -168,13 +168,15 @@ async function renderOverview() {
 
   const o = state.overview;
   const storage = healthRes?.storage || {};
+  // v73.3: overview no longer renders a grid of identical KPI cards —
+  // all six system metrics live in one connected stat strip.
   const kpis = [
-    { label: 'Version', value: `v${o.version}`, kind: 'accent', delta: `Uptime ${fmtUptime(o.uptimeSeconds)}` },
-    { label: 'Tenants', value: o.tenantCount, kind: 'purple', delta: `${o.tenantIds.join(', ').slice(0, 60) || '—'}` },
-    { label: 'Capabilities', value: o.capabilityCount, kind: 'blue', delta: o.capabilityIds.join(', ') },
-    { label: 'ML Classifier', value: o.mlTrained ? 'Trained' : 'Idle', kind: o.mlTrained ? 'ok' : 'warn', delta: o.mlVersion },
-    { label: 'Storage Mode', value: o.storageMode || 'file', kind: o.storageMode === 'persistent' ? 'ok' : 'neutral', delta: `${o.postgres ? 'PG ' : ''}${o.redis ? 'Redis' : ''}`.trim() || 'local files' },
-    { label: 'Memory (RSS)', value: `${o.memoryMb} MB`, kind: 'info', delta: 'Process resident set' }
+    { label: 'Version', value: `v${o.version}`, kind: 'v-accent', icon: '🚀', delta: `Uptime ${fmtUptime(o.uptimeSeconds)}` },
+    { label: 'Tenants', value: o.tenantCount, kind: 'v-purple', icon: '🏢', delta: o.tenantIds.join(', ').slice(0, 40) || '—' },
+    { label: 'Capabilities', value: o.capabilityCount, kind: 'v-blue', icon: '🧩', delta: o.capabilityIds.join(', ').slice(0, 40) },
+    { label: 'ML Classifier', value: o.mlTrained ? 'Trained' : 'Idle', kind: o.mlTrained ? 'v-ok' : 'v-warn', icon: '🧠', delta: o.mlVersion },
+    { label: 'Storage Mode', value: o.storageMode || 'file', kind: o.storageMode === 'persistent' ? 'v-ok' : 'v-neutral', icon: '💾', delta: `${o.postgres ? 'PG ' : ''}${o.redis ? 'Redis' : ''}`.trim() || 'local files' },
+    { label: 'Memory (RSS)', value: `${o.memoryMb} MB`, kind: 'v-teal', icon: '📊', delta: 'Process resident set' }
   ];
 
   // Capability health table
@@ -195,28 +197,31 @@ async function renderOverview() {
   ].join('');
 
   view.innerHTML = `
-    <div class="kpi-grid">
+    <div class="stat-strip">
       ${kpis.map(k => `
-        <div class="kpi ${k.kind}">
-          <div class="label">${esc(k.label)}</div>
-          <div class="value">${esc(k.value)}</div>
-          <div class="delta">${esc(k.delta)}</div>
+        <div class="stat ${k.kind}">
+          <div class="stat-icon">${k.icon}</div>
+          <div style="min-width:0">
+            <div class="stat-num" title="${esc(k.value)}">${esc(k.value)}</div>
+            <div class="stat-lbl">${esc(k.label)}</div>
+            <div class="stat-sub" title="${esc(k.delta)}">${esc(k.delta)}</div>
+          </div>
         </div>`).join('')}
     </div>
 
-    <!-- v73.1: Charts row — capability health bar + storage status donut + system sparkline -->
-    <div class="chart-grid">
-      <div class="card chart-card">
+    <!-- v73.3: asymmetric chart split — capability health gets the wide slot -->
+    <div class="split-3">
+      <div class="card">
         <h3>Capability Health Distribution</h3>
-        <canvas id="adminCapChart" height="180"></canvas>
+        <div class="chart-host"><canvas id="adminCapChart"></canvas></div>
       </div>
-      <div class="card chart-card">
+      <div class="card">
         <h3>Storage & Persistence</h3>
-        <canvas id="adminStorageChart" height="180"></canvas>
+        <div class="chart-host"><canvas id="adminStorageChart"></canvas></div>
       </div>
-      <div class="card chart-card">
+      <div class="card">
         <h3>System Snapshot</h3>
-        <canvas id="adminSystemChart" height="180"></canvas>
+        <div class="chart-host"><canvas id="adminSystemChart"></canvas></div>
       </div>
     </div>
 

@@ -131,14 +131,18 @@
       });
       state.avatars = window.NOVA_AVATARS || {};
     } catch {
+      // v73.2: fallback when avatars.js fails to load — use the Nova Agent
+      // Orb inline (same mark as avatars.js 'nova') instead of a plain "N".
       state.avatars = {
-        get: () => ({ name: 'Nova', title: 'Assistant', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#2d5bd1"/><text x="50" y="62" text-anchor="middle" fill="#fff" font-size="32" font-weight="bold" font-family="sans-serif">N</text></svg>' })
+        get: () => ({ name: 'Nova', title: 'AI Agent', svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg-nvfb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#312e81"/><stop offset="0.55" stop-color="#6d28d9"/><stop offset="1" stop-color="#155e75"/></linearGradient><radialGradient id="glow-nvfb" cx="0.5" cy="0.45" r="0.62"><stop offset="0" stop-color="#a5b4fc" stop-opacity="0.9"/><stop offset="0.5" stop-color="#7c3aed" stop-opacity="0.25"/><stop offset="1" stop-color="#0c0a1d" stop-opacity="0"/></radialGradient><linearGradient id="spark-nvfb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#67e8f9"/></linearGradient></defs><rect width="100" height="100" rx="50" fill="url(#bg-nvfb)"/><circle cx="50" cy="50" r="47" fill="url(#glow-nvfb)"/><g fill="none" stroke-width="1.1"><ellipse cx="50" cy="50" rx="35" ry="13.5" stroke="#a5f3fc" opacity="0.42" transform="rotate(-22 50 50)"/><ellipse cx="50" cy="50" rx="35" ry="13.5" stroke="#e0e7ff" opacity="0.28" transform="rotate(58 50 50)"/></g><path d="M50 24 L56 44 L76 50 L56 56 L50 76 L44 56 L24 50 L44 44 Z" fill="url(#spark-nvfb)"/><circle cx="50" cy="50" r="5.5" fill="#0e7490" stroke="#ffffff" stroke-width="1.6"/><circle cx="24" cy="26" r="1.4" fill="#ffffff" opacity="0.7"/><circle cx="76" cy="72" r="1.2" fill="#ffffff" opacity="0.55"/></svg>` })
       };
     }
   }
   function getAvatarSvg() {
     if (!state.avatars || !state.config) return '';
-    const key = state.config.agent?.avatar || 'spark';
+    // v73.2: default to the Nova Agent Orb (technology/agent mark) instead
+    // of the spark. Tenants can still pick any avatar via config.
+    const key = state.config.agent?.avatar || 'nova';
     const avatar = state.avatars.get ? state.avatars.get(key) : state.avatars[key];
     return avatar?.svg || '';
   }

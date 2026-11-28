@@ -1384,7 +1384,7 @@ async function startServer() {
           widget: {
             enabled: true, position: 'bottom-right', themeColor: '{{theme_color}}', language: 'auto',
             welcomeMessage: body.welcomeMessage || 'Hi! 👋 Welcome to {{business_name}}. How can I help you today?',
-            agentAvatar: body.agentAvatar || 'marcus', agentName: '{{agent_name}}', agentTitle: 'Assistant',
+            agentAvatar: body.agentAvatar || 'nova', agentName: '{{agent_name}}', agentTitle: 'Assistant',
             suggestions: body.suggestions || ['What services do you offer?', 'Book now', 'What are your hours?'],
             preChatForm: { enabled: true, fields: [
               { id: 'name', label: 'Your name', type: 'text', required: true, placeholder: 'John Doe' },
@@ -2590,8 +2590,11 @@ async function startServer() {
             return null;
           })(),
           // v29 agent persona
+          // v73.3: default avatar is the Nova Agent Orb (technology mark)
+          // instead of the 'marcus' face portrait. Tenants that explicitly
+          // set widget.agentAvatar keep their choice.
           agent: {
-            avatar: widget.agentAvatar || 'marcus',
+            avatar: widget.agentAvatar || 'nova',
             name: widget.agentName || branding.assistantName || 'Nova',
             title: widget.agentTitle || 'Assistant',
             online: true

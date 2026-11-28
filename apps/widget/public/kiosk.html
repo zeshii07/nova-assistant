@@ -786,7 +786,8 @@
     function getAvatarSvg(key) {
       const av = window.NOVA_AVATARS;
       if (!av) return null;
-      const portrait = (av.get ? av.get(key) : av[key]) || (av.get ? av.get('marcus') : av['marcus']);
+      // v73.2: fall back to the Nova Agent Orb (technology mark), not a face.
+      const portrait = (av.get ? av.get(key) : av[key]) || (av.get ? av.get('nova') : av['nova']);
       return portrait?.svg || null;
     }
     function renderAvatar(targetEl, key) {
@@ -826,7 +827,8 @@
         applyBranding(data);
         // Wait for avatars.js then render the agent portrait (if config provides a key)
         await avatarsPromise;
-        const avatarKey = data.agent?.avatar || 'marcus';
+        // v73.2: default to the Nova Agent Orb (animated technology mark)
+        const avatarKey = data.agent?.avatar || 'nova';
         renderAvatar(splashPortrait, avatarKey);
         renderAvatar(headerPortrait, avatarKey);
         // Voice profile + voice sample
